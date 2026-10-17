@@ -271,11 +271,11 @@ export const CompareBundlesPage: React.FC<CompareBundlesPageProps> = ({ initialM
   return (
     <div className="space-y-6 animate-fade-in-up">
       {/* Top Header */}
-      <div className="pb-2 border-b border-[#E6E1D3]/70">
-        <h1 className="font-serif text-2xl font-bold tracking-tight text-[#2C3A2B]">
+      <div className="pb-3 border-b border-[#E6E1D3]/70">
+        <h1 className="font-serif text-3xl sm:text-4xl font-bold tracking-tight text-[#2C3A2B]">
           Bundles
         </h1>
-        <p className="text-xs text-[#5A5A40] mt-0.5">
+        <p className="text-sm sm:text-base text-[#4A4A35] mt-1 leading-relaxed">
           Discover curated workstation bundles tailored to your budget, add smart accessories with remaining funds, or create a custom setup.
         </p>
       </div>
