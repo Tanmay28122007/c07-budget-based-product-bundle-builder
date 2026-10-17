@@ -11,7 +11,10 @@ import {
   Eye,
   X,
   ExternalLink,
-  Plus
+  Plus,
+  LayoutGrid,
+  List,
+  Check
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { Product } from '../../types';
@@ -32,6 +35,7 @@ export const ProductCataloguePage: React.FC = () => {
   const [selectedStockStatus, setSelectedStockStatus] = useState<string>('all');
   const [sortField, setSortField] = useState<'price_asc' | 'price_desc' | 'name' | 'id'>('price_asc');
   const [viewingProduct, setViewingProduct] = useState<Product | null>(null);
+  const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
 
   // Extract unique categories from fixture products
   const categories = useMemo(() => {
@@ -178,135 +182,315 @@ export const ProductCataloguePage: React.FC = () => {
               <option value="id">Product ID</option>
             </select>
           </div>
+
+          {/* View Mode: Boxes (Side by side) vs Table */}
+          <div className="flex items-center gap-1 bg-[#FDFBF7] p-1 rounded-xl border border-[#E6E1D3]">
+            <button
+              type="button"
+              onClick={() => setViewMode('grid')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                viewMode === 'grid'
+                  ? 'bg-white text-[#2C3A2B] shadow-2xs border border-[#E6E1D3]'
+                  : 'text-[#8B8B7A] hover:text-[#2C2C1E]'
+              }`}
+              title="Boxes View (Side by side)"
+            >
+              <LayoutGrid className="w-3.5 h-3.5" />
+              <span>Boxes</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode('table')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                viewMode === 'table'
+                  ? 'bg-white text-[#2C3A2B] shadow-2xs border border-[#E6E1D3]'
+                  : 'text-[#8B8B7A] hover:text-[#2C2C1E]'
+              }`}
+              title="Table View"
+            >
+              <List className="w-3.5 h-3.5" />
+              <span>Table</span>
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Catalogue Table */}
-      <div className="bg-white border border-[#E6E1D3] rounded-[24px] shadow-xs overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse text-xs">
-            <thead>
-              <tr className="bg-[#F5F5EC]/70 border-b border-[#E6E1D3] text-[11px] font-serif font-bold text-[#2C3A2B] uppercase tracking-wider">
-                <th className="py-3 px-4">Product ID</th>
-                <th className="py-3 px-4">Item Name & Brand</th>
-                <th className="py-3 px-4">Category Slot</th>
-                <th className="py-3 px-4 text-right">Price (INR)</th>
-                <th className="py-3 px-4">Inventory</th>
-                <th className="py-3 px-4">Key Compatibility Attributes</th>
-                <th className="py-3 px-4 text-right">Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#E6E1D3]/50">
-              {filteredProducts.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="py-12 text-center text-xs text-[#5A5A40]">
-                    No products matched the active filters or search terms.
-                  </td>
-                </tr>
-              ) : (
-                filteredProducts.map(p => {
-                  const isInCurrentBundle = Object.values(currentItems).some(item => item?.id === p.id);
+      {/* Catalogue Content: Boxes Side-by-Side (Grid) or Table */}
+      {viewMode === 'grid' ? (
+        <div className="space-y-4">
+          {filteredProducts.length === 0 ? (
+            <div className="bg-white border border-[#E6E1D3] rounded-[24px] p-12 text-center text-xs text-[#5A5A40]">
+              No products matched the active filters or search terms.
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
+              {filteredProducts.map(p => {
+                const isInCurrentBundle = Object.values(currentItems).some(item => item?.id === p.id);
 
-                  return (
-                    <tr key={p.id} className="hover:bg-[#FDFBF7] transition-colors">
-                      <td className="py-3.5 px-4 font-mono font-medium text-[#5A5A40]">
-                        {p.id}
-                      </td>
-
-                      <td className="py-3.5 px-4">
-                        <div className="font-semibold text-[#2C3A2B] leading-tight">{p.name}</div>
-                        <div className="text-[11px] text-[#5A5A40] font-mono mt-0.5">
-                          {p.brand} {p.model ? `· ${p.model}` : ''}
-                        </div>
-                      </td>
-
-                      <td className="py-3.5 px-4">
-                        <span className="font-mono text-[#2C3A2B] bg-[#F4F1EA] border border-[#E6E1D3] px-2 py-0.5 rounded text-[11px]">
-                          {p.category}
+                return (
+                  <div
+                    key={p.id}
+                    className={`bg-white border rounded-[24px] p-5 shadow-xs hover:shadow-xl transition-all duration-300 flex flex-col justify-between relative group hover:-translate-y-1.5 ${
+                      isInCurrentBundle
+                        ? 'border-[#2C3A2B] ring-2 ring-[#2C3A2B]/15 bg-[#FDFBF7]'
+                        : 'border-[#E6E1D3] hover:border-[#8B5A2B]/50'
+                    }`}
+                  >
+                    <div>
+                      {/* Top Header of the Box */}
+                      <div className="flex items-center justify-between gap-2 mb-3">
+                        <span className="font-mono text-[10px] uppercase font-bold tracking-wider px-2.5 py-0.5 rounded-full bg-[#F4F1EA] text-[#8B5A2B] border border-[#E6E1D3]">
+                          {p.category.replace(/_/g, ' ')}
                         </span>
-                      </td>
+                        <span className="font-mono text-[11px] font-semibold text-[#8B8B7A]">
+                          {p.id}
+                        </span>
+                      </div>
 
-                      <td className="py-3.5 px-4 text-right font-mono font-bold tabular-nums text-[#2C3A2B]">
-                        {formatINR(p.price)}
-                      </td>
+                      {/* Brand & Model */}
+                      <div className="text-[11px] font-mono text-[#5A5A40] mb-1">
+                        {p.brand} {p.model ? `· ${p.model}` : ''}
+                      </div>
 
-                      <td className="py-3.5 px-4">
+                      {/* Product Name */}
+                      <h3 className="font-serif font-bold text-[#2C3A2B] text-base leading-snug group-hover:text-[#8B5A2B] transition-colors line-clamp-2 min-h-[2.75rem]">
+                        {p.name}
+                      </h3>
+
+                      {/* Price & Stock */}
+                      <div className="flex items-baseline justify-between gap-2 mt-3 pt-3 border-t border-[#E6E1D3]/70">
+                        <div className="font-mono text-xl font-bold text-[#2C3A2B] tabular-nums">
+                          {formatINR(p.price)}
+                        </div>
                         {p.inStock ? (
-                          <div className="flex items-center gap-1.5 text-[#2C3A2B] font-medium">
-                            <span className="w-1.5 h-1.5 rounded-full bg-[#A3B18A]" />
+                          <div className="flex items-center gap-1.5 text-[11px] font-semibold text-[#2C3A2B] bg-[#A3B18A]/15 px-2.5 py-0.5 rounded-full border border-[#A3B18A]/30">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#588157]" />
                             <span>{p.stockQuantity} units</span>
                           </div>
                         ) : (
-                          <div className="flex items-center gap-1.5 text-[#C05621] font-medium">
+                          <div className="flex items-center gap-1.5 text-[11px] font-semibold text-[#C05621] bg-rose-50 px-2.5 py-0.5 rounded-full border border-rose-200">
                             <span className="w-1.5 h-1.5 rounded-full bg-[#C05621]" />
                             <span>Out of Stock</span>
                           </div>
                         )}
-                      </td>
+                      </div>
 
-                      <td className="py-3.5 px-4 text-[11px] text-[#5A5A40]">
-                        <div className="space-y-0.5 font-mono">
-                          {p.weightKg > 0 && <span>Weight: {p.weightKg}kg</span>}
-                          {p.attributes.deskWidthCm && <span> · Width: {p.attributes.deskWidthCm}cm</span>}
-                          {p.attributes.connector && <span> · Port: {p.attributes.connector.toUpperCase()}</span>}
-                          {p.attributes.ergonomicGrade && <span> · {p.attributes.ergonomicGrade}</span>}
-                          {p.incompatibleProductIds?.length ? (
-                            <span className="block text-[#C05621] font-sans text-[10px]">
-                              Blocks: {p.incompatibleProductIds.join(', ')}
-                            </span>
-                          ) : null}
+                      {/* Key Attributes Badges */}
+                      <div className="mt-3 flex flex-wrap gap-1.5 text-[10px] font-mono text-[#5A5A40]">
+                        {p.weightKg > 0 && (
+                          <span className="px-2 py-0.5 rounded-md bg-[#FDFBF7] border border-[#E6E1D3]">
+                            {p.weightKg} kg
+                          </span>
+                        )}
+                        {p.attributes.connector && (
+                          <span className="px-2 py-0.5 rounded-md bg-[#FDFBF7] border border-[#E6E1D3] uppercase">
+                            {p.attributes.connector}
+                          </span>
+                        )}
+                        {p.attributes.deskWidthCm && (
+                          <span className="px-2 py-0.5 rounded-md bg-[#FDFBF7] border border-[#E6E1D3]">
+                            Width: {p.attributes.deskWidthCm}cm
+                          </span>
+                        )}
+                        {p.attributes.ergonomicGrade && (
+                          <span className="px-2 py-0.5 rounded-md bg-[#FDFBF7] border border-[#E6E1D3]">
+                            {p.attributes.ergonomicGrade}
+                          </span>
+                        )}
+                        {p.attributes.powerDeliveryWatts && (
+                          <span className="px-2 py-0.5 rounded-md bg-[#FDFBF7] border border-[#E6E1D3]">
+                            {p.attributes.powerDeliveryWatts}W PD
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Blocks / Incompatibility warnings */}
+                      {p.incompatibleProductIds && p.incompatibleProductIds.length > 0 && (
+                        <div className="mt-2.5 text-[10px] font-sans text-[#C05621] bg-rose-50/70 border border-rose-200/60 rounded-xl px-2.5 py-1 flex items-center gap-1.5">
+                          <AlertCircle className="w-3.5 h-3.5 shrink-0 text-[#C05621]" />
+                          <span className="truncate">Blocks: {p.incompatibleProductIds.join(', ')}</span>
                         </div>
-                      </td>
+                      )}
+                    </div>
 
-                      <td className="py-3.5 px-4 text-right">
-                        <div className="flex items-center justify-end gap-1.5">
-                          <button
-                            onClick={() => setViewingProduct(p)}
-                            className="p-1.5 text-[#5A5A40] hover:text-[#2C3A2B] hover:bg-[#F4F1EA] rounded-lg transition-colors"
-                            title="View full specs"
-                          >
-                            <Eye className="w-4 h-4" />
-                          </button>
+                    {/* Bottom Action Footer */}
+                    <div className="mt-4 pt-3 border-t border-[#E6E1D3]/70 flex items-center gap-2">
+                      <button
+                        onClick={() => setViewingProduct(p)}
+                        className="p-2 text-[#5A5A40] hover:text-[#2C2C1E] hover:bg-[#F4F1EA] rounded-xl border border-[#E6E1D3] transition-colors cursor-pointer"
+                        title="Inspect specifications"
+                        aria-label="Inspect specifications"
+                      >
+                        <Eye className="w-4 h-4" />
+                      </button>
 
-                          {isInCurrentBundle ? (
-                            <span className="text-[11px] font-semibold text-[#2C3A2B] px-2.5 py-1 bg-[#A3B18A]/20 border border-[#A3B18A]/40 rounded-lg">
-                              In Bundle
-                            </span>
+                      {isInCurrentBundle ? (
+                        <div className="flex-1 py-2 px-3 rounded-xl bg-[#2C3A2B] text-white text-xs font-semibold flex items-center justify-center gap-1.5 shadow-2xs">
+                          <Check className="w-3.5 h-3.5 text-amber-200" />
+                          <span>In Bundle</span>
+                        </div>
+                      ) : (
+                        <button
+                          disabled={!p.inStock}
+                          onClick={() => {
+                            selectProduct(p.category, p);
+                            setActiveTab('builder');
+                          }}
+                          className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                            p.inStock
+                              ? 'bg-[#2C3A2B] hover:bg-[#1E281D] text-white shadow-xs hover:shadow-md'
+                              : 'bg-[#F4F1EA] text-[#8B8B7A] cursor-not-allowed border border-[#E6E1D3]'
+                          }`}
+                        >
+                          <Plus className="w-3.5 h-3.5" />
+                          <span>Add to Slot</span>
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Grid View Count Bar */}
+          <div className="p-4 bg-white border border-[#E6E1D3] rounded-[24px] shadow-xs flex items-center justify-between text-xs text-[#5A5A40]">
+            <span>
+              Showing {filteredProducts.length} of {fixture.products.length} products
+            </span>
+            <span className="font-mono text-[11px]">
+              Source of Truth: {isCustomFixture ? 'Loaded JSON' : 'Synthetic Data Engine'}
+            </span>
+          </div>
+        </div>
+      ) : (
+        /* Catalogue Table */
+        <div className="bg-white border border-[#E6E1D3] rounded-[24px] shadow-xs overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr className="bg-[#F5F5EC]/70 border-b border-[#E6E1D3] text-[11px] font-serif font-bold text-[#2C3A2B] uppercase tracking-wider">
+                  <th className="py-3 px-4">Product ID</th>
+                  <th className="py-3 px-4">Item Name & Brand</th>
+                  <th className="py-3 px-4">Category Slot</th>
+                  <th className="py-3 px-4 text-right">Price (INR)</th>
+                  <th className="py-3 px-4">Inventory</th>
+                  <th className="py-3 px-4">Key Compatibility Attributes</th>
+                  <th className="py-3 px-4 text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#E6E1D3]/50">
+                {filteredProducts.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="py-12 text-center text-xs text-[#5A5A40]">
+                      No products matched the active filters or search terms.
+                    </td>
+                  </tr>
+                ) : (
+                  filteredProducts.map(p => {
+                    const isInCurrentBundle = Object.values(currentItems).some(item => item?.id === p.id);
+
+                    return (
+                      <tr key={p.id} className="hover:bg-[#FDFBF7] transition-colors">
+                        <td className="py-3.5 px-4 font-mono font-medium text-[#5A5A40]">
+                          {p.id}
+                        </td>
+
+                        <td className="py-3.5 px-4">
+                          <div className="font-semibold text-[#2C3A2B] leading-tight">{p.name}</div>
+                          <div className="text-[11px] text-[#5A5A40] font-mono mt-0.5">
+                            {p.brand} {p.model ? `· ${p.model}` : ''}
+                          </div>
+                        </td>
+
+                        <td className="py-3.5 px-4">
+                          <span className="font-mono text-[#2C3A2B] bg-[#F4F1EA] border border-[#E6E1D3] px-2 py-0.5 rounded text-[11px]">
+                            {p.category}
+                          </span>
+                        </td>
+
+                        <td className="py-3.5 px-4 text-right font-mono font-bold tabular-nums text-[#2C3A2B]">
+                          {formatINR(p.price)}
+                        </td>
+
+                        <td className="py-3.5 px-4">
+                          {p.inStock ? (
+                            <div className="flex items-center gap-1.5 text-[#2C3A2B] font-medium">
+                              <span className="w-1.5 h-1.5 rounded-full bg-[#A3B18A]" />
+                              <span>{p.stockQuantity} units</span>
+                            </div>
                           ) : (
-                            <button
-                              disabled={!p.inStock}
-                              onClick={() => {
-                                selectProduct(p.category, p);
-                                setActiveTab('builder');
-                              }}
-                              className={`px-3 py-1.5 rounded-lg text-[11px] font-medium transition-colors ${
-                                p.inStock
-                                  ? 'bg-[#2C3A2B] hover:bg-[#3A4D39] text-white shadow-xs'
-                                  : 'bg-[#F4F1EA] text-[#5A5A40]/50 cursor-not-allowed border border-[#E6E1D3]'
-                              }`}
-                            >
-                              Add to Slot
-                            </button>
+                            <div className="flex items-center gap-1.5 text-[#C05621] font-medium">
+                              <span className="w-1.5 h-1.5 rounded-full bg-[#C05621]" />
+                              <span>Out of Stock</span>
+                            </div>
                           )}
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
+                        </td>
 
-        <div className="p-4 border-t border-[#E6E1D3] bg-[#F5F5EC]/50 flex items-center justify-between text-xs text-[#5A5A40]">
-          <span>
-            Showing {filteredProducts.length} of {fixture.products.length} products
-          </span>
-          <span className="font-mono text-[11px]">
-            Source of Truth: {isCustomFixture ? 'Loaded JSON' : 'Synthetic Data Engine'}
-          </span>
+                        <td className="py-3.5 px-4 text-[11px] text-[#5A5A40]">
+                          <div className="space-y-0.5 font-mono">
+                            {p.weightKg > 0 && <span>Weight: {p.weightKg}kg</span>}
+                            {p.attributes.deskWidthCm && <span> · Width: {p.attributes.deskWidthCm}cm</span>}
+                            {p.attributes.connector && <span> · Port: {p.attributes.connector.toUpperCase()}</span>}
+                            {p.attributes.ergonomicGrade && <span> · {p.attributes.ergonomicGrade}</span>}
+                            {p.incompatibleProductIds?.length ? (
+                              <span className="block text-[#C05621] font-sans text-[10px]">
+                                Blocks: {p.incompatibleProductIds.join(', ')}
+                              </span>
+                            ) : null}
+                          </div>
+                        </td>
+
+                        <td className="py-3.5 px-4 text-right">
+                          <div className="flex items-center justify-end gap-1.5">
+                            <button
+                              onClick={() => setViewingProduct(p)}
+                              className="p-1.5 text-[#5A5A40] hover:text-[#2C3A2B] hover:bg-[#F4F1EA] rounded-lg transition-colors"
+                              title="View full specs"
+                            >
+                              <Eye className="w-4 h-4" />
+                            </button>
+
+                            {isInCurrentBundle ? (
+                              <span className="text-[11px] font-semibold text-[#2C3A2B] px-2.5 py-1 bg-[#A3B18A]/20 border border-[#A3B18A]/40 rounded-lg">
+                                In Bundle
+                              </span>
+                            ) : (
+                              <button
+                                disabled={!p.inStock}
+                                onClick={() => {
+                                  selectProduct(p.category, p);
+                                  setActiveTab('builder');
+                                }}
+                                className={`px-3 py-1.5 rounded-lg text-[11px] font-medium transition-colors ${
+                                  p.inStock
+                                    ? 'bg-[#2C3A2B] hover:bg-[#3A4D39] text-white shadow-xs'
+                                    : 'bg-[#F4F1EA] text-[#5A5A40]/50 cursor-not-allowed border border-[#E6E1D3]'
+                                }`}
+                              >
+                                Add to Slot
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="p-4 border-t border-[#E6E1D3] bg-[#F5F5EC]/50 flex items-center justify-between text-xs text-[#5A5A40]">
+            <span>
+              Showing {filteredProducts.length} of {fixture.products.length} products
+            </span>
+            <span className="font-mono text-[11px]">
+              Source of Truth: {isCustomFixture ? 'Loaded JSON' : 'Synthetic Data Engine'}
+            </span>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Product Detail Modal / Drawer */}
       {viewingProduct && (
