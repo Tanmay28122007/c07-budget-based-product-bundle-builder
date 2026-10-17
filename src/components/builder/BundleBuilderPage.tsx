@@ -53,10 +53,6 @@ export const BundleBuilderPage: React.FC = () => {
   const [optimizerPreference, setOptimizerPreference] = useState<'lowest_cost' | 'best_value'>('lowest_cost');
   const [optimizationFeedback, setOptimizationFeedback] = useState<string | null>(null);
 
-  const budgetPresets = fixture.activity.defaultBudget <= 10000 
-    ? [1000, 1999, 2000, 2200, 3000]
-    : [35000, 55000, 75000, 95000, 120000];
-
   const handleRunOptimizer = () => {
     const res = optimizeBundle(optimizerPreference);
     if (res.success) {
@@ -184,37 +180,18 @@ export const BundleBuilderPage: React.FC = () => {
           Total Budget (₹)
         </span>
 
-        <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-          <div className="relative flex-1">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8B8B7A] font-mono text-xs">
-              ₹
-            </span>
-            <input
-              type="number"
-              min="0"
-              step="1000"
-              value={budget}
-              onChange={e => setBudget(Number(e.target.value))}
-              className="w-full pl-7 pr-3 py-1.5 text-sm font-mono font-bold text-[#2C3A2B] bg-[#F4F1EA]/70 focus:bg-white border border-[#E6E1D3] rounded-xl focus:outline-hidden focus:border-[#2C3A2B] transition-all"
-            />
-          </div>
-
-          {/* Presets */}
-          <div className="flex items-center gap-1.5 overflow-x-auto py-1">
-            {budgetPresets.map(preset => (
-              <button
-                key={preset}
-                onClick={() => setBudget(preset)}
-                className={`px-3 py-1.5 text-[11px] font-mono rounded-lg border transition-all shrink-0 cursor-pointer hover:scale-110 active:scale-95 ${
-                  budget === preset
-                    ? 'bg-[#2C3A2B] text-white border-[#2C3A2B] font-semibold shadow-xs'
-                    : 'bg-[#F4F1EA] hover:bg-[#E6E1D3] text-[#5A5A40] border-[#E6E1D3] hover:shadow-xs'
-                }`}
-              >
-                ₹{(preset / 1000).toFixed(0)}k
-              </button>
-            ))}
-          </div>
+        <div className="relative">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8B8B7A] font-mono text-xs">
+            ₹
+          </span>
+          <input
+            type="number"
+            min="0"
+            step="1000"
+            value={budget}
+            onChange={e => setBudget(Number(e.target.value))}
+            className="w-full pl-7 pr-3 py-2 text-sm font-mono font-bold text-[#2C3A2B] bg-[#F4F1EA]/70 focus:bg-white border border-[#E6E1D3] rounded-xl focus:outline-hidden focus:border-[#2C3A2B] transition-all"
+          />
         </div>
       </div>
 
