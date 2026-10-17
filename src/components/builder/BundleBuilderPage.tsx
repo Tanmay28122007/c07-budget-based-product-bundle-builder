@@ -180,7 +180,7 @@ export const BundleBuilderPage: React.FC = () => {
           Total Budget (₹)
         </span>
 
-        <div className="relative">
+        <div className="relative w-full sm:w-1/4 min-w-[200px]">
           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8B8B7A] font-mono text-xs">
             ₹
           </span>
