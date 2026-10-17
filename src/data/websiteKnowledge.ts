@@ -826,9 +826,7 @@ export function generateComprehensiveHeuristicResponse(message: string, context:
       `Here is what you can ask me to do:\n\n` +
       `1. **Order Any Product Directly**: Tell me what you'd like to buy (e.g. *"Order P26 Ergonomic Vertical Mouse"* or *"Buy RGB Mechanical Keyboard and 100W GaN Charger"*), and I'll compute the landed cost and generate an instant 1-click order card!\n` +
       `2. **Browse & Compare**: Explore all 40 products (\`P01\` to \`P40\`) across 15 categories.\n` +
-      `3. **Manage Bundle Cart & Checkout**: Add items, inspect budget headroom, or say *"Checkout my cart"* to complete purchase.\n` +
-      `4. **MBA Unit Economics & Strategy**: Analyze retailer subscription models, referral margins (3.5%), and break-even metrics (~40 baskets).\n` +
-      `5. **Automated Test Suite**: Inspect all 22+ live verification tests.\n\n` +
+      `3. **Manage Bundle Cart & Checkout**: Add items, inspect budget headroom, or say *"Checkout my cart"* to complete purchase.\n\n` +
       `What would you like to order or explore today?`,
     action: {
       type: 'navigate',
