@@ -27,6 +27,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     savedBundles,
     testResults,
     userRole,
+    logout,
     isSupabaseConnected,
     setIsSupabaseModalOpen
   } = useApp();
@@ -140,10 +141,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
-        {/* Brand / Emblem Zone - Clickable to return to homepage */}
+        {/* Brand / Emblem Zone - Clickable to return to homepage (role selection) */}
         <button
           onClick={() => {
-            setActiveTab('dashboard');
+            logout();
             onClose();
           }}
           title="Return to Homepage"
