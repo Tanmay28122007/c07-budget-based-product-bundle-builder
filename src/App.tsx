@@ -47,6 +47,8 @@ const AppContent: React.FC = () => {
           {activeTab === 'settings' && <SettingsPage />}
           {activeTab === 'profile' && <ProfilePage />}
           {activeTab === 'checkout' && <CheckoutPage />}
+          {/* Fallback for unknown or legacy 'landing' tab */}
+          {(!['dashboard', 'builder', 'chat', 'catalogue', 'product-detail', 'compare', 'tests', 'business', 'evidence', 'settings', 'profile', 'checkout'].includes(activeTab)) && <ProductCataloguePage />}
         </motion.div>
       </AnimatePresence>
     </AppLayout>
