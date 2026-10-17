@@ -3,8 +3,6 @@ import {
   Search,
   Filter,
   ArrowUpDown,
-  Download,
-  Upload,
   CheckCircle,
   AlertCircle,
   Package,
@@ -16,12 +14,12 @@ import {
   List,
   Check,
   PackageSearch,
-  RotateCcw
+  RotateCcw,
+  Trash2
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { Product } from '../../types';
 import { formatINR } from '../../utils/pricing';
-import { exportCatalogueToCSV, downloadFile } from '../../utils/exportUtils';
 
 function getProductImageUrl(img?: string, id?: string): string {
   if (!img) return id ? `/assets/${id}.png` : '';
@@ -51,10 +49,12 @@ export const ProductCataloguePage: React.FC = () => {
     isCustomFixture,
     currentItems,
     selectProduct,
-    setActiveTab
+    removeProduct,
+    setActiveTab,
+    searchQuery,
+    setSearchQuery
   } = useApp();
 
-  const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedStockStatus, setSelectedStockStatus] = useState<string>('all');
   const [sortField, setSortField] = useState<'price_asc' | 'price_desc' | 'name' | 'id'>('price_asc');
@@ -77,9 +77,9 @@ export const ProductCataloguePage: React.FC = () => {
         // Stock filter
         if (selectedStockStatus === 'in_stock' && !p.inStock) return false;
         if (selectedStockStatus === 'out_of_stock' && p.inStock) return false;
-        // Search term
-        if (!search) return true;
-        const q = search.toLowerCase();
+        // Search term (using single top navigation search bar)
+        if (!searchQuery) return true;
+        const q = searchQuery.toLowerCase().trim();
         return (
           p.name.toLowerCase().includes(q) ||
           p.id.toLowerCase().includes(q) ||
@@ -94,26 +94,13 @@ export const ProductCataloguePage: React.FC = () => {
         if (sortField === 'name') return a.name.localeCompare(b.name);
         return a.id.localeCompare(b.id);
       });
-  }, [fixture.products, selectedCategory, selectedStockStatus, search, sortField]);
+  }, [fixture.products, selectedCategory, selectedStockStatus, searchQuery, sortField]);
 
   const handleResetFilters = () => {
-    setSearch('');
+    setSearchQuery('');
     setSelectedCategory('all');
     setSelectedStockStatus('all');
     setSortField('price_asc');
-  };
-
-  const handleExportCatalogueCSV = () => {
-    const csv = exportCatalogueToCSV(fixture.products);
-    downloadFile(csv, `catalogue_export_${Date.now()}.csv`, 'text/csv');
-  };
-
-  const handleExportCatalogueJSON = () => {
-    downloadFile(
-      JSON.stringify(fixture.products, null, 2),
-      `catalogue_export_${Date.now()}.json`,
-      'application/json'
-    );
   };
 
   return (
@@ -135,98 +122,77 @@ export const ProductCataloguePage: React.FC = () => {
             Verified inventory database for {fixture.activity.name} activity.
           </p>
         </div>
-
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setActiveTab('settings')}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium text-[#2C3A2B] bg-white hover:bg-[#F4F1EA] border border-[#E6E1D3] rounded-xl shadow-2xs transition-colors"
-          >
-            <Upload className="w-3.5 h-3.5 text-[#5A5A40]" />
-            Import JSON Fixture
-          </button>
-          <button
-            onClick={handleExportCatalogueCSV}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium text-[#2C3A2B] bg-white hover:bg-[#F4F1EA] border border-[#E6E1D3] rounded-xl shadow-2xs transition-colors"
-          >
-            <Download className="w-3.5 h-3.5 text-[#5A5A40]" />
-            Export CSV
-          </button>
-        </div>
       </div>
 
-      {/* Filters Strip */}
-      <div className="p-4 bg-white border border-[#E6E1D3] rounded-[24px] shadow-xs space-y-3">
-        <div className="flex flex-col sm:flex-row gap-3">
-          {/* Search */}
-          <div className="relative flex-1">
-            <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#5A5A40]" />
-            <input
-              type="text"
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              placeholder="Search by ID, name, brand, or specifications..."
-              className="w-full pl-9 pr-8 py-2 text-xs bg-[#FDFBF7] focus:bg-white border border-[#E6E1D3] rounded-xl text-[#2C3A2B] focus:outline-hidden focus:ring-1 focus:ring-[#2C3A2B]"
-            />
-            {search && (
-              <button
-                type="button"
-                onClick={() => setSearch('')}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#8B8B7A] hover:text-[#2C2C1E] p-0.5"
-                title="Clear search"
+      {/* Filters Strip (Single clean row without redundant second search bar) */}
+      <div className="p-4 bg-white border border-[#E6E1D3] rounded-[24px] shadow-xs">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-3">
+            {/* Category Filter */}
+            <div className="flex items-center gap-1.5">
+              <span className="text-[11px] text-[#5A5A40] font-medium">Category:</span>
+              <select
+                value={selectedCategory}
+                onChange={e => setSelectedCategory(e.target.value)}
+                className="text-xs bg-[#FDFBF7] border border-[#E6E1D3] rounded-xl px-3 py-2 text-[#2C3A2B] focus:outline-hidden"
               >
-                <X className="w-3.5 h-3.5" />
-              </button>
+                <option value="all">All Categories ({fixture.products.length})</option>
+                {categories.map(cat => (
+                  <option key={cat} value={cat}>
+                    {cat.replace(/_/g, ' ')}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Stock Filter */}
+            <div className="flex items-center gap-1.5">
+              <span className="text-[11px] text-[#5A5A40] font-medium">Availability:</span>
+              <select
+                value={selectedStockStatus}
+                onChange={e => setSelectedStockStatus(e.target.value)}
+                className="text-xs bg-[#FDFBF7] border border-[#E6E1D3] rounded-xl px-3 py-2 text-[#2C3A2B] focus:outline-hidden"
+              >
+                <option value="all">All Items</option>
+                <option value="in_stock">In Stock Only</option>
+                <option value="out_of_stock">Out of Stock Only</option>
+              </select>
+            </div>
+
+            {/* Sort */}
+            <div className="flex items-center gap-1.5">
+              <span className="text-[11px] text-[#5A5A40] font-medium">Sort:</span>
+              <select
+                value={sortField}
+                onChange={e => setSortField(e.target.value as any)}
+                className="text-xs bg-[#FDFBF7] border border-[#E6E1D3] rounded-xl px-3 py-2 text-[#2C3A2B] focus:outline-hidden"
+              >
+                <option value="price_asc">Price: Low to High</option>
+                <option value="price_desc">Price: High to Low</option>
+                <option value="name">Name (A-Z)</option>
+                <option value="id">Product ID</option>
+              </select>
+            </div>
+
+            {/* Active search filter tag from top search bar */}
+            {searchQuery && (
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-[#F4F1EA] text-[#2C3A2B] border border-[#E6E1D3] rounded-xl text-xs font-mono">
+                <span className="text-[#8B8B7A]">Search:</span>
+                <span className="font-semibold text-[#8B5A2B]">"{searchQuery}"</span>
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery('')}
+                  className="p-0.5 text-[#8B8B7A] hover:text-rose-600 transition-colors cursor-pointer"
+                  title="Clear search"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </div>
             )}
           </div>
 
-          {/* Category Filter */}
-          <div className="flex items-center gap-1.5">
-            <span className="text-[11px] text-[#5A5A40] font-medium">Category:</span>
-            <select
-              value={selectedCategory}
-              onChange={e => setSelectedCategory(e.target.value)}
-              className="text-xs bg-[#FDFBF7] border border-[#E6E1D3] rounded-xl px-3 py-2 text-[#2C3A2B] focus:outline-hidden"
-            >
-              <option value="all">All Categories ({fixture.products.length})</option>
-              {categories.map(cat => (
-                <option key={cat} value={cat}>
-                  {cat.replace(/_/g, ' ')}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Stock Filter */}
-          <div className="flex items-center gap-1.5">
-            <span className="text-[11px] text-[#5A5A40] font-medium">Availability:</span>
-            <select
-              value={selectedStockStatus}
-              onChange={e => setSelectedStockStatus(e.target.value)}
-              className="text-xs bg-[#FDFBF7] border border-[#E6E1D3] rounded-xl px-3 py-2 text-[#2C3A2B] focus:outline-hidden"
-            >
-              <option value="all">All Items</option>
-              <option value="in_stock">In Stock Only</option>
-              <option value="out_of_stock">Out of Stock Only</option>
-            </select>
-          </div>
-
-          {/* Sort */}
-          <div className="flex items-center gap-1.5">
-            <span className="text-[11px] text-[#5A5A40] font-medium">Sort:</span>
-            <select
-              value={sortField}
-              onChange={e => setSortField(e.target.value as any)}
-              className="text-xs bg-[#FDFBF7] border border-[#E6E1D3] rounded-xl px-3 py-2 text-[#2C3A2B] focus:outline-hidden"
-            >
-              <option value="price_asc">Price: Low to High</option>
-              <option value="price_desc">Price: High to Low</option>
-              <option value="name">Name (A-Z)</option>
-              <option value="id">Product ID</option>
-            </select>
-          </div>
-
           {/* View Mode: Amazon Listings (Stacked) vs Table */}
-          <div className="flex items-center gap-1 bg-[#FDFBF7] p-1 rounded-xl border border-[#E6E1D3]">
+          <div className="flex items-center gap-1 bg-[#FDFBF7] p-1 rounded-xl border border-[#E6E1D3] shrink-0">
             <button
               type="button"
               onClick={() => setViewMode('list')}
@@ -280,7 +246,8 @@ export const ProductCataloguePage: React.FC = () => {
           ) : (
             <div className="space-y-4">
               {filteredProducts.map(p => {
-                const isInCurrentBundle = Object.values(currentItems).some(item => item?.id === p.id);
+                const bundleSlotKey = Object.entries(currentItems).find(([_, item]) => item?.id === p.id)?.[0];
+                const isInCurrentBundle = Boolean(bundleSlotKey);
                 const imgSrc = getProductImageUrl(p.image, p.id);
                 const hasImgError = imgErrors[p.id];
 
@@ -372,10 +339,20 @@ export const ProductCataloguePage: React.FC = () => {
                             ID: {p.id}
                           </span>
                           {isInCurrentBundle && (
-                            <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                              <Check className="w-3 h-3 text-emerald-600" />
-                              Selected in Current Bundle
-                            </span>
+                            <div className="flex items-center gap-2">
+                              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+                                <Check className="w-3 h-3 text-emerald-600" />
+                                In Current Bundle {bundleSlotKey ? `(${bundleSlotKey})` : ''}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => bundleSlotKey && removeProduct(bundleSlotKey)}
+                                className="text-[11px] font-semibold text-rose-600 hover:text-rose-800 underline cursor-pointer"
+                                title="Remove from bundle"
+                              >
+                                Remove
+                              </button>
+                            </div>
                           )}
                         </div>
 
@@ -467,7 +444,7 @@ export const ProductCataloguePage: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* 3. RIGHT SECTION: Price, Stock Status, Product Cost, and Add to Slot Button */}
+                    {/* 3. RIGHT SECTION: Price, Stock Status, Product Cost, and Add/Remove Button */}
                     <div className="w-full md:w-56 lg:w-64 shrink-0 flex flex-col justify-between p-4 sm:p-5 bg-[#FDFBF7] md:bg-transparent rounded-2xl md:rounded-none border border-[#E6E1D3] md:border-0 md:border-l md:border-[#E6E1D3]/80 md:pl-6 space-y-4">
                       {/* Price & Stock Status */}
                       <div className="space-y-3">
@@ -505,12 +482,30 @@ export const ProductCataloguePage: React.FC = () => {
                         </div>
                       </div>
 
-                      {/* Action Buttons */}
+                      {/* Action Buttons: Add to Slot OR Remove from Bundle */}
                       <div className="space-y-2 pt-2">
                         {isInCurrentBundle ? (
-                          <div className="w-full py-2.5 px-3 rounded-xl bg-[#2C3A2B] text-white text-xs font-semibold flex items-center justify-center gap-2 shadow-2xs">
-                            <Check className="w-4 h-4 text-emerald-300" />
-                            <span>In Bundle</span>
+                          <div className="space-y-2">
+                            <div className="w-full py-1.5 px-3 rounded-xl bg-[#E8EEDD] border border-[#D0DEC0] text-[#1E3A1E] text-xs font-semibold flex items-center justify-between">
+                              <span className="flex items-center gap-1.5">
+                                <Check className="w-3.5 h-3.5 text-emerald-600" />
+                                <span>In Bundle</span>
+                              </span>
+                              {bundleSlotKey && (
+                                <span className="text-[10px] font-mono text-[#588157] uppercase font-bold px-1.5 py-0.5 rounded bg-white/80 border border-[#D0DEC0]">
+                                  {bundleSlotKey}
+                                </span>
+                              )}
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => bundleSlotKey && removeProduct(bundleSlotKey)}
+                              className="w-full py-2 px-3 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer bg-rose-50 hover:bg-rose-100 text-rose-700 hover:text-rose-800 border border-rose-200 shadow-2xs hover:shadow-xs active:scale-[0.99]"
+                              title="Remove this product from bundle slot"
+                            >
+                              <Trash2 className="w-3.5 h-3.5 text-rose-600" />
+                              <span>Remove from Bundle</span>
+                            </button>
                           </div>
                         ) : (
                           <button
@@ -592,7 +587,8 @@ export const ProductCataloguePage: React.FC = () => {
                   </tr>
                 ) : (
                   filteredProducts.map(p => {
-                    const isInCurrentBundle = Object.values(currentItems).some(item => item?.id === p.id);
+                    const bundleSlotKey = Object.entries(currentItems).find(([_, item]) => item?.id === p.id)?.[0];
+                    const isInCurrentBundle = Boolean(bundleSlotKey);
                     const imgSrc = getProductImageUrl(p.image, p.id);
                     const hasImgError = imgErrors[p.id];
 
@@ -678,9 +674,19 @@ export const ProductCataloguePage: React.FC = () => {
                             </button>
 
                             {isInCurrentBundle ? (
-                              <span className="text-[11px] font-semibold text-[#2C3A2B] px-2.5 py-1 bg-[#A3B18A]/20 border border-[#A3B18A]/40 rounded-lg">
-                                In Bundle
-                              </span>
+                              <div className="flex items-center gap-1.5">
+                                <span className="text-[11px] font-semibold text-[#2C3A2B] px-2 py-0.5 bg-[#A3B18A]/20 border border-[#A3B18A]/40 rounded-lg">
+                                  In Bundle {bundleSlotKey ? `(${bundleSlotKey})` : ''}
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => bundleSlotKey && removeProduct(bundleSlotKey)}
+                                  className="p-1 text-rose-600 hover:text-rose-800 hover:bg-rose-50 border border-rose-200 rounded-lg transition-colors cursor-pointer"
+                                  title="Remove from bundle"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
                             ) : (
                               <button
                                 disabled={!p.inStock}
@@ -838,18 +844,39 @@ export const ProductCataloguePage: React.FC = () => {
               >
                 Close
               </button>
-              {viewingProduct.inStock && (
-                <button
-                  onClick={() => {
-                    selectProduct(viewingProduct.category, viewingProduct);
-                    setViewingProduct(null);
-                    setActiveTab('builder');
-                  }}
-                  className="px-4 py-2 text-xs font-semibold text-white bg-[#2C3A2B] hover:bg-[#3A4D39] rounded-xl shadow-xs cursor-pointer"
-                >
-                  Assign to Slot in Builder
-                </button>
-              )}
+              {(() => {
+                const modalSlotKey = Object.entries(currentItems).find(([_, item]) => item?.id === viewingProduct.id)?.[0];
+                if (modalSlotKey) {
+                  return (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        removeProduct(modalSlotKey);
+                        setViewingProduct(null);
+                      }}
+                      className="px-4 py-2 text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-xl shadow-xs cursor-pointer flex items-center gap-1.5"
+                    >
+                      <Trash2 className="w-3.5 h-3.5 text-rose-600" />
+                      <span>Remove from Bundle</span>
+                    </button>
+                  );
+                }
+                if (viewingProduct.inStock) {
+                  return (
+                    <button
+                      onClick={() => {
+                        selectProduct(viewingProduct.category, viewingProduct);
+                        setViewingProduct(null);
+                        setActiveTab('builder');
+                      }}
+                      className="px-4 py-2 text-xs font-semibold text-white bg-[#2C3A2B] hover:bg-[#3A4D39] rounded-xl shadow-xs cursor-pointer"
+                    >
+                      Assign to Slot in Builder
+                    </button>
+                  );
+                }
+                return null;
+              })()}
             </div>
           </div>
         </div>

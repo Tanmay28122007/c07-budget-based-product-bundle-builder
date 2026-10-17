@@ -74,7 +74,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
         </div>
 
         {/* Global Search Bar */}
-        <div className="relative hidden md:block w-48 lg:w-64">
+        <div className="relative w-36 sm:w-48 lg:w-64">
           <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-[#8B8B7A]" />
           <input
             type="text"
