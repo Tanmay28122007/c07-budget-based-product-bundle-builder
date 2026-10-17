@@ -392,42 +392,42 @@ export const CreateBundleCatalogModal: React.FC<CreateBundleCatalogModalProps> =
                   >
                     <div>
                       {/* Image & Header */}
-                      <div className="relative w-full h-36 bg-[#F8F7F4] rounded-xl overflow-hidden flex items-center justify-center p-3 mb-3 border border-[#E6E1D3]/50">
+                      <div className="relative w-full h-44 sm:h-48 bg-[#F8F7F4] rounded-2xl overflow-hidden flex items-center justify-center p-3.5 mb-3.5 border border-[#E6E1D3]/80 group-hover:border-[#8B5A2B]/40 transition-colors">
                         <img
                           src={getProductImageUrl(product.image, product.id)}
                           alt={product.name}
-                          className="w-full h-full object-contain mix-blend-multiply"
+                          className="w-full h-full object-contain mix-blend-multiply group-hover:scale-108 transition-transform duration-300"
                         />
-                        <span className="absolute top-2 left-2 text-[10px] font-mono uppercase font-bold px-2 py-0.5 rounded-full bg-white/90 text-[#8B5A2B] border border-[#E6E1D3] shadow-2xs">
+                        <span className="absolute top-2.5 left-2.5 text-[11px] font-mono uppercase font-bold px-2.5 py-0.5 rounded-full bg-white/95 text-[#8B5A2B] border border-[#E6E1D3] shadow-2xs">
                           {product.category}
                         </span>
-                        <span className="absolute top-2 right-2 text-[10px] font-mono text-[#8B8B7A] px-1.5 py-0.5 rounded bg-white/90 border border-[#E6E1D3]">
+                        <span className="absolute top-2.5 right-2.5 text-[11px] font-mono font-semibold text-[#8B8B7A] px-2 py-0.5 rounded-md bg-white/95 border border-[#E6E1D3]">
                           {product.id}
                         </span>
                       </div>
 
                       {/* Title & Specs */}
-                      <h4 className="font-serif font-bold text-sm text-[#2C3A2B] leading-snug line-clamp-2">
+                      <h4 className="font-serif font-bold text-sm sm:text-base text-[#2C3A2B] leading-snug line-clamp-2 group-hover:text-[#8B5A2B] transition-colors">
                         {product.name}
                       </h4>
 
-                      <div className="flex flex-wrap items-center gap-1.5 mt-2">
+                      <div className="flex flex-wrap items-center gap-1.5 mt-2.5">
                         {product.attributes.colour && (
-                          <span className="inline-flex items-center gap-1 text-[10px] font-mono text-[#5A5A40] px-1.5 py-0.5 rounded bg-[#F4F1EA] border border-[#E6E1D3]">
+                          <span className="inline-flex items-center gap-1.5 text-xs font-mono text-[#5A5A40] px-2 py-0.5 rounded-md bg-[#F4F1EA] border border-[#E6E1D3]">
                             <span
-                              className="w-2 h-2 rounded-full border border-black/20"
+                              className="w-2.5 h-2.5 rounded-full border border-black/20"
                               style={{ backgroundColor: getColourHex(product.attributes.colour) }}
                             />
                             {product.attributes.colour}
                           </span>
                         )}
                         {product.attributes.size && (
-                          <span className="text-[10px] font-mono text-[#5A5A40] px-1.5 py-0.5 rounded bg-[#F4F1EA] border border-[#E6E1D3]">
+                          <span className="text-xs font-mono text-[#5A5A40] px-2 py-0.5 rounded-md bg-[#F4F1EA] border border-[#E6E1D3]">
                             {product.attributes.size}
                           </span>
                         )}
                         {product.attributes.connector && (
-                          <span className="text-[10px] font-mono uppercase text-[#5A5A40] px-1.5 py-0.5 rounded bg-[#F4F1EA] border border-[#E6E1D3]">
+                          <span className="text-xs font-mono uppercase text-[#5A5A40] px-2 py-0.5 rounded-md bg-[#F4F1EA] border border-[#E6E1D3]">
                             {product.attributes.connector}
                           </span>
                         )}
@@ -435,10 +435,10 @@ export const CreateBundleCatalogModal: React.FC<CreateBundleCatalogModalProps> =
                     </div>
 
                     {/* Price and Add/Remove button */}
-                    <div className="mt-4 pt-3 border-t border-[#E6E1D3]/60 flex items-center justify-between gap-2">
+                    <div className="mt-4 pt-3.5 border-t border-[#E6E1D3]/70 flex items-center justify-between gap-2">
                       <div>
-                        <span className="text-[10px] font-mono uppercase text-[#8B8B7A] block leading-tight">Price</span>
-                        <span className="text-base font-bold font-mono text-[#2C3A2B]">
+                        <span className="text-[10px] font-mono uppercase text-[#8B8B7A] block leading-tight font-semibold">Price</span>
+                        <span className="text-base sm:text-lg font-bold font-mono text-[#2C3A2B]">
                           {formatINR(product.price)}
                         </span>
                       </div>

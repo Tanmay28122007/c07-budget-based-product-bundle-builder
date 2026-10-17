@@ -22,6 +22,16 @@ interface RequiredSlotCardProps {
   availableCount?: number;
 }
 
+function getProductImageUrl(img?: string, id?: string): string {
+  if (img && !img.startsWith('blob:') && !img.startsWith('data:')) {
+    return img;
+  }
+  if (id && /^P\d+$/i.test(id)) {
+    return `/assets/${id.toUpperCase()}.png`;
+  }
+  return img || '/assets/P01.png';
+}
+
 export const RequiredSlotCard: React.FC<RequiredSlotCardProps> = ({
   slot,
   product,
@@ -45,7 +55,7 @@ export const RequiredSlotCard: React.FC<RequiredSlotCardProps> = ({
 
   return (
     <div
-      className={`rounded-[22px] border p-4.5 transition-all duration-300 relative overflow-hidden group hover:-translate-y-2 hover:scale-[1.012] hover:shadow-xl ${
+      className={`rounded-[24px] border p-5 transition-all duration-300 relative overflow-hidden group hover:-translate-y-1.5 hover:shadow-xl ${
         !isFilled
           ? 'border-dashed border-[#D6CFBF] bg-[#FDFBF7]/90 hover:border-[#8B5A2B] hover:bg-[#F5F5EC]'
           : hasCompatibilityError
@@ -56,16 +66,16 @@ export const RequiredSlotCard: React.FC<RequiredSlotCardProps> = ({
       }`}
     >
       {/* Top Header of Card */}
-      <div className="flex items-center justify-between gap-2 pb-3 border-b border-[#E6E1D3]/80">
-        <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-lg bg-[#F4F1EA] text-[#2C3A2B] border border-[#E6E1D3] flex items-center justify-center group-hover:bg-[#2C3A2B] group-hover:text-white group-hover:scale-115 group-hover:rotate-6 group-hover:shadow-md transition-all duration-300">
+      <div className="flex items-center justify-between gap-2 pb-3.5 border-b border-[#E6E1D3]/80">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-xl bg-[#F4F1EA] text-[#2C3A2B] border border-[#E6E1D3] flex items-center justify-center group-hover:bg-[#2C3A2B] group-hover:text-white group-hover:scale-110 group-hover:shadow-md transition-all duration-300">
             <Layers className="w-4 h-4" />
           </div>
           <div>
-            <span className="text-[10px] font-mono font-bold text-[#8B5A2B] uppercase tracking-wider block">
+            <span className="text-xs font-mono font-bold text-[#8B5A2B] uppercase tracking-wider block">
               {slot.category} Slot
             </span>
-            <span className="font-serif text-sm font-bold text-[#2C3A2B] leading-tight">
+            <span className="font-serif text-base font-bold text-[#2C3A2B] leading-tight">
               {slot.label}
             </span>
           </div>
@@ -75,20 +85,20 @@ export const RequiredSlotCard: React.FC<RequiredSlotCardProps> = ({
         <div>
           {isFilled ? (
             hasCompatibilityError ? (
-              <span className="text-[11px] font-semibold text-rose-700 bg-rose-50 px-2.5 py-0.5 rounded-full border border-rose-200 flex items-center gap-1.5 shadow-2xs">
+              <span className="text-xs font-semibold text-rose-700 bg-rose-50 px-3 py-1 rounded-full border border-rose-200 flex items-center gap-1.5 shadow-2xs">
                 <AlertCircle className="w-3.5 h-3.5 text-rose-600" /> Conflict
               </span>
             ) : !isInStock ? (
-              <span className="text-[11px] font-semibold text-amber-700 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200 flex items-center gap-1.5 shadow-2xs">
+              <span className="text-xs font-semibold text-amber-700 bg-amber-50 px-3 py-1 rounded-full border border-amber-200 flex items-center gap-1.5 shadow-2xs">
                 <AlertTriangle className="w-3.5 h-3.5 text-amber-600" /> Out of stock
               </span>
             ) : (
-              <span className="text-[11px] font-semibold text-[#2C3A2B] bg-[#A3B18A]/25 px-2.5 py-0.5 rounded-full border border-[#A3B18A]/50 flex items-center gap-1.5 shadow-2xs">
+              <span className="text-xs font-semibold text-[#2C3A2B] bg-[#A3B18A]/25 px-3 py-1 rounded-full border border-[#A3B18A]/50 flex items-center gap-1.5 shadow-2xs">
                 <Check className="w-3.5 h-3.5 text-[#2C3A2B]" /> Selected
               </span>
             )
           ) : (
-            <span className="text-[10px] font-mono font-semibold text-[#8B8B7A] bg-[#F4F1EA] px-2.5 py-0.5 rounded-md border border-[#E6E1D3]">
+            <span className="text-xs font-mono font-semibold text-[#8B8B7A] bg-[#F4F1EA] px-3 py-1 rounded-lg border border-[#E6E1D3]">
               Required Slot
             </span>
           )}
@@ -96,77 +106,65 @@ export const RequiredSlotCard: React.FC<RequiredSlotCardProps> = ({
       </div>
 
       {/* Card Body */}
-      <div className="py-3.5">
+      <div className="py-4">
         {isFilled && product ? (
-          <div className="space-y-2.5">
-            {/* Title & Price Header */}
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-1.5 text-[11px] font-mono text-[#5A5A40]">
-                  <span className="font-semibold text-[#2C3A2B]">{product.id}</span>
+          <div className="space-y-3">
+            {/* Visual Photo & Title Header */}
+            <div className="flex items-center gap-4">
+              {/* Product Studio Photo */}
+              <div className="relative shrink-0 w-20 h-20 sm:w-22 sm:h-22 bg-[#FAF9F5] rounded-xl border border-[#E6E1D3] p-2 flex items-center justify-center overflow-hidden">
+                <img
+                  src={getProductImageUrl(product.image, product.id)}
+                  alt={product.name}
+                  className="w-full h-full object-contain mix-blend-multiply group-hover:scale-108 transition-transform duration-300"
+                />
+              </div>
+
+              {/* Title & Price Header */}
+              <div className="min-w-0 flex-1 space-y-1">
+                <div className="flex items-center gap-1.5 text-xs font-mono text-[#5A5A40]">
+                  <span className="font-bold text-[#2C3A2B]">{product.id}</span>
                   <span>·</span>
                   <span>{product.brand}</span>
                 </div>
-                <h4 className="text-sm font-serif font-bold text-[#2C3A2B] leading-snug mt-0.5 truncate">
+                <h4 className="text-sm sm:text-base font-serif font-bold text-[#2C3A2B] leading-snug line-clamp-2">
                   {product.name}
                 </h4>
-              </div>
-
-              {/* Price & Stock Display */}
-              <div className="text-right shrink-0">
-                <div className="text-base font-bold font-mono tabular-nums text-[#2C3A2B]">
+                <div className="text-base sm:text-lg font-bold font-mono text-[#8B5A2B]">
                   {formatINR(product.price)}
-                </div>
-                <div className="mt-0.5">
-                  {!isInStock ? (
-                    <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-rose-700 bg-rose-50 px-2 py-0.5 rounded-full border border-rose-200">
-                      <span className="w-1.5 h-1.5 rounded-full bg-rose-600" />
-                      0 units
-                    </span>
-                  ) : isLowStock ? (
-                    <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
-                      <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-                      {stockQty} left
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-[#2C3A2B] bg-[#A3B18A]/20 px-2 py-0.5 rounded-full border border-[#A3B18A]/40">
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#588157]" />
-                      {stockQty} in stock
-                    </span>
-                  )}
                 </div>
               </div>
             </div>
 
             {/* Spec Badges */}
-            <div className="flex flex-wrap gap-1.5 text-[10px] font-mono text-[#5A5A40]">
+            <div className="flex flex-wrap gap-1.5 text-xs font-mono text-[#5A5A40]">
               {product.attributes.size && (
-                <span className="px-2 py-0.5 rounded bg-[#F4F1EA] border border-[#E6E1D3]">
+                <span className="px-2.5 py-1 rounded-md bg-[#F4F1EA] border border-[#E6E1D3]">
                   Size: {product.attributes.size}
                 </span>
               )}
               {product.attributes.colour && (
-                <span className="px-2 py-0.5 rounded bg-[#F4F1EA] border border-[#E6E1D3]">
+                <span className="px-2.5 py-1 rounded-md bg-[#F4F1EA] border border-[#E6E1D3]">
                   {product.attributes.colour}
                 </span>
               )}
               {product.attributes.unitCostInr && (
-                <span className="px-2 py-0.5 rounded bg-[#F4F1EA] border border-[#E6E1D3]">
+                <span className="px-2.5 py-1 rounded-md bg-[#F4F1EA] border border-[#E6E1D3]">
                   Cost: {formatINR(product.attributes.unitCostInr)}
                 </span>
               )}
               {product.attributes.connector && (
-                <span className="px-2 py-0.5 rounded bg-[#F4F1EA] border border-[#E6E1D3] uppercase">
+                <span className="px-2.5 py-1 rounded-md bg-[#F4F1EA] border border-[#E6E1D3] uppercase">
                   Port: {product.attributes.connector}
                 </span>
               )}
               {product.attributes.compatibleWith?.length ? (
-                <span className="px-2 py-0.5 rounded bg-[#F4F1EA] border border-[#E6E1D3]">
+                <span className="px-2.5 py-1 rounded-md bg-[#F4F1EA] border border-[#E6E1D3]">
                   {product.attributes.compatibleWith.join(', ')}
                 </span>
               ) : null}
               {product.weightKg > 0 && !product.attributes.size && (
-                <span className="px-2 py-0.5 rounded bg-[#F4F1EA] border border-[#E6E1D3]">
+                <span className="px-2.5 py-1 rounded-md bg-[#F4F1EA] border border-[#E6E1D3]">
                   {product.weightKg}kg
                 </span>
               )}

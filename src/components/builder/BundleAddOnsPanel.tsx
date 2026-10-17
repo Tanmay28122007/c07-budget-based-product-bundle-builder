@@ -261,52 +261,52 @@ export const BundleAddOnsPanel: React.FC<BundleAddOnsPanelProps> = ({
                   >
                     <div>
                       {/* Thumbnail & Category */}
-                      <div className="relative w-full h-32 bg-white rounded-xl overflow-hidden flex items-center justify-center p-2 mb-3 border border-[#E6E1D3]/50">
+                      <div className="relative w-full h-44 sm:h-48 bg-white rounded-2xl overflow-hidden flex items-center justify-center p-3 mb-3.5 border border-[#E6E1D3]/80 group-hover:border-emerald-300 transition-colors">
                         <img
                           src={getProductImageUrl(product.image, product.id)}
                           alt={product.name}
-                          className="w-full h-full object-contain mix-blend-multiply group-hover:scale-105 transition-transform"
+                          className="w-full h-full object-contain mix-blend-multiply group-hover:scale-108 transition-transform duration-300"
                         />
-                        <span className="absolute top-2 left-2 text-[9px] font-mono uppercase font-bold px-2 py-0.5 rounded-full bg-[#F4F1EA] text-[#8B5A2B] border border-[#E6E1D3]">
+                        <span className="absolute top-2.5 left-2.5 text-[10px] font-mono uppercase font-bold px-2.5 py-0.5 rounded-full bg-[#F4F1EA]/95 text-[#8B5A2B] border border-[#E6E1D3] shadow-2xs">
                           {product.category}
                         </span>
-                        <span className="absolute top-2 right-2 text-[9px] font-mono text-[#8B8B7A] px-1.5 py-0.5 rounded bg-[#FDFBF7] border border-[#E6E1D3]">
+                        <span className="absolute top-2.5 right-2.5 text-[10px] font-mono text-[#8B8B7A] px-2 py-0.5 rounded-md bg-[#FDFBF7]/95 border border-[#E6E1D3] font-semibold">
                           {product.id}
                         </span>
                       </div>
 
                       {/* Product Name */}
-                      <h4 className="font-serif font-bold text-xs sm:text-sm text-[#2C3A2B] line-clamp-2 leading-snug">
+                      <h4 className="font-serif font-bold text-sm sm:text-base text-[#2C3A2B] line-clamp-2 leading-snug group-hover:text-[#8B5A2B] transition-colors">
                         {product.name}
                       </h4>
 
                       {/* Headroom badge */}
-                      <div className="mt-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 text-[10px] font-mono font-semibold border border-emerald-200">
+                      <div className="mt-2.5 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-800 text-xs font-mono font-semibold border border-emerald-200">
                         <span>{formatINR(moneyLeftAfter)} left after add</span>
                       </div>
                     </div>
 
                     {/* Price & Add Button */}
-                    <div className="mt-4 pt-3 border-t border-[#E6E1D3]/60 flex items-center justify-between gap-2">
+                    <div className="mt-4 pt-3.5 border-t border-[#E6E1D3]/70 flex items-center justify-between gap-2">
                       <div>
-                        <span className="text-[9px] font-mono uppercase text-[#8B8B7A] block">Add-on Price</span>
-                        <span className="text-sm font-bold font-mono text-[#2C3A2B]">
+                        <span className="text-[10px] font-mono uppercase text-[#8B8B7A] block font-semibold">Add-on Price</span>
+                        <span className="text-base sm:text-lg font-bold font-mono text-[#2C3A2B]">
                           {formatINR(product.price)}
                         </span>
                       </div>
 
                       {isAdded ? (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-xs font-semibold text-emerald-800 bg-emerald-100/70 border border-emerald-300">
-                          <Check className="w-3 h-3 text-emerald-600" />
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-emerald-800 bg-emerald-100/80 border border-emerald-300 shadow-2xs">
+                          <Check className="w-3.5 h-3.5 text-emerald-600" />
                           Added
                         </span>
                       ) : (
                         <button
                           type="button"
                           onClick={() => handleAddAddon(product)}
-                          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold text-white bg-[#2C3A2B] hover:bg-[#1E281D] transition-all cursor-pointer shadow-2xs hover:scale-102 active:scale-98"
+                          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold text-white bg-[#2C3A2B] hover:bg-[#1E281D] transition-all cursor-pointer shadow-xs hover:scale-102 active:scale-98"
                         >
-                          <Plus className="w-3.5 h-3.5" />
+                          <Plus className="w-4 h-4" />
                           <span>Add</span>
                         </button>
                       )}
