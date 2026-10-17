@@ -75,7 +75,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         },
         {
           id: 'compare',
-          label: 'Compare Builder',
+          label: 'Bundles',
           icon: Columns,
           badge: savedBundles.length > 0 ? `${savedBundles.length} saved` : (validation.filledSlotCount > 0 ? `${validation.filledSlotCount}/${validation.totalSlotCount}` : null)
         }
@@ -90,7 +90,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         },
         {
           id: 'compare',
-          label: 'Compare Builder',
+          label: 'Bundles',
           icon: Columns,
           badge: cartItemsCount > 0 ? `${cartItemsCount} in cart` : (savedBundles.length > 0 ? `${savedBundles.length} saved` : '2 in cart')
         },
@@ -116,7 +116,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         },
         {
           id: 'compare',
-          label: 'Compare Builder',
+          label: 'Bundles',
           icon: Columns,
           badge: savedBundles.length > 0 ? `${savedBundles.length} saved` : (cartItemsCount > 0 ? `${cartItemsCount} in cart` : null)
         },

@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   Sparkles,
   CheckCircle2,
@@ -21,7 +21,9 @@ import {
   CreditCard,
   Search,
   Filter,
-  X
+  X,
+  PackagePlus,
+  ShoppingBag
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { Product } from '../../types';
@@ -33,6 +35,8 @@ import {
   generateRandomDatabaseBundles
 } from '../../utils/bundleRecommendations';
 import { fetchFilteredBundles, BundleApiResponse } from '../../services/apiClient';
+import { CreateBundleCatalogModal } from './CreateBundleCatalogModal';
+import { BundleAddOnsPanel } from './BundleAddOnsPanel';
 
 function getProductImageUrl(img?: string, id?: string): string {
   if (!img) return id ? `/assets/${id}.png` : '';
@@ -59,58 +63,59 @@ function getColourHex(colour?: string): string {
 
 interface BundleRecommendationsSectionProps {
   onSelectBundle: (bundle: BundleRecommendation) => void;
+  onOpenWorkspace?: () => void;
 }
 
 export const BundleRecommendationsSection: React.FC<BundleRecommendationsSectionProps> = ({
-  onSelectBundle
+  onSelectBundle,
+  onOpenWorkspace
 }) => {
-  const { fixture, budget: appBudget, setBudget, initiateCheckout } = useApp();
+  const { fixture, budget: appBudget, setBudget, initiateCheckout, addNotification } = useApp();
 
-  // Requirements state
+  // Search & Filter state
+  const [bundleSearch, setBundleSearch] = useState<string>('');
+  const [bundleCategory, setBundleCategory] = useState<string>('all');
+  const [bundleSort, setBundleSort] = useState<'price_asc' | 'price_desc' | 'items_asc' | 'items_desc'>('price_asc');
+  const [onlyWithinBudget, setOnlyWithinBudget] = useState<boolean>(true);
+
+  // Requirements / Inserted Items state
   const [requirements, setRequirements] = useState<ProductRequirement[]>([]);
   const [selectedProductIdInput, setSelectedProductIdInput] = useState<string>('');
   const [quantityInput, setQuantityInput] = useState<number>(1);
   const [exactOnly, setExactOnly] = useState<boolean>(false);
   const [expandedCardId, setExpandedCardId] = useState<string | null>(null);
 
-  // Specific bundle detail filter state
-  const [bundleCategory, setBundleCategory] = useState<string>('all');
-  const [bundleColour, setBundleColour] = useState<string>('all');
-  const [bundleSearch, setBundleSearch] = useState<string>('');
-  const [bundleSort, setBundleSort] = useState<'price_asc' | 'price_desc' | 'items_asc' | 'items_desc'>('price_asc');
+  // Modal for Create Bundle Catalogue
+  const [isCreateBundleModalOpen, setIsCreateBundleModalOpen] = useState<boolean>(false);
+
+  // Reference bundle selected for Add-ons panel
+  const [selectedReferenceBundleId, setSelectedReferenceBundleId] = useState<string | null>(null);
 
   // Backend connection state
   const [backendBundles, setBackendBundles] = useState<BundleRecommendation[] | null>(null);
   const [isBackendLoading, setIsBackendLoading] = useState<boolean>(false);
   const [backendStatus, setBackendStatus] = useState<'connected' | 'offline'>('connected');
-  const [backendLatency, setBackendLatency] = useState<number | null>(null);
   const [backendHasUnavailableProduct, setBackendHasUnavailableProduct] = useState<boolean>(false);
   const [backendUnavailableReason, setBackendUnavailableReason] = useState<string | undefined>(undefined);
   const [backendIsOverBudgetForAll, setBackendIsOverBudgetForAll] = useState<boolean>(false);
   const [backendOverBudgetReason, setBackendOverBudgetReason] = useState<string | undefined>(undefined);
 
-  // Unique categories and colours available in fixture
+  // Unique categories in fixture
   const availableCategories = useMemo(() => {
     return Array.from(new Set(fixture.products.map(p => p.category)));
   }, [fixture.products]);
 
-  const availableColours = useMemo(() => {
-    return Array.from(new Set(fixture.products.map(p => p.colour).filter(Boolean))) as string[];
-  }, [fixture.products]);
-
-  // Connect to backend endpoint POST /api/bundles/filter whenever requirements or specific details change
+  // Connect to backend endpoint whenever filters change
   useEffect(() => {
     let isMounted = true;
     const timer = setTimeout(async () => {
       try {
         setIsBackendLoading(true);
-        const startTime = performance.now();
         const res: BundleApiResponse = await fetchFilteredBundles({
           requirements,
           budget: appBudget || undefined,
           exactOnly,
           category: bundleCategory !== 'all' ? bundleCategory : undefined,
-          colour: bundleColour !== 'all' ? bundleColour : undefined,
           search: bundleSearch.trim() || undefined,
           sort: bundleSort
         });
@@ -121,12 +126,11 @@ export const BundleRecommendationsSection: React.FC<BundleRecommendationsSection
           setBackendUnavailableReason(res.unavailableReason);
           setBackendIsOverBudgetForAll(Boolean(res.isOverBudgetForAll));
           setBackendOverBudgetReason(res.overBudgetReason);
-          setBackendLatency(Math.round(performance.now() - startTime));
           setBackendStatus('connected');
           setIsBackendLoading(false);
         }
       } catch (err) {
-        console.warn('Backend bundle filter failed, using local engine fallback:', err);
+        console.warn('Backend bundle filter fallback to local engine:', err);
         if (isMounted) {
           setBackendBundles(null);
           setBackendStatus('offline');
@@ -139,152 +143,7 @@ export const BundleRecommendationsSection: React.FC<BundleRecommendationsSection
       isMounted = false;
       clearTimeout(timer);
     };
-  }, [requirements, appBudget, exactOnly, bundleCategory, bundleColour, bundleSearch, bundleSort]);
-
-  // Quick preset buttons for instant test verification
-  const handleApplyPreset = (presetType: 'test1' | 'test2' | 'test3' | 'test4' | 'test5' | 'random' | 'reset') => {
-    switch (presetType) {
-      case 'random': {
-        // Generate 25 random bundles from database
-        setRequirements([]);
-        setExactOnly(false);
-        setSelectedProductIdInput('');
-        setQuantityInput(1);
-        setBundleCategory('all');
-        setBundleColour('all');
-        setBundleSearch('');
-        setBundleSort('price_asc');
-        const randomList = generateRandomDatabaseBundles(fixture.products, 25, fixture.shippingRule, fixture.taxRule, appBudget);
-        setBackendBundles(randomList);
-        setBackendHasUnavailableProduct(false);
-        setBackendUnavailableReason(undefined);
-        setBackendIsOverBudgetForAll(false);
-        setBackendOverBudgetReason(undefined);
-        break;
-      }
-
-      case 'test1':
-        // Case 1: Blue Mug + Red Mug (P05 in stock, P06 out of stock -> 0 bundles)
-        setRequirements([
-          { id: 'req-1', productId: 'P05', quantity: 1 },
-          { id: 'req-2', productId: 'P06', quantity: 1 }
-        ]);
-        setExactOnly(false);
-        setBundleCategory('all');
-        setBundleColour('all');
-        setBundleSearch('');
-        break;
-
-      case 'test2':
-        // Case 2: Specific product with quantity > 1 (2x Blue Mug P05)
-        setRequirements([
-          { id: 'req-1', productId: 'P05', quantity: 2 }
-        ]);
-        setExactOnly(false);
-        setBundleCategory('all');
-        setBundleColour('all');
-        setBundleSearch('');
-        break;
-
-      case 'test3':
-        // Case 3: User specifies a budget (P07 + P08 with budget ₹2,000)
-        setRequirements([
-          { id: 'req-1', productId: 'P07', quantity: 1 },
-          { id: 'req-2', productId: 'P08', quantity: 1 }
-        ]);
-        setExactOnly(false);
-        setBudget(2000);
-        setBundleCategory('all');
-        setBundleColour('all');
-        setBundleSearch('');
-        break;
-
-      case 'test4':
-        // Case 4: User requests an unavailable product (P01 Blue Tshirt M, stock 0)
-        setRequirements([
-          { id: 'req-1', productId: 'P01', quantity: 1 }
-        ]);
-        setExactOnly(false);
-        setBundleCategory('all');
-        setBundleColour('all');
-        setBundleSearch('');
-        break;
-
-      case 'test5':
-        // Case 5: Fewer than 10 valid bundles exist (2x Blue Mug P05 with budget ₹1,200)
-        setRequirements([
-          { id: 'req-1', productId: 'P05', quantity: 2 }
-        ]);
-        setExactOnly(false);
-        setBudget(1200);
-        setBundleCategory('all');
-        setBundleColour('all');
-        setBundleSearch('');
-        break;
-
-      case 'reset':
-        // Clears requirements and restores baseline bundles
-        setRequirements([]);
-        setExactOnly(false);
-        setSelectedProductIdInput('');
-        setQuantityInput(1);
-        setBundleCategory('all');
-        setBundleColour('all');
-        setBundleSearch('');
-        setBundleSort('price_asc');
-        break;
-    }
-  };
-
-  const handleAddRequirement = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedProductIdInput) return;
-
-    const prod = fixture.products.find(p => p.id === selectedProductIdInput);
-    if (!prod) return;
-
-    const existingIdx = requirements.findIndex(r => r.productId === prod.id);
-    if (existingIdx >= 0) {
-      // Increment quantity
-      setRequirements(prev =>
-        prev.map((r, i) => (i === existingIdx ? { ...r, quantity: r.quantity + quantityInput } : r))
-      );
-    } else {
-      setRequirements(prev => [
-        ...prev,
-        {
-          id: `req-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
-          productId: prod.id,
-          title: prod.name,
-          category: prod.category,
-          colour: prod.colour,
-          size: prod.size,
-          quantity: Math.max(1, quantityInput)
-        }
-      ]);
-    }
-
-    setSelectedProductIdInput('');
-    setQuantityInput(1);
-  };
-
-  const handleRemoveRequirement = (id: string) => {
-    setRequirements(prev => prev.filter(r => r.id !== id));
-  };
-
-  const handleUpdateRequirementQty = (id: string, delta: number) => {
-    setRequirements(prev =>
-      prev
-        .map(r => {
-          if (r.id === id) {
-            const newQty = r.quantity + delta;
-            return newQty > 0 ? { ...r, quantity: newQty } : null;
-          }
-          return r;
-        })
-        .filter((r): r is ProductRequirement => r !== null)
-    );
-  };
+  }, [requirements, appBudget, exactOnly, bundleCategory, bundleSearch, bundleSort]);
 
   // Local engine fallback calculation
   const localRecommendationResult = useMemo(() => {
@@ -299,14 +158,17 @@ export const BundleRecommendationsSection: React.FC<BundleRecommendationsSection
 
     let filtered = [...base.bundles];
 
-    // Filter by keyword search
+    // Filter by keyword search (items, name, tagline, role, category)
     if (bundleSearch.trim()) {
       const q = bundleSearch.toLowerCase().trim();
       filtered = filtered.filter(b => {
         const name = b.name.toLowerCase();
         const tagline = b.tagline.toLowerCase();
         const explanation = b.matchExplanation.toLowerCase();
-        const itemNames = b.items.map(it => `${it.product.name} ${it.product.category} ${it.product.colour || ''}`).join(' ').toLowerCase();
+        const itemNames = b.items
+          .map(it => `${it.product.name} ${it.product.id} ${it.product.category} ${it.product.colour || ''} ${it.product.brand || ''}`)
+          .join(' ')
+          .toLowerCase();
         return name.includes(q) || tagline.includes(q) || explanation.includes(q) || itemNames.includes(q);
       });
     }
@@ -320,12 +182,9 @@ export const BundleRecommendationsSection: React.FC<BundleRecommendationsSection
       );
     }
 
-    // Filter by colour
-    if (bundleColour !== 'all') {
-      const col = bundleColour.toLowerCase().trim();
-      filtered = filtered.filter(b =>
-        b.items.some(it => (it.product.colour || '').toLowerCase().includes(col))
-      );
+    // Filter by budget cap
+    if (onlyWithinBudget && appBudget > 0) {
+      filtered = filtered.filter(b => b.landedPrice <= appBudget);
     }
 
     // Sort bundles
@@ -343,513 +202,355 @@ export const BundleRecommendationsSection: React.FC<BundleRecommendationsSection
       ...base,
       bundles: filtered
     };
-  }, [fixture, requirements, appBudget, exactOnly, bundleSearch, bundleCategory, bundleColour, bundleSort]);
+  }, [fixture, requirements, appBudget, exactOnly, bundleSearch, bundleCategory, onlyWithinBudget, bundleSort]);
 
-  // Determine whether to use live backend filtered results or local fallback
+  // Active bundles list
   const isUsingBackend = backendBundles !== null && backendStatus === 'connected';
-  const bundles = isUsingBackend ? backendBundles : localRecommendationResult.bundles;
-  const hasUnavailableProduct = isUsingBackend
-    ? backendHasUnavailableProduct
-    : localRecommendationResult.hasUnavailableProduct;
-  const unavailableReason = isUsingBackend
-    ? backendUnavailableReason
-    : localRecommendationResult.unavailableReason;
-  const isOverBudgetForAll = isUsingBackend
-    ? backendIsOverBudgetForAll
-    : localRecommendationResult.isOverBudgetForAll;
-  const overBudgetReason = isUsingBackend
-    ? backendOverBudgetReason
-    : localRecommendationResult.overBudgetReason;
+  const rawBundles = isUsingBackend ? backendBundles : localRecommendationResult.bundles;
 
-  const hasSpecificDetailFilters =
-    bundleCategory !== 'all' ||
-    bundleColour !== 'all' ||
-    bundleSearch.trim() !== '' ||
-    bundleSort !== 'price_asc' ||
-    exactOnly ||
-    requirements.length > 0;
+  // Apply client-side budget cap & search guarantee
+  const bundles = useMemo(() => {
+    let list = [...rawBundles];
+    if (onlyWithinBudget && appBudget > 0) {
+      list = list.filter(b => b.landedPrice <= appBudget);
+    }
+    if (bundleSearch.trim()) {
+      const q = bundleSearch.toLowerCase().trim();
+      list = list.filter(b => {
+        const name = b.name.toLowerCase();
+        const tagline = b.tagline.toLowerCase();
+        const itemNames = b.items.map(it => `${it.product.name} ${it.product.id} ${it.product.category}`).join(' ').toLowerCase();
+        return name.includes(q) || tagline.includes(q) || itemNames.includes(q);
+      });
+    }
+    return list;
+  }, [rawBundles, onlyWithinBudget, appBudget, bundleSearch]);
+
+  // Reference bundle for Add-ons panel
+  const referenceBundle: BundleRecommendation | null = useMemo(() => {
+    if (selectedReferenceBundleId) {
+      const found = bundles.find(b => b.id === selectedReferenceBundleId);
+      if (found) return found;
+    }
+    return bundles.length > 0 ? bundles[0] : null;
+  }, [bundles, selectedReferenceBundleId]);
+
+  // Insert requirement handler
+  const handleAddRequirement = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedProductIdInput) return;
+
+    const prod = fixture.products.find(p => p.id === selectedProductIdInput);
+    if (!prod) return;
+
+    const existingIdx = requirements.findIndex(r => r.productId === prod.id);
+    if (existingIdx >= 0) {
+      setRequirements(prev =>
+        prev.map((r, i) => (i === existingIdx ? { ...r, quantity: r.quantity + quantityInput } : r))
+      );
+    } else {
+      setRequirements(prev => [
+        ...prev,
+        {
+          id: `req-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+          productId: prod.id,
+          title: prod.name,
+          category: prod.category,
+          quantity: Math.max(1, quantityInput)
+        }
+      ]);
+    }
+
+    setSelectedProductIdInput('');
+    setQuantityInput(1);
+    addNotification('Item Filter Added', `Bundles must now include ${quantityInput}x ${prod.name}`, 'info');
+  };
+
+  const handleRemoveRequirement = (id: string) => {
+    setRequirements(prev => prev.filter(r => r.id !== id));
+  };
+
+  const handleResetFilters = () => {
+    setBundleSearch('');
+    setBundleCategory('all');
+    setRequirements([]);
+    setExactOnly(false);
+    setSelectedProductIdInput('');
+    setQuantityInput(1);
+    setOnlyWithinBudget(true);
+  };
 
   return (
     <div className="space-y-6">
       {/* ========================================================================= */}
-      {/* 1. HEADER & INTRO BANNER                                                  */}
+      {/* 1. TOP SEARCH & BUDGET FILTER BAR                                         */}
       {/* ========================================================================= */}
-      <div className="p-6 bg-white border border-[#E6E1D3] rounded-[24px] shadow-xs">
+      <div className="p-6 bg-white border border-[#E6E1D3] rounded-[28px] shadow-xs space-y-5">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="space-y-1">
-            <div className="flex flex-wrap items-center gap-2">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-[#2C3A2B]/10 text-[#2C3A2B] border border-[#2C3A2B]/20">
-                <Sparkles className="w-3.5 h-3.5 text-[#2C3A2B]" />
-                <span>Dynamic Bundle Recommendation Engine</span>
-              </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold tracking-wider uppercase bg-[#2C3A2B] text-amber-200 shadow-2xs">
+                Bundles Explorer
+              </span>
+              <span className="text-xs text-[#8B8B7A] font-mono">
+                {bundles.length} bundles available
+              </span>
             </div>
-
-            <h2 className="text-xl sm:text-2xl font-serif font-bold text-[#2C3A2B] tracking-tight">
-              Dynamic Product Bundle Recommendations
+            <h2 className="text-2xl font-serif font-bold text-[#2C3A2B] mt-1">
+              Find or Build Your Perfect Bundle
             </h2>
-            <p className="text-xs sm:text-sm text-[#5A5A40] leading-relaxed max-w-3xl">
-              Specify your required products, quantities, colours, categories, or budget to receive up to 25 distinct, validated,
-              and compatible bundle options generated dynamically from the official C07 catalogue backend.
+            <p className="text-xs text-[#5A5A40]">
+              Filter pre-configured workstation bundles by inserting required items and setting your target budget.
             </p>
           </div>
 
+          {/* Quick preset chips */}
           <div className="flex flex-wrap items-center gap-2">
             <button
-              onClick={() => handleApplyPreset('random')}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-white bg-[#8B5A2B] hover:bg-[#6D4522] rounded-xl transition-all cursor-pointer shadow-2xs hover:scale-102"
-              title="Generate 25 randomized bundles from our active product database"
+              onClick={() => {
+                const randomList = generateRandomDatabaseBundles(fixture.products, 25, fixture.shippingRule, fixture.taxRule, appBudget);
+                setBackendBundles(randomList);
+                addNotification('Bundles Shuffled', 'Loaded 25 randomized product bundles from database.', 'info');
+              }}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-[#8B5A2B] bg-[#FDFBF7] hover:bg-[#F4F1EA] border border-[#E6E1D3] rounded-xl transition-all cursor-pointer shadow-2xs"
             >
               <Sparkles className="w-3.5 h-3.5" />
-              <span>Shuffle 25 Random Bundles</span>
+              <span>Shuffle 25 Bundles</span>
             </button>
+
             <button
-              onClick={() => handleApplyPreset('reset')}
-              className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-[#5A5A40] bg-[#F4F1EA] hover:bg-[#E6E1D3] border border-[#E6E1D3] rounded-xl transition-all cursor-pointer shadow-2xs"
-              title="Reset all filters to view 25 predefined baseline bundles"
+              onClick={handleResetFilters}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-[#5A5A40] bg-[#F4F1EA] hover:bg-[#E6E1D3] border border-[#E6E1D3] rounded-xl transition-all cursor-pointer shadow-2xs"
             >
               <RotateCcw className="w-3.5 h-3.5" />
-              <span>Reset to 25 Baselines</span>
+              <span>Reset Filters</span>
             </button>
           </div>
         </div>
 
-        {/* ======================================================================= */}
-        {/* QUICK VERIFICATION PRESETS (1-Click Test Buttons)                       */}
-        {/* ======================================================================= */}
-        <div className="mt-5 pt-4 border-t border-[#E6E1D3]/80">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-[11px] font-bold text-[#8B5A2B] uppercase tracking-wider flex items-center gap-1 mr-1">
-              <SlidersHorizontal className="w-3 h-3" /> Quick Test Cases:
-            </span>
-
-            <button
-              onClick={() => handleApplyPreset('test1')}
-              className="px-2.5 py-1 text-xs font-medium rounded-lg bg-[#FDFBF7] hover:bg-[#F4F1EA] text-[#2C3A2B] border border-[#E6E1D3] transition-all hover:scale-102 cursor-pointer shadow-2xs"
-              title="Test 1: User requests 1x Blue Mug + 1x Red Mug (Red Mug is out-of-stock)"
-            >
-              <span className="font-bold text-amber-800">Test 1:</span> Blue Mug + Red Mug
-            </button>
-
-            <button
-              onClick={() => handleApplyPreset('test2')}
-              className="px-2.5 py-1 text-xs font-medium rounded-lg bg-[#FDFBF7] hover:bg-[#F4F1EA] text-[#2C3A2B] border border-[#E6E1D3] transition-all hover:scale-102 cursor-pointer shadow-2xs"
-              title="Test 2: Specific product with quantity > 1 (2x Blue Mug)"
-            >
-              <span className="font-bold text-emerald-800">Test 2:</span> 2x Blue Mug
-            </button>
-
-            <button
-              onClick={() => handleApplyPreset('test3')}
-              className="px-2.5 py-1 text-xs font-medium rounded-lg bg-[#FDFBF7] hover:bg-[#F4F1EA] text-[#2C3A2B] border border-[#E6E1D3] transition-all hover:scale-102 cursor-pointer shadow-2xs"
-              title="Test 3: Mouse + Keyboard within ₹2,000 Budget"
-            >
-              <span className="font-bold text-indigo-800">Test 3:</span> Budget ₹2,000 (P07+P08)
-            </button>
-
-            <button
-              onClick={() => handleApplyPreset('test4')}
-              className="px-2.5 py-1 text-xs font-medium rounded-lg bg-[#FDFBF7] hover:bg-[#F4F1EA] text-[#2C3A2B] border border-[#E6E1D3] transition-all hover:scale-102 cursor-pointer shadow-2xs"
-              title="Test 4: Request unavailable product (P01 Blue Tshirt M, stock 0)"
-            >
-              <span className="font-bold text-rose-800">Test 4:</span> Unavailable Product (P01)
-            </button>
-
-            <button
-              onClick={() => handleApplyPreset('test5')}
-              className="px-2.5 py-1 text-xs font-medium rounded-lg bg-[#FDFBF7] hover:bg-[#F4F1EA] text-[#2C3A2B] border border-[#E6E1D3] transition-all hover:scale-102 cursor-pointer shadow-2xs"
-              title="Test 5: Combination with fewer than 10 valid bundles (2x Blue Mug + Budget ₹1,200)"
-            >
-              <span className="font-bold text-purple-800">Test 5:</span> Fewer than 10 Bundles
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* ========================================================================= */}
-      {/* 2. INTERACTIVE REQUIREMENT BUILDER BAR                                    */}
-      {/* ========================================================================= */}
-      <div className="p-5 bg-white border border-[#E6E1D3] rounded-[24px] shadow-xs space-y-4">
-        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4">
-          {/* Add Product Form */}
-          <form onSubmit={handleAddRequirement} className="flex-1 grid grid-cols-1 sm:grid-cols-12 gap-3">
-            <div className="sm:col-span-6">
-              <label className="block text-[11px] font-bold text-[#8B5A2B] uppercase tracking-wider mb-1">
-                Select Required Product
-              </label>
-              <select
-                value={selectedProductIdInput}
-                onChange={e => setSelectedProductIdInput(e.target.value)}
-                className="w-full px-3 py-2 text-xs font-medium text-[#2C2C1E] bg-[#FDFBF7] border border-[#E6E1D3] rounded-xl focus:outline-hidden focus:border-[#2C3A2B] cursor-pointer"
-              >
-                <option value="">-- Choose product to require --</option>
-                {fixture.products.map(p => {
-                  const isOos = !p.inStock || (p.stockQuantity !== undefined && p.stockQuantity <= 0);
-                  return (
-                    <option key={p.id} value={p.id}>
-                      {p.id} - {p.name} ({p.colour || 'Standard'}{p.size && p.size !== 'One' ? `, Size ${p.size}` : ''}) · {formatINR(p.price)} {isOos ? '· [OUT OF STOCK]' : `(${p.stockQuantity} in stock)`}
-                    </option>
-                  );
-                })}
-              </select>
-            </div>
-
-            <div className="sm:col-span-3">
-              <label className="block text-[11px] font-bold text-[#8B5A2B] uppercase tracking-wider mb-1">
-                Quantity
-              </label>
-              <div className="flex items-center rounded-xl border border-[#E6E1D3] bg-[#FDFBF7] overflow-hidden">
-                <button
-                  type="button"
-                  onClick={() => setQuantityInput(q => Math.max(1, q - 1))}
-                  className="px-2.5 py-2 text-xs font-bold text-[#5A5A40] hover:bg-[#E6E1D3] transition-colors cursor-pointer"
-                >
-                  -
-                </button>
-                <input
-                  type="number"
-                  min="1"
-                  max="50"
-                  value={quantityInput}
-                  onChange={e => setQuantityInput(Math.max(1, parseInt(e.target.value) || 1))}
-                  className="w-full text-center text-xs font-bold font-mono text-[#2C2C1E] bg-transparent focus:outline-hidden py-2"
-                />
-                <button
-                  type="button"
-                  onClick={() => setQuantityInput(q => q + 1)}
-                  className="px-2.5 py-2 text-xs font-bold text-[#5A5A40] hover:bg-[#E6E1D3] transition-colors cursor-pointer"
-                >
-                  +
-                </button>
-              </div>
-            </div>
-
-            <div className="sm:col-span-3 flex items-end">
-              <button
-                type="submit"
-                disabled={!selectedProductIdInput}
-                className="w-full inline-flex items-center justify-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-[#2C3A2B] hover:bg-[#3A4D39] disabled:bg-stone-300 disabled:cursor-not-allowed rounded-xl transition-all shadow-xs cursor-pointer"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                <span>Add Item</span>
-              </button>
-            </div>
-          </form>
-
-          {/* Exact Only Controls */}
-          <div className="pt-3 lg:pt-0 lg:border-l lg:border-[#E6E1D3]/80 lg:pl-4 flex items-center">
-            <label className="flex items-center gap-2 cursor-pointer select-none">
-              <input
-                type="checkbox"
-                checked={exactOnly}
-                onChange={e => setExactOnly(e.target.checked)}
-                className="w-4 h-4 rounded-sm border-[#E6E1D3] text-[#2C3A2B] focus:ring-0 cursor-pointer accent-[#2C3A2B]"
-              />
-              <div>
-                <span className="text-xs font-semibold text-[#2C2C1E]">
-                  Exact products only
-                </span>
-                <span className="text-[10px] text-[#5A5A40] block">
-                  No complementary items added
-                </span>
-              </div>
+        {/* Search Bar & Budget Filter Controls */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 pt-2">
+          {/* Search Input (5 Cols) */}
+          <div className="lg:col-span-5 relative">
+            <label className="text-[10px] font-mono uppercase tracking-wider text-[#8B8B7A] font-bold block mb-1.5">
+              Search Bundles & Items
             </label>
-          </div>
-        </div>
-
-        {/* Active Requirements List Chips */}
-        {requirements.length > 0 && (
-          <div className="pt-3 border-t border-[#E6E1D3]/80">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="text-[11px] font-bold text-[#8B5A2B] uppercase tracking-wider">
-                Active Requirements ({requirements.length}):
-              </span>
-
-              {requirements.map(req => {
-                const prod = fixture.products.find(p => p.id === req.productId);
-                const isOos = !prod || !prod.inStock || (prod.stockQuantity !== undefined && prod.stockQuantity <= 0);
-
-                return (
-                  <div
-                    key={req.id}
-                    className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs shadow-2xs transition-all ${
-                      isOos
-                        ? 'bg-rose-50 border-rose-200 text-rose-800'
-                        : 'bg-[#FDFBF7] border-[#E6E1D3] text-[#2C2C1E]'
-                    }`}
-                  >
-                    {prod && (
-                      <img
-                        src={getProductImageUrl(prod.image, prod.id)}
-                        alt={prod.name}
-                        className="w-5 h-5 rounded-md object-contain bg-white border border-[#E6E1D3]"
-                      />
-                    )}
-                    <span className="font-bold">{req.quantity}x</span>
-                    <span className="font-medium">
-                      {prod ? `${prod.colour || ''} ${prod.name}` : req.productId}
-                    </span>
-                    <span className="font-mono text-[11px] text-[#8B5A2B]">
-                      {prod ? formatINR(prod.price * req.quantity) : ''}
-                    </span>
-
-                    {/* Stepper */}
-                    <div className="flex items-center ml-1 gap-1">
-                      <button
-                        onClick={() => handleUpdateRequirementQty(req.id, -1)}
-                        className="w-4 h-4 flex items-center justify-center rounded-sm bg-[#E6E1D3] hover:bg-[#D6CFBF] text-[#2C2C1E] font-bold text-[10px] cursor-pointer"
-                        title="Decrease quantity"
-                      >
-                        -
-                      </button>
-                      <button
-                        onClick={() => handleUpdateRequirementQty(req.id, 1)}
-                        className="w-4 h-4 flex items-center justify-center rounded-sm bg-[#E6E1D3] hover:bg-[#D6CFBF] text-[#2C2C1E] font-bold text-[10px] cursor-pointer"
-                        title="Increase quantity"
-                      >
-                        +
-                      </button>
-                      <button
-                        onClick={() => handleRemoveRequirement(req.id)}
-                        className="ml-1 text-stone-400 hover:text-rose-600 transition-colors cursor-pointer"
-                        title="Remove requirement"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {/* Specific Bundle Details Filter Toolbar */}
-        <div className="pt-3 border-t border-[#E6E1D3]/80 space-y-3">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
-            <span className="text-[11px] font-bold text-[#8B5A2B] uppercase tracking-wider flex items-center gap-1.5">
-              <Filter className="w-3.5 h-3.5 text-[#8B5A2B]" />
-              Filter Bundles by Specific Details:
-            </span>
-
-            {hasSpecificDetailFilters && (
-              <button
-                onClick={() => {
-                  setBundleCategory('all');
-                  setBundleColour('all');
-                  setBundleSearch('');
-                  setBundleSort('price_asc');
-                  setExactOnly(false);
-                }}
-                className="inline-flex items-center gap-1 text-[11px] font-semibold text-rose-700 hover:text-rose-900 transition-colors cursor-pointer"
-              >
-                <X className="w-3 h-3" />
-                <span>Reset Filters</span>
-              </button>
-            )}
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            {/* Search Input */}
             <div className="relative">
-              <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />
+              <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8B8B7A]" />
               <input
                 type="text"
-                placeholder="Search bundle name or item..."
                 value={bundleSearch}
-                onChange={e => setBundleSearch(e.target.value)}
-                className="w-full pl-8 pr-3 py-1.5 text-xs font-medium text-[#2C2C1E] bg-[#FDFBF7] border border-[#E6E1D3] rounded-xl focus:outline-hidden focus:border-[#2C3A2B]"
+                onChange={(e) => setBundleSearch(e.target.value)}
+                placeholder="Search items, keywords, roles (e.g., Chair, Monitor, Lamp, Developer)..."
+                className="w-full pl-9 pr-8 py-2.5 rounded-xl text-xs bg-[#FDFBF7] border border-[#E6E1D3] text-[#2C3A2B] placeholder:text-[#8B8B7A] focus:outline-none focus:border-[#2C3A2B] shadow-2xs"
               />
               {bundleSearch && (
                 <button
                   onClick={() => setBundleSearch('')}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 cursor-pointer"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#8B8B7A] hover:text-[#2C3A2B]"
                 >
-                  <X className="w-3 h-3" />
+                  <X className="w-3.5 h-3.5" />
                 </button>
               )}
             </div>
-
-            {/* Category Filter */}
-            <div>
-              <select
-                value={bundleCategory}
-                onChange={e => setBundleCategory(e.target.value)}
-                className="w-full px-3 py-1.5 text-xs font-medium text-[#2C2C1E] bg-[#FDFBF7] border border-[#E6E1D3] rounded-xl focus:outline-hidden focus:border-[#2C3A2B] cursor-pointer"
-              >
-                <option value="all">All Categories</option>
-                {availableCategories.map(cat => (
-                  <option key={cat} value={cat}>
-                    Category: {cat}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Colour Filter */}
-            <div>
-              <select
-                value={bundleColour}
-                onChange={e => setBundleColour(e.target.value)}
-                className="w-full px-3 py-1.5 text-xs font-medium text-[#2C2C1E] bg-[#FDFBF7] border border-[#E6E1D3] rounded-xl focus:outline-hidden focus:border-[#2C3A2B] cursor-pointer"
-              >
-                <option value="all">All Colours</option>
-                {availableColours.map(col => (
-                  <option key={col} value={col}>
-                    Colour: {col}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Sort Order */}
-            <div>
-              <select
-                value={bundleSort}
-                onChange={e => setBundleSort(e.target.value as any)}
-                className="w-full px-3 py-1.5 text-xs font-medium text-[#2C2C1E] bg-[#FDFBF7] border border-[#E6E1D3] rounded-xl focus:outline-hidden focus:border-[#2C3A2B] cursor-pointer"
-              >
-                <option value="price_asc">Price: Low to High</option>
-                <option value="price_desc">Price: High to Low</option>
-                <option value="items_asc">Fewest Items First</option>
-                <option value="items_desc">Most Items First</option>
-              </select>
-            </div>
           </div>
 
-          {/* Active Specific Filter Badges */}
-          {(bundleCategory !== 'all' || bundleColour !== 'all' || bundleSearch.trim() || exactOnly) && (
-            <div className="flex flex-wrap items-center gap-1.5 pt-1">
-              <span className="text-[10px] font-bold text-[#8B5A2B] uppercase tracking-wider mr-1">
-                Active Detail Filters:
+          {/* Insert Specific Required Item (4 Cols) */}
+          <div className="lg:col-span-4">
+            <label className="text-[10px] font-mono uppercase tracking-wider text-[#8B8B7A] font-bold block mb-1.5">
+              Insert Must-Have Product
+            </label>
+            <form onSubmit={handleAddRequirement} className="flex items-center gap-1.5">
+              <select
+                value={selectedProductIdInput}
+                onChange={(e) => setSelectedProductIdInput(e.target.value)}
+                className="flex-1 py-2.5 px-3 rounded-xl text-xs bg-[#FDFBF7] border border-[#E6E1D3] text-[#2C3A2B] focus:outline-none focus:border-[#2C3A2B] shadow-2xs cursor-pointer truncate"
+              >
+                <option value="">+ Choose product to insert...</option>
+                {fixture.products.map(p => (
+                  <option key={p.id} value={p.id}>
+                    {p.name} ({formatINR(p.price)})
+                  </option>
+                ))}
+              </select>
+              <button
+                type="submit"
+                disabled={!selectedProductIdInput}
+                className="px-3.5 py-2.5 rounded-xl text-xs font-bold text-white bg-[#2C3A2B] hover:bg-[#1E281D] disabled:bg-[#E6E1D3] disabled:text-[#8B8B7A] disabled:cursor-not-allowed transition-colors shadow-2xs shrink-0 cursor-pointer"
+              >
+                Insert
+              </button>
+            </form>
+          </div>
+
+          {/* Target Budget Filter & Quick Chips (3 Cols) */}
+          <div className="lg:col-span-3">
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="text-[10px] font-mono uppercase tracking-wider text-[#8B8B7A] font-bold">
+                Target Budget
+              </label>
+              <span className="font-mono text-xs font-bold text-[#2C3A2B]">
+                {formatINR(appBudget)}
               </span>
-
-              {bundleSearch.trim() && (
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-emerald-50 text-emerald-800 border border-emerald-200">
-                  Search: "{bundleSearch.trim()}"
-                  <button onClick={() => setBundleSearch('')} className="hover:text-emerald-950 cursor-pointer">
-                    <X className="w-3 h-3" />
-                  </button>
-                </span>
-              )}
-
-              {bundleCategory !== 'all' && (
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-amber-50 text-amber-900 border border-amber-200">
-                  Category: {bundleCategory}
-                  <button onClick={() => setBundleCategory('all')} className="hover:text-amber-950 cursor-pointer">
-                    <X className="w-3 h-3" />
-                  </button>
-                </span>
-              )}
-
-              {bundleColour !== 'all' && (
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-stone-100 text-[#2C2C1E] border border-stone-300">
-                  <span
-                    className="w-2.5 h-2.5 rounded-full border border-stone-300"
-                    style={{ backgroundColor: getColourHex(bundleColour) }}
-                  ></span>
-                  Colour: {bundleColour}
-                  <button onClick={() => setBundleColour('all')} className="hover:text-black cursor-pointer">
-                    <X className="w-3 h-3" />
-                  </button>
-                </span>
-              )}
-
-              {exactOnly && (
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-purple-50 text-purple-800 border border-purple-200">
-                  Exact Items Only
-                  <button onClick={() => setExactOnly(false)} className="hover:text-purple-950 cursor-pointer">
-                    <X className="w-3 h-3" />
-                  </button>
-                </span>
-              )}
             </div>
+
+            <div className="flex items-center gap-2">
+              <input
+                type="range"
+                min="10000"
+                max="250000"
+                step="5000"
+                value={appBudget}
+                onChange={(e) => setBudget(Number(e.target.value))}
+                className="w-full accent-[#2C3A2B] cursor-pointer"
+              />
+            </div>
+
+            {/* Quick Budget Chips */}
+            <div className="flex items-center gap-1.5 mt-2">
+              {[35000, 65000, 100000, 150000].map(amt => (
+                <button
+                  key={amt}
+                  type="button"
+                  onClick={() => setBudget(amt)}
+                  className={`px-2 py-0.5 rounded-md text-[10px] font-mono font-semibold transition-all cursor-pointer ${
+                    appBudget === amt
+                      ? 'bg-[#2C3A2B] text-white'
+                      : 'bg-[#F4F1EA] text-[#5A5A40] hover:bg-[#E6E1D3]'
+                  }`}
+                >
+                  ₹{amt >= 100000 ? `${amt / 100000}L` : `${amt / 1000}k`}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Active Requirements List / Filter Chips */}
+        {requirements.length > 0 && (
+          <div className="pt-3 border-t border-[#E6E1D3]/80 flex flex-wrap items-center gap-2">
+            <span className="text-[11px] font-bold text-[#8B5A2B] uppercase tracking-wider">
+              Must Contain ({requirements.length}):
+            </span>
+            {requirements.map(req => {
+              const prod = fixture.products.find(p => p.id === req.productId);
+              return (
+                <span
+                  key={req.id}
+                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-amber-50 text-amber-900 border border-amber-200 text-xs font-medium shadow-2xs"
+                >
+                  <span className="font-bold">{req.quantity}x</span>
+                  <span>{prod ? prod.name : req.productId}</span>
+                  <button
+                    onClick={() => handleRemoveRequirement(req.id)}
+                    className="p-0.5 text-amber-700 hover:text-amber-900 rounded cursor-pointer"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* ========================================================================= */}
+      {/* 2. "CREATE BUNDLE" BUTTON (Directly Below Search & Filter)                 */}
+      {/* ========================================================================= */}
+      <div className="p-4 sm:p-5 bg-gradient-to-r from-[#2C3A2B] via-[#354834] to-[#2C3A2B] rounded-[24px] shadow-md text-white flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold tracking-wider uppercase bg-amber-400 text-[#1E281D]">
+              Custom Builder
+            </span>
+            <span className="text-xs text-amber-200/90 font-medium">
+              Want something specific?
+            </span>
+          </div>
+          <h3 className="font-serif text-lg sm:text-xl font-bold">
+            Create Your Own Custom Bundle
+          </h3>
+          <p className="text-xs text-stone-300 max-w-xl">
+            Open the full catalogue of all 60 products to handpick chairs, desks, monitors, lamps, and docking stations tailored to your exact budget.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setIsCreateBundleModalOpen(true)}
+          className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-xs font-bold uppercase tracking-wider text-[#2C3A2B] bg-amber-300 hover:bg-amber-200 transition-all cursor-pointer shadow-md hover:scale-102 active:scale-98 shrink-0"
+        >
+          <PackagePlus className="w-4 h-4 text-[#2C3A2B]" />
+          <span>+ Create Bundle</span>
+          <ArrowRight className="w-3.5 h-3.5 text-[#2C3A2B]" />
+        </button>
+      </div>
+
+      {/* Results Header Count Banner */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 py-3 rounded-2xl bg-[#FDFBF7] border border-[#E6E1D3] shadow-2xs text-xs">
+        <div className="flex items-center gap-2 text-[#2C2C1E]">
+          <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+          <span className="font-semibold">
+            Showing {bundles.length} {bundles.length === 1 ? 'matching bundle' : 'matching bundles'}
+          </span>
+          {bundleSearch && (
+            <span className="text-[#8B5A2B] font-medium">
+              for "{bundleSearch}"
+            </span>
           )}
+          {onlyWithinBudget && (
+            <span className="text-emerald-800 font-medium">
+              under {formatINR(appBudget)}
+            </span>
+          )}
+        </div>
+
+        <div className="flex items-center gap-3">
+          <label className="flex items-center gap-1.5 cursor-pointer text-[#5A5A40]">
+            <input
+              type="checkbox"
+              checked={onlyWithinBudget}
+              onChange={(e) => setOnlyWithinBudget(e.target.checked)}
+              className="w-3.5 h-3.5 rounded text-[#2C3A2B] accent-[#2C3A2B] cursor-pointer"
+            />
+            <span className="text-xs font-medium">Filter strictly under budget</span>
+          </label>
+
+          <select
+            value={bundleSort}
+            onChange={(e) => setBundleSort(e.target.value as any)}
+            className="py-1 px-2.5 rounded-lg text-xs font-semibold bg-white border border-[#E6E1D3] text-[#2C3A2B] focus:outline-none cursor-pointer"
+          >
+            <option value="price_asc">Price: Low to High</option>
+            <option value="price_desc">Price: High to Low</option>
+            <option value="items_asc">Items: Fewest First</option>
+            <option value="items_desc">Items: Most First</option>
+          </select>
         </div>
       </div>
 
       {/* ========================================================================= */}
-      {/* 3. VALIDATION ALERTS & STATUS EXPLANATION                                 */}
+      {/* 3. RECOMMENDED BUNDLES GRID                                               */}
       {/* ========================================================================= */}
-      {hasUnavailableProduct && (
-        <div className="p-4 rounded-[22px] bg-rose-50 border border-rose-200 shadow-2xs flex items-start gap-3.5">
-          <AlertTriangle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
-          <div className="space-y-1">
-            <h4 className="font-serif text-sm font-bold text-rose-900">
-              Unavailable Product in Requirements
-            </h4>
-            <p className="text-xs text-rose-800 leading-relaxed">
-              {unavailableReason}
-            </p>
-            <p className="text-[11px] text-rose-700 italic">
-              Requirement matching rule: Every recommended bundle must include the required products. Since the requested item is out of stock in active inventory, zero valid bundles can be formed.
-            </p>
-          </div>
-        </div>
-      )}
-
-      {isOverBudgetForAll && !hasUnavailableProduct && (
-        <div className="p-4 rounded-[22px] bg-amber-50 border border-amber-200 shadow-2xs flex items-start gap-3.5">
-          <AlertTriangle className="w-5 h-5 text-amber-700 shrink-0 mt-0.5" />
-          <div className="space-y-1">
-            <h4 className="font-serif text-sm font-bold text-amber-900">
-              No Bundles Within Specified Budget
-            </h4>
-            <p className="text-xs text-amber-800 leading-relaxed">
-              {overBudgetReason || `No valid bundles could satisfy all constraints within ${formatINR(appBudget || 0)}.`}
-            </p>
-            <p className="text-[11px] text-amber-700">
-              Try increasing your target budget or removing higher-priced required products.
-            </p>
-          </div>
-        </div>
-      )}
-
-      {/* Results Count Banner */}
-      {!hasUnavailableProduct && !isOverBudgetForAll && (
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 py-3 rounded-2xl bg-[#FDFBF7] border border-[#E6E1D3] shadow-2xs text-xs">
-          <div className="flex items-center gap-2 text-[#2C2C1E]">
-            <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-            <span className="font-semibold">
-              Showing {bundles.length} {bundles.length === 1 ? 'valid bundle' : 'distinct valid bundles'}
-            </span>
-            {bundles.length < 10 && (
-              <span className="text-[#8B5A2B] font-medium">
-                (All valid combinations meeting your exact requirements and constraints)
-              </span>
-            )}
-          </div>
-
-          <div className="flex items-center gap-3 text-[#5A5A40]">
-            <span>Shipping: Flat {formatINR(fixture.shippingRule.baseFee ?? 100)}</span>
-            <span>•</span>
-            <span>Tax: Included</span>
-            {appBudget && (
-              <>
-                <span>•</span>
-                <span className="font-mono font-bold text-[#2C3A2B]">
-                  Budget Cap: {formatINR(appBudget)}
-                </span>
-              </>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* ========================================================================= */}
-      {/* 4. RECOMMENDATION CARDS (Grid of Up to 10 Distinct Valid Bundles)          */}
-      {/* ========================================================================= */}
-      {bundles.length > 0 && (
+      {bundles.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {bundles.map((bundle, index) => {
             const isExpanded = expandedCardId === bundle.id;
+            const isSelectedRef = referenceBundle?.id === bundle.id;
+            const remaining = appBudget - bundle.landedPrice;
+            const isWithin = remaining >= 0;
 
             return (
               <div
                 key={bundle.id}
-                className="bg-white border border-[#E6E1D3] rounded-[24px] p-5 shadow-xs hover:shadow-md transition-all flex flex-col justify-between group"
+                className={`bg-white border rounded-[24px] p-5 shadow-xs transition-all flex flex-col justify-between group ${
+                  isSelectedRef
+                    ? 'border-emerald-500 ring-2 ring-emerald-400/20 shadow-md'
+                    : 'border-[#E6E1D3] hover:border-[#8B5A2B]/40 hover:shadow-md'
+                }`}
               >
                 <div className="space-y-4">
-                  {/* Card Header: Bundle Number, Badges & Price */}
+                  {/* Card Top: Number, Role Badges & Price */}
                   <div className="flex items-start justify-between gap-3">
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
@@ -861,14 +562,14 @@ export const BundleRecommendationsSection: React.FC<BundleRecommendationsSection
                             Exact Match
                           </span>
                         )}
-                        {bundle.isPredefined && (
-                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#F4F1EA] text-[#5A5A40] border border-[#E6E1D3]">
-                            Predefined
-                          </span>
-                        )}
                         <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#E8EFE9] text-[#2C3A2B]">
                           {bundle.totalItemCount} {bundle.totalItemCount === 1 ? 'Item' : 'Items'}
                         </span>
+                        {isSelectedRef && (
+                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-900 border border-emerald-300">
+                            Active for Add-ons
+                          </span>
+                        )}
                       </div>
                       <h3 className="font-serif text-base sm:text-lg font-bold text-[#2C3A2B] group-hover:text-[#8B5A2B] transition-colors leading-snug">
                         {bundle.name}
@@ -884,15 +585,15 @@ export const BundleRecommendationsSection: React.FC<BundleRecommendationsSection
                         {formatINR(bundle.landedPrice)}
                       </div>
                       <span className="text-[10px] font-medium text-[#8B8B7A] block">
-                        Landed Total (incl. ₹{bundle.shippingFee} shipping)
+                        Landed Total
                       </span>
-                      {bundle.remainingBudget !== undefined && (
-                        <span className="inline-block mt-0.5 px-2 py-0.2 rounded-full text-[10px] font-mono font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
-                          {bundle.remainingBudget >= 0
-                            ? `+${formatINR(bundle.remainingBudget)} left`
-                            : `-${formatINR(Math.abs(bundle.remainingBudget))} over`}
-                        </span>
-                      )}
+                      <span className={`inline-block mt-0.5 px-2 py-0.2 rounded-full text-[10px] font-mono font-bold border ${
+                        isWithin
+                          ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                          : 'bg-rose-50 text-rose-800 border-rose-200'
+                      }`}>
+                        {isWithin ? `+${formatINR(remaining)} left` : `-${formatINR(Math.abs(remaining))} over`}
+                      </span>
                     </div>
                   </div>
 
@@ -948,54 +649,65 @@ export const BundleRecommendationsSection: React.FC<BundleRecommendationsSection
                     <div className="pt-3 border-t border-[#E6E1D3]/80 space-y-2 text-xs animate-in fade-in duration-200">
                       <div className="font-bold text-[#2C3A2B] text-xs">Bundle Item Specifications:</div>
                       <div className="space-y-1.5">
-                        {bundle.items.map((it, idx) => (
+                        {bundle.items.map((it, itemIdx) => (
                           <div
-                            key={`spec-${it.product.id}-${idx}`}
-                            className="flex items-center justify-between p-2 rounded-lg bg-[#FDFBF7] border border-[#E6E1D3] text-xs"
+                            key={`spec-${it.product.id}-${itemIdx}`}
+                            className="flex items-center justify-between p-2 rounded-xl bg-[#FDFBF7] border border-[#E6E1D3]/70"
                           >
                             <div className="flex items-center gap-2">
-                              <span className="font-mono font-bold text-[#8B5A2B]">{it.product.id}</span>
-                              <span className="font-medium text-[#2C2C1E]">{it.product.name}</span>
-                              <span className="text-[#7A7A68]">
-                                ({it.product.category}{it.product.colour ? ` · ${it.product.colour}` : ''})
+                              <span className="font-mono text-[10px] font-bold text-[#8B8B7A]">{it.product.id}</span>
+                              <span className="font-medium text-[#2C3A2B]">{it.quantity}x {it.product.name}</span>
+                              <span className="text-[10px] text-[#5A5A40] bg-[#E6E1D3] px-1.5 py-0.2 rounded">
+                                {it.product.category}
                               </span>
                             </div>
-                            <div className="font-mono text-[#2C2C1E] font-semibold">
-                              {it.quantity} × {formatINR(it.product.price)} = {formatINR(it.product.price * it.quantity)}
-                            </div>
+                            <span className="font-mono font-bold text-[#2C3A2B]">
+                              {formatINR(it.product.price * it.quantity)}
+                            </span>
                           </div>
                         ))}
-                      </div>
-
-                      <div className="pt-2 flex items-center justify-between text-xs text-[#5A5A40]">
-                        <span>Item Subtotal: {formatINR(bundle.itemSubtotal)}</span>
-                        <span>Shipping: {formatINR(bundle.shippingFee)}</span>
-                        <span className="font-bold font-mono text-[#2C3A2B]">
-                          Total Landed: {formatINR(bundle.landedPrice)}
-                        </span>
                       </div>
                     </div>
                   )}
                 </div>
 
-                {/* Card Actions: View Details & Select Bundle */}
-                <div className="mt-4 pt-3 border-t border-[#E6E1D3]/80 flex items-center justify-between gap-3">
-                  <button
-                    onClick={() => setExpandedCardId(isExpanded ? null : bundle.id)}
-                    className="inline-flex items-center gap-1 text-xs font-semibold text-[#5A5A40] hover:text-[#2C2C1E] transition-colors cursor-pointer"
-                  >
-                    {isExpanded ? (
-                      <>
-                        <ChevronUp className="w-3.5 h-3.5" />
-                        <span>Hide Specs</span>
-                      </>
-                    ) : (
-                      <>
-                        <ChevronDown className="w-3.5 h-3.5" />
-                        <span>View Specs</span>
-                      </>
-                    )}
-                  </button>
+                {/* Card Actions Footer */}
+                <div className="mt-5 pt-3 border-t border-[#E6E1D3]/80 flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setExpandedCardId(isExpanded ? null : bundle.id)}
+                      className="inline-flex items-center gap-1 text-xs font-semibold text-[#5A5A40] hover:text-[#2C3A2B] transition-colors cursor-pointer"
+                    >
+                      {isExpanded ? (
+                        <>
+                          <ChevronUp className="w-3.5 h-3.5" />
+                          <span>Hide Specs</span>
+                        </>
+                      ) : (
+                        <>
+                          <ChevronDown className="w-3.5 h-3.5" />
+                          <span>View Specs</span>
+                        </>
+                      )}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedReferenceBundleId(bundle.id);
+                        addNotification('Active for Add-ons', `Now showing add-on recommendations for "${bundle.name}" below.`, 'info');
+                      }}
+                      className={`inline-flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-lg border transition-colors cursor-pointer ${
+                        isSelectedRef
+                          ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
+                          : 'bg-white text-[#5A5A40] border-[#E6E1D3] hover:bg-[#F4F1EA]'
+                      }`}
+                      title="Select this bundle to see its remaining budget and recommended add-ons below"
+                    >
+                      <Sparkles className="w-3 h-3 text-emerald-600" />
+                      <span>{isSelectedRef ? 'Add-ons Selected' : 'See Add-ons'}</span>
+                    </button>
+                  </div>
 
                   <div className="flex items-center gap-2">
                     <button
@@ -1026,36 +738,62 @@ export const BundleRecommendationsSection: React.FC<BundleRecommendationsSection
             );
           })}
         </div>
-      )}
-
-      {/* Empty State when zero bundles match active filters */}
-      {bundles.length === 0 && !hasUnavailableProduct && !isOverBudgetForAll && (
-        <div className="p-8 text-center bg-white border border-[#E6E1D3] rounded-[24px] shadow-xs space-y-3">
-          <div className="w-12 h-12 mx-auto rounded-full bg-[#F4F1EA] flex items-center justify-center text-[#5A5A40]">
-            <Package className="w-6 h-6" />
+      ) : (
+        /* Empty State */
+        <div className="p-10 text-center bg-white border border-[#E6E1D3] rounded-[24px] shadow-xs space-y-4">
+          <div className="w-14 h-14 mx-auto rounded-full bg-[#F4F1EA] flex items-center justify-center text-[#5A5A40]">
+            <Package className="w-7 h-7" />
           </div>
-          <h3 className="font-serif text-base font-bold text-[#2C3A2B]">
-            No bundles match your specific details
-          </h3>
-          <p className="text-xs text-[#5A5A40] max-w-md mx-auto">
-            We couldn't find any bundle combinations matching your exact category, colour, or search filters.
-            Try clearing some filters or loosening requirements.
-          </p>
-          <button
-            onClick={() => {
-              setBundleCategory('all');
-              setBundleColour('all');
-              setBundleSearch('');
-              setBundleSort('price_asc');
-              setExactOnly(false);
-            }}
-            className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-[#2C3A2B] hover:bg-[#3A4D39] rounded-xl transition-all shadow-xs cursor-pointer"
-          >
-            <RotateCcw className="w-3.5 h-3.5" />
-            <span>Reset Detail Filters</span>
-          </button>
+          <div>
+            <h3 className="font-serif text-lg font-bold text-[#2C3A2B]">
+              No bundles match your exact search criteria
+            </h3>
+            <p className="text-xs text-[#5A5A40] max-w-md mx-auto mt-1">
+              Try adjusting your search query, increasing your target budget, or use the custom bundle creator to assemble any combination of products.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+            <button
+              type="button"
+              onClick={handleResetFilters}
+              className="px-4 py-2 rounded-xl text-xs font-semibold bg-[#F4F1EA] hover:bg-[#E6E1D3] text-[#2C3A2B] border border-[#E6E1D3] transition-colors cursor-pointer"
+            >
+              Reset Search & Filters
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsCreateBundleModalOpen(true)}
+              className="px-4 py-2 rounded-xl text-xs font-bold bg-[#2C3A2B] hover:bg-[#1E281D] text-white transition-colors cursor-pointer shadow-xs"
+            >
+              + Create Custom Bundle Instead
+            </button>
+          </div>
         </div>
       )}
+
+      {/* ========================================================================= */}
+      {/* 4. "ADD-ONS" PANEL (Directly Below All Bundles)                           */}
+      {/* ========================================================================= */}
+      <BundleAddOnsPanel
+        referenceBundle={referenceBundle}
+        targetBudget={appBudget}
+        availableBundles={bundles}
+        onSelectReferenceBundle={(b) => setSelectedReferenceBundleId(b.id)}
+        onIncreaseBudget={(amt) => {
+          setBudget(appBudget + amt);
+          addNotification('Budget Increased', `Increased target budget by ${formatINR(amt)} to unlock add-ons.`, 'success');
+        }}
+      />
+
+      {/* ========================================================================= */}
+      {/* 5. CREATE BUNDLE CATALOG MODAL                                            */}
+      {/* ========================================================================= */}
+      <CreateBundleCatalogModal
+        isOpen={isCreateBundleModalOpen}
+        onClose={() => setIsCreateBundleModalOpen(false)}
+        onOpenWorkspace={onOpenWorkspace}
+      />
     </div>
   );
 };

@@ -71,10 +71,10 @@ export const CompareBundlesPage: React.FC<CompareBundlesPageProps> = ({ initialM
     initiateCheckout
   } = useApp();
 
-  // Mode state: 'workspace' for full bundle building, 'compare' for side-by-side comparison, 'recommendations' for 10 dynamic bundle recommendations
+  // Mode state: 'recommendations' for curated bundles & add-ons, 'workspace' for custom builder, 'compare' for side-by-side comparison
   const [viewMode, setViewMode] = useState<'workspace' | 'compare' | 'recommendations'>(() => {
     if (initialMode) return initialMode;
-    return savedBundles.length === 0 ? 'workspace' : 'compare';
+    return 'recommendations';
   });
 
   // Builder workspace state
@@ -275,20 +275,37 @@ export const CompareBundlesPage: React.FC<CompareBundlesPageProps> = ({ initialM
         <div>
           <div className="flex items-center gap-2.5">
             <h1 className="font-serif text-2xl font-bold tracking-tight text-[#2C3A2B]">
-              Compare Builder
+              Bundles
             </h1>
             <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold tracking-wider uppercase bg-[#2C3A2B] text-amber-200 shadow-2xs">
-              Workspace & Comparison
+              Curated & Custom Builder
             </span>
           </div>
           <p className="text-xs text-[#5A5A40] mt-0.5">
-            Assemble product bundles within fixed budgets, run auto-optimizers, and compare landed costs & tradeoffs side-by-side.
+            Discover curated workstation bundles tailored to your budget, add smart accessories with remaining funds, or create a custom setup.
           </p>
         </div>
 
-        {/* View Switcher: Workspace vs Compare */}
+        {/* View Switcher: Curated Bundles vs Workspace vs Compare */}
         <div className="flex flex-wrap items-center gap-2.5">
           <div className="inline-flex items-center p-1 bg-[#F4F1EA] border border-[#E6E1D3] rounded-2xl shadow-inner">
+            <button
+              onClick={() => setViewMode('recommendations')}
+              className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer hover:scale-102 active:scale-98 ${
+                viewMode === 'recommendations'
+                  ? 'bg-[#2C3A2B] text-white shadow-xs'
+                  : 'text-[#5A5A40] hover:text-[#2C3A2B] hover:bg-white/60'
+              }`}
+            >
+              <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+              <span>Curated Bundles</span>
+              <span className={`text-[10px] font-mono px-1.5 py-0.2 rounded-md ${
+                viewMode === 'recommendations' ? 'bg-amber-400/20 text-amber-300 border border-amber-300/40' : 'bg-[#E6E1D3] text-[#5A5A40]'
+              }`}>
+                25
+              </span>
+            </button>
+
             <button
               onClick={() => setViewMode('workspace')}
               className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer hover:scale-102 active:scale-98 ${
@@ -320,23 +337,6 @@ export const CompareBundlesPage: React.FC<CompareBundlesPageProps> = ({ initialM
                 viewMode === 'compare' ? 'bg-white/20 text-white' : 'bg-[#E6E1D3] text-[#5A5A40]'
               }`}>
                 {savedBundles.length}
-              </span>
-            </button>
-
-            <button
-              onClick={() => setViewMode('recommendations')}
-              className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer hover:scale-102 active:scale-98 ${
-                viewMode === 'recommendations'
-                  ? 'bg-[#2C3A2B] text-white shadow-xs'
-                  : 'text-[#5A5A40] hover:text-[#2C3A2B] hover:bg-white/60'
-              }`}
-            >
-              <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-              <span>Bundle Recommendations</span>
-              <span className={`text-[10px] font-mono px-1.5 py-0.2 rounded-md ${
-                viewMode === 'recommendations' ? 'bg-amber-400/20 text-amber-900 border border-amber-300/40' : 'bg-[#E6E1D3] text-[#5A5A40]'
-              }`}>
-                25
               </span>
             </button>
           </div>
@@ -1211,11 +1211,12 @@ export const CompareBundlesPage: React.FC<CompareBundlesPageProps> = ({ initialM
         </div>
       )}
 
-      {/* ========================================================================= */}
-      {/* VIEW 3: 10 DYNAMIC PRODUCT BUNDLE RECOMMENDATIONS                          */}
-      {/* ========================================================================= */}
+      {/* VIEW: CURATED BUNDLES, SEARCH, CREATE BUNDLE & ADD-ONS */}
       {viewMode === 'recommendations' && (
-        <BundleRecommendationsSection onSelectBundle={handleSelectRecommendedBundle} />
+        <BundleRecommendationsSection
+          onSelectBundle={handleSelectRecommendedBundle}
+          onOpenWorkspace={() => setViewMode('workspace')}
+        />
       )}
 
       {/* Product Selection Modal */}
