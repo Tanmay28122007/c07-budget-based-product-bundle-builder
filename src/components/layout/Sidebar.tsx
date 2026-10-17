@@ -276,33 +276,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           })}
 
         </nav>
-
-        {/* Fixture & Mode Status Footer */}
-        <div className="p-3 border-t border-[#E6E1D3] bg-[#F4F1EA]/60">
-          <div className="px-3 py-2 rounded-xl bg-white border border-[#E6E1D3] text-xs shadow-2xs">
-            <div className="flex items-center justify-between text-[11px] text-[#5A5A40] mb-1">
-              <span>Inventory Set</span>
-              <span className="font-mono text-[#2C3A2B] font-semibold">
-                {isCustomFixture ? 'Loaded JSON' : 'Standard C07'}
-              </span>
-            </div>
-            <div className="text-[11px] text-[#5A5A40] flex items-center justify-between">
-              <span>Activity</span>
-              <span className="font-medium text-[#2C3A2B]">{fixture.activity.name}</span>
-            </div>
-            {!isCustomFixture && (
-              <div className="mt-2 pt-2 border-t border-[#E6E1D3] flex items-center justify-between text-[10px] text-[#8B5A2B]">
-                <span>Educational Demo</span>
-                <button
-                  onClick={() => setActiveTab('settings')}
-                  className="font-medium hover:underline text-[#8B5A2B]"
-                >
-                  Upload JSON
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
       </aside>
     </>
   );
