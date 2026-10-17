@@ -17,8 +17,7 @@ import {
   Eye,
   ChevronDown,
   ChevronUp,
-  Tag,
-  CreditCard
+  Tag
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { Product } from '../../types';
@@ -47,7 +46,7 @@ interface BundleRecommendationsSectionProps {
 export const BundleRecommendationsSection: React.FC<BundleRecommendationsSectionProps> = ({
   onSelectBundle
 }) => {
-  const { fixture, budget: appBudget, initiateCheckout } = useApp();
+  const { fixture, budget: appBudget } = useApp();
 
   // Requirements state
   const [requirements, setRequirements] = useState<ProductRequirement[]>([]);
@@ -677,30 +676,14 @@ export const BundleRecommendationsSection: React.FC<BundleRecommendationsSection
                     )}
                   </button>
 
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => {
-                        onSelectBundle(bundle);
-                        initiateCheckout({
-                          items: bundle.items,
-                          bundleName: bundle.name
-                        });
-                      }}
-                      className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-white bg-[#8B5A2B] hover:bg-[#6D4522] rounded-xl transition-all shadow-xs hover:shadow-md cursor-pointer hover:scale-102 active:scale-98"
-                    >
-                      <CreditCard className="w-3.5 h-3.5 text-amber-300" />
-                      <span>BUY NOW</span>
-                    </button>
-
-                    <button
-                      onClick={() => onSelectBundle(bundle)}
-                      className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-[#2C3A2B] hover:bg-[#3A4D39] rounded-xl transition-all shadow-xs hover:shadow-md cursor-pointer hover:scale-102 active:scale-98"
-                    >
-                      <PackageCheck className="w-3.5 h-3.5 text-amber-300" />
-                      <span>Select Bundle</span>
-                      <ArrowRight className="w-3.5 h-3.5 ml-0.5" />
-                    </button>
-                  </div>
+                  <button
+                    onClick={() => onSelectBundle(bundle)}
+                    className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-[#2C3A2B] hover:bg-[#3A4D39] rounded-xl transition-all shadow-xs hover:shadow-md cursor-pointer hover:scale-102 active:scale-98"
+                  >
+                    <PackageCheck className="w-3.5 h-3.5 text-amber-300" />
+                    <span>Select Bundle</span>
+                    <ArrowRight className="w-3.5 h-3.5 ml-0.5" />
+                  </button>
                 </div>
               </div>
             );

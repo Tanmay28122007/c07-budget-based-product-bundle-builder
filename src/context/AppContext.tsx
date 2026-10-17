@@ -13,16 +13,14 @@ import {
   ShopperExperimentRecord,
   ProjectEvidenceRecord,
   NegotiatedScope,
-  UserProfile,
-  CheckoutBundleItem,
-  CheckoutBundleData
+  UserProfile
 } from '../types';
-export type { UserProfile, CheckoutBundleItem, CheckoutBundleData };
+export type { UserProfile };
 import { DEFAULT_SYNTHETIC_FIXTURE, mapC07Fixture } from '../data/defaultFixture';
 import { validateBundle } from '../utils/bundleValidation';
 import { findValidBundle, OptimizationResult } from '../utils/bundleOptimizer';
 import { runAllTests, runReferenceRequestTest, EDGE_CASE_TESTS } from '../utils/testRunner';
-import { formatINR, calculateLandedPrice } from '../utils/pricing';
+import { formatINR } from '../utils/pricing';
 import {
   fetchSavedBundlesFromDb,
   upsertSavedBundleToDb,
@@ -140,14 +138,6 @@ interface AppContextType {
   setIsProfileModalOpen: (open: boolean) => void;
   openProfileModal: () => void;
   closeProfileModal: () => void;
-
-  // Checkout & Payment Simulation
-  checkoutData: CheckoutBundleData | null;
-  setCheckoutData: (data: CheckoutBundleData | null) => void;
-  initiateCheckout: (customBundle?: {
-    items: { product: Product; quantity: number }[];
-    bundleName?: string;
-  }) => void;
 }
 
 export const DEFAULT_USER_PROFILE: UserProfile = {
@@ -338,8 +328,7 @@ const VALID_TABS = [
   'evidence',
   'settings',
   'product-detail',
-  'profile',
-  'checkout'
+  'profile'
 ];
 
 const getInitialTab = (): string => {
@@ -1107,94 +1096,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     setUnitEconomics(prev => ({ ...prev, ...updates }));
   };
 
-  // Checkout & Payment Simulation State
-  const [checkoutData, setCheckoutData] = useState<CheckoutBundleData | null>(() => {
-    try {
-      if (typeof localStorage !== 'undefined') {
-        const saved = localStorage.getItem('c07_checkout_data_v1');
-        if (saved) return JSON.parse(saved);
-      }
-    } catch {}
-    return null;
-  });
-
-  const initiateCheckout = (customBundle?: {
-    items: { product: Product; quantity: number }[];
-    bundleName?: string;
-  }) => {
-    let orderData: CheckoutBundleData;
-
-    if (customBundle && customBundle.items.length > 0) {
-      const validItems = customBundle.items.filter(it => it.quantity > 0);
-      const expandedProducts: Product[] = [];
-      validItems.forEach(it => {
-        for (let i = 0; i < it.quantity; i++) {
-          expandedProducts.push(it.product);
-        }
-      });
-      const breakdown = calculateLandedPrice(expandedProducts, budget, fixture.shippingRule, fixture.taxRule);
-
-      orderData = {
-        items: validItems,
-        subtotal: breakdown.productSubtotal,
-        shippingFee: breakdown.shippingFee,
-        shippingDiscount: breakdown.shippingDiscount,
-        netShipping: breakdown.netShipping,
-        taxAmount: breakdown.taxAmount,
-        total: breakdown.landedPrice,
-        bundleName: customBundle.bundleName || 'Selected Bundle',
-        source: 'recommendation'
-      };
-    } else {
-      const map = new Map<string, { product: Product; quantity: number }>();
-      Object.values(currentItems).forEach(p => {
-        if (!p) return;
-        const existing = map.get(p.id);
-        if (existing) {
-          existing.quantity += 1;
-        } else {
-          map.set(p.id, { product: p, quantity: 1 });
-        }
-      });
-      const items = Array.from(map.values());
-      const breakdown = validation.landedPrice;
-
-      orderData = {
-        items,
-        subtotal: breakdown.productSubtotal,
-        shippingFee: breakdown.shippingFee,
-        shippingDiscount: breakdown.shippingDiscount,
-        netShipping: breakdown.netShipping,
-        taxAmount: breakdown.taxAmount,
-        total: breakdown.landedPrice,
-        bundleName: fixture.activity.name || 'Workspace Bundle',
-        source: 'workspace'
-      };
-    }
-
-    try {
-      localStorage.setItem('c07_checkout_data_v1', JSON.stringify(orderData));
-    } catch {}
-
-    setCheckoutData(orderData);
-    setActiveTab('checkout');
-  };
-
-  useEffect(() => {
-    if (checkoutData) {
-      try {
-        localStorage.setItem('c07_checkout_data_v1', JSON.stringify(checkoutData));
-      } catch {}
-    }
-  }, [checkoutData]);
-
   return (
     <AppContext.Provider
       value={{
-        checkoutData,
-        setCheckoutData,
-        initiateCheckout,
-
         userRole,
         loginAs,
         logout,

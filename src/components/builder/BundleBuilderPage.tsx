@@ -18,8 +18,7 @@ import {
   Check,
   ArrowRight,
   Trash2,
-  Plus,
-  CreditCard
+  Plus
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { RequiredSlot } from '../../types';
@@ -41,8 +40,7 @@ export const BundleBuilderPage: React.FC = () => {
     optimizeBundle,
     setActiveTab,
     toggleAssistant,
-    setIsCartOpen,
-    initiateCheckout
+    setIsCartOpen
   } = useApp();
 
   const [activeSlotForSelection, setActiveSlotForSelection] = useState<RequiredSlot | null>(null);
@@ -52,6 +50,10 @@ export const BundleBuilderPage: React.FC = () => {
   const [bundleNotesInput, setBundleNotesInput] = useState('');
   const [optimizerPreference, setOptimizerPreference] = useState<'lowest_cost' | 'best_value'>('lowest_cost');
   const [optimizationFeedback, setOptimizationFeedback] = useState<string | null>(null);
+
+  const budgetPresets = fixture.activity.defaultBudget <= 10000 
+    ? [1000, 1999, 2000, 2200, 3000]
+    : [35000, 55000, 75000, 95000, 120000];
 
   const handleRunOptimizer = () => {
     const res = optimizeBundle(optimizerPreference);
@@ -180,18 +182,37 @@ export const BundleBuilderPage: React.FC = () => {
           Total Budget (₹)
         </span>
 
-        <div className="relative w-full sm:w-1/4 min-w-[200px]">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8B8B7A] font-mono text-xs">
-            ₹
-          </span>
-          <input
-            type="number"
-            min="0"
-            step="1000"
-            value={budget}
-            onChange={e => setBudget(Number(e.target.value))}
-            className="w-full pl-7 pr-3 py-2 text-sm font-mono font-bold text-[#2C3A2B] bg-[#F4F1EA]/70 focus:bg-white border border-[#E6E1D3] rounded-xl focus:outline-hidden focus:border-[#2C3A2B] transition-all"
-          />
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+          <div className="relative flex-1">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8B8B7A] font-mono text-xs">
+              ₹
+            </span>
+            <input
+              type="number"
+              min="0"
+              step="1000"
+              value={budget}
+              onChange={e => setBudget(Number(e.target.value))}
+              className="w-full pl-7 pr-3 py-1.5 text-sm font-mono font-bold text-[#2C3A2B] bg-[#F4F1EA]/70 focus:bg-white border border-[#E6E1D3] rounded-xl focus:outline-hidden focus:border-[#2C3A2B] transition-all"
+            />
+          </div>
+
+          {/* Presets */}
+          <div className="flex items-center gap-1.5 overflow-x-auto py-1">
+            {budgetPresets.map(preset => (
+              <button
+                key={preset}
+                onClick={() => setBudget(preset)}
+                className={`px-3 py-1.5 text-[11px] font-mono rounded-lg border transition-all shrink-0 cursor-pointer hover:scale-110 active:scale-95 ${
+                  budget === preset
+                    ? 'bg-[#2C3A2B] text-white border-[#2C3A2B] font-semibold shadow-xs'
+                    : 'bg-[#F4F1EA] hover:bg-[#E6E1D3] text-[#5A5A40] border-[#E6E1D3] hover:shadow-xs'
+                }`}
+              >
+                ₹{(preset / 1000).toFixed(0)}k
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -587,16 +608,21 @@ export const BundleBuilderPage: React.FC = () => {
 
 
 
-            {/* BUY NOW Button */}
-            <div className="pt-2">
+            {/* Export Buttons */}
+            <div className="pt-2 flex items-center gap-2">
               <button
-                onClick={() => initiateCheckout()}
-                disabled={Object.values(currentItems).filter(Boolean).length === 0}
-                className="w-full py-3 px-4 rounded-xl text-xs font-bold uppercase tracking-wider text-white bg-[#2C3A2B] hover:bg-[#1E281D] shadow-md hover:shadow-lg flex items-center justify-center gap-2 transition-all cursor-pointer hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                onClick={handleExportCSV}
+                className="flex-1 py-1.5 px-2 text-xs font-medium text-[#2C2C1E] hover:bg-[#F4F1EA] border border-[#E6E1D3] rounded-xl flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
               >
-                <CreditCard className="w-4 h-4 text-amber-300" />
-                <span>BUY NOW — {formatINR(validation.landedPrice.landedPrice)}</span>
-                <ArrowRight className="w-4 h-4 ml-0.5" />
+                <FileSpreadsheet className="w-3.5 h-3.5 text-[#8B8B7A]" />
+                Export CSV
+              </button>
+              <button
+                onClick={handleExportJSON}
+                className="flex-1 py-1.5 px-2 text-xs font-medium text-[#2C2C1E] hover:bg-[#F4F1EA] border border-[#E6E1D3] rounded-xl flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+              >
+                <FileJson className="w-3.5 h-3.5 text-[#8B8B7A]" />
+                Export JSON
               </button>
             </div>
           </div>

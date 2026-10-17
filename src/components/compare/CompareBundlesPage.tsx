@@ -22,8 +22,7 @@ import {
   LayoutGrid,
   Eye,
   SlidersHorizontal,
-  BookmarkPlus,
-  CreditCard
+  BookmarkPlus
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { formatINR } from '../../utils/pricing';
@@ -67,8 +66,7 @@ export const CompareBundlesPage: React.FC<CompareBundlesPageProps> = ({ initialM
     deleteSavedBundle,
     setActiveTab,
     toggleAssistant,
-    addNotification,
-    initiateCheckout
+    addNotification
   } = useApp();
 
   // Mode state: 'workspace' for full bundle building, 'compare' for side-by-side comparison, 'recommendations' for 10 dynamic bundle recommendations
@@ -91,6 +89,10 @@ export const CompareBundlesPage: React.FC<CompareBundlesPageProps> = ({ initialM
     return savedBundles.slice(0, 3).map(b => b.id);
   });
   const [includeActiveInComparison, setIncludeActiveInComparison] = useState(true);
+
+  const budgetPresets = fixture.activity.defaultBudget <= 10000 
+    ? [1000, 1999, 2000, 2200, 3000]
+    : [35000, 55000, 75000, 95000, 120000];
 
   const handleRunOptimizer = () => {
     const res = optimizeBundle(optimizerPreference);
@@ -440,18 +442,37 @@ export const CompareBundlesPage: React.FC<CompareBundlesPageProps> = ({ initialM
               Total Budget (₹)
             </span>
 
-            <div className="relative w-full sm:w-1/4 min-w-[200px]">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8B8B7A] font-mono text-xs">
-                ₹
-              </span>
-              <input
-                type="number"
-                min="0"
-                step="1000"
-                value={budget}
-                onChange={e => setBudget(Number(e.target.value))}
-                className="w-full pl-7 pr-3 py-2 text-sm font-mono font-bold text-[#2C3A2B] bg-[#F4F1EA]/70 focus:bg-white border border-[#E6E1D3] rounded-xl focus:outline-hidden focus:border-[#2C3A2B] transition-all"
-              />
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+              <div className="relative flex-1">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8B8B7A] font-mono text-xs">
+                  ₹
+                </span>
+                <input
+                  type="number"
+                  min="0"
+                  step="1000"
+                  value={budget}
+                  onChange={e => setBudget(Number(e.target.value))}
+                  className="w-full pl-7 pr-3 py-1.5 text-sm font-mono font-bold text-[#2C3A2B] bg-[#F4F1EA]/70 focus:bg-white border border-[#E6E1D3] rounded-xl focus:outline-hidden focus:border-[#2C3A2B]"
+                />
+              </div>
+
+              {/* Presets */}
+              <div className="flex items-center gap-1.5 overflow-x-auto">
+                {budgetPresets.map(preset => (
+                  <button
+                    key={preset}
+                    onClick={() => setBudget(preset)}
+                    className={`px-3 py-1.5 text-[11px] font-mono rounded-lg border transition-colors shrink-0 cursor-pointer ${
+                      budget === preset
+                        ? 'bg-[#2C3A2B] text-white border-[#2C3A2B] font-semibold'
+                        : 'bg-[#F4F1EA] hover:bg-[#E6E1D3] text-[#5A5A40] border-[#E6E1D3]'
+                    }`}
+                  >
+                    ₹{(preset / 1000).toFixed(0)}k
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
@@ -796,16 +817,21 @@ export const CompareBundlesPage: React.FC<CompareBundlesPageProps> = ({ initialM
 
 
 
-                {/* BUY NOW Button */}
-                <div className="pt-2">
+                {/* Export Buttons */}
+                <div className="pt-2 flex items-center gap-2">
                   <button
-                    onClick={() => initiateCheckout()}
-                    disabled={Object.values(currentItems).filter(Boolean).length === 0}
-                    className="w-full py-3 px-4 rounded-xl text-xs font-bold uppercase tracking-wider text-white bg-[#2C3A2B] hover:bg-[#1E281D] shadow-md hover:shadow-lg flex items-center justify-center gap-2 transition-all cursor-pointer hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                    onClick={handleExportActiveCSV}
+                    className="flex-1 py-1.5 px-2 text-xs font-medium text-[#2C2C1E] hover:bg-[#F4F1EA] border border-[#E6E1D3] rounded-xl flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                   >
-                    <CreditCard className="w-4 h-4 text-amber-300" />
-                    <span>BUY NOW — {formatINR(validation.landedPrice.landedPrice)}</span>
-                    <ArrowRight className="w-4 h-4 ml-0.5" />
+                    <FileSpreadsheet className="w-3.5 h-3.5 text-[#8B8B7A]" />
+                    Export CSV
+                  </button>
+                  <button
+                    onClick={handleExportActiveJSON}
+                    className="flex-1 py-1.5 px-2 text-xs font-medium text-[#2C2C1E] hover:bg-[#F4F1EA] border border-[#E6E1D3] rounded-xl flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                  >
+                    <FileJson className="w-3.5 h-3.5 text-[#8B8B7A]" />
+                    Export JSON
                   </button>
                 </div>
 
@@ -859,14 +885,15 @@ export const CompareBundlesPage: React.FC<CompareBundlesPageProps> = ({ initialM
                 Snapshot Workspace
               </button>
 
-              <button
-                onClick={() => initiateCheckout()}
-                disabled={Object.values(currentItems).filter(Boolean).length === 0}
-                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold text-white bg-[#2C3A2B] hover:bg-[#1E281D] rounded-xl shadow-2xs hover:shadow-md transition-all cursor-pointer hover:scale-102 active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <CreditCard className="w-3.5 h-3.5 text-amber-300" />
-                <span>BUY NOW</span>
-              </button>
+              {bundlesToCompare.length > 0 && (
+                <button
+                  onClick={handleExportComparison}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-[#2C2C1E] bg-white hover:bg-[#F4F1EA] border border-[#E6E1D3] rounded-xl shadow-2xs transition-colors cursor-pointer"
+                >
+                  <FileSpreadsheet className="w-3.5 h-3.5 text-[#5A5A40]" />
+                  Export Comparison CSV
+                </button>
+              )}
             </div>
           </div>
 
@@ -1181,52 +1208,35 @@ export const CompareBundlesPage: React.FC<CompareBundlesPageProps> = ({ initialM
                         {bundlesToCompare.map(b => (
                           <td key={b.id} className="py-3.5 px-4">
                             {b.id === 'active_workspace' ? (
-                              <div className="flex items-center gap-1.5 flex-wrap">
-                                <button
-                                  onClick={() => initiateCheckout()}
-                                  className="px-3 py-1.5 rounded-xl text-xs font-bold text-white bg-[#2C3A2B] hover:bg-[#1E281D] shadow-2xs flex items-center gap-1 cursor-pointer hover:scale-102 transition-all"
-                                >
-                                  <CreditCard className="w-3 h-3 text-amber-300" />
-                                  <span>BUY NOW</span>
-                                </button>
+                              <div className="flex items-center gap-2">
                                 <button
                                   onClick={() => setViewMode('workspace')}
-                                  className="px-2.5 py-1.5 rounded-xl text-xs font-semibold text-[#2C3A2B] bg-[#F4F1EA] hover:bg-[#E6E1D3] border border-[#E6E1D3] shadow-2xs cursor-pointer"
+                                  className="px-3.5 py-1.5 rounded-xl text-xs font-semibold text-white bg-[#2C3A2B] hover:bg-[#3A4D39] shadow-2xs cursor-pointer"
                                 >
-                                  Edit
+                                  Edit in Workspace
                                 </button>
                                 <button
                                   onClick={handleSnapshotActive}
                                   className="p-1.5 text-[#5A5A40] hover:text-[#2C3A2B] rounded-lg hover:bg-[#F4F1EA]"
                                   title="Save snapshot"
                                 >
-                                  <Save className="w-3.5 h-3.5" />
+                                  <Save className="w-4 h-4" />
                                 </button>
                               </div>
                             ) : (
-                              <div className="flex items-center gap-1.5 flex-wrap">
-                                <button
-                                  onClick={() => {
-                                    loadSavedBundle(b);
-                                    initiateCheckout();
-                                  }}
-                                  className="px-3 py-1.5 rounded-xl text-xs font-bold text-white bg-[#2C3A2B] hover:bg-[#1E281D] shadow-2xs flex items-center gap-1 cursor-pointer hover:scale-102 transition-all"
-                                >
-                                  <CreditCard className="w-3 h-3 text-amber-300" />
-                                  <span>BUY NOW</span>
-                                </button>
+                              <div className="flex items-center gap-2">
                                 <button
                                   onClick={() => loadSavedBundle(b)}
-                                  className="px-2.5 py-1.5 rounded-xl text-xs font-semibold text-[#2C3A2B] bg-[#F4F1EA] hover:bg-[#E6E1D3] border border-[#E6E1D3] shadow-2xs cursor-pointer"
+                                  className="px-3.5 py-1.5 rounded-xl text-xs font-semibold text-white bg-[#2C3A2B] hover:bg-[#3A4D39] shadow-2xs cursor-pointer"
                                 >
-                                  Load
+                                  Load Bundle
                                 </button>
                                 <button
                                   onClick={() => deleteSavedBundle(b.id)}
                                   className="p-1.5 text-[#5A5A40] hover:text-[#C05621] rounded-lg hover:bg-[#F4F1EA] cursor-pointer"
                                   title="Delete this record"
                                 >
-                                  <Trash2 className="w-3.5 h-3.5" />
+                                  <Trash2 className="w-4 h-4" />
                                 </button>
                               </div>
                             )}
