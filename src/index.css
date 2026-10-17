@@ -56,3 +56,102 @@ h1, h2, h3, .font-serif {
 ::-webkit-scrollbar-thumb:hover {
   background: #8B5A2B;
 }
+
+/* ========================================================================= */
+/* GLOBAL INTERACTIVE HOVER & MICRO-MOTION SYSTEM                           */
+/* ========================================================================= */
+
+/* Smooth baseline transitions for all interactive elements */
+button,
+a,
+input,
+select,
+textarea,
+[role="button"],
+.interactive-item {
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Global button hover lift & tactile active response */
+button:not(:disabled):hover,
+[role="button"]:not(:disabled):hover {
+  transform: translateY(-1.5px);
+  filter: brightness(1.02);
+}
+
+button:not(:disabled):active,
+[role="button"]:not(:disabled):active {
+  transform: translateY(0.5px) scale(0.985);
+  filter: brightness(0.98);
+}
+
+/* Primary Heritage & Terracotta buttons deeper hover glow */
+button.bg-\[\#2C3A2B\]:hover {
+  box-shadow: 0 10px 24px -6px rgba(44, 58, 43, 0.35), 0 2px 8px -2px rgba(44, 58, 43, 0.2) !important;
+}
+
+button.bg-\[\#8B5A2B\]:hover {
+  box-shadow: 0 10px 24px -6px rgba(139, 90, 43, 0.35), 0 2px 8px -2px rgba(139, 90, 43, 0.2) !important;
+}
+
+/* Global Card Lift & Ambient Warm Shadow Elevation */
+.card-hover,
+.bg-white.border,
+.rounded-2xl.border,
+.rounded-\[24px\].border,
+.rounded-xl.border {
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.25s ease,
+              background-color 0.2s ease;
+}
+
+/* When hovering any card marked cursor-pointer or group */
+.cursor-pointer.border:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 30px -10px rgba(44, 58, 43, 0.12), 0 4px 12px -2px rgba(139, 90, 43, 0.08);
+  border-color: rgba(139, 90, 43, 0.45);
+}
+
+/* Table rows smooth hover highlight */
+tbody tr {
+  transition: background-color 0.18s ease-in-out, transform 0.18s ease-in-out;
+}
+tbody tr:hover {
+  background-color: rgba(244, 241, 234, 0.75) !important;
+}
+
+/* Interactive badge micro-hover */
+span.rounded-full {
+  transition: transform 0.15s ease-out, background-color 0.15s ease;
+}
+span.rounded-full:hover {
+  transform: scale(1.05);
+}
+
+/* Input & Select glow on hover */
+input:hover:not(:disabled),
+select:hover:not(:disabled),
+textarea:hover:not(:disabled) {
+  border-color: #8B5A2B;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: #2C3A2B;
+  box-shadow: 0 0 0 3px rgba(44, 58, 43, 0.12);
+}
+
+/* Navigation links subtle slide */
+nav button:hover {
+  transform: translateX(3px) !important;
+}
+
+/* Floating Action Button (FAB) hover pulse */
+button[aria-label*="AI Assistant"]:hover,
+button[aria-label*="Assistant"]:hover {
+  transform: scale(1.08) translateY(-2px) !important;
+  box-shadow: 0 12px 28px -4px rgba(212, 106, 67, 0.5) !important;
+}

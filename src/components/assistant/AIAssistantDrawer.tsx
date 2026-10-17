@@ -12,15 +12,14 @@ import {
   Trash2,
   ArrowRight,
   RefreshCw,
-  Sliders,
   DollarSign,
   Package,
-  Layers,
-  ChevronDown,
-  Info,
   Check,
-  MessageSquare
+  MessageSquare,
+  Loader2,
+  Languages
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
 import { useApp } from '../../context/AppContext';
 import { formatINR } from '../../utils/pricing';
 
@@ -59,25 +58,21 @@ export const AIAssistantDrawer: React.FC = () => {
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [selectedLang, setSelectedLang] = useState<'en' | 'hi' | 'gu'>('en');
   const [drawerModel, setDrawerModel] = useState<'gemini-3.8-flash' | 'gemini-3.1-flash-lite' | 'gemini-4-argon'>('gemini-3.8-flash');
-  const [messages, setMessages] = useState<ChatMessage[]>(() => {
-    return [
-      {
-        id: 'msg-welcome',
-        role: 'assistant',
-        text: `Hello! I am your **AI Workspace & Hardware Consultant** powered by Gemini.
 
-I can help you:
-- **Assemble complete, 100% compatible product bundles** tailored to your budget.
-- **Diagnose & fix hardware conflicts** (clamp lights vs curved monitors, desk width overhangs, dock power delivery).
-- **Optimize landed pricing** (product subtotal + shipping surcharge + tax).
-- **Evaluate unit economics** & shopper feasibility.
+  const [messages, setMessages] = useState<ChatMessage[]>(() => [
+    {
+      id: 'msg-welcome',
+      role: 'assistant',
+      text: `Welcome to **Vocal-Local AI Assistant**! 
 
-Click a quick prompt below or ask me anything!`,
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-      }
-    ];
-  });
+I am your intelligent Workspace & Hardware Bundle Consultant powered by Gemini.
+
+Choose your preferred language below or ask me anything to optimize your setup:`,
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    }
+  ]);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -94,28 +89,53 @@ Click a quick prompt below or ask me anything!`,
     }
   }, [isAssistantOpen, messages]);
 
-  const quickPrompts = [
-    {
-      label: 'Build Best Bundle under ₹75k',
-      prompt: 'Build me an optimal, fully compatible workspace bundle under ₹75,000 budget.'
-    },
-    {
-      label: 'Fix Compatibility Errors',
-      prompt: 'Analyze my current bundle for any hardware compatibility conflicts and fix them.'
-    },
-    {
-      label: 'Reduce Landed Cost',
-      prompt: 'My bundle cost needs reduction. Suggest alternatives to stay strictly within budget.'
-    },
-    {
-      label: 'Explain Clamp vs Curved Rule',
-      prompt: 'Why is a screenbar clamp light incompatible with a curved monitor in this system?'
-    },
-    {
-      label: 'Analyze Unit Economics',
-      prompt: 'Give me an MBA analysis of the unit economics, landed margins, and platform referral fee.'
-    }
-  ];
+  const quickPromptsByLang = {
+    en: [
+      { label: 'Build Best Bundle under ₹75k', prompt: 'Build me an optimal, fully compatible workspace bundle under ₹75,000 budget.' },
+      { label: 'Fix Compatibility Errors', prompt: 'Analyze my current bundle for any hardware compatibility conflicts and fix them.' },
+      { label: 'Reduce Landed Cost', prompt: 'My bundle cost needs reduction. Suggest alternatives to stay strictly within budget.' },
+      { label: 'Explain Clamp vs Curved Rule', prompt: 'Why is a screenbar clamp light incompatible with a curved monitor in this system?' },
+      { label: 'Analyze Unit Economics', prompt: 'Give me an MBA analysis of the unit economics, landed margins, and platform referral fee.' }
+    ],
+    hi: [
+      { label: '₹75,000 में सर्वश्रेष्ठ बंडल बनाएं', prompt: '₹75,000 के बजट में मेरे लिए सर्वश्रेष्ठ और 100% संगत वर्कस्पेस बंडल तैयार करें।' },
+      { label: 'हार्डवेयर त्रुटियां ठीक करें', prompt: 'मेरे वर्तमान बंडल की अनुकूलता जांचें और सभी समस्याओं को हल करें।' },
+      { label: 'लागत कम करें', prompt: 'बंडल का खर्च कम करने के लिए बजट-अनुकूल विकल्प सुझाएं।' },
+      { label: 'यूनिट इकोनॉमिक्स विश्लेषण', prompt: 'इस बंडल के मार्जिन, टैक्स और यूनिट इकोनॉमिक्स का विस्तृत विश्लेषण दें।' }
+    ],
+    gu: [
+      { label: '₹75,000 માં શ્રેષ્ઠ બંડલ બનાવો', prompt: '₹75,000 ના બજેટમાં મારા માટે શ્રેષ્ઠ અને 100% સુસંગત વર્કસ્પેસ બંડલ તૈયાર કરો.' },
+      { label: 'હાર્ડવેર ભૂલો સુધારો', prompt: 'મારા વર્તમાન બંડલની સુસંગતતા તપાસો અને બધી સમસ્યાઓ હલ કરો.' },
+      { label: 'ખર્ચ ઓછો કરો', prompt: 'બંડલનો ખર્ચ ઘટાડવા માટે બજેટ-અનુકૂળ વિકલ્પો સૂચવો.' },
+      { label: 'યુનિટ ઇકોનોમિક્સ વિશ્લેષણ', prompt: 'આ બંડલના માર્જિન અને યુનિટ ઇકોનોમિક્સનું વિગતવાર વિશ્લેષણ આપો.' }
+    ]
+  };
+
+  const handleLanguageSelect = (langKey: 'en' | 'hi' | 'gu') => {
+    setSelectedLang(langKey);
+    const langNames = { en: 'English', hi: 'Hindi (हिंदी)', gu: 'Gujarati (ગુજરાતી)' };
+    const confirmTexts = {
+      en: 'Language set to English. How can I assist with your workspace setup today?',
+      hi: 'भाषा सफलतापूर्वक हिंदी में सेट कर दी गई है। आज मैं आपके वर्कस्पेस बंडल के लिए क्या सहायता कर सकता हूँ?',
+      gu: 'ભાષા સફળતાપૂર્વક ગુજરાતીમાં સેટ થઈ ગઈ છે. આજે હું તમારા વર્કસ્પેસ બંડલ માટે કેવી રીતે મદદ કરી શકું?'
+    };
+
+    setMessages(prev => [
+      ...prev,
+      {
+        id: `msg-lang-user-${Date.now()}`,
+        role: 'user',
+        text: `Selected language: ${langNames[langKey]}`,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      },
+      {
+        id: `msg-lang-bot-${Date.now()}`,
+        role: 'assistant',
+        text: confirmTexts[langKey],
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      }
+    ]);
+  };
 
   const handleSendMessage = async (textToSend?: string) => {
     const text = (textToSend || inputMessage).trim();
@@ -133,7 +153,10 @@ Click a quick prompt below or ask me anything!`,
     setIsLoading(true);
 
     try {
-      // Build full context payload for the server
+      const activeLangName = selectedLang === 'hi' ? 'Hindi' : selectedLang === 'gu' ? 'Gujarati' : 'English';
+      const promptWithLanguage = `[SYSTEM: Selected Language = ${activeLangName}]\nPlease respond in ${activeLangName}.\n${text}`;
+
+      // Build context payload for the server
       const currentItemsSummary: Record<string, any> = {};
       for (const [slotId, prod] of Object.entries(currentItems)) {
         if (prod) {
@@ -191,7 +214,7 @@ Click a quick prompt below or ask me anything!`,
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          message: text,
+          message: promptWithLanguage,
           history: historyPayload,
           context: contextPayload,
           model: drawerModel
@@ -207,7 +230,7 @@ Click a quick prompt below or ask me anything!`,
       const assistantMsg: ChatMessage = {
         id: `msg-${Date.now()}-a`,
         role: 'assistant',
-        text: data.reply || "I've reviewed your request and workspace state.",
+        text: data.reply || "I've analyzed your workspace requirements and current configuration.",
         action: data.action || null,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
@@ -215,10 +238,16 @@ Click a quick prompt below or ask me anything!`,
       setMessages(prev => [...prev, assistantMsg]);
     } catch (err: any) {
       console.error('Failed to get AI assistant response:', err);
+      const fallbackReplies: Record<'en' | 'hi' | 'gu', string> = {
+        en: `I encountered an issue connecting to the AI service (${err.message}). You can still use the bundle builder tools or retry in a moment.`,
+        hi: `AI सेवा से कनेक्ट करने में समस्या आई (${err.message})। कृपया कुछ क्षणों बाद पुनः प्रयास करें।`,
+        gu: `AI સેવા સાથે કનેક્ટ કરવામાં સમસ્યા આવી (${err.message})। કૃપા કરીને થોડીવાર પછી ફરી પ્રયાસ કરો.`
+      };
+
       const errorMsg: ChatMessage = {
         id: `msg-${Date.now()}-err`,
         role: 'assistant',
-        text: `I encountered an issue connecting to the AI service: ${err.message}. Please check your connection and try again.`,
+        text: fallbackReplies[selectedLang],
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
       setMessages(prev => [...prev, errorMsg]);
@@ -250,7 +279,11 @@ Click a quick prompt below or ask me anything!`,
       {
         id: 'msg-reset',
         role: 'assistant',
-        text: 'Chat history cleared. How can I help you optimize your workspace bundle today?',
+        text: selectedLang === 'hi'
+          ? 'बातचीत का इतिहास साफ़ कर दिया गया है। मैं आपके लिए क्या सहायता कर सकता हूँ?'
+          : selectedLang === 'gu'
+          ? 'વાતચીતનો ઇતિહાસ સાફ કરવામાં આવ્યો છે. હું તમને કેવી રીતે મદદ કરી શકું?'
+          : 'Chat history cleared. How can I help you optimize your workspace bundle today?',
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       }
     ]);
@@ -292,7 +325,6 @@ Click a quick prompt below or ask me anything!`,
   };
 
   const renderInlineMarkdown = (str: string) => {
-    // Basic regex parser for **bold** and `code`
     const parts = [];
     let remaining = str;
     let keyIdx = 0;
@@ -301,7 +333,6 @@ Click a quick prompt below or ask me anything!`,
       const boldMatch = remaining.match(/\*\*(.+?)\*\*/);
       const codeMatch = remaining.match(/`([^`]+)`/);
 
-      // Find which comes first
       const boldIdx = boldMatch ? remaining.indexOf(boldMatch[0]) : -1;
       const codeIdx = codeMatch ? remaining.indexOf(codeMatch[0]) : -1;
 
@@ -338,104 +369,143 @@ Click a quick prompt below or ask me anything!`,
 
   const violationCount = validation.compatibilityViolations.length;
   const isOverBudget = validation.landedPrice.isOverBudget;
+  const currentPrompts = quickPromptsByLang[selectedLang] || quickPromptsByLang.en;
 
   return (
     <>
-      {/* Floating Bottom-Right Trigger Button (matches reference theme) */}
-      {!isAssistantOpen && (
-        <button
-          onClick={toggleAssistant}
-          aria-label="Open AI Assistant"
-          className="fixed bottom-6 right-6 z-40 flex items-center justify-center w-14 h-14 rounded-full bg-[#D46A43] hover:bg-[#b05534] text-white shadow-[0_8px_25px_rgba(212,106,67,0.4)] hover:shadow-2xl hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer border-2 border-white/40 group"
-        >
-          <div className="relative flex items-center justify-center">
-            <MessageSquare className="w-6 h-6 text-white group-hover:scale-110 transition-transform" />
-            <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-400 rounded-full animate-ping" />
-            <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-500 rounded-full ring-2 ring-white" />
-          </div>
+      {/* Floating Trigger Button in Bottom-Right */}
+      <button
+        onClick={toggleAssistant}
+        aria-label="Toggle AI Assistant"
+        className="fixed bottom-6 right-6 z-40 p-4 rounded-full shadow-2xl transition-all duration-300 hover:scale-105 active:scale-95 focus:outline-none flex items-center justify-center gap-2 cursor-pointer border-2 border-white/50"
+        style={{
+          background: 'linear-gradient(135deg, #2C3A2B 0%, #1B281B 100%)',
+          color: 'white',
+          boxShadow: '0 10px 30px rgba(44, 58, 43, 0.4)'
+        }}
+      >
+        <div className="relative flex items-center justify-center">
+          <MessageSquare className="w-6 h-6 text-emerald-300" />
+          <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-amber-400 rounded-full animate-ping" />
+          <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-amber-400 rounded-full ring-2 ring-white" />
+        </div>
 
-          {violationCount > 0 && (
-            <span className="absolute -top-1.5 -left-1.5 px-2 py-0.5 rounded-full bg-[#8B5A2B] text-white font-bold text-[10px] shadow-sm animate-pulse">
-              {violationCount}
-            </span>
-          )}
-        </button>
-      )}
+        {violationCount > 0 && (
+          <span className="absolute -top-1.5 -left-1.5 px-2 py-0.5 rounded-full bg-[#D46A43] text-white font-bold text-[10px] shadow-sm animate-pulse">
+            {violationCount}
+          </span>
+        )}
+      </button>
 
-      {/* Slide-over Drawer / Modal Container */}
-      {isAssistantOpen && (
-        <div className="fixed inset-0 z-50 pointer-events-none flex justify-end">
-          {/* Backdrop on mobile */}
-          <div
-            className="fixed inset-0 bg-[#2C2C1E]/40 backdrop-blur-2xs pointer-events-auto lg:hidden"
-            onClick={() => setIsAssistantOpen(false)}
-          />
-
-          {/* Drawer Body */}
-          <aside
-            className={`pointer-events-auto flex flex-col bg-[#FDFBF7] border-l border-[#E6E1D3] shadow-2xl transition-all duration-200 ease-out h-full ${
-              isExpanded ? 'w-full md:w-[680px]' : 'w-full sm:w-[440px]'
+      {/* Animated Floating Chat Modal */}
+      <AnimatePresence>
+        {isAssistantOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: 24, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 24, scale: 0.95 }}
+            transition={{ duration: 0.22, ease: 'easeOut' }}
+            className={`fixed bottom-24 right-4 sm:right-6 bg-[#FDFBF7] rounded-2xl shadow-2xl flex flex-col z-50 border border-[#E6E1D3] overflow-hidden transition-all duration-300 ${
+              isExpanded
+                ? 'w-[95vw] sm:w-[680px] h-[82vh] max-h-[780px]'
+                : 'w-[94vw] sm:w-[440px] h-[580px] max-h-[82vh]'
             }`}
           >
-            {/* Top Bar */}
-            <div className="px-4 py-3 border-b border-[#E6E1D3] flex items-center justify-between bg-white gap-2">
-              <div className="flex items-center gap-2 min-w-0">
-                <div className="w-8 h-8 rounded-xl bg-[#2C3A2B] text-white flex items-center justify-center shadow-xs shrink-0">
-                  <Sparkles className="w-4 h-4 text-amber-200" />
+            {/* Header */}
+            <div className="bg-white px-4 py-3 flex items-center justify-between shadow-xs z-10 border-b border-[#E6E1D3]">
+              <div className="flex items-center space-x-2.5 min-w-0">
+                <div className="w-9 h-9 rounded-full flex items-center justify-center bg-[#2C3A2B] text-emerald-300 shadow-xs shrink-0">
+                  <Sparkles className="w-4 h-4 text-amber-300" />
                 </div>
                 <div className="min-w-0">
                   <div className="flex items-center gap-1.5">
-                    <span className="text-xs font-serif font-bold text-[#2C3A2B] truncate">
-                      Vocal-Local Assistant
-                    </span>
-                    <span className="px-1.5 py-0.2 rounded-full text-[9px] font-mono font-medium bg-[#A3B18A]/20 text-[#2C3A2B] border border-[#A3B18A]/40 shrink-0">
+                    <h3 className="font-bold text-sm text-[#2C2C1E] truncate">AI Bundle Assistant</h3>
+                    <span className="px-1.5 py-0.5 rounded-full text-[9px] font-mono font-medium bg-[#A3B18A]/25 text-[#2C3A2B] border border-[#A3B18A]/40 shrink-0">
                       Live
                     </span>
                   </div>
-                  <div className="flex items-center gap-1 mt-0.5">
-                    <select
-                      value={drawerModel}
-                      onChange={e => setDrawerModel(e.target.value as any)}
-                      className="text-[10px] font-mono font-semibold bg-[#F4F1EA] border border-[#E6E1D3] rounded px-1.5 py-0.5 text-[#2C3A2B] cursor-pointer"
-                    >
-                      <option value="gemini-3.8-flash">gemini-3.8-flash</option>
-                      <option value="gemini-3.1-flash-lite">gemini-3.1-flash-lite</option>
-                      <option value="gemini-4-argon">gemini-4-argon</option>
-                    </select>
-                  </div>
+                  <p className="text-[10px] text-[#8A8A88] truncate">Hardware Feasibility & Optimization</p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-1 text-[#8B8B7A] shrink-0">
+              {/* Controls & Language Switcher */}
+              <div className="flex items-center gap-1.5 shrink-0">
+                {/* Language Switch Pills */}
+                <div className="flex items-center gap-0.5 bg-[#F4F1EA] p-1 rounded-full border border-[#E6E1D3]">
+                  <button
+                    type="button"
+                    onClick={() => handleLanguageSelect('en')}
+                    className={`px-2 py-0.5 text-[10px] font-bold rounded-full transition-all cursor-pointer ${
+                      selectedLang === 'en' ? 'bg-[#2C3A2B] text-white shadow-xs' : 'text-[#5A5A40] hover:bg-white'
+                    }`}
+                  >
+                    EN
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleLanguageSelect('hi')}
+                    className={`px-2 py-0.5 text-[10px] font-bold rounded-full transition-all cursor-pointer ${
+                      selectedLang === 'hi' ? 'bg-[#2C3A2B] text-white shadow-xs' : 'text-[#5A5A40] hover:bg-white'
+                    }`}
+                  >
+                    हिंदी
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleLanguageSelect('gu')}
+                    className={`px-2 py-0.5 text-[10px] font-bold rounded-full transition-all cursor-pointer ${
+                      selectedLang === 'gu' ? 'bg-[#2C3A2B] text-white shadow-xs' : 'text-[#5A5A40] hover:bg-white'
+                    }`}
+                  >
+                    ગુજ
+                  </button>
+                </div>
+
+                {/* Model Selector */}
+                <select
+                  value={drawerModel}
+                  onChange={e => setDrawerModel(e.target.value as any)}
+                  className="hidden md:block text-[10px] font-mono font-semibold bg-[#F4F1EA] border border-[#E6E1D3] rounded px-1.5 py-1 text-[#2C3A2B] cursor-pointer"
+                >
+                  <option value="gemini-3.8-flash">3.8-flash</option>
+                  <option value="gemini-3.1-flash-lite">3.1-lite</option>
+                  <option value="gemini-4-argon">4-argon</option>
+                </select>
+
+                {/* Full Chat button */}
                 <button
                   onClick={() => {
                     setActiveTab('chat');
                     setIsAssistantOpen(false);
                   }}
                   title="Open dedicated full-page Gemini Chatbot"
-                  className="px-2 py-1 text-[11px] font-semibold text-[#8B5A2B] bg-[#F4F1EA] hover:bg-[#E6E1D3] rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
+                  className="p-1.5 hover:bg-[#F4F1EA] text-[#8B5A2B] rounded-full transition-colors cursor-pointer"
                 >
-                  <Bot className="w-3.5 h-3.5 text-[#8B5A2B]" />
-                  <span className="hidden sm:inline">Full Chat</span>
+                  <Bot className="w-4 h-4" />
                 </button>
+
+                {/* Clear chat */}
                 <button
                   onClick={handleClearHistory}
-                  title="Clear chat history"
-                  className="p-1.5 hover:text-[#2C2C1E] hover:bg-[#F4F1EA] rounded-lg transition-colors cursor-pointer"
+                  title="Clear conversation"
+                  className="p-1.5 hover:bg-[#F4F1EA] text-[#8A8A88] rounded-full transition-colors cursor-pointer"
                 >
-                  <Trash2 className="w-3.5 h-3.5" />
+                  <Trash2 className="w-4 h-4" />
                 </button>
+
+                {/* Expand / Minimize */}
                 <button
                   onClick={() => setIsExpanded(prev => !prev)}
-                  title={isExpanded ? 'Compact drawer' : 'Expand drawer'}
-                  className="hidden sm:block p-1.5 hover:text-[#2C2C1E] hover:bg-[#F4F1EA] rounded-lg transition-colors cursor-pointer"
+                  title={isExpanded ? 'Collapse' : 'Expand'}
+                  className="hidden sm:block p-1.5 hover:bg-[#F4F1EA] text-[#8A8A88] rounded-full transition-colors cursor-pointer"
                 >
-                  {isExpanded ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
+                  {isExpanded ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
                 </button>
+
+                {/* Close Button */}
                 <button
                   onClick={() => setIsAssistantOpen(false)}
-                  title="Close assistant"
-                  className="p-1.5 hover:text-[#2C2C1E] hover:bg-[#F4F1EA] rounded-lg transition-colors cursor-pointer"
+                  className="p-1.5 hover:bg-[#F4F1EA] text-[#8A8A88] rounded-full transition-colors cursor-pointer"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -483,7 +553,7 @@ Click a quick prompt below or ask me anything!`,
 
             {/* Quick Prompts Bar */}
             <div className="px-4 py-2 border-b border-[#E6E1D3] bg-[#FDFBF7] flex items-center gap-1.5 overflow-x-auto no-scrollbar">
-              {quickPrompts.map((qp, i) => (
+              {currentPrompts.map((qp, i) => (
                 <button
                   key={i}
                   disabled={isLoading}
@@ -495,46 +565,74 @@ Click a quick prompt below or ask me anything!`,
               ))}
             </div>
 
-            {/* Chat Messages Scrollable Area */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
-              {messages.map(msg => {
+            {/* Messages Area */}
+            <div className="flex-1 overflow-y-auto w-full p-4 space-y-4" style={{ backgroundColor: '#FDFBF7' }}>
+              {messages.map((msg, index) => {
                 const isUser = msg.role === 'user';
                 return (
                   <div
                     key={msg.id}
-                    className={`flex gap-3 text-xs ${isUser ? 'justify-end' : 'justify-start'}`}
+                    className={`flex flex-col ${isUser ? 'items-end' : 'items-start'}`}
                   >
-                    {!isUser && (
-                      <div className="w-7 h-7 rounded-full bg-[#2C3A2B] text-white shrink-0 flex items-center justify-center shadow-xs">
-                        <Bot className="w-4 h-4 text-emerald-300" />
-                      </div>
-                    )}
-
                     <div
-                      className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 shadow-2xs ${
+                      className={`max-w-[85%] p-3 text-xs shadow-xs whitespace-pre-wrap ${
                         isUser
-                          ? 'bg-[#2C3A2B] text-white rounded-tr-xs'
-                          : 'bg-white border border-[#E6E1D3] rounded-tl-xs text-[#2C2C1E]'
+                          ? 'bg-[#2C3A2B] text-white rounded-t-2xl rounded-bl-2xl'
+                          : 'bg-white border border-[#E6E1D3] text-[#2C2C1E] rounded-t-2xl rounded-br-2xl'
                       }`}
                     >
-                      {/* Message Content */}
-                      <div className={isUser ? 'text-white' : 'text-[#2C2C1E]'}>
-                        {isUser ? (
-                          <p className="leading-relaxed whitespace-pre-wrap">{msg.text}</p>
-                        ) : (
-                          renderFormattedText(msg.text)
-                        )}
-                      </div>
+                      {/* Message Text */}
+                      {isUser ? (
+                        <p className="leading-relaxed whitespace-pre-wrap">{msg.text}</p>
+                      ) : (
+                        renderFormattedText(msg.text)
+                      )}
 
-                      {/* Interactive Action Card */}
+                      {/* Interactive Language Selector on First Greeting */}
+                      {index === 0 && !isUser && (
+                        <div className="mt-4 pt-3 border-t border-[#E6E1D3]/70 flex flex-col gap-2">
+                          <span className="text-[11px] font-semibold text-[#5A5A40] flex items-center gap-1">
+                            <Languages className="w-3.5 h-3.5 text-[#8B5A2B]" />
+                            Choose preferred language:
+                          </span>
+                          <div className="grid grid-cols-1 gap-1.5">
+                            <button
+                              type="button"
+                              onClick={() => handleLanguageSelect('en')}
+                              className="w-full py-1.5 px-3 bg-[#FDFBF7] hover:bg-[#2C3A2B] hover:text-white border border-[#E6E1D3] rounded-xl text-left text-xs font-medium transition-colors flex items-center justify-between text-[#2C2C1E] cursor-pointer"
+                            >
+                              <span>🇬🇧 English</span>
+                              <span className="text-[10px] opacity-70">Workspace Consultant</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleLanguageSelect('hi')}
+                              className="w-full py-1.5 px-3 bg-[#FDFBF7] hover:bg-[#2C3A2B] hover:text-white border border-[#E6E1D3] rounded-xl text-left text-xs font-medium transition-colors flex items-center justify-between text-[#2C2C1E] cursor-pointer"
+                            >
+                              <span>🇮🇳 हिंदी (Hindi)</span>
+                              <span className="text-[10px] opacity-70">हिंदी में सहायता प्राप्त करें</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleLanguageSelect('gu')}
+                              className="w-full py-1.5 px-3 bg-[#FDFBF7] hover:bg-[#2C3A2B] hover:text-white border border-[#E6E1D3] rounded-xl text-left text-xs font-medium transition-colors flex items-center justify-between text-[#2C2C1E] cursor-pointer"
+                            >
+                              <span>🇮🇳 ગુજરાતી (Gujarati)</span>
+                              <span className="text-[10px] opacity-70">ગુજરાતીમાં સહાય મેળવો</span>
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Action Cards */}
                       {!isUser && msg.action && (
                         <div className="mt-3 pt-3 border-t border-[#E6E1D3]">
                           {msg.action.type === 'apply_bundle' && (
                             <div className="p-3 bg-[#FDFBF7] border border-[#E6E1D3] rounded-xl shadow-xs">
                               <div className="flex items-center justify-between mb-2">
-                                <div className="flex items-center gap-1.5 font-serif font-bold text-[#2C3A2B] text-[11px]">
+                                <div className="flex items-center gap-1.5 font-bold text-[#2C3A2B] text-[11px]">
                                   <Package className="w-3.5 h-3.5 text-[#8B5A2B]" />
-                                  <span>{msg.action.title || 'Recommended Setup'}</span>
+                                  <span>{msg.action.title || 'Recommended Bundle'}</span>
                                 </div>
                                 {msg.action.budget && (
                                   <span className="font-mono text-[10px] px-1.5 py-0.5 rounded-md bg-[#F4F1EA] text-[#8B5A2B] font-medium border border-[#E6E1D3]">
@@ -551,7 +649,7 @@ Click a quick prompt below or ask me anything!`,
                                     return (
                                       <div
                                         key={slotId}
-                                        className="flex items-center justify-between text-[10px] text-[#5A5A40] bg-white border border-[#E6E1D3]/50 px-2 py-1 rounded-md"
+                                        className="flex items-center justify-between text-[10px] text-[#5A5A40] bg-white border border-[#E6E1D3]/60 px-2 py-1 rounded-md"
                                       >
                                         <span className="font-medium text-[#2C3A2B]">
                                           {slot?.label || slotId}:
@@ -568,10 +666,10 @@ Click a quick prompt below or ask me anything!`,
                               <button
                                 onClick={() => handleApplyAction(msg.id, msg.action)}
                                 disabled={msg.actionApplied}
-                                className={`w-full py-1.5 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all ${
+                                className={`w-full py-2 px-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-all ${
                                   msg.actionApplied
                                     ? 'bg-[#A3B18A]/30 text-[#2C3A2B] border border-[#A3B18A] cursor-default'
-                                    : 'bg-[#8B5A2B] hover:bg-[#743815] text-white shadow-xs cursor-pointer'
+                                    : 'bg-[#2C3A2B] hover:bg-[#1B281B] text-white shadow-xs cursor-pointer'
                                 }`}
                               >
                                 {msg.actionApplied ? (
@@ -591,7 +689,7 @@ Click a quick prompt below or ask me anything!`,
 
                           {msg.action.type === 'swap_product' && (
                             <div className="p-3 bg-[#FDFBF7] border border-[#E6E1D3] rounded-xl shadow-xs">
-                              <div className="flex items-center gap-1.5 font-serif font-bold text-[#2C3A2B] text-[11px] mb-1">
+                              <div className="flex items-center gap-1.5 font-bold text-[#2C3A2B] text-[11px] mb-1">
                                 <RefreshCw className="w-3.5 h-3.5 text-[#8B5A2B]" />
                                 <span>Suggested Product Replacement</span>
                               </div>
@@ -611,7 +709,7 @@ Click a quick prompt below or ask me anything!`,
                               <button
                                 onClick={() => handleApplyAction(msg.id, msg.action)}
                                 disabled={msg.actionApplied}
-                                className={`w-full py-1.5 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all ${
+                                className={`w-full py-2 px-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-all ${
                                   msg.actionApplied
                                     ? 'bg-[#A3B18A]/30 text-[#2C3A2B] border border-[#A3B18A] cursor-default'
                                     : 'bg-[#D46A43] hover:bg-[#b05534] text-white shadow-xs cursor-pointer'
@@ -635,7 +733,7 @@ Click a quick prompt below or ask me anything!`,
                           {msg.action.type === 'set_budget' && (
                             <div className="p-3 bg-[#FDFBF7] border border-[#E6E1D3] rounded-xl shadow-xs">
                               <div className="flex items-center justify-between mb-1">
-                                <span className="font-serif font-bold text-[#2C3A2B] text-[11px]">
+                                <span className="font-bold text-[#2C3A2B] text-[11px]">
                                   Adjust Target Budget
                                 </span>
                                 <span className="font-mono font-bold text-[#8B5A2B] text-xs">
@@ -650,7 +748,7 @@ Click a quick prompt below or ask me anything!`,
                               <button
                                 onClick={() => handleApplyAction(msg.id, msg.action)}
                                 disabled={msg.actionApplied}
-                                className={`w-full py-1.5 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all ${
+                                className={`w-full py-2 px-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-all ${
                                   msg.actionApplied
                                     ? 'bg-[#A3B18A]/30 text-[#2C3A2B] border border-[#A3B18A] cursor-default'
                                     : 'bg-[#8B5A2B] hover:bg-[#743815] text-white shadow-xs cursor-pointer'
@@ -673,88 +771,70 @@ Click a quick prompt below or ask me anything!`,
                         </div>
                       )}
 
-                      {/* Timestamp */}
                       <div
                         className={`text-[9px] mt-1.5 flex justify-end ${
-                          isUser ? 'text-emerald-200' : 'text-[#8B8B7A]'
+                          isUser ? 'text-emerald-200' : 'text-[#8A8A88]'
                         }`}
                       >
                         {msg.timestamp}
                       </div>
                     </div>
-
-                    {isUser && (
-                      <div className="w-7 h-7 rounded-full bg-[#8B5A2B] text-white shrink-0 flex items-center justify-center text-[10px] font-bold">
-                        U
-                      </div>
-                    )}
                   </div>
                 );
               })}
 
               {isLoading && (
-                <div className="flex gap-3 text-xs justify-start">
-                  <div className="w-7 h-7 rounded-full bg-[#2C3A2B] text-white shrink-0 flex items-center justify-center shadow-xs">
-                    <Bot className="w-4 h-4 text-emerald-300 animate-pulse" />
-                  </div>
-                  <div className="bg-white border border-[#E6E1D3] rounded-2xl rounded-tl-xs px-4 py-3 shadow-2xs flex items-center gap-2 text-[#5A5A40]">
-                    <span className="w-2 h-2 rounded-full bg-[#8B5A2B] animate-bounce" />
-                    <span className="w-2 h-2 rounded-full bg-[#8B5A2B] animate-bounce [animation-delay:0.2s]" />
-                    <span className="w-2 h-2 rounded-full bg-[#8B5A2B] animate-bounce [animation-delay:0.4s]" />
-                    <span className="text-[11px] font-medium text-[#5A5A40] ml-1">
-                      Gemini is analyzing catalogue constraints...
+                <div className="flex justify-start">
+                  <div className="bg-white border border-[#E6E1D3] p-3 rounded-t-2xl rounded-br-2xl shadow-xs flex items-center gap-2 text-[#5A5A40]">
+                    <Loader2 className="w-4 h-4 text-[#8B5A2B] animate-spin" />
+                    <span className="text-xs">
+                      {selectedLang === 'hi'
+                        ? 'Gemini विश्लेषण कर रहा है...'
+                        : selectedLang === 'gu'
+                        ? 'Gemini વિશ્લેષણ કરી રહ્યું છે...'
+                        : 'Gemini is analyzing catalogue constraints...'}
                     </span>
                   </div>
                 </div>
               )}
-
               <div ref={messagesEndRef} />
             </div>
 
-            {/* Input Bar */}
-            <div className="p-3 border-t border-[#E6E1D3] bg-white">
-              <form
-                onSubmit={e => {
-                  e.preventDefault();
-                  handleSendMessage();
-                }}
-                className="relative flex items-end gap-2"
+            {/* Input Area */}
+            <form
+              onSubmit={e => {
+                e.preventDefault();
+                handleSendMessage();
+              }}
+              className="bg-white p-3 border-t border-[#E6E1D3] flex items-center space-x-2"
+            >
+              <input
+                type="text"
+                value={inputMessage}
+                onChange={e => setInputMessage(e.target.value)}
+                placeholder={
+                  selectedLang === 'hi'
+                    ? 'अपना संदेश लिखें (जैसे: बजट अनुकूल बंडल बनाएं)...'
+                    : selectedLang === 'gu'
+                    ? 'તમારો સંદેશ લખો (જેમ કે: બજેટ અનુકૂળ બંડલ બનાવો)...'
+                    : 'Ask Gemini to build, optimize, or fix your bundle...'
+                }
+                disabled={isLoading}
+                className="flex-1 bg-[#F4F1EA] border-none rounded-full px-4 py-2.5 text-xs focus:ring-1 focus:ring-[#2C3A2B] outline-none placeholder-[#8A8A88] text-[#2C2C1E]"
+              />
+              <button
+                type="submit"
+                disabled={!inputMessage.trim() || isLoading}
+                className="p-2.5 bg-[#2C3A2B] text-white rounded-full hover:bg-[#1B281B] transition-colors disabled:opacity-50 disabled:cursor-not-allowed shrink-0 cursor-pointer shadow-xs"
               >
-                <div className="relative flex-1">
-                  <textarea
-                    ref={inputRef}
-                    rows={2}
-                    value={inputMessage}
-                    onChange={e => setInputMessage(e.target.value)}
-                    onKeyDown={e => {
-                      if (e.key === 'Enter' && !e.shiftKey) {
-                        e.preventDefault();
-                        handleSendMessage();
-                      }
-                    }}
-                    placeholder="Ask Gemini to build, optimize, or fix your bundle..."
-                    disabled={isLoading}
-                    className="w-full resize-none p-2.5 pr-10 text-xs bg-[#F4F1EA]/70 hover:bg-[#F4F1EA] focus:bg-white border border-[#E6E1D3] rounded-xl focus:outline-hidden focus:border-[#2C3A2B] transition-colors placeholder:text-[#8B8B7A] text-[#2C2C1E]"
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={!inputMessage.trim() || isLoading}
-                  aria-label="Send message to AI assistant"
-                  className="p-2.5 rounded-xl bg-[#8B5A2B] hover:bg-[#743815] disabled:opacity-40 text-white shadow-xs transition-colors shrink-0 cursor-pointer disabled:cursor-not-allowed"
-                >
-                  <Send className="w-4 h-4" />
-                </button>
-              </form>
-              <div className="mt-1.5 flex items-center justify-between text-[10px] text-[#8B8B7A] px-1 font-mono">
-                <span>Press Enter to send, Shift+Enter for new line</span>
-                <span>Context-Aware Gemini Assistant</span>
-              </div>
-            </div>
-          </aside>
-        </div>
-      )}
+                <Send className="w-4 h-4" />
+              </button>
+            </form>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 };
+
+export { AIAssistantDrawer as FloatingChat };
