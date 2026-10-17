@@ -217,6 +217,19 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
                 <span>My Profile</span>
                 <User className="w-3.5 h-3.5 text-[#5A5A40]" />
               </button>
+
+              <div className="my-1 border-t border-[#E6E1D3]" />
+
+              <button
+                onClick={() => {
+                  logout();
+                  setShowProfile(false);
+                }}
+                className="w-full text-left px-3 py-1.5 rounded-xl text-xs font-semibold text-rose-700 hover:bg-rose-50 flex items-center justify-between cursor-pointer transition-colors"
+              >
+                <span>Log Out</span>
+                <LogOut className="w-3.5 h-3.5 text-rose-600" />
+              </button>
             </div>
           )}
         </div>
