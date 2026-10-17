@@ -7,8 +7,7 @@ import {
   CheckCircle2,
   TrendingUp,
   FileCode2,
-  Settings,
-  Bot
+  Settings
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 
@@ -80,12 +79,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           label: 'Compare Bundles',
           icon: Columns,
           badge: savedBundles.length > 0 ? savedBundles.length.toString() : null
-        },
-        {
-          id: 'chat',
-          label: 'Gemini Assistant',
-          icon: Bot,
-          badge: 'AI'
         }
       ]
     : userRole === 'customer'
@@ -107,32 +100,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           label: 'Compare Bundles',
           icon: Columns,
           badge: savedBundles.length > 0 ? savedBundles.length.toString() : null
-        },
-        {
-          id: 'chat',
-          label: 'Gemini Assistant',
-          icon: Bot,
-          badge: 'AI'
-        },
-        {
-          id: 'dashboard',
-          label: 'Front Page (Switch)',
-          icon: LayoutDashboard,
-          badge: null
         }
       ]
     : [
         {
-          id: 'dashboard',
-          label: 'Front Page (Login)',
-          icon: LayoutDashboard,
-          badge: 'Start'
-        },
-        {
           id: 'builder',
-          label: 'Customer Portal',
+          label: 'Build a Bundle',
           icon: PackagePlus,
-          badge: null
+          badge: validation.filledSlotCount > 0 ? `${validation.filledSlotCount}/${validation.totalSlotCount}` : null
         },
         {
           id: 'catalogue',
@@ -141,10 +116,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           badge: fixture.products.length.toString()
         },
         {
-          id: 'chat',
-          label: 'Gemini Assistant',
-          icon: Bot,
-          badge: 'AI'
+          id: 'compare',
+          label: 'Compare Bundles',
+          icon: Columns,
+          badge: savedBundles.length > 0 ? savedBundles.length.toString() : null
         }
       ];
 
