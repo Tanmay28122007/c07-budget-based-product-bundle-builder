@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import {
   Sparkles,
   CheckCircle2,
@@ -18,12 +18,7 @@ import {
   ChevronDown,
   ChevronUp,
   Tag,
-  CreditCard,
-  Server,
-  Search,
-  Filter,
-  X,
-  Loader2
+  CreditCard
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { Product } from '../../types';
@@ -33,7 +28,6 @@ import {
   BundleRecommendation,
   generateBundleRecommendations
 } from '../../utils/bundleRecommendations';
-import { fetchFilteredBundles, BundleApiResponse } from '../../services/apiClient';
 
 function getProductImageUrl(img?: string, id?: string): string {
   if (!img) return id ? `/assets/${id}.png` : '';
@@ -44,18 +38,6 @@ function getProductImageUrl(img?: string, id?: string): string {
     return img.replace('./assets/', '/assets/');
   }
   return img;
-}
-
-function getColourHex(colour?: string): string {
-  if (!colour) return '#9CA3AF';
-  const c = colour.toLowerCase();
-  if (c.includes('blue')) return '#2563EB';
-  if (c.includes('red')) return '#DC2626';
-  if (c.includes('black')) return '#1E293B';
-  if (c.includes('grey') || c.includes('gray')) return '#64748B';
-  if (c.includes('green')) return '#16A34A';
-  if (c.includes('brown')) return '#8B5A2B';
-  return '#9CA3AF';
 }
 
 interface BundleRecommendationsSectionProps {
@@ -75,74 +57,6 @@ export const BundleRecommendationsSection: React.FC<BundleRecommendationsSection
   const [budgetConstraint, setBudgetConstraint] = useState<number | null>(appBudget || null);
   const [expandedCardId, setExpandedCardId] = useState<string | null>(null);
 
-  // Specific bundle detail filter state
-  const [bundleCategory, setBundleCategory] = useState<string>('all');
-  const [bundleColour, setBundleColour] = useState<string>('all');
-  const [bundleSearch, setBundleSearch] = useState<string>('');
-  const [bundleSort, setBundleSort] = useState<'price_asc' | 'price_desc' | 'items_asc' | 'items_desc'>('price_asc');
-
-  // Backend connection state
-  const [backendBundles, setBackendBundles] = useState<BundleRecommendation[] | null>(null);
-  const [isBackendLoading, setIsBackendLoading] = useState<boolean>(false);
-  const [backendStatus, setBackendStatus] = useState<'connected' | 'offline'>('connected');
-  const [backendLatency, setBackendLatency] = useState<number | null>(null);
-  const [backendHasUnavailableProduct, setBackendHasUnavailableProduct] = useState<boolean>(false);
-  const [backendUnavailableReason, setBackendUnavailableReason] = useState<string | undefined>(undefined);
-  const [backendIsOverBudgetForAll, setBackendIsOverBudgetForAll] = useState<boolean>(false);
-  const [backendOverBudgetReason, setBackendOverBudgetReason] = useState<string | undefined>(undefined);
-
-  // Unique categories and colours available in fixture
-  const availableCategories = useMemo(() => {
-    return Array.from(new Set(fixture.products.map(p => p.category)));
-  }, [fixture.products]);
-
-  const availableColours = useMemo(() => {
-    return Array.from(new Set(fixture.products.map(p => p.colour).filter(Boolean))) as string[];
-  }, [fixture.products]);
-
-  // Connect to backend endpoint POST /api/bundles/filter whenever requirements or specific details change
-  useEffect(() => {
-    let isMounted = true;
-    const timer = setTimeout(async () => {
-      try {
-        setIsBackendLoading(true);
-        const startTime = performance.now();
-        const res: BundleApiResponse = await fetchFilteredBundles({
-          requirements,
-          budget: budgetConstraint || undefined,
-          exactOnly,
-          category: bundleCategory !== 'all' ? bundleCategory : undefined,
-          colour: bundleColour !== 'all' ? bundleColour : undefined,
-          search: bundleSearch.trim() || undefined,
-          sort: bundleSort
-        });
-
-        if (isMounted && res.success) {
-          setBackendBundles(res.bundles);
-          setBackendHasUnavailableProduct(Boolean(res.hasUnavailableProduct));
-          setBackendUnavailableReason(res.unavailableReason);
-          setBackendIsOverBudgetForAll(Boolean(res.isOverBudgetForAll));
-          setBackendOverBudgetReason(res.overBudgetReason);
-          setBackendLatency(Math.round(performance.now() - startTime));
-          setBackendStatus('connected');
-          setIsBackendLoading(false);
-        }
-      } catch (err) {
-        console.warn('Backend bundle filter failed, using local engine fallback:', err);
-        if (isMounted) {
-          setBackendBundles(null);
-          setBackendStatus('offline');
-          setIsBackendLoading(false);
-        }
-      }
-    }, 120);
-
-    return () => {
-      isMounted = false;
-      clearTimeout(timer);
-    };
-  }, [requirements, budgetConstraint, exactOnly, bundleCategory, bundleColour, bundleSearch, bundleSort]);
-
   // Quick preset buttons for instant test verification
   const handleApplyPreset = (presetType: 'test1' | 'test2' | 'test3' | 'test4' | 'test5' | 'reset') => {
     switch (presetType) {
@@ -154,9 +68,6 @@ export const BundleRecommendationsSection: React.FC<BundleRecommendationsSection
         ]);
         setExactOnly(false);
         setBudgetConstraint(null);
-        setBundleCategory('all');
-        setBundleColour('all');
-        setBundleSearch('');
         break;
 
       case 'test2':
@@ -166,9 +77,6 @@ export const BundleRecommendationsSection: React.FC<BundleRecommendationsSection
         ]);
         setExactOnly(false);
         setBudgetConstraint(null);
-        setBundleCategory('all');
-        setBundleColour('all');
-        setBundleSearch('');
         break;
 
       case 'test3':
@@ -179,9 +87,6 @@ export const BundleRecommendationsSection: React.FC<BundleRecommendationsSection
         ]);
         setExactOnly(false);
         setBudgetConstraint(2000);
-        setBundleCategory('all');
-        setBundleColour('all');
-        setBundleSearch('');
         break;
 
       case 'test4':
@@ -191,9 +96,6 @@ export const BundleRecommendationsSection: React.FC<BundleRecommendationsSection
         ]);
         setExactOnly(false);
         setBudgetConstraint(null);
-        setBundleCategory('all');
-        setBundleColour('all');
-        setBundleSearch('');
         break;
 
       case 'test5':
@@ -203,22 +105,15 @@ export const BundleRecommendationsSection: React.FC<BundleRecommendationsSection
         ]);
         setExactOnly(false);
         setBudgetConstraint(1200);
-        setBundleCategory('all');
-        setBundleColour('all');
-        setBundleSearch('');
         break;
 
       case 'reset':
-        // Clears requirements and restores baseline bundles
+        // Clears requirements and restores 10 baseline bundles
         setRequirements([]);
         setExactOnly(false);
         setBudgetConstraint(null);
         setSelectedProductIdInput('');
         setQuantityInput(1);
-        setBundleCategory('all');
-        setBundleColour('all');
-        setBundleSearch('');
-        setBundleSort('price_asc');
         break;
     }
   };
@@ -273,9 +168,9 @@ export const BundleRecommendationsSection: React.FC<BundleRecommendationsSection
     );
   };
 
-  // Local engine fallback calculation
-  const localRecommendationResult = useMemo(() => {
-    const base = generateBundleRecommendations(
+  // Generate dynamic recommendations based on active requirements & constraints
+  const recommendationResult = useMemo(() => {
+    return generateBundleRecommendations(
       fixture.products,
       requirements,
       budgetConstraint,
@@ -283,79 +178,10 @@ export const BundleRecommendationsSection: React.FC<BundleRecommendationsSection
       fixture.shippingRule,
       fixture.taxRule
     );
+  }, [fixture, requirements, budgetConstraint, exactOnly]);
 
-    let filtered = [...base.bundles];
-
-    // Filter by keyword search
-    if (bundleSearch.trim()) {
-      const q = bundleSearch.toLowerCase().trim();
-      filtered = filtered.filter(b => {
-        const name = b.name.toLowerCase();
-        const tagline = b.tagline.toLowerCase();
-        const explanation = b.matchExplanation.toLowerCase();
-        const itemNames = b.items.map(it => `${it.product.name} ${it.product.category} ${it.product.colour || ''}`).join(' ').toLowerCase();
-        return name.includes(q) || tagline.includes(q) || explanation.includes(q) || itemNames.includes(q);
-      });
-    }
-
-    // Filter by category
-    if (bundleCategory !== 'all') {
-      const cat = bundleCategory.toLowerCase().trim();
-      filtered = filtered.filter(b =>
-        b.categories.some(c => c.toLowerCase() === cat) ||
-        b.items.some(it => it.product.category.toLowerCase() === cat)
-      );
-    }
-
-    // Filter by colour
-    if (bundleColour !== 'all') {
-      const col = bundleColour.toLowerCase().trim();
-      filtered = filtered.filter(b =>
-        b.items.some(it => (it.product.colour || '').toLowerCase().includes(col))
-      );
-    }
-
-    // Sort bundles
-    if (bundleSort === 'price_asc') {
-      filtered.sort((a, b) => a.landedPrice - b.landedPrice);
-    } else if (bundleSort === 'price_desc') {
-      filtered.sort((a, b) => b.landedPrice - a.landedPrice);
-    } else if (bundleSort === 'items_asc') {
-      filtered.sort((a, b) => a.totalItemCount - b.totalItemCount);
-    } else if (bundleSort === 'items_desc') {
-      filtered.sort((a, b) => b.totalItemCount - a.totalItemCount);
-    }
-
-    return {
-      ...base,
-      bundles: filtered
-    };
-  }, [fixture, requirements, budgetConstraint, exactOnly, bundleSearch, bundleCategory, bundleColour, bundleSort]);
-
-  // Determine whether to use live backend filtered results or local fallback
-  const isUsingBackend = backendBundles !== null && backendStatus === 'connected';
-  const bundles = isUsingBackend ? backendBundles : localRecommendationResult.bundles;
-  const hasUnavailableProduct = isUsingBackend
-    ? backendHasUnavailableProduct
-    : localRecommendationResult.hasUnavailableProduct;
-  const unavailableReason = isUsingBackend
-    ? backendUnavailableReason
-    : localRecommendationResult.unavailableReason;
-  const isOverBudgetForAll = isUsingBackend
-    ? backendIsOverBudgetForAll
-    : localRecommendationResult.isOverBudgetForAll;
-  const overBudgetReason = isUsingBackend
-    ? backendOverBudgetReason
-    : localRecommendationResult.overBudgetReason;
-
-  const hasSpecificDetailFilters =
-    bundleCategory !== 'all' ||
-    bundleColour !== 'all' ||
-    bundleSearch.trim() !== '' ||
-    bundleSort !== 'price_asc' ||
-    budgetConstraint !== null ||
-    exactOnly ||
-    requirements.length > 0;
+  const { bundles, hasUnavailableProduct, unavailableReason, isOverBudgetForAll, overBudgetReason } =
+    recommendationResult;
 
   return (
     <div className="space-y-6">
@@ -365,50 +191,16 @@ export const BundleRecommendationsSection: React.FC<BundleRecommendationsSection
       <div className="p-6 bg-white border border-[#E6E1D3] rounded-[24px] shadow-xs">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-1">
-            <div className="flex flex-wrap items-center gap-2">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-[#2C3A2B]/10 text-[#2C3A2B] border border-[#2C3A2B]/20">
-                <Sparkles className="w-3.5 h-3.5 text-[#2C3A2B]" />
-                <span>Dynamic Bundle Recommendation Engine</span>
-              </div>
-
-              {/* Live Backend Connection Indicator */}
-              <div
-                className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-semibold transition-all ${
-                  isBackendLoading
-                    ? 'bg-amber-50 text-amber-800 border border-amber-200'
-                    : backendStatus === 'connected'
-                    ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
-                    : 'bg-stone-100 text-stone-700 border border-stone-200'
-                }`}
-                title={
-                  backendStatus === 'connected'
-                    ? `Connected to backend endpoint POST /api/bundles/filter (${backendLatency}ms)`
-                    : 'Backend offline - using local computation engine'
-                }
-              >
-                <Server className="w-3 h-3" />
-                {isBackendLoading ? (
-                  <>
-                    <Loader2 className="w-3 h-3 animate-spin text-amber-600" />
-                    <span>Filtering via Backend...</span>
-                  </>
-                ) : backendStatus === 'connected' ? (
-                  <>
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                    <span>Backend Filter Connected ({backendLatency ?? 12}ms)</span>
-                  </>
-                ) : (
-                  <span>Local Calculation Mode</span>
-                )}
-              </div>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-[#2C3A2B]/10 text-[#2C3A2B] border border-[#2C3A2B]/20">
+              <Sparkles className="w-3.5 h-3.5 text-[#2C3A2B]" />
+              <span>Dynamic Bundle Recommendation Engine</span>
             </div>
-
             <h2 className="text-xl sm:text-2xl font-serif font-bold text-[#2C3A2B] tracking-tight">
               Dynamic Product Bundle Recommendations
             </h2>
             <p className="text-xs sm:text-sm text-[#5A5A40] leading-relaxed max-w-3xl">
-              Specify your required products, quantities, colours, categories, or budget to receive up to 20 distinct, validated,
-              and compatible bundle options generated dynamically from the official C07 catalogue backend.
+              Specify your required products, quantities, or budget to receive up to 20 distinct, validated,
+              and compatible bundle options generated dynamically from the official C07 catalogue.
             </p>
           </div>
 
@@ -653,159 +445,6 @@ export const BundleRecommendationsSection: React.FC<BundleRecommendationsSection
             </div>
           </div>
         )}
-
-        {/* Specific Bundle Details Filter Toolbar */}
-        <div className="pt-3 border-t border-[#E6E1D3]/80 space-y-3">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
-            <span className="text-[11px] font-bold text-[#8B5A2B] uppercase tracking-wider flex items-center gap-1.5">
-              <Filter className="w-3.5 h-3.5 text-[#8B5A2B]" />
-              Filter Bundles by Specific Details (Backend Filtered):
-            </span>
-
-            {hasSpecificDetailFilters && (
-              <button
-                onClick={() => {
-                  setBundleCategory('all');
-                  setBundleColour('all');
-                  setBundleSearch('');
-                  setBundleSort('price_asc');
-                  setBudgetConstraint(null);
-                  setExactOnly(false);
-                }}
-                className="inline-flex items-center gap-1 text-[11px] font-semibold text-rose-700 hover:text-rose-900 transition-colors cursor-pointer"
-              >
-                <X className="w-3 h-3" />
-                <span>Reset Filters</span>
-              </button>
-            )}
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            {/* Search Input */}
-            <div className="relative">
-              <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />
-              <input
-                type="text"
-                placeholder="Search bundle name or item..."
-                value={bundleSearch}
-                onChange={e => setBundleSearch(e.target.value)}
-                className="w-full pl-8 pr-3 py-1.5 text-xs font-medium text-[#2C2C1E] bg-[#FDFBF7] border border-[#E6E1D3] rounded-xl focus:outline-hidden focus:border-[#2C3A2B]"
-              />
-              {bundleSearch && (
-                <button
-                  onClick={() => setBundleSearch('')}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 cursor-pointer"
-                >
-                  <X className="w-3 h-3" />
-                </button>
-              )}
-            </div>
-
-            {/* Category Filter */}
-            <div>
-              <select
-                value={bundleCategory}
-                onChange={e => setBundleCategory(e.target.value)}
-                className="w-full px-3 py-1.5 text-xs font-medium text-[#2C2C1E] bg-[#FDFBF7] border border-[#E6E1D3] rounded-xl focus:outline-hidden focus:border-[#2C3A2B] cursor-pointer"
-              >
-                <option value="all">All Categories</option>
-                {availableCategories.map(cat => (
-                  <option key={cat} value={cat}>
-                    Category: {cat}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Colour Filter */}
-            <div>
-              <select
-                value={bundleColour}
-                onChange={e => setBundleColour(e.target.value)}
-                className="w-full px-3 py-1.5 text-xs font-medium text-[#2C2C1E] bg-[#FDFBF7] border border-[#E6E1D3] rounded-xl focus:outline-hidden focus:border-[#2C3A2B] cursor-pointer"
-              >
-                <option value="all">All Colours</option>
-                {availableColours.map(col => (
-                  <option key={col} value={col}>
-                    Colour: {col}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Sort Order */}
-            <div>
-              <select
-                value={bundleSort}
-                onChange={e => setBundleSort(e.target.value as any)}
-                className="w-full px-3 py-1.5 text-xs font-medium text-[#2C2C1E] bg-[#FDFBF7] border border-[#E6E1D3] rounded-xl focus:outline-hidden focus:border-[#2C3A2B] cursor-pointer"
-              >
-                <option value="price_asc">Price: Low to High</option>
-                <option value="price_desc">Price: High to Low</option>
-                <option value="items_asc">Fewest Items First</option>
-                <option value="items_desc">Most Items First</option>
-              </select>
-            </div>
-          </div>
-
-          {/* Active Specific Filter Badges */}
-          {(bundleCategory !== 'all' || bundleColour !== 'all' || bundleSearch.trim() || budgetConstraint || exactOnly) && (
-            <div className="flex flex-wrap items-center gap-1.5 pt-1">
-              <span className="text-[10px] font-bold text-[#8B5A2B] uppercase tracking-wider mr-1">
-                Active Detail Filters:
-              </span>
-
-              {bundleSearch.trim() && (
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-emerald-50 text-emerald-800 border border-emerald-200">
-                  Search: "{bundleSearch.trim()}"
-                  <button onClick={() => setBundleSearch('')} className="hover:text-emerald-950 cursor-pointer">
-                    <X className="w-3 h-3" />
-                  </button>
-                </span>
-              )}
-
-              {bundleCategory !== 'all' && (
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-amber-50 text-amber-900 border border-amber-200">
-                  Category: {bundleCategory}
-                  <button onClick={() => setBundleCategory('all')} className="hover:text-amber-950 cursor-pointer">
-                    <X className="w-3 h-3" />
-                  </button>
-                </span>
-              )}
-
-              {bundleColour !== 'all' && (
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-stone-100 text-[#2C2C1E] border border-stone-300">
-                  <span
-                    className="w-2.5 h-2.5 rounded-full border border-stone-300"
-                    style={{ backgroundColor: getColourHex(bundleColour) }}
-                  ></span>
-                  Colour: {bundleColour}
-                  <button onClick={() => setBundleColour('all')} className="hover:text-black cursor-pointer">
-                    <X className="w-3 h-3" />
-                  </button>
-                </span>
-              )}
-
-              {budgetConstraint && (
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-indigo-50 text-indigo-800 border border-indigo-200 font-mono">
-                  Budget ≤ {formatINR(budgetConstraint)}
-                  <button onClick={() => setBudgetConstraint(null)} className="hover:text-indigo-950 cursor-pointer">
-                    <X className="w-3 h-3" />
-                  </button>
-                </span>
-              )}
-
-              {exactOnly && (
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-purple-50 text-purple-800 border border-purple-200">
-                  Exact Items Only
-                  <button onClick={() => setExactOnly(false)} className="hover:text-purple-950 cursor-pointer">
-                    <X className="w-3 h-3" />
-                  </button>
-                </span>
-              )}
-            </div>
-          )}
-        </div>
       </div>
 
       {/* ========================================================================= */}
@@ -1066,36 +705,6 @@ export const BundleRecommendationsSection: React.FC<BundleRecommendationsSection
               </div>
             );
           })}
-        </div>
-      )}
-
-      {/* Empty State when zero bundles match active filters */}
-      {bundles.length === 0 && !hasUnavailableProduct && !isOverBudgetForAll && (
-        <div className="p-8 text-center bg-white border border-[#E6E1D3] rounded-[24px] shadow-xs space-y-3">
-          <div className="w-12 h-12 mx-auto rounded-full bg-[#F4F1EA] flex items-center justify-center text-[#5A5A40]">
-            <Package className="w-6 h-6" />
-          </div>
-          <h3 className="font-serif text-base font-bold text-[#2C3A2B]">
-            No bundles match your specific details
-          </h3>
-          <p className="text-xs text-[#5A5A40] max-w-md mx-auto">
-            We couldn't find any bundle combinations matching your exact category, colour, or search filters.
-            Try clearing some filters or loosening requirements.
-          </p>
-          <button
-            onClick={() => {
-              setBundleCategory('all');
-              setBundleColour('all');
-              setBundleSearch('');
-              setBundleSort('price_asc');
-              setBudgetConstraint(null);
-              setExactOnly(false);
-            }}
-            className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-[#2C3A2B] hover:bg-[#3A4D39] rounded-xl transition-all shadow-xs cursor-pointer"
-          >
-            <RotateCcw className="w-3.5 h-3.5" />
-            <span>Reset Detail Filters</span>
-          </button>
         </div>
       )}
     </div>
