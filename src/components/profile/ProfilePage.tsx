@@ -112,14 +112,14 @@ export const ProfilePage: React.FC = () => {
 
         <div className="relative flex flex-col sm:flex-row items-center sm:items-start gap-6 text-center sm:text-left">
           {/* Avatar with Custom Color / Initials */}
-          <div className="relative group">
+          <div className="relative group cursor-pointer">
             <div
-              className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl flex items-center justify-center font-serif text-3xl sm:text-4xl font-bold tracking-tight shadow-lg ring-4 ring-white transition-transform duration-300 group-hover:scale-105"
+              className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl flex items-center justify-center font-serif text-3xl sm:text-4xl font-bold tracking-tight shadow-xl ring-4 ring-white transition-all duration-300 group-hover:scale-115 group-hover:rotate-3 group-hover:shadow-2xl group-hover:ring-[#8B5A2B]/40"
               style={{ backgroundColor: formData.avatarColor, color: '#FFFFFF' }}
             >
               {getInitials(formData.name)}
             </div>
-            <div className="absolute -bottom-2 -right-2 bg-white rounded-full p-1.5 shadow-md border border-[#E6E1D3]">
+            <div className="absolute -bottom-2 -right-2 bg-white rounded-full p-1.5 shadow-lg border border-[#E6E1D3] transition-transform duration-300 group-hover:scale-125 group-hover:rotate-12">
               <ShieldCheck className="w-5 h-5 text-emerald-600" />
             </div>
           </div>
@@ -130,10 +130,10 @@ export const ProfilePage: React.FC = () => {
               <h1 className="text-2xl sm:text-3xl font-serif font-bold text-[#2C3A2B] tracking-tight">
                 {formData.name || 'Your Name'}
               </h1>
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wider bg-[#8B5A2B]/10 text-[#8B5A2B] border border-[#8B5A2B]/20">
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wider bg-[#8B5A2B]/10 text-[#8B5A2B] border border-[#8B5A2B]/20 transition-transform duration-200 hover:scale-110">
                 {userRole ? `${userRole} mode` : 'Guest Session'}
               </span>
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-mono font-medium bg-[#F4F1EA] text-[#5A5A40] border border-[#E6E1D3]">
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-mono font-medium bg-[#F4F1EA] text-[#5A5A40] border border-[#E6E1D3] transition-transform duration-200 hover:scale-110">
                 Member since {formData.memberSince || '2024'}
               </span>
             </div>
@@ -148,15 +148,15 @@ export const ProfilePage: React.FC = () => {
 
             {/* Quick Metrics Bar */}
             <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 pt-3 border-t border-[#E6E1D3]/80 text-xs">
-              <div className="flex items-center gap-1.5 text-[#5A5A40]">
+              <div className="flex items-center gap-1.5 text-[#5A5A40] transition-transform duration-200 hover:scale-105">
                 <Mail className="w-3.5 h-3.5 text-[#8B8B7A]" />
                 <span className="font-mono">{formData.email}</span>
               </div>
-              <div className="flex items-center gap-1.5 text-[#5A5A40]">
+              <div className="flex items-center gap-1.5 text-[#5A5A40] transition-transform duration-200 hover:scale-105">
                 <MapPin className="w-3.5 h-3.5 text-[#8B8B7A]" />
                 <span>{formData.city}, {formData.country}</span>
               </div>
-              <div className="flex items-center gap-1.5 text-[#5A5A40]">
+              <div className="flex items-center gap-1.5 text-[#5A5A40] transition-transform duration-200 hover:scale-105">
                 <Briefcase className="w-3.5 h-3.5 text-[#8B8B7A]" />
                 <span>{savedBundles.length} Saved Bundles</span>
               </div>
@@ -171,15 +171,15 @@ export const ProfilePage: React.FC = () => {
             <button
               type="button"
               onClick={() => handleLoadPreset('vaishnavi')}
-              className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-[#2C3A2B] text-white hover:bg-[#3A4D39] transition-all cursor-pointer shadow-xs flex items-center justify-center gap-1.5"
+              className="px-3.5 py-2 rounded-xl text-xs font-semibold bg-[#2C3A2B] text-white hover:bg-[#3A4D39] transition-all duration-300 hover:scale-108 hover:-translate-y-1 cursor-pointer shadow-sm hover:shadow-lg flex items-center justify-center gap-1.5 group/btn"
             >
-              <Sparkles className="w-3.5 h-3.5 text-amber-200" />
+              <Sparkles className="w-3.5 h-3.5 text-amber-200 group-hover/btn:rotate-45 transition-transform" />
               <span>Vaishnavi Goud</span>
             </button>
             <button
               type="button"
               onClick={() => handleLoadPreset('tanmay')}
-              className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-[#F4F1EA] text-[#2C3A2B] hover:bg-[#EAE5D9] transition-all cursor-pointer border border-[#E6E1D3] flex items-center justify-center gap-1.5"
+              className="px-3.5 py-2 rounded-xl text-xs font-semibold bg-[#F4F1EA] text-[#2C3A2B] hover:bg-[#EAE5D9] transition-all duration-300 hover:scale-108 hover:-translate-y-1 cursor-pointer border border-[#E6E1D3] hover:border-[#8B5A2B]/60 shadow-2xs hover:shadow-md flex items-center justify-center gap-1.5"
             >
               <span>Tanmay Anand</span>
             </button>
@@ -192,10 +192,10 @@ export const ProfilePage: React.FC = () => {
         <button
           type="button"
           onClick={() => setActiveSubTab('details')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer hover:scale-105 hover:-translate-y-0.5 ${
             activeSubTab === 'details'
-              ? 'bg-[#2C3A2B] text-white shadow-xs'
-              : 'text-[#5A5A40] hover:bg-[#F4F1EA] hover:text-[#2C3A2B]'
+              ? 'bg-[#2C3A2B] text-white shadow-md'
+              : 'text-[#5A5A40] hover:bg-[#F4F1EA] hover:text-[#2C3A2B] hover:shadow-xs'
           }`}
         >
           <User className="w-4 h-4" />
@@ -205,10 +205,10 @@ export const ProfilePage: React.FC = () => {
         <button
           type="button"
           onClick={() => setActiveSubTab('address')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer hover:scale-105 hover:-translate-y-0.5 ${
             activeSubTab === 'address'
-              ? 'bg-[#2C3A2B] text-white shadow-xs'
-              : 'text-[#5A5A40] hover:bg-[#F4F1EA] hover:text-[#2C3A2B]'
+              ? 'bg-[#2C3A2B] text-white shadow-md'
+              : 'text-[#5A5A40] hover:bg-[#F4F1EA] hover:text-[#2C3A2B] hover:shadow-xs'
           }`}
         >
           <MapPin className="w-4 h-4" />
@@ -218,10 +218,10 @@ export const ProfilePage: React.FC = () => {
         <button
           type="button"
           onClick={() => setActiveSubTab('preferences')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer hover:scale-105 hover:-translate-y-0.5 ${
             activeSubTab === 'preferences'
-              ? 'bg-[#2C3A2B] text-white shadow-xs'
-              : 'text-[#5A5A40] hover:bg-[#F4F1EA] hover:text-[#2C3A2B]'
+              ? 'bg-[#2C3A2B] text-white shadow-md'
+              : 'text-[#5A5A40] hover:bg-[#F4F1EA] hover:text-[#2C3A2B] hover:shadow-xs'
           }`}
         >
           <SlidersHorizontal className="w-4 h-4" />
