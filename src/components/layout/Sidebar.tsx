@@ -7,8 +7,7 @@ import {
   CheckCircle2,
   TrendingUp,
   FileCode2,
-  Settings,
-  Database
+  Settings
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 
@@ -27,9 +26,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     savedBundles,
     testResults,
     userRole,
-    logout,
-    isSupabaseConnected,
-    setIsSupabaseModalOpen
+    logout
   } = useApp();
 
   const navItems = userRole === 'admin'
@@ -210,38 +207,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           })}
 
         </nav>
-
-        {/* Supabase Cloud Database Status Card */}
-        <div className="p-3 border-t border-[#E6E1D3] bg-white/40">
-          <button
-            onClick={() => {
-              setIsSupabaseModalOpen(true);
-              onClose();
-            }}
-            className={`w-full flex items-center justify-between p-2.5 rounded-xl border text-xs transition-colors cursor-pointer ${
-              isSupabaseConnected
-                ? 'bg-emerald-50/80 border-emerald-200 text-emerald-900 hover:bg-emerald-100/80'
-                : 'bg-[#F4F1EA] border-[#E6E1D3] text-[#5A5A40] hover:bg-[#EAE5D9]'
-            }`}
-          >
-            <div className="flex items-center gap-2">
-              <Database className={`w-4 h-4 ${isSupabaseConnected ? 'text-emerald-700' : 'text-[#8B5A2B]'}`} />
-              <div className="text-left">
-                <div className="font-semibold text-xs leading-tight text-[#2C3A2B]">
-                  {isSupabaseConnected ? 'Supabase Connected' : 'Supabase Cloud DB'}
-                </div>
-                <div className="text-[10px] text-[#8B8B7A]">
-                  {isSupabaseConnected ? 'Live sync enabled' : 'Click to connect & sync'}
-                </div>
-              </div>
-            </div>
-            <span
-              className={`w-2 h-2 rounded-full ${
-                isSupabaseConnected ? 'bg-emerald-500 shadow-xs' : 'bg-amber-400'
-              }`}
-            />
-          </button>
-        </div>
       </aside>
     </>
   );
