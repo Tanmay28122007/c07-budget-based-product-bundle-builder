@@ -16,10 +16,7 @@ import {
   FileJson,
   FileSpreadsheet,
   Check,
-  ArrowRight,
-  Trash2,
-  Plus,
-  CreditCard
+  ArrowRight
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { RequiredSlot } from '../../types';
@@ -40,9 +37,7 @@ export const BundleBuilderPage: React.FC = () => {
     saveCurrentBundle,
     optimizeBundle,
     setActiveTab,
-    toggleAssistant,
-    setIsCartOpen,
-    initiateCheckout
+    toggleAssistant
   } = useApp();
 
   const [activeSlotForSelection, setActiveSlotForSelection] = useState<RequiredSlot | null>(null);
@@ -52,6 +47,10 @@ export const BundleBuilderPage: React.FC = () => {
   const [bundleNotesInput, setBundleNotesInput] = useState('');
   const [optimizerPreference, setOptimizerPreference] = useState<'lowest_cost' | 'best_value'>('lowest_cost');
   const [optimizationFeedback, setOptimizationFeedback] = useState<string | null>(null);
+
+  const budgetPresets = fixture.activity.defaultBudget <= 10000 
+    ? [1000, 1999, 2000, 2200, 3000]
+    : [35000, 55000, 75000, 95000, 120000];
 
   const handleRunOptimizer = () => {
     const res = optimizeBundle(optimizerPreference);
@@ -180,18 +179,37 @@ export const BundleBuilderPage: React.FC = () => {
           Total Budget (₹)
         </span>
 
-        <div className="relative w-full sm:w-1/4 min-w-[200px]">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8B8B7A] font-mono text-xs">
-            ₹
-          </span>
-          <input
-            type="number"
-            min="0"
-            step="1000"
-            value={budget}
-            onChange={e => setBudget(Number(e.target.value))}
-            className="w-full pl-7 pr-3 py-2 text-sm font-mono font-bold text-[#2C3A2B] bg-[#F4F1EA]/70 focus:bg-white border border-[#E6E1D3] rounded-xl focus:outline-hidden focus:border-[#2C3A2B] transition-all"
-          />
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+          <div className="relative flex-1">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8B8B7A] font-mono text-xs">
+              ₹
+            </span>
+            <input
+              type="number"
+              min="0"
+              step="1000"
+              value={budget}
+              onChange={e => setBudget(Number(e.target.value))}
+              className="w-full pl-7 pr-3 py-1.5 text-sm font-mono font-bold text-[#2C3A2B] bg-[#F4F1EA]/70 focus:bg-white border border-[#E6E1D3] rounded-xl focus:outline-hidden focus:border-[#2C3A2B] transition-all"
+            />
+          </div>
+
+          {/* Presets */}
+          <div className="flex items-center gap-1.5 overflow-x-auto py-1">
+            {budgetPresets.map(preset => (
+              <button
+                key={preset}
+                onClick={() => setBudget(preset)}
+                className={`px-3 py-1.5 text-[11px] font-mono rounded-lg border transition-all shrink-0 cursor-pointer hover:scale-110 active:scale-95 ${
+                  budget === preset
+                    ? 'bg-[#2C3A2B] text-white border-[#2C3A2B] font-semibold shadow-xs'
+                    : 'bg-[#F4F1EA] hover:bg-[#E6E1D3] text-[#5A5A40] border-[#E6E1D3] hover:shadow-xs'
+                }`}
+              >
+                ₹{(preset / 1000).toFixed(0)}k
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -298,108 +316,6 @@ export const BundleBuilderPage: React.FC = () => {
                 availableCount={fixture.products.filter(p => p.category === slot.category).length}
               />
             ))}
-          </div>
-
-          {/* Additional Items in Bundle Cart */}
-          {Object.entries(currentItems).filter(
-            ([slotId, prod]) => prod !== null && !fixture.activity.requiredSlots.some(s => s.id === slotId)
-          ).length > 0 && (
-            <div className="space-y-3 pt-3 border-t border-[#E6E1D3]/80">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-mono font-bold uppercase tracking-wider text-[#8B5A2B] flex items-center gap-1.5">
-                  <PackageCheck className="w-4 h-4 text-[#8B5A2B]" />
-                  <span>
-                    Additional Bundle Items ({
-                      Object.entries(currentItems).filter(
-                        ([slotId, prod]) => prod !== null && !fixture.activity.requiredSlots.some(s => s.id === slotId)
-                      ).length
-                    })
-                  </span>
-                </span>
-                <span className="text-[11px] text-[#8B8B7A]">
-                  Active in bundle cart
-                </span>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {Object.entries(currentItems)
-                  .filter(([slotId, prod]) => prod !== null && !fixture.activity.requiredSlots.some(s => s.id === slotId))
-                  .map(([slotId, prod]) => {
-                    const prodImg = prod!.image ? prod!.image.replace('../assets/', '/assets/').replace('./assets/', '/assets/') : `/assets/${prod!.id}.png`;
-                    return (
-                      <div
-                        key={slotId}
-                        className="p-4 rounded-2xl bg-white border border-[#E6E1D3] shadow-xs hover:border-[#2C3A2B]/40 hover:shadow-md transition-all flex items-center justify-between gap-3 group"
-                      >
-                        <div className="flex items-center gap-3 min-w-0">
-                          <div className="w-14 h-14 rounded-xl bg-[#F5F5EC] border border-[#E6E1D3] p-1 flex items-center justify-center shrink-0 overflow-hidden">
-                            <img
-                              src={prodImg}
-                              alt={prod!.name}
-                              className="w-full h-full object-contain mix-blend-multiply group-hover:scale-105 transition-transform"
-                            />
-                          </div>
-                          <div className="min-w-0">
-                            <span className="text-[10px] font-mono uppercase font-bold tracking-wider text-[#8B5A2B] bg-[#F4F1EA] px-2 py-0.5 rounded border border-[#E6E1D3]">
-                              {prod!.category}
-                            </span>
-                            <h4 className="font-serif font-bold text-sm text-[#2C3A2B] truncate mt-1">
-                              {prod!.name}
-                            </h4>
-                            <span className="font-mono font-bold text-xs text-[#2C3A2B] block mt-0.5">
-                              {formatINR(prod!.price)}
-                            </span>
-                          </div>
-                        </div>
-
-                        <button
-                          type="button"
-                          onClick={() => removeProduct(slotId)}
-                          className="p-2 text-[#8B8B7A] hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors cursor-pointer shrink-0"
-                          title="Remove item from bundle cart"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    );
-                  })}
-              </div>
-            </div>
-          )}
-
-          {/* Add More Items to Bundle Cart Card */}
-          <div className="p-4 sm:p-5 rounded-2xl border-2 border-dashed border-[#D6CFBF] bg-[#FDFBF7]/80 hover:bg-[#F4F1EA] hover:border-[#8B5A2B] transition-all flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-3.5">
-              <div className="w-11 h-11 rounded-2xl bg-white border border-[#E6E1D3] text-[#8B5A2B] flex items-center justify-center shadow-xs shrink-0">
-                <PackagePlus className="w-5 h-5" />
-              </div>
-              <div>
-                <h4 className="font-serif font-bold text-sm sm:text-base text-[#2C3A2B]">
-                  Add More Items to Your Bundle Cart
-                </h4>
-                <p className="text-xs text-[#5A5A40] mt-0.5">
-                  Pair extra notebooks, water bottles, backpacks, mugs, or accessories into your active order.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2 self-stretch sm:self-auto">
-              <button
-                type="button"
-                onClick={() => setIsCartOpen(true)}
-                className="flex-1 sm:flex-initial px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider text-white bg-[#2C3A2B] hover:bg-[#1E281D] shadow-xs hover:shadow-md transition-all cursor-pointer flex items-center justify-center gap-1.5"
-              >
-                <Plus className="w-4 h-4" />
-                <span>Quick Add in Cart</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveTab('catalogue')}
-                className="flex-1 sm:flex-initial px-3.5 py-2.5 rounded-xl text-xs font-semibold text-[#2C3A2B] bg-white hover:bg-[#F4F1EA] border border-[#E6E1D3] shadow-2xs transition-colors cursor-pointer text-center"
-              >
-                Catalogue
-              </button>
-            </div>
           </div>
         </div>
 
@@ -587,16 +503,21 @@ export const BundleBuilderPage: React.FC = () => {
 
 
 
-            {/* BUY NOW Button */}
-            <div className="pt-2">
+            {/* Export Buttons */}
+            <div className="pt-2 flex items-center gap-2">
               <button
-                onClick={() => initiateCheckout()}
-                disabled={Object.values(currentItems).filter(Boolean).length === 0}
-                className="w-full py-3 px-4 rounded-xl text-xs font-bold uppercase tracking-wider text-white bg-[#2C3A2B] hover:bg-[#1E281D] shadow-md hover:shadow-lg flex items-center justify-center gap-2 transition-all cursor-pointer hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                onClick={handleExportCSV}
+                className="flex-1 py-1.5 px-2 text-xs font-medium text-[#2C2C1E] hover:bg-[#F4F1EA] border border-[#E6E1D3] rounded-xl flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
               >
-                <CreditCard className="w-4 h-4 text-amber-300" />
-                <span>BUY NOW — {formatINR(validation.landedPrice.landedPrice)}</span>
-                <ArrowRight className="w-4 h-4 ml-0.5" />
+                <FileSpreadsheet className="w-3.5 h-3.5 text-[#8B8B7A]" />
+                Export CSV
+              </button>
+              <button
+                onClick={handleExportJSON}
+                className="flex-1 py-1.5 px-2 text-xs font-medium text-[#2C2C1E] hover:bg-[#F4F1EA] border border-[#E6E1D3] rounded-xl flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+              >
+                <FileJson className="w-3.5 h-3.5 text-[#8B8B7A]" />
+                Export JSON
               </button>
             </div>
           </div>

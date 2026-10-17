@@ -8,8 +8,7 @@ import {
   TrendingUp,
   FileCode2,
   Settings,
-  ShoppingCart,
-  User
+  ShoppingCart
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 
@@ -98,13 +97,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           id: 'cart',
           label: 'Bundle Cart',
           icon: ShoppingCart,
-          badge: cartItemsCount > 0 ? `${cartItemsCount}` : '2'
-        },
-        {
-          id: 'profile',
-          label: 'My Profile',
-          icon: User,
-          badge: 'Edit'
+          badge: cartItemsCount > 0 ? `${cartItemsCount}` : null
         }
       ]
     : [

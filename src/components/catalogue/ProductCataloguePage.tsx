@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   Search,
   Filter,
@@ -15,15 +15,11 @@ import {
   RotateCcw,
   Trash2,
   ChevronRight,
-  Info,
-  SlidersHorizontal,
-  Sparkles,
-  Loader2
+  Info
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { Product } from '../../types';
 import { formatINR } from '../../utils/pricing';
-import { fetchFilteredProducts, ProductApiResponse } from '../../services/apiClient';
 
 function getProductImageUrl(img?: string, id?: string): string {
   if (!img) return id ? `/assets/${id}.png` : '';
@@ -44,10 +40,6 @@ function getColourHex(colour?: string): string {
   if (c.includes('black')) return '#1E293B';
   if (c.includes('grey') || c.includes('gray')) return '#64748B';
   if (c.includes('green')) return '#16A34A';
-  if (c.includes('brown')) return '#8B5A2B';
-  if (c.includes('silver')) return '#94A3B8';
-  if (c.includes('khaki') || c.includes('tan')) return '#C3B091';
-  if (c.includes('white')) return '#FFFFFF';
   return '#9CA3AF';
 }
 
@@ -57,7 +49,6 @@ export const ProductCataloguePage: React.FC = () => {
     isCustomFixture,
     currentItems,
     selectProduct,
-    addItemToCart,
     removeProduct,
     setActiveTab,
     openProductDetails,
@@ -66,86 +57,27 @@ export const ProductCataloguePage: React.FC = () => {
     setIsCartOpen
   } = useApp();
 
-  // Specific user detail filters
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [selectedColour, setSelectedColour] = useState<string>('all');
-  const [selectedSize, setSelectedSize] = useState<string>('all');
   const [selectedStockStatus, setSelectedStockStatus] = useState<string>('all');
-  const [minPrice, setMinPrice] = useState<string>('');
-  const [maxPrice, setMaxPrice] = useState<string>('');
   const [sortField, setSortField] = useState<'price_asc' | 'price_desc' | 'name' | 'id'>('price_asc');
   const [imgErrors, setImgErrors] = useState<Record<string, boolean>>({});
 
-  // Backend connection state
-  const [backendProducts, setBackendProducts] = useState<Product[] | null>(null);
-  const [isBackendLoading, setIsBackendLoading] = useState<boolean>(false);
-  const [backendStatus, setBackendStatus] = useState<'connected' | 'offline'>('connected');
-  const [backendLatency, setBackendLatency] = useState<number | null>(null);
-
-  // Extract unique categories, colours, and sizes from fixture products
+  // Extract unique categories from fixture products
   const categories = useMemo(() => {
-    return Array.from(new Set(fixture.products.map(p => p.category)));
+    const set = new Set(fixture.products.map(p => p.category));
+    return Array.from(set);
   }, [fixture.products]);
 
-  const colours = useMemo(() => {
-    return Array.from(new Set(fixture.products.map(p => p.colour).filter(Boolean))) as string[];
-  }, [fixture.products]);
-
-  const sizes = useMemo(() => {
-    return Array.from(new Set(fixture.products.map(p => p.size).filter(Boolean))) as string[];
-  }, [fixture.products]);
-
-  // Connect to backend API to filter products based on specific user details
-  useEffect(() => {
-    let isMounted = true;
-    const timer = setTimeout(async () => {
-      try {
-        setIsBackendLoading(true);
-        const startTime = performance.now();
-        const res = await fetchFilteredProducts({
-          search: searchQuery,
-          category: selectedCategory,
-          colour: selectedColour,
-          size: selectedSize,
-          inStock: selectedStockStatus,
-          minPrice: minPrice ? Number(minPrice) : undefined,
-          maxPrice: maxPrice ? Number(maxPrice) : undefined,
-          sort: sortField
-        });
-
-        if (isMounted && res.success) {
-          setBackendProducts(res.products);
-          setBackendLatency(Math.round(performance.now() - startTime));
-          setBackendStatus('connected');
-          setIsBackendLoading(false);
-        }
-      } catch (err) {
-        console.warn('Backend product filter failed, falling back to local memory:', err);
-        if (isMounted) {
-          setBackendProducts(null);
-          setBackendStatus('offline');
-          setIsBackendLoading(false);
-        }
-      }
-    }, 120);
-
-    return () => {
-      isMounted = false;
-      clearTimeout(timer);
-    };
-  }, [selectedCategory, selectedColour, selectedSize, selectedStockStatus, minPrice, maxPrice, searchQuery, sortField]);
-
-  // Local client fallback filtering
-  const localFilteredProducts = useMemo(() => {
+  // Filtering and sorting
+  const filteredProducts = useMemo(() => {
     return fixture.products
       .filter(p => {
+        // Category filter
         if (selectedCategory !== 'all' && p.category !== selectedCategory) return false;
-        if (selectedColour !== 'all' && p.colour !== selectedColour) return false;
-        if (selectedSize !== 'all' && p.size !== selectedSize) return false;
+        // Stock filter
         if (selectedStockStatus === 'in_stock' && !p.inStock) return false;
         if (selectedStockStatus === 'out_of_stock' && p.inStock) return false;
-        if (minPrice && p.price < Number(minPrice)) return false;
-        if (maxPrice && p.price > Number(maxPrice)) return false;
+        // Search term (using single top navigation search bar)
         if (!searchQuery) return true;
         const q = searchQuery.toLowerCase().trim();
         return (
@@ -153,8 +85,6 @@ export const ProductCataloguePage: React.FC = () => {
           p.id.toLowerCase().includes(q) ||
           p.brand.toLowerCase().includes(q) ||
           p.category.toLowerCase().includes(q) ||
-          (p.colour && p.colour.toLowerCase().includes(q)) ||
-          (p.size && p.size.toLowerCase().includes(q)) ||
           p.description.toLowerCase().includes(q)
         );
       })
@@ -164,30 +94,14 @@ export const ProductCataloguePage: React.FC = () => {
         if (sortField === 'name') return a.name.localeCompare(b.name);
         return a.id.localeCompare(b.id);
       });
-  }, [fixture.products, selectedCategory, selectedColour, selectedSize, selectedStockStatus, minPrice, maxPrice, searchQuery, sortField]);
-
-  // Products to display: prioritize backend filtered results, fallback to local
-  const filteredProducts = backendProducts !== null ? backendProducts : localFilteredProducts;
+  }, [fixture.products, selectedCategory, selectedStockStatus, searchQuery, sortField]);
 
   const handleResetFilters = () => {
     setSearchQuery('');
     setSelectedCategory('all');
-    setSelectedColour('all');
-    setSelectedSize('all');
     setSelectedStockStatus('all');
-    setMinPrice('');
-    setMaxPrice('');
     setSortField('price_asc');
   };
-
-  const hasActiveFilters =
-    selectedCategory !== 'all' ||
-    selectedColour !== 'all' ||
-    selectedSize !== 'all' ||
-    selectedStockStatus !== 'all' ||
-    minPrice !== '' ||
-    maxPrice !== '' ||
-    Boolean(searchQuery);
 
   return (
     <div className="space-y-6">
@@ -200,7 +114,7 @@ export const ProductCataloguePage: React.FC = () => {
             </h1>
             {!isCustomFixture && (
               <span className="text-[11px] font-mono px-2.5 py-0.5 rounded-full bg-[#F5F5EC] text-[#5A5A40] border border-[#E6E1D3]">
-                Benchmark Inventory
+                Synthetic Preview Data
               </span>
             )}
           </div>
@@ -210,198 +124,73 @@ export const ProductCataloguePage: React.FC = () => {
         </div>
       </div>
 
-      {/* Specific Details Filtering Panel */}
-      <div className="p-5 bg-white border border-[#E6E1D3] rounded-[24px] shadow-xs space-y-4">
-        <div className="flex items-center justify-between border-b border-[#E6E1D3]/70 pb-3">
-          <div className="flex items-center gap-2">
-            <SlidersHorizontal className="w-4 h-4 text-[#8B5A2B]" />
-            <span className="text-xs font-bold text-[#2C3A2B] uppercase tracking-wider">
-              Filter by Specific Details
-            </span>
-          </div>
+      {/* Filters Strip (Single clean row without redundant second search bar) */}
+      <div className="p-4 bg-white border border-[#E6E1D3] rounded-[24px] shadow-xs">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-3">
+            {/* Category Filter */}
+            <div className="flex items-center gap-1.5">
+              <span className="text-[11px] text-[#5A5A40] font-medium">Category:</span>
+              <select
+                value={selectedCategory}
+                onChange={e => setSelectedCategory(e.target.value)}
+                className="text-xs bg-[#FDFBF7] border border-[#E6E1D3] rounded-xl px-3 py-2 text-[#2C3A2B] focus:outline-hidden"
+              >
+                <option value="all">All Categories ({fixture.products.length})</option>
+                {categories.map(cat => (
+                  <option key={cat} value={cat}>
+                    {cat.replace(/_/g, ' ')}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-          {hasActiveFilters && (
-            <button
-              onClick={handleResetFilters}
-              className="text-xs font-semibold text-rose-600 hover:text-rose-700 flex items-center gap-1 transition-colors cursor-pointer"
-            >
-              <RotateCcw className="w-3 h-3" />
-              <span>Clear All</span>
-            </button>
-          )}
-        </div>
+            {/* Stock Filter */}
+            <div className="flex items-center gap-1.5">
+              <span className="text-[11px] text-[#5A5A40] font-medium">Availability:</span>
+              <select
+                value={selectedStockStatus}
+                onChange={e => setSelectedStockStatus(e.target.value)}
+                className="text-xs bg-[#FDFBF7] border border-[#E6E1D3] rounded-xl px-3 py-2 text-[#2C3A2B] focus:outline-hidden"
+              >
+                <option value="all">All Items</option>
+                <option value="in_stock">In Stock Only</option>
+                <option value="out_of_stock">Out of Stock Only</option>
+              </select>
+            </div>
 
-        {/* Filter Controls Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 text-xs">
-          {/* 1. Category */}
-          <div className="space-y-1">
-            <label className="text-[11px] font-semibold text-[#5A5A40]">Category</label>
-            <select
-              value={selectedCategory}
-              onChange={e => setSelectedCategory(e.target.value)}
-              className="w-full bg-[#FDFBF7] border border-[#E6E1D3] rounded-xl px-2.5 py-1.5 text-xs text-[#2C3A2B] focus:outline-none focus:border-[#2C3A2B]"
-            >
-              <option value="all">All Categories</option>
-              {categories.map(cat => (
-                <option key={cat} value={cat}>
-                  {cat.replace(/_/g, ' ')}
-                </option>
-              ))}
-            </select>
-          </div>
+            {/* Sort */}
+            <div className="flex items-center gap-1.5">
+              <span className="text-[11px] text-[#5A5A40] font-medium">Sort:</span>
+              <select
+                value={sortField}
+                onChange={e => setSortField(e.target.value as any)}
+                className="text-xs bg-[#FDFBF7] border border-[#E6E1D3] rounded-xl px-3 py-2 text-[#2C3A2B] focus:outline-hidden"
+              >
+                <option value="price_asc">Price: Low to High</option>
+                <option value="price_desc">Price: High to Low</option>
+                <option value="name">Name (A-Z)</option>
+                <option value="id">Product ID</option>
+              </select>
+            </div>
 
-          {/* 2. Colour Specific Detail */}
-          <div className="space-y-1">
-            <label className="text-[11px] font-semibold text-[#5A5A40]">Colour</label>
-            <select
-              value={selectedColour}
-              onChange={e => setSelectedColour(e.target.value)}
-              className="w-full bg-[#FDFBF7] border border-[#E6E1D3] rounded-xl px-2.5 py-1.5 text-xs text-[#2C3A2B] focus:outline-none focus:border-[#2C3A2B]"
-            >
-              <option value="all">All Colours</option>
-              {colours.map(col => (
-                <option key={col} value={col}>
-                  {col}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* 3. Size Specific Detail */}
-          <div className="space-y-1">
-            <label className="text-[11px] font-semibold text-[#5A5A40]">Size / Specs</label>
-            <select
-              value={selectedSize}
-              onChange={e => setSelectedSize(e.target.value)}
-              className="w-full bg-[#FDFBF7] border border-[#E6E1D3] rounded-xl px-2.5 py-1.5 text-xs text-[#2C3A2B] focus:outline-none focus:border-[#2C3A2B]"
-            >
-              <option value="all">All Sizes</option>
-              {sizes.map(sz => (
-                <option key={sz} value={sz}>
-                  {sz}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* 4. Min Price */}
-          <div className="space-y-1">
-            <label className="text-[11px] font-semibold text-[#5A5A40]">Min Price (₹)</label>
-            <input
-              type="number"
-              placeholder="Min ₹"
-              min="0"
-              step="100"
-              value={minPrice}
-              onChange={e => setMinPrice(e.target.value)}
-              className="w-full bg-[#FDFBF7] border border-[#E6E1D3] rounded-xl px-2.5 py-1.5 text-xs font-mono text-[#2C3A2B] focus:outline-none focus:border-[#2C3A2B]"
-            />
-          </div>
-
-          {/* 5. Max Price */}
-          <div className="space-y-1">
-            <label className="text-[11px] font-semibold text-[#5A5A40]">Max Price (₹)</label>
-            <input
-              type="number"
-              placeholder="Max ₹"
-              min="0"
-              step="100"
-              value={maxPrice}
-              onChange={e => setMaxPrice(e.target.value)}
-              className="w-full bg-[#FDFBF7] border border-[#E6E1D3] rounded-xl px-2.5 py-1.5 text-xs font-mono text-[#2C3A2B] focus:outline-none focus:border-[#2C3A2B]"
-            />
-          </div>
-
-          {/* 6. Stock Availability */}
-          <div className="space-y-1">
-            <label className="text-[11px] font-semibold text-[#5A5A40]">Stock Status</label>
-            <select
-              value={selectedStockStatus}
-              onChange={e => setSelectedStockStatus(e.target.value)}
-              className="w-full bg-[#FDFBF7] border border-[#E6E1D3] rounded-xl px-2.5 py-1.5 text-xs text-[#2C3A2B] focus:outline-none focus:border-[#2C3A2B]"
-            >
-              <option value="all">All Availability</option>
-              <option value="in_stock">In Stock Only</option>
-              <option value="out_of_stock">Out of Stock Only</option>
-            </select>
-          </div>
-        </div>
-
-        {/* Active Filter Badges Strip */}
-        {hasActiveFilters && (
-          <div className="pt-2 border-t border-[#E6E1D3]/60 flex flex-wrap items-center gap-2">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-[#8B8B7A]">
-              Active Filters:
-            </span>
-
-            {selectedCategory !== 'all' && (
-              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs bg-[#F4F1EA] text-[#2C3A2B] border border-[#E6E1D3]">
-                <span>Category: <strong>{selectedCategory}</strong></span>
-                <button onClick={() => setSelectedCategory('all')} className="hover:text-rose-600">
-                  <X className="w-3 h-3" />
-                </button>
-              </span>
-            )}
-
-            {selectedColour !== 'all' && (
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs bg-[#F4F1EA] text-[#2C3A2B] border border-[#E6E1D3]">
-                <span
-                  className="w-2.5 h-2.5 rounded-full border border-black/20"
-                  style={{ backgroundColor: getColourHex(selectedColour) }}
-                />
-                <span>Colour: <strong>{selectedColour}</strong></span>
-                <button onClick={() => setSelectedColour('all')} className="hover:text-rose-600">
-                  <X className="w-3 h-3" />
-                </button>
-              </span>
-            )}
-
-            {selectedSize !== 'all' && (
-              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs bg-[#F4F1EA] text-[#2C3A2B] border border-[#E6E1D3]">
-                <span>Size: <strong>{selectedSize}</strong></span>
-                <button onClick={() => setSelectedSize('all')} className="hover:text-rose-600">
-                  <X className="w-3 h-3" />
-                </button>
-              </span>
-            )}
-
-            {minPrice !== '' && (
-              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs bg-[#F4F1EA] text-[#2C3A2B] border border-[#E6E1D3]">
-                <span>Min: <strong>{formatINR(Number(minPrice))}</strong></span>
-                <button onClick={() => setMinPrice('')} className="hover:text-rose-600">
-                  <X className="w-3 h-3" />
-                </button>
-              </span>
-            )}
-
-            {maxPrice !== '' && (
-              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs bg-[#F4F1EA] text-[#2C3A2B] border border-[#E6E1D3]">
-                <span>Max: <strong>{formatINR(Number(maxPrice))}</strong></span>
-                <button onClick={() => setMaxPrice('')} className="hover:text-rose-600">
-                  <X className="w-3 h-3" />
-                </button>
-              </span>
-            )}
-
-            {selectedStockStatus !== 'all' && (
-              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs bg-[#F4F1EA] text-[#2C3A2B] border border-[#E6E1D3]">
-                <span>{selectedStockStatus === 'in_stock' ? 'In Stock Only' : 'Out of Stock Only'}</span>
-                <button onClick={() => setSelectedStockStatus('all')} className="hover:text-rose-600">
-                  <X className="w-3 h-3" />
-                </button>
-              </span>
-            )}
-
+            {/* Active search filter tag from top search bar */}
             {searchQuery && (
-              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs bg-[#F4F1EA] text-[#2C3A2B] border border-[#E6E1D3]">
-                <span>Keyword: <strong>"{searchQuery}"</strong></span>
-                <button onClick={() => setSearchQuery('')} className="hover:text-rose-600">
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-[#F4F1EA] text-[#2C3A2B] border border-[#E6E1D3] rounded-xl text-xs font-mono">
+                <span className="text-[#8B8B7A]">Search:</span>
+                <span className="font-semibold text-[#8B5A2B]">"{searchQuery}"</span>
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery('')}
+                  className="p-0.5 text-[#8B8B7A] hover:text-rose-600 transition-colors cursor-pointer"
+                  title="Clear search"
+                >
                   <X className="w-3 h-3" />
                 </button>
-              </span>
+              </div>
             )}
           </div>
-        )}
+        </div>
       </div>
 
       {/* Catalogue Content: Amazon-Style Vertical Listings */}
@@ -520,17 +309,9 @@ export const ProductCataloguePage: React.FC = () => {
                       <div className="space-y-2.5">
                         {/* Category Pill & Product ID */}
                         <div className="flex flex-wrap items-center gap-2">
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setSelectedCategory(p.category);
-                            }}
-                            className="font-mono text-[11px] uppercase font-bold tracking-wider px-2.5 py-0.5 rounded-full bg-[#F4F1EA] hover:bg-[#E8EEDD] text-[#8B5A2B] hover:text-[#2C3A2B] border border-[#E6E1D3] transition-colors cursor-pointer"
-                            title={`Filter catalogue to show only ${p.category}s`}
-                          >
+                          <span className="font-mono text-[11px] uppercase font-bold tracking-wider px-2.5 py-0.5 rounded-full bg-[#F4F1EA] text-[#8B5A2B] border border-[#E6E1D3]">
                             {p.category.replace(/_/g, ' ')}
-                          </button>
+                          </span>
                           <span className="font-mono text-xs font-semibold text-[#8B8B7A] px-2 py-0.5 rounded-md bg-[#FDFBF7] border border-[#E6E1D3]">
                             ID: {p.id}
                           </span>
@@ -708,7 +489,11 @@ export const ProductCataloguePage: React.FC = () => {
                           <button
                             disabled={!p.inStock}
                             onClick={() => {
-                              addItemToCart(p);
+                              const matchingSlot = fixture.activity.requiredSlots.find(
+                                s => s.id === p.category || s.category.toLowerCase() === p.category.toLowerCase()
+                              );
+                              const targetSlotId = matchingSlot ? matchingSlot.id : p.category;
+                              selectProduct(targetSlotId, p);
                               setIsCartOpen(true);
                             }}
                             className={`w-full py-2.5 px-3 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer ${
@@ -716,10 +501,10 @@ export const ProductCataloguePage: React.FC = () => {
                                 ? 'bg-[#2C3A2B] hover:bg-[#1E281D] text-white shadow-xs hover:shadow-xl hover:scale-[1.03] active:scale-[0.96]'
                                 : 'bg-[#F4F1EA] text-[#8B8B7A] cursor-not-allowed border border-[#E6E1D3]'
                             }`}
-                            title={p.inStock ? 'Add product to bundle cart' : 'Cannot add out-of-stock item'}
+                            title={p.inStock ? 'Add product to bundle slot' : 'Cannot add out-of-stock item'}
                           >
                             <Plus className="w-4 h-4 transition-transform group-hover:rotate-90" />
-                            <span>{p.inStock ? 'Add to Cart' : 'Out of Stock'}</span>
+                            <span>{p.inStock ? 'Add to Slot' : 'Out of Stock'}</span>
                           </button>
                         )}
 
