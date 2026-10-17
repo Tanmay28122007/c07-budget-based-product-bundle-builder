@@ -22,7 +22,7 @@ import {
   EyeOff,
   X
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion } from 'motion/react';
 import { useApp } from '../../context/AppContext';
 import { formatINR } from '../../utils/pricing';
 import { exportBundleToCSV, exportTestResultsToCSV, downloadFile } from '../../utils/exportUtils';
@@ -272,6 +272,126 @@ export const DashboardPage: React.FC = () => {
       );
     }
 
+    // Dedicated Customer Sign In Page: Exactly identical layout & style as Admin Sign In (img 2)
+    if (showAuthModal) {
+      return (
+        <div className="py-6 sm:py-12 flex flex-col items-center justify-center min-h-[72vh]">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 16 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 16 }}
+            transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+            className="bg-white border border-[#E6E1D3] rounded-[32px] p-8 sm:p-10 max-w-md w-full shadow-2xl relative overflow-hidden text-left"
+          >
+            {/* Top right decorative arc watermark */}
+            <div className="absolute top-0 right-0 w-36 h-36 bg-[#F5F5EC] rounded-bl-[120px] pointer-events-none -z-0" />
+
+            {/* Back to selection close button */}
+            <button
+              onClick={() => {
+                setShowAuthModal(false);
+                setAuthError('');
+              }}
+              className="absolute top-5 right-5 p-2 rounded-full hover:bg-[#F4F1EA] text-[#8A8A88] hover:text-[#2C2C1E] transition-colors cursor-pointer z-10"
+              aria-label="Back to role selection"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="relative z-10">
+              {/* Icon Box */}
+              <div className="w-14 h-14 rounded-2xl bg-[#2C3A2B] text-white flex items-center justify-center mb-5 shadow-sm border border-[#E6E1D3]">
+                <UserCheck className="w-7 h-7 text-amber-200" />
+              </div>
+
+              <div className="flex items-center gap-2 mb-1.5">
+                <h2 className="font-serif text-3xl font-bold text-[#2C3A2B] tracking-tight">
+                  Customer Sign In
+                </h2>
+              </div>
+              <p className="text-xs text-[#5A5A40] leading-relaxed">
+                Enter your Customer ID & password to access your customized workstation workspace.
+              </p>
+
+              {/* Sign In Form */}
+              <form onSubmit={handleCustomerAuth} className="mt-6 space-y-4">
+                {authError && (
+                  <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center gap-2">
+                    <AlertTriangle className="w-4 h-4 shrink-0 text-rose-600" />
+                    <span>{authError}</span>
+                  </div>
+                )}
+
+                {/* Customer ID / Email */}
+                <div>
+                  <label className="block text-[11px] font-bold text-[#5A5A40] uppercase tracking-wider mb-1">
+                    Customer ID or Email
+                  </label>
+                  <div className="relative">
+                    <Mail className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8A8A88]" />
+                    <input
+                      type="text"
+                      value={customerId}
+                      onChange={e => setCustomerId(e.target.value)}
+                      placeholder="shopper@workspace.com"
+                      required
+                      className="w-full pl-10 pr-3.5 py-2.5 bg-white border border-[#E6E1D3] rounded-xl text-xs text-[#2C2C1E] placeholder-[#8A8A88] focus:border-[#2C3A2B] focus:ring-2 focus:ring-[#2C3A2B]/20 outline-none transition-all font-mono"
+                    />
+                  </div>
+                </div>
+
+                {/* Password */}
+                <div>
+                  <label className="block text-[11px] font-bold text-[#5A5A40] uppercase tracking-wider mb-1">
+                    Password
+                  </label>
+                  <div className="relative">
+                    <Lock className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8A8A88]" />
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      value={customerPassword}
+                      onChange={e => setCustomerPassword(e.target.value)}
+                      placeholder="Enter customer password"
+                      required
+                      className="w-full pl-10 pr-10 py-2.5 bg-white border border-[#E6E1D3] rounded-xl text-xs text-[#2C2C1E] placeholder-[#8A8A88] focus:border-[#2C3A2B] focus:ring-2 focus:ring-[#2C3A2B]/20 outline-none transition-all"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(prev => !prev)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8A8A88] hover:text-[#2C2C1E] transition-colors p-1"
+                    >
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Sign In Button */}
+                <button
+                  type="submit"
+                  className="w-full py-3.5 px-5 rounded-2xl bg-[#2C3A2B] hover:bg-[#1E281D] text-white text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2.5 shadow-md hover:shadow-xl transition-all cursor-pointer mt-3"
+                >
+                  <span>LOG IN TO CUSTOMER PORTAL</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+
+                {/* Back Link */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowAuthModal(false);
+                    setAuthError('');
+                  }}
+                  className="w-full py-2 text-xs font-semibold text-[#8B8B7A] hover:text-[#2C2C1E] transition-colors cursor-pointer text-center"
+                >
+                  ← Back to Selection
+                </button>
+              </form>
+            </div>
+          </motion.div>
+        </div>
+      );
+    }
+
     return (
       <div className="py-6 sm:py-12 flex flex-col items-center justify-center min-h-[72vh]">
         {/* ========================================================================= */}
@@ -411,187 +531,6 @@ export const DashboardPage: React.FC = () => {
               </button>
             </motion.div>
           </div>
-
-          {/* Customer Authentication Modal (Login / Sign Up) */}
-          <AnimatePresence>
-            {showAuthModal && (
-              <div
-                className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#2C2C1E]/55 backdrop-blur-md"
-                onClick={() => setShowAuthModal(false)}
-              >
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.94, y: 18 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.94, y: 18 }}
-                  transition={{ type: 'spring', damping: 28, stiffness: 350 }}
-                  onClick={e => e.stopPropagation()}
-                  className="bg-[#FDFBF7] border border-[#E6E1D3] rounded-[32px] p-6 sm:p-8 max-w-md w-full shadow-2xl relative overflow-hidden text-left"
-                >
-                  {/* Decorative corner accent */}
-                  <div className="absolute top-0 right-0 w-36 h-36 bg-[#F5F5EC] rounded-bl-[120px] pointer-events-none -z-0" />
-
-                  {/* Close Button */}
-                  <button
-                    onClick={() => setShowAuthModal(false)}
-                    className="absolute top-5 right-5 p-2 rounded-full hover:bg-[#F4F1EA] text-[#8A8A88] hover:text-[#2C2C1E] transition-colors cursor-pointer z-10"
-                    aria-label="Close modal"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
-
-                  <div className="relative z-10">
-                    {/* Header Icon & Title */}
-                    <div className="w-12 h-12 rounded-2xl bg-[#2C3A2B] text-white flex items-center justify-center mb-4 shadow-sm">
-                      <UserCheck className="w-6 h-6 text-amber-200" />
-                    </div>
-
-                    <h3 className="font-serif text-2xl font-bold text-[#2C3A2B] tracking-tight">
-                      {authMode === 'login' ? 'Customer Sign In' : 'Create Customer Account'}
-                    </h3>
-                    <p className="text-xs text-[#5A5A40] mt-1 leading-relaxed">
-                      {authMode === 'login'
-                        ? 'Enter your Customer ID & password to access your customized workstation workspace.'
-                        : 'Sign up to assemble, validate, and optimize your target workstation setup.'}
-                    </p>
-
-                    {/* Auth Form */}
-                    <form onSubmit={handleCustomerAuth} className="mt-6 space-y-4">
-                      {authError && (
-                        <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center gap-2">
-                          <AlertTriangle className="w-4 h-4 shrink-0 text-rose-600" />
-                          <span>{authError}</span>
-                        </div>
-                      )}
-
-                      {/* Sign Up: Full Name */}
-                      {authMode === 'signup' && (
-                        <div>
-                          <label className="block text-[11px] font-bold text-[#5A5A40] uppercase tracking-wider mb-1">
-                            Full Name
-                          </label>
-                          <div className="relative">
-                            <User className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8A8A88]" />
-                            <input
-                              type="text"
-                              value={customerName}
-                              onChange={e => setCustomerName(e.target.value)}
-                              placeholder="e.g. Tanmay Anand"
-                              className="w-full pl-10 pr-3.5 py-2.5 bg-white border border-[#E6E1D3] rounded-xl text-xs text-[#2C2C1E] placeholder-[#8A8A88] focus:border-[#2C3A2B] focus:ring-2 focus:ring-[#2C3A2B]/20 outline-none transition-all"
-                            />
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Customer ID / Email */}
-                      <div>
-                        <label className="block text-[11px] font-bold text-[#5A5A40] uppercase tracking-wider mb-1">
-                          Customer ID or Email
-                        </label>
-                        <div className="relative">
-                          <Mail className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8A8A88]" />
-                          <input
-                            type="text"
-                            value={customerId}
-                            onChange={e => setCustomerId(e.target.value)}
-                            placeholder="e.g. shopper@workspace.com or CUST-01"
-                            required
-                            className="w-full pl-10 pr-3.5 py-2.5 bg-white border border-[#E6E1D3] rounded-xl text-xs text-[#2C2C1E] placeholder-[#8A8A88] focus:border-[#2C3A2B] focus:ring-2 focus:ring-[#2C3A2B]/20 outline-none transition-all font-mono"
-                          />
-                        </div>
-                      </div>
-
-                      {/* Password */}
-                      <div>
-                        <label className="block text-[11px] font-bold text-[#5A5A40] uppercase tracking-wider mb-1">
-                          Password
-                        </label>
-                        <div className="relative">
-                          <Lock className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8A8A88]" />
-                          <input
-                            type={showPassword ? 'text' : 'password'}
-                            value={customerPassword}
-                            onChange={e => setCustomerPassword(e.target.value)}
-                            placeholder="Enter password"
-                            required
-                            className="w-full pl-10 pr-10 py-2.5 bg-white border border-[#E6E1D3] rounded-xl text-xs text-[#2C2C1E] placeholder-[#8A8A88] focus:border-[#2C3A2B] focus:ring-2 focus:ring-[#2C3A2B]/20 outline-none transition-all"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => setShowPassword(prev => !prev)}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8A8A88] hover:text-[#2C2C1E] transition-colors p-1"
-                          >
-                            {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* Sign Up: Confirm Password */}
-                      {authMode === 'signup' && (
-                        <div>
-                          <label className="block text-[11px] font-bold text-[#5A5A40] uppercase tracking-wider mb-1">
-                            Confirm Password
-                          </label>
-                          <div className="relative">
-                            <Lock className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8A8A88]" />
-                            <input
-                              type={showPassword ? 'text' : 'password'}
-                              value={customerConfirmPassword}
-                              onChange={e => setCustomerConfirmPassword(e.target.value)}
-                              placeholder="Confirm your password"
-                              required
-                              className="w-full pl-10 pr-3.5 py-2.5 bg-white border border-[#E6E1D3] rounded-xl text-xs text-[#2C2C1E] placeholder-[#8A8A88] focus:border-[#2C3A2B] focus:ring-2 focus:ring-[#2C3A2B]/20 outline-none transition-all"
-                            />
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Submit Button */}
-                      <button
-                        type="submit"
-                        className="w-full py-3 px-4 rounded-xl bg-[#2C3A2B] hover:bg-[#1B281B] text-white text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-md hover:shadow-xl transition-all cursor-pointer mt-2"
-                      >
-                        <span>{authMode === 'login' ? 'Log In to Customer Portal' : 'Create Account & Sign In'}</span>
-                        <ArrowRight className="w-4 h-4" />
-                      </button>
-                    </form>
-
-                    {/* Bottom Toggle: Switch between Log In and Sign Up */}
-                    <div className="mt-5 pt-4 border-t border-[#E6E1D3] text-center text-xs text-[#5A5A40]">
-                      {authMode === 'login' ? (
-                        <p>
-                          Don't have an account?{' '}
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setAuthMode('signup');
-                              setAuthError('');
-                            }}
-                            className="font-bold text-[#8B5A2B] hover:underline cursor-pointer ml-1"
-                          >
-                            Sign Up
-                          </button>
-                        </p>
-                      ) : (
-                        <p>
-                          Already have an account?{' '}
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setAuthMode('login');
-                              setAuthError('');
-                            }}
-                            className="font-bold text-[#2C3A2B] hover:underline cursor-pointer ml-1"
-                          >
-                            Log In
-                          </button>
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                </motion.div>
-              </div>
-            )}
-          </AnimatePresence>
         </motion.section>
       </div>
     );
