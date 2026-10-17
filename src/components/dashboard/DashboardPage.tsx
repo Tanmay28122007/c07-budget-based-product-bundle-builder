@@ -107,10 +107,10 @@ export const DashboardPage: React.FC = () => {
 
           {/* Hero Serif Title & Subtitle */}
           <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-[#2C3A2B] mb-3">
-            Vocal-Local Village OS
+            Product Bundle Builder
           </h1>
           <p className="text-[#5A5A40] text-sm sm:text-base max-w-xl mx-auto leading-relaxed">
-            Welcome to the Digital Gram Panchayat & Commerce OS. Please select your login to continue.
+            Welcome to the Budget-Based Product Bundle Builder. Please select your login to continue.
           </p>
 
           {/* Two Login Cards: Customer or Admin */}
@@ -134,7 +134,7 @@ export const DashboardPage: React.FC = () => {
                     Customer
                   </h2>
                   <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-[#F4F1EA] text-[#8B5A2B] border border-[#E6E1D3] group-hover:bg-[#8B5A2B] group-hover:text-white transition-colors">
-                    Citizen
+                    Shopper
                   </span>
                 </div>
 
@@ -174,12 +174,12 @@ export const DashboardPage: React.FC = () => {
                     Admin
                   </h2>
                   <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-[#F4F1EA] text-[#2C3A2B] border border-[#E6E1D3] group-hover:bg-[#2C3A2B] group-hover:text-white transition-colors">
-                    Sarpanch
+                    Manager
                   </span>
                 </div>
 
                 <p className="text-[#5A5A40] text-sm leading-relaxed mb-6 group-hover:text-[#2C2C1E] transition-colors">
-                  Admin login to manage village records, review automated test suites, and audit landed economics.
+                  Admin login to manage catalog records, review automated test suites, and audit landed economics.
                 </p>
               </div>
 
@@ -213,7 +213,7 @@ export const DashboardPage: React.FC = () => {
             <div className="flex items-center gap-2">
               <h2 className="font-serif font-bold text-lg text-[#2C3A2B]">Admin Workspace Control</h2>
               <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
-                Sarpanch Active
+                Admin Active
               </span>
             </div>
             <p className="text-xs text-[#5A5A40]">

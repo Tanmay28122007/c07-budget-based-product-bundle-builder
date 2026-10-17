@@ -79,7 +79,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
         </button>
 
         <div className="flex items-center gap-2 text-xs text-[#5A5A40]">
-          <span className="font-semibold text-[#2C3A2B]">Vocal-Local OS</span>
+          <span className="font-semibold text-[#2C3A2B]">Bundle Builder</span>
           <span className="text-[#E6E1D3]">/</span>
           <span>{fixture.activity.name}</span>
           <span className="text-[#E6E1D3]">/</span>

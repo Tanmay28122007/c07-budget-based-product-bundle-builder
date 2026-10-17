@@ -65,7 +65,7 @@ export const AIAssistantDrawer: React.FC = () => {
     {
       id: 'msg-welcome',
       role: 'assistant',
-      text: `Welcome to **Vocal-Local AI Assistant**! 
+      text: `Welcome to your **AI Bundle Assistant**! 
 
 I am your intelligent Workspace & Hardware Bundle Consultant powered by Gemini.
 

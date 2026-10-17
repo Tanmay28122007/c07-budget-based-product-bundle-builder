@@ -175,10 +175,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
             </div>
             <div>
               <div className="font-serif text-sm font-bold tracking-tight text-[#2C3A2B] leading-tight">
-                Vocal-Local OS
+                Bundle Builder
               </div>
               <div className="text-[11px] text-[#5A5A40] font-medium">
-                Product Bundle Builder
+                Product Workspace OS
               </div>
             </div>
           </div>
@@ -323,7 +323,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
             <div className="flex items-center justify-between text-[11px] text-[#5A5A40] mb-1">
               <span>Inventory Set</span>
               <span className="font-mono text-[#2C3A2B] font-semibold">
-                {isCustomFixture ? 'Loaded JSON' : 'Vocal-Local C07'}
+                {isCustomFixture ? 'Loaded JSON' : 'Standard C07'}
               </span>
             </div>
             <div className="text-[11px] text-[#5A5A40] flex items-center justify-between">
