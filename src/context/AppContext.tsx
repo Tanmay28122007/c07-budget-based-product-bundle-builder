@@ -491,7 +491,12 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       const saved = localStorage.getItem('c07_fixture_v2');
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (parsed?.products?.length && parsed?.activity) return parsed;
+        if (parsed?.products?.length && parsed?.activity) {
+          if (parsed.products.length < C07_DEFAULT_FIXTURE.products.length) {
+            return C07_DEFAULT_FIXTURE;
+          }
+          return parsed;
+        }
       }
     } catch (e) {
       console.warn('Could not parse saved fixture from storage:', e);
@@ -499,10 +504,10 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     return C07_DEFAULT_FIXTURE;
   });
 
-  // Guard against stale cached fixtures with fewer than 25 products
+  // Guard against stale cached fixtures with fewer products than C07_DEFAULT_FIXTURE
   useEffect(() => {
-    if (fixture.products.length < DEFAULT_SYNTHETIC_FIXTURE.products.length) {
-      setFixture(DEFAULT_SYNTHETIC_FIXTURE);
+    if (fixture.products.length < C07_DEFAULT_FIXTURE.products.length) {
+      setFixture(C07_DEFAULT_FIXTURE);
       try {
         localStorage.removeItem('c07_fixture_v2');
       } catch {}

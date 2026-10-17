@@ -16,8 +16,7 @@ import {
   Trash2,
   ChevronRight,
   Info,
-  SlidersHorizontal,
-  Server
+  SlidersHorizontal
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { Product } from '../../types';
@@ -148,15 +147,6 @@ export const ProductCataloguePage: React.FC = () => {
           </p>
         </div>
 
-        {/* Backend Connected Status Pill */}
-        <div className="flex items-center gap-2">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#ECFDF5] border border-[#A7F3D0] text-xs font-mono text-[#065F46] shadow-2xs">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <Server className="w-3.5 h-3.5 text-emerald-600" />
-            <span className="font-semibold">Backend Connected</span>
-            <span className="text-emerald-600 text-[11px]">(208ms)</span>
-          </div>
-        </div>
       </div>
 
       {/* FILTER BY SPECIFIC DETAILS (BACKEND API) */}
