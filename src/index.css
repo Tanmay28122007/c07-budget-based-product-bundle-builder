@@ -61,6 +61,16 @@ h1, h2, h3, .font-serif {
 /* GLOBAL HIGH-INTENSITY HOVER & MICRO-MOTION SYSTEM                        */
 /* ========================================================================= */
 
+/* Global Smooth Rendering & GPU Acceleration */
+html {
+  scroll-behavior: smooth;
+}
+
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
 /* Smooth baseline transitions for all interactive elements */
 button,
 a,
@@ -69,93 +79,111 @@ select,
 textarea,
 [role="button"],
 .interactive-item {
-  transition: color 0.2s cubic-bezier(0.2, 0.8, 0.2, 1),
-              background-color 0.2s cubic-bezier(0.2, 0.8, 0.2, 1),
-              border-color 0.2s cubic-bezier(0.2, 0.8, 0.2, 1),
-              box-shadow 0.24s cubic-bezier(0.2, 0.8, 0.2, 1),
-              transform 0.24s cubic-bezier(0.2, 0.8, 0.2, 1),
-              opacity 0.2s ease;
+  transition: color 0.24s cubic-bezier(0.16, 1, 0.3, 1),
+              background-color 0.24s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.24s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+              opacity 0.22s ease;
 }
 
-/* Global button hover lift & tactile active response - SILKY SMOOTH */
+/* Global button hover lift & tactile active response - HEIGHTENED SMOOTH HOVER */
 button:not(:disabled):hover,
 [role="button"]:not(:disabled):hover {
-  transform: translateY(-1.5px);
-  filter: brightness(1.02);
-  box-shadow: 0 6px 16px -4px rgba(44, 58, 43, 0.14);
+  transform: translateY(-2px) scale(1.015);
+  filter: brightness(1.03);
+  box-shadow: 0 10px 22px -5px rgba(44, 58, 43, 0.18);
 }
 
 button:not(:disabled):active,
 [role="button"]:not(:disabled):active {
-  transform: translateY(0.5px) scale(0.99);
-  filter: brightness(0.98);
+  transform: translateY(0.5px) scale(0.985);
+  filter: brightness(0.97);
+  transition-duration: 0.1s;
 }
 
-/* Compact header, pill & icon buttons don't bounce out of place */
+/* Compact header & icon buttons silky micro-hover */
 .shrink-0 button,
 header button,
-nav button,
-button.rounded-full,
 .icon-btn {
   transform: none !important;
   box-shadow: none !important;
 }
 .shrink-0 button:hover,
 header button:hover,
-nav button:hover,
-button.rounded-full:hover,
 .icon-btn:hover {
-  transform: scale(1.04) !important;
-  filter: brightness(1.02);
+  transform: scale(1.08) !important;
+  filter: brightness(1.04);
 }
 
-/* Primary prominent CTA buttons rich elevation */
+/* Primary Heritage & Terracotta buttons strong, smooth hover elevation */
 button.bg-\[\#2C3A2B\]:hover {
-  transform: translateY(-2px) scale(1.01) !important;
-  box-shadow: 0 10px 24px -6px rgba(44, 58, 43, 0.35) !important;
+  transform: translateY(-3px) scale(1.02) !important;
+  box-shadow: 0 16px 34px -6px rgba(44, 58, 43, 0.42), 0 6px 14px -2px rgba(44, 58, 43, 0.26) !important;
+  filter: brightness(1.06);
 }
 
 button.bg-\[\#8B5A2B\]:hover {
-  transform: translateY(-2px) scale(1.01) !important;
-  box-shadow: 0 10px 24px -6px rgba(139, 90, 43, 0.35) !important;
+  transform: translateY(-3px) scale(1.02) !important;
+  box-shadow: 0 16px 34px -6px rgba(139, 90, 43, 0.42), 0 6px 14px -2px rgba(139, 90, 43, 0.26) !important;
+  filter: brightness(1.06);
 }
 
-/* Card Elevation & Hover - Velvety Smooth */
+/* Card Elevation & Hover - Ultra Silky, Elevated Float */
 .card-hover,
 .bg-white.border,
 .rounded-2xl.border,
 .rounded-\[24px\].border,
 .rounded-xl.border {
-  transition: transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1),
-              box-shadow 0.28s cubic-bezier(0.2, 0.8, 0.2, 1),
-              border-color 0.22s ease,
-              background-color 0.22s ease;
+  transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.32s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.28s ease,
+              background-color 0.24s ease;
+  will-change: transform, box-shadow;
 }
 
-/* Hovering interactive cards */
-.cursor-pointer.border:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 16px 32px -10px rgba(44, 58, 43, 0.16), 0 4px 12px -2px rgba(139, 90, 43, 0.08) !important;
+/* Hovering interactive cards across whole website */
+.cursor-pointer.border:hover,
+.card-hover:hover {
+  transform: translateY(-4px) scale(1.012) !important;
+  box-shadow: 0 22px 45px -10px rgba(44, 58, 43, 0.22), 0 8px 20px -4px rgba(139, 90, 43, 0.16) !important;
   border-color: #8B5A2B !important;
 }
 
-/* Table rows smooth highlight */
+/* Table rows smooth hover highlight and micro-float */
 tbody tr {
-  transition: background-color 0.16s ease, transform 0.16s ease;
+  transition: background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 tbody tr:hover {
-  background-color: #F4F1EA !important;
-  transform: translateY(-0.5px);
+  background-color: #EDE8DC !important;
+  transform: scale(1.004) translateY(-1px);
+  box-shadow: 0 6px 16px -4px rgba(44, 58, 43, 0.12) !important;
+  position: relative;
+  z-index: 2;
 }
 
-/* Inputs & selects smooth focus ring, no jumping */
+/* Interactive badge micro-hover */
+span.rounded-full {
+  transition: transform 0.24s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.24s ease,
+              background-color 0.2s ease;
+}
+span.rounded-full:hover {
+  transform: scale(1.06) translateY(-1px);
+  box-shadow: 0 4px 12px -2px rgba(139, 90, 43, 0.2);
+}
+
+/* Inputs & selects smooth focus bloom, no sudden jumps */
 input, select, textarea {
-  transition: border-color 0.2s ease, box-shadow 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition: border-color 0.22s ease, box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 input:hover:not(:disabled),
 select:hover:not(:disabled),
 textarea:hover:not(:disabled) {
   border-color: #8B5A2B;
+  box-shadow: 0 0 0 2px rgba(139, 90, 43, 0.12);
 }
 
 input:focus,
@@ -163,14 +191,26 @@ select:focus,
 textarea:focus {
   outline: none;
   border-color: #2C3A2B;
-  box-shadow: 0 0 0 3px rgba(44, 58, 43, 0.12) !important;
+  box-shadow: 0 0 0 3px rgba(44, 58, 43, 0.18) !important;
+}
+
+/* Navigation links energetic smooth slide */
+nav button {
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+              background-color 0.22s ease,
+              color 0.22s ease,
+              box-shadow 0.28s ease !important;
+}
+nav button:hover {
+  transform: translateX(5px) !important;
+  box-shadow: 0 6px 16px -3px rgba(44, 58, 43, 0.14) !important;
 }
 
 /* Floating Action Button (FAB) smooth organic hover */
 button[aria-label*="AI Assistant"]:hover,
 button[aria-label*="Assistant"]:hover {
-  transform: scale(1.06) translateY(-2px) !important;
-  box-shadow: 0 14px 28px -4px rgba(44, 58, 43, 0.4) !important;
+  transform: scale(1.08) translateY(-3px) !important;
+  box-shadow: 0 20px 42px -6px rgba(44, 58, 43, 0.48) !important;
 }
 
 
