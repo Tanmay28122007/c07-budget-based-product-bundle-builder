@@ -380,3 +380,372 @@ Supported tabs for navigation: "dashboard", "builder", "chat", "catalogue", "com
 - Fully support questions in English, Hindi (हिंदी), and Gujarati (ગુજરાતી).
 - You can explain features, navigate the user, diagnose errors, design custom setups, analyze economics, and explain tests!`;
 }
+
+/**
+ * Intelligent Heuristic Response Engine
+ * Grounded in the entire website so that even without an API key or offline,
+ * the bot delivers comprehensive, context-aware answers and actionable cards.
+ */
+export function generateComprehensiveHeuristicResponse(message: string, context: any) {
+  const lowerMsg = message.toLowerCase();
+  const currentBudget = context?.budget || 75000;
+  const validation = context?.validation;
+  const violations = validation?.compatibilityViolations || validation?.violations || [];
+  const availableProducts = context?.availableProducts || [];
+  const requiredSlots = context?.requiredSlots || [];
+  const activeTab = context?.activeTab || 'dashboard';
+
+  // Detect language request
+  const isHindi = lowerMsg.includes('hindi') || lowerMsg.includes('हिंदी') || lowerMsg.includes('भाषा') || /[\u0900-\u097F]/.test(message);
+  const isGujarati = lowerMsg.includes('gujarati') || lowerMsg.includes('ગુજરાતી') || /[\u0A80-\u0AFF]/.test(message);
+
+  // 1. Navigation / Whole Website Overview
+  if (lowerMsg.includes('whole website') || lowerMsg.includes('all pages') || lowerMsg.includes('overview') || lowerMsg.includes('sitemap') || lowerMsg.includes('what can you do') || lowerMsg.includes('features')) {
+    if (isHindi) {
+      return {
+        reply: `यह वेबसाइट **बजट-आधारित प्रोडक्ट बंडल बिल्डर (C07)** है। यहाँ कुल 9 मुख्य अनुभाग (मॉड्यूल्स) हैं:\n\n` +
+          `1. **डैशबोर्ड (Dashboard)**: लाइव KPI, बजट उपयोग और त्वरित शॉर्टकट।\n` +
+          `2. **बंडल बिल्डर (Builder)**: 6 स्लॉट (डेस्क, कुर्सी, मॉनिटर, डॉक, कीबोर्ड/माउस, लाइट) में हार्डवेयर कॉन्फ़िगर करें, लैंडेड प्राइस देखें और ऑटो-सॉल्व चलाएं।\n` +
+          `3. **AI चैटबॉट (Chat)**: जेमिनी मल्टी-टर्न हार्डवेयर सलाहकार 3 विशेषज्ञ भूमिकाओं के साथ।\n` +
+          `4. **प्रोडक्ट कैटलॉग (Catalogue)**: 24 हार्डवेयर उत्पादों का पूर्ण विवरण और लाइव स्टॉक।\n` +
+          `5. **बंडल तुलना (Compare)**: स्टार्टर, डेवलपर प्रो और एग्जीक्यूटिव बंडलों की आमने-सामने तुलना।\n` +
+          `6. **बिजनेस इनसाइट्स (Business)**: MBA यूनिट इकोनॉमिक्स, ब्रेक-ईवन बास्केट और शॉपर्स रिसर्च।\n` +
+          `7. **ऑटोमेटेड टेस्ट सुइट (Tests)**: 22+ लाइव नियम और लैंडेड प्राइस टेस्ट।\n` +
+          `8. **प्रोजेक्ट एविडेंस (Evidence)**: प्रोटोटाइप v0.1 बनाम अंतिम सत्यापन मैट्रिक्स।\n` +
+          `9. **सेटिंग्स (Settings)**: 18% GST दर, शिपिंग नियम और डेटा रीसेट।\n\nआप किस पेज पर जाना चाहते हैं?`,
+        action: {
+          type: 'navigate',
+          tab: 'builder',
+          reason: 'Explore the 6-slot hardware Bundle Builder workspace'
+        },
+        model: 'heuristic-website-trainer'
+      };
+    }
+
+    if (isGujarati) {
+      return {
+        reply: `આ વેબસાઇટ **બજેટ-આધારિત પ્રોડક્ટ બંડલ બિલ્ડર (C07)** છે. અહીં કુલ 9 મુખ્ય વિભાગો છે:\n\n` +
+          `1. **ડેશબોર્ડ (Dashboard)**: લાઇવ KPI અને બજેટ પ્રોગ્રેસ.\n` +
+          `2. **બંડલ બિલ્ડર (Builder)**: 6 હાર્ડવેર સ્લોટ્સ ગોઠવો અને ઑટો-સૉલ્વ ચલાવો.\n` +
+          `3. **AI સહાયક (Chat)**: જેમિની મલ્ટિ-ટર્ન હાર્ડવેર કન્સલ્ટન્ટ.\n` +
+          `4. **પ્રોડક્ટ કૅટેલોગ (Catalogue)**: 24 હાર્ડવેર ઉત્પાદનો અને લાઇવ સ્ટોક.\n` +
+          `5. **બંડલ સરખામણી (Compare)**: પ્રીસેટ બંડલોની સરખામણી.\n` +
+          `6. **બિઝનેસ ઇનસાઇટ્સ (Business)**: MBA યુનિટ ઇકોનોમિક્સ અને બ્રેક-ઇવન.\n` +
+          `7. **ટેસ્ટિંગ સ્યુટ (Tests)**: 22+ લાઇવ સુસંગતતા અને પ્રાઇસિંગ ટેસ્ટ્સ.\n` +
+          `8. **પ્રોજેક્ટ એવિડન્સ (Evidence)**: વેરિફિકેશન મૅટ્રિક્સ.\n` +
+          `9. **સેટિંગ્સ (Settings)**: GST અને શિપિંગ નિયમો.\n\nતમે કયા પૃષ્ઠ પર જવા માંગો છો?`,
+        action: {
+          type: 'navigate',
+          tab: 'builder',
+          reason: 'વર્કસ્પેસ બંડલ બિલ્ડર ખોલો'
+        },
+        model: 'heuristic-website-trainer'
+      };
+    }
+
+    return {
+      reply: `I am fully trained on the entire **Budget-Based Product Bundle Builder** platform! Here is an overview of all 9 integrated modules:\n\n` +
+        `1. **Executive Dashboard (\`dashboard\`)**: Real-time KPI telemetry (Budget, Landed Price, Utilization %, Compatibility, Limiting Factor) and quick solver shortcuts.\n` +
+        `2. **Bundle Builder (\`builder\`)**: Interactive 6-slot workspace (Desk, Chair, Monitor, Dock, Peripherals, Lighting), live Landed Price calculation bar, and Cartesian Auto-Solve engine.\n` +
+        `3. **Gemini AI Assistant (\`chat\`)**: Multi-turn hardware consultant with 3 specialized personas (Ergonomic Workspace Architect, Rapid Spec Checker, Procurement Strategist) and 1-click execution cards.\n` +
+        `4. **Product Catalogue (\`catalogue\`)**: Full directory of 24 hardware components with specifications, weights, dimensions, and live stock tracking.\n` +
+        `5. **Compare Bundles (\`compare\`)**: Side-by-side matrix comparing Starter Pack (₹35k), Developer Pro (₹65k), and Executive Ultra (₹95k) against your custom bundle.\n` +
+        `6. **Business Insights & Strategy (\`business\`)**: MBA unit economics simulator (Retailer ₹15k fee, ₹3.5k cost-to-serve, 3.5% referral fee, break-even ~40 baskets) and empirical shopper research log.\n` +
+        `7. **Automated Test Suite (\`tests\`)**: 22+ live browser tests (REF-001 to REF-006, EDGE-001 to EDGE-006) validating compatibility logic and pricing math.\n` +
+        `8. **Project Evidence & Scope Audit (\`evidence\`)**: Academic audit tracking baseline prototype v0.1 vs final implementation, contractual scope boundaries, and verification proofs.\n` +
+        `9. **Settings & Configuration (\`settings\`)**: 18% GST tax configuration, shipping surcharge rules (₹499 base, ₹50,000 free shipping threshold), and factory reset.\n\n` +
+        `Where would you like to explore first?`,
+      action: {
+        type: 'navigate',
+        tab: 'builder',
+        reason: 'Open the 6-slot Bundle Builder workspace'
+      },
+      model: 'heuristic-website-trainer'
+    };
+  }
+
+  // 2. Direct Navigation Intents
+  if (lowerMsg.includes('go to') || lowerMsg.includes('navigate to') || lowerMsg.includes('open page') || lowerMsg.includes('show page') || lowerMsg.includes('show me')) {
+    if (lowerMsg.includes('business') || lowerMsg.includes('economics') || lowerMsg.includes('mba') || lowerMsg.includes('strategy')) {
+      return {
+        reply: `Opening the **Business Insights & Strategy** page. Here you can explore our MBA unit economics simulator, retailer subscription contributions, referral fees, break-even basket forecasts, and the empirical shopper research log.`,
+        action: { type: 'navigate', tab: 'business', reason: 'View Business Insights & Unit Economics' },
+        model: 'heuristic-website-trainer'
+      };
+    }
+    if (lowerMsg.includes('test') || lowerMsg.includes('suite') || lowerMsg.includes('verification')) {
+      return {
+        reply: `Opening the **Automated Test Suite**. Here you can run all 22+ tests in real time, validating reference requests, edge-case scenarios, and landed price mathematical precision.`,
+        action: { type: 'navigate', tab: 'tests', reason: 'Run and inspect Automated Test Suite' },
+        model: 'heuristic-website-trainer'
+      };
+    }
+    if (lowerMsg.includes('catalogue') || lowerMsg.includes('catalog') || lowerMsg.includes('products') || lowerMsg.includes('inventory')) {
+      return {
+        reply: `Opening the **Product Catalogue**. Browse all 24 hardware components across 6 categories with technical blueprints, dimensions, wattage, and live stock levels.`,
+        action: { type: 'navigate', tab: 'catalogue', reason: 'Browse complete Product Catalogue' },
+        model: 'heuristic-website-trainer'
+      };
+    }
+    if (lowerMsg.includes('compare') || lowerMsg.includes('comparison') || lowerMsg.includes('presets')) {
+      return {
+        reply: `Opening the **Compare Bundles** page. Review side-by-side matrices of the Starter (₹35k), Developer Pro (₹65k), and Executive (₹95k) setups against your active bundle.`,
+        action: { type: 'navigate', tab: 'compare', reason: 'Inspect Side-by-Side Bundle Comparisons' },
+        model: 'heuristic-website-trainer'
+      };
+    }
+    if (lowerMsg.includes('evidence') || lowerMsg.includes('scope') || lowerMsg.includes('audit')) {
+      return {
+        reply: `Opening the **Project Evidence & Scope Audit** page. Review academic change documentation, baseline prototype v0.1 vs final implementation, and formal verification evidence.`,
+        action: { type: 'navigate', tab: 'evidence', reason: 'Inspect Project Evidence & Scope Audit' },
+        model: 'heuristic-website-trainer'
+      };
+    }
+    if (lowerMsg.includes('setting') || lowerMsg.includes('config') || lowerMsg.includes('tax') || lowerMsg.includes('shipping fee')) {
+      return {
+        reply: `Opening the **Settings & Configuration** page. You can customize the 18% GST tax rate, shipping threshold policies, and restore factory defaults.`,
+        action: { type: 'navigate', tab: 'settings', reason: 'Open Settings & Global Configuration' },
+        model: 'heuristic-website-trainer'
+      };
+    }
+    if (lowerMsg.includes('builder') || lowerMsg.includes('slots') || lowerMsg.includes('workspace')) {
+      return {
+        reply: `Navigating to the **Bundle Builder** workspace. Configure your 6 hardware slots with real-time landed price feedback and auto-solve optimization.`,
+        action: { type: 'navigate', tab: 'builder', reason: 'Return to Bundle Builder' },
+        model: 'heuristic-website-trainer'
+      };
+    }
+    if (lowerMsg.includes('dashboard') || lowerMsg.includes('home') || lowerMsg.includes('kpi')) {
+      return {
+        reply: `Navigating to the **Executive Dashboard**. Review high-level budget metrics, compatibility alerts, and quick action shortcuts.`,
+        action: { type: 'navigate', tab: 'dashboard', reason: 'View Executive Dashboard' },
+        model: 'heuristic-website-trainer'
+      };
+    }
+  }
+
+  // 3. Business Insights & MBA Unit Economics Queries
+  if (lowerMsg.includes('business') || lowerMsg.includes('unit economics') || lowerMsg.includes('mba') || lowerMsg.includes('break even') || lowerMsg.includes('break-even') || lowerMsg.includes('referral') || lowerMsg.includes('cost to serve') || lowerMsg.includes('retailer fee')) {
+    return {
+      reply: `### MBA Unit Economics & Strategy Overview\n\n` +
+        `**1. Strategic Value Proposition**:\n` +
+        `"Help shoppers build complete, compatible bundles with transparent landed pricing," solving assembly friction, hidden shipping fees, and port mismatches.\n\n` +
+        `**2. Unit Economics Formulas**:\n` +
+        `- **Retailer Monthly Contribution**: Retailer Monthly Fee (₹15,000) - Monthly Cost to Serve (₹3,500) = **₹11,500 net contribution** per enrolled retailer.\n` +
+        `- **Affiliate Referral Revenue**: Eligible Basket Value × 3.5% referral commission.\n` +
+        `- **Referral Contribution Per Basket**: Referral Revenue - Variable Cost per Basket (₹120).\n` +
+        `  * E.g., On a ₹65,000 bundle: (₹65,000 × 3.5%) - ₹120 = ₹2,275 - ₹120 = **₹2,155 contribution**.\n` +
+        `- **Break-Even Basket Threshold**: Fixed Monthly Costs (₹85,000) ÷ Contribution per basket (~₹2,155) = **~40 completed baskets/month**.\n\n` +
+        `Would you like to open the interactive simulation calculator on the Business Insights page?`,
+      action: {
+        type: 'navigate',
+        tab: 'business',
+        reason: 'Open interactive MBA Unit Economics simulation'
+      },
+      model: 'heuristic-website-trainer'
+    };
+  }
+
+  // 4. Automated Test Suite & Verification Queries
+  if (lowerMsg.includes('test') || lowerMsg.includes('tests') || lowerMsg.includes('edge case') || lowerMsg.includes('verification') || lowerMsg.includes('benchmark')) {
+    return {
+      reply: `### Automated Test Suite (22+ Executable Tests)\n\n` +
+        `Our test suite verifies the platform across two rigorous dimensions:\n\n` +
+        `**1. Reference Request Tests (REF-001 to REF-006)**:\n` +
+        `- **REF-001**: Budget Conscious Starter (₹35,000 target - confirms valid in-stock combination under tight budget).\n` +
+        `- **REF-002**: Standard Professional Ergonomic Setup (₹65,000 target - confirms Tier-1/2 items with healthy budget buffer).\n` +
+        `- **REF-003**: Executive Standing Desk Setup (₹95,000 target - validates motorized desk & 4K monitor pairing).\n` +
+        `- **REF-004**: Infeasible Ultra-Low Budget (₹15,000 target - correctly asserts that 6 complete items cannot be formed).\n` +
+        `- **REF-005**: Free Shipping Boundary Test (validates exact ₹50,000 free shipping waiver).\n` +
+        `- **REF-006**: Heavy Weight Surcharge Test (validates ₹450 surcharge per item >= 15kg).\n\n` +
+        `**2. Edge-Case Scenarios (EDGE-001 to EDGE-006)**:\n` +
+        `- **EDGE-001**: Cheapest Products Incompatible (detects greedy failure trap).\n` +
+        `- **EDGE-002**: Curved Monitor Clamp Light Trap (curved 1500R screen vs clamp screenbar).\n` +
+        `- **EDGE-003**: Port Mismatch Trap (legacy monitor vs DP-only mini dock).\n` +
+        `- **EDGE-004**: Out-of-Stock Trap (excludes DSK-004 and CHR-004).\n` +
+        `- **EDGE-005**: Desk Tipping Overhang Trap (ultrawide monitor on 90cm desk).\n` +
+        `- **EDGE-006**: Heavy Item Arithmetic Precision.\n\n` +
+        `You can execute all tests live with latency tracking on the Test Results page.`,
+      action: {
+        type: 'navigate',
+        tab: 'tests',
+        reason: 'Execute and view live test results'
+      },
+      model: 'heuristic-website-trainer'
+    };
+  }
+
+  // 5. Auto-Solve Algorithm Queries
+  if (lowerMsg.includes('algorithm') || lowerMsg.includes('auto-solve') || lowerMsg.includes('autosolve') || lowerMsg.includes('how does it work') || lowerMsg.includes('knapsack') || lowerMsg.includes('cartesian')) {
+    return {
+      reply: `### Cartesian Auto-Solve Algorithm Explained\n\n` +
+        `The bundle optimizer solves a **Multi-Choice Knapsack Problem with Physical Compatibility Constraints**:\n\n` +
+        `1. **Candidate Grouping & Stock Pruning**:\n` +
+        `   Products in the catalogue are grouped into the 6 required categories. Any item with \`inStock === false\` or quantity = 0 is pruned immediately (e.g., Vertex Pro Desk DSK-004, Wobble Stool CHR-004).\n\n` +
+        `2. **Cartesian Product Exploration with Backtracking**:\n` +
+        `   The algorithm evaluates candidate combinations (up to 2,304 potential bundle permutations) across all slots.\n\n` +
+        `3. **Constraint Validation Engine**:\n` +
+        `   For each bundle, it checks:\n` +
+        `   - Desk width >= 120cm for ultrawide monitors (34"+).\n` +
+        `   - ScreenBar clamps mount only on flat displays (no curved displays).\n` +
+        `   - Port matches (HDMI/DP compatibility).\n` +
+        `   - Chair armrest clearance.\n\n` +
+        `4. **Landed Cost Evaluation**:\n` +
+        `   Calculates Subtotal + Net Shipping (free if subtotal >= ₹50,000; else ₹499 + ₹450 per heavy item) + 18% GST. Discards any combination where Landed Price > Budget.\n\n` +
+        `5. **Objective Function**:\n` +
+        `   Depending on preference, it returns the **Lowest Cost** bundle or **Maximum Ergonomic Value** (maximizing Tier-1 ergonomic grades).`,
+      action: {
+        type: 'navigate',
+        tab: 'builder',
+        reason: 'Try the Auto-Solve button in Bundle Builder'
+      },
+      model: 'heuristic-website-trainer'
+    };
+  }
+
+  // 6. Compatibility Conflict Resolution
+  if (lowerMsg.includes('fix') || lowerMsg.includes('compatib') || lowerMsg.includes('error') || lowerMsg.includes('violation') || lowerMsg.includes('conflict')) {
+    if (violations.length > 0) {
+      const v = violations[0];
+      // Check clamp vs curved monitor
+      if (v.ruleId === 'clamp_vs_monitor' || lowerMsg.includes('lamp') || lowerMsg.includes('light') || lowerMsg.includes('curved')) {
+        const weightedLamp = availableProducts.find(
+          (p: any) => p.category === 'lighting' && (p.attributes?.lightMountType === 'weighted_base' || p.name.includes('Lamp')) && p.inStock
+        ) || { id: 'LGT-002', name: 'Architect Gooseneck Weighted Base LED Task Lamp', price: 2999 };
+
+        return {
+          reply: `### Compatibility Conflict Detected: ScreenBar vs Curved Display\n\n` +
+            `**Problem**: ScreenBar monitor clamp lights (LGT-001) cannot clip securely onto curved display bezels (MON-003 with 1500R curvature). The clamping angle causes uneven pressure, screen wobbling, or potential bezel cracks.\n\n` +
+            `**Solution**: Swap to the **${weightedLamp.name}** (₹${weightedLamp.price.toLocaleString('en-IN')}). It features an independent weighted desktop base that illuminates the entire workspace without relying on monitor clamp mounting.\n\n` +
+            `Click the button below to resolve this immediately in your builder!`,
+          action: {
+            type: 'swap_product',
+            slotId: 'lighting',
+            productId: weightedLamp.id,
+            reason: `Swap to ${weightedLamp.name} to safely illuminate curved monitor setup.`
+          },
+          model: 'heuristic-website-trainer'
+        };
+      }
+
+      // Check desk width vs ultrawide
+      if (v.ruleId === 'desk_width_vs_ultrawide' || lowerMsg.includes('desk') || lowerMsg.includes('width') || lowerMsg.includes('overhang')) {
+        const widerDesk = availableProducts.find(
+          (p: any) => p.category === 'desk' && (p.attributes?.deskWidthCm || 0) >= 120 && p.inStock
+        ) || { id: 'DSK-001', name: 'ErgoLift Dual-Motor Standing Desk (140x70cm)', price: 24999 };
+
+        return {
+          reply: `### Compatibility Conflict Detected: Desk Width vs Ultrawide Monitor\n\n` +
+            `**Problem**: Ultrawide monitors (34"+) require at least 120 cm desk width. On compact 90 cm desks (DSK-003), the screen extends past the desk edges, presenting a tipping hazard.\n\n` +
+            `**Solution**: Upgrade to the **${widerDesk.name}** (140 cm width). It provides ample room for peripherals, cable passthrough, and zero overhang risk.\n\n` +
+            `Click below to swap to a wider desk!`,
+          action: {
+            type: 'swap_product',
+            slotId: 'desk',
+            productId: widerDesk.id,
+            reason: `Upgrade to ${widerDesk.name} to accommodate 34-inch display without overhang.`
+          },
+          model: 'heuristic-website-trainer'
+        };
+      }
+
+      return {
+        reply: `You currently have **${violations.length} compatibility violation(s)**:\n\n` +
+          violations.map((vio: any, i: number) => `${i + 1}. **${vio.ruleId}**: ${vio.message}`).join('\n') +
+          `\n\nWould you like me to resolve these or navigate you to the Builder?`,
+        action: {
+          type: 'navigate',
+          tab: 'builder',
+          reason: 'Review and fix conflicts in Bundle Builder'
+        },
+        model: 'heuristic-website-trainer'
+      };
+    } else {
+      return {
+        reply: `All items currently selected in your bundle are **100% physically and electrically compatible**! There are no clamp mounting conflicts, desk overhang hazards, or hardware port mismatches.`,
+        model: 'heuristic-website-trainer'
+      };
+    }
+  }
+
+  // 7. Budget Adjustment & Optimization
+  if (lowerMsg.includes('budget') || lowerMsg.includes('price') || lowerMsg.includes('cost') || lowerMsg.includes('landed') || lowerMsg.includes('cheaper')) {
+    if (validation?.landedPrice?.isOverBudget) {
+      const overBy = validation.landedPrice.landedPrice - currentBudget;
+      const targetCeiling = Math.ceil(validation.landedPrice.landedPrice / 1000) * 1000;
+      return {
+        reply: `### Budget Status: Over Budget by ₹${overBy.toLocaleString('en-IN')}\n\n` +
+          `- **Current Landed Price**: ₹${validation.landedPrice.landedPrice.toLocaleString('en-IN')}\n` +
+          `- **Current Target Budget**: ₹${currentBudget.toLocaleString('en-IN')}\n` +
+          `- **Landed Breakdown**: Subtotal ₹${validation.landedPrice.productSubtotal.toLocaleString('en-IN')} + Net Shipping ₹${validation.landedPrice.netShipping} + 18% GST ₹${validation.landedPrice.taxAmount.toLocaleString('en-IN')}.\n\n` +
+          `You can adjust your budget ceiling to **₹${targetCeiling.toLocaleString('en-IN')}** to accommodate your current premium selections, or ask me to find a cost-effective alternative setup.`,
+        action: {
+          type: 'set_budget',
+          budget: targetCeiling,
+          reason: `Increase budget to ₹${targetCeiling.toLocaleString('en-IN')} to cover complete landed price.`
+        },
+        model: 'heuristic-website-trainer'
+      };
+    } else {
+      return {
+        reply: `### Budget Status: Within Budget\n\n` +
+          `- **Current Landed Price**: ₹${validation?.landedPrice?.landedPrice?.toLocaleString('en-IN') || '0'}\n` +
+          `- **Target Budget**: ₹${currentBudget.toLocaleString('en-IN')}\n` +
+          `- **Remaining Headroom**: ₹${validation?.landedPrice?.remainingBudget?.toLocaleString('en-IN') || currentBudget.toLocaleString('en-IN')} (${validation?.landedPrice?.budgetUtilisationPercent || 0}% utilized).\n\n` +
+          `Your setup qualifies for safe checkout under your current financial cap.`,
+        model: 'heuristic-website-trainer'
+      };
+    }
+  }
+
+  // 8. Bundle Recommendation Intent
+  if (lowerMsg.includes('build') || lowerMsg.includes('recommend') || lowerMsg.includes('suggest') || lowerMsg.includes('setup') || lowerMsg.includes('bundle')) {
+    const suggestedItems: Record<string, string> = {
+      desk: 'DSK-001',
+      chair: 'CHR-001',
+      monitor: 'MON-001',
+      laptop_stand_or_dock: 'DCK-002',
+      peripherals: 'PER-002',
+      lighting: 'LGT-001'
+    };
+
+    return {
+      reply: `### Recommended Complete WFH Ergonomic Bundle\n\n` +
+        `I have assembled an optimal, fully in-stock setup engineered for healthy posture and high productivity within ₹${currentBudget.toLocaleString('en-IN')}:\n\n` +
+        `- **Workstation Desk**: ErgoLift Dual-Motor Standing Desk (140x70cm, ₹24,999) - motorized height adjustment with Tier-1 ergonomics.\n` +
+        `- **Ergonomic Chair**: AeroMesh Task Chair with 3D Lumbar & 4D Armrests (₹14,999) - breathable mesh supporting 8+ hour shifts.\n` +
+        `- **Main Display**: 27" 4K UHD IPS USB-C Monitor (₹26,999) - crisp 3840x2160 with single-cable 65W charging.\n` +
+        `- **Dock & Riser**: USB-C 7-in-1 Aluminum Riser Stand (₹3,999) - 85W power delivery & 4K HDMI passthrough.\n` +
+        `- **Peripherals**: Silent Multi-Device Bluetooth Combo (₹4,499) - whisper-quiet scissor keys.\n` +
+        `- **Lighting**: Asymmetric ScreenBar Monitor Light (₹5,499) - zero screen glare, rotary wireless dial.\n\n` +
+        `All items are 100% compatible with flat-bezel mounting and ample desk width. Click below to load this setup!`,
+      action: {
+        type: 'apply_bundle',
+        title: 'Ergonomic Productivity Setup',
+        budget: currentBudget >= 85000 ? currentBudget : 85000,
+        items: suggestedItems
+      },
+      model: 'heuristic-website-trainer'
+    };
+  }
+
+  // 9. Default Comprehensive Assistant Response
+  return {
+    reply: `Hello! I am your AI Consultant trained on the entire **Budget-Based Product Bundle Builder** platform.\n\n` +
+      `Here is what I can do for you:\n\n` +
+      `1. **Assemble & Optimize Complete Bundles**: Build valid 6-slot hardware setups matching your target budget.\n` +
+      `2. **Resolve Compatibility Conflicts**: Fix curved monitor clamp mismatches, desk width overhangs, and port incompatibilities with 1-click swaps.\n` +
+      `3. **Landed Pricing & Tax**: Calculate exact landed pricing including base shipping (₹499), heavy item surcharges (₹450), free shipping thresholds (₹50k), and 18% GST.\n` +
+      `4. **MBA Unit Economics & Strategy**: Analyze retailer subscription revenue, referral fee margins (3.5%), and break-even basket forecasts (~40 baskets).\n` +
+      `5. **Automated Testing**: Explain our 22+ tests, reference requests, and edge-case scenarios.\n` +
+      `6. **Direct Navigation**: Navigate to any of our 9 platform pages (\`builder\`, \`catalogue\`, \`compare\`, \`business\`, \`tests\`, \`evidence\`, \`settings\`, \`dashboard\`).\n\n` +
+      `How can I assist your workspace journey today?`,
+    action: {
+      type: 'navigate',
+      tab: 'builder',
+      reason: 'Open Bundle Builder workspace'
+    },
+    model: 'heuristic-website-trainer'
+  };
+}
+

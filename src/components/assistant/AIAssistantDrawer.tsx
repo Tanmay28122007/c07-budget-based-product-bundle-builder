@@ -16,7 +16,8 @@ import {
   Package,
   Check,
   MessageSquare,
-  Loader2
+  Loader2,
+  Compass
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useApp } from '../../context/AppContext';
@@ -28,7 +29,8 @@ export interface ChatMessage {
   text: string;
   timestamp: string;
   action?: {
-    type: 'apply_bundle' | 'swap_product' | 'set_budget';
+    type: 'apply_bundle' | 'swap_product' | 'set_budget' | 'navigate';
+    tab?: string;
     title?: string;
     budget?: number;
     items?: Record<string, string>;
@@ -51,6 +53,7 @@ export const AIAssistantDrawer: React.FC = () => {
     validation,
     applyBundleRecommendation,
     swapProductById,
+    activeTab,
     setActiveTab
   } = useApp();
 
@@ -163,6 +166,7 @@ Choose your preferred language below or ask me anything to optimize your setup:`
       }));
 
       const contextPayload = {
+        activeTab,
         activityName: fixture.activity.name,
         budget,
         requiredSlots: fixture.activity.requiredSlots,
@@ -244,6 +248,8 @@ Choose your preferred language below or ask me anything to optimize your setup:`
       setActiveTab('builder');
     } else if (action.type === 'set_budget' && action.budget) {
       setBudget(action.budget);
+    } else if (action.type === 'navigate' && action.tab) {
+      setActiveTab(action.tab as any);
     }
 
     setMessages(prev =>

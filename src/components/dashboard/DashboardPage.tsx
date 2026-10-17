@@ -55,6 +55,13 @@ export const DashboardPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [authError, setAuthError] = useState('');
 
+  // Admin Sign In Page State (Dedicated sign in page, nothing else)
+  const [showAdminSignIn, setShowAdminSignIn] = useState(false);
+  const [adminId, setAdminId] = useState('admin@workspace.com');
+  const [adminPassword, setAdminPassword] = useState('admin123');
+  const [showAdminPassword, setShowAdminPassword] = useState(false);
+  const [adminAuthError, setAdminAuthError] = useState('');
+
   const handleCustomerAuth = (e: React.FormEvent) => {
     e.preventDefault();
     setAuthError('');
@@ -72,6 +79,21 @@ export const DashboardPage: React.FC = () => {
     }
     setShowAuthModal(false);
     loginAs('customer');
+  };
+
+  const handleAdminAuth = (e: React.FormEvent) => {
+    e.preventDefault();
+    setAdminAuthError('');
+    if (!adminId.trim()) {
+      setAdminAuthError('Please enter your Admin ID or Email.');
+      return;
+    }
+    if (!adminPassword.trim()) {
+      setAdminAuthError('Please enter your admin password.');
+      return;
+    }
+    setShowAdminSignIn(false);
+    loginAs('admin');
   };
 
   // Metrics computation from real loaded datasets
@@ -120,8 +142,131 @@ export const DashboardPage: React.FC = () => {
     downloadFile(csv, `test_results_${Date.now()}.csv`, 'text/csv');
   };
 
-  // If NOT logged in as Admin, the front page contains ONLY the two login choices: Customer or Admin
+  // If NOT logged in as Admin, check if Admin Sign In is requested
   if (userRole !== 'admin') {
+    // Dedicated Admin Sign In Page: Shows sign in page and nothing else
+    if (showAdminSignIn) {
+      return (
+        <div className="py-6 sm:py-12 flex flex-col items-center justify-center min-h-[72vh]">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 16 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 16 }}
+            transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+            className="bg-white border border-[#E6E1D3] rounded-[32px] p-8 sm:p-10 max-w-md w-full shadow-2xl relative overflow-hidden text-left"
+          >
+            {/* Top right decorative arc watermark */}
+            <div className="absolute top-0 right-0 w-36 h-36 bg-[#F5F5EC] rounded-bl-[120px] pointer-events-none -z-0" />
+
+            {/* Back to selection close button */}
+            <button
+              onClick={() => {
+                setShowAdminSignIn(false);
+                setAdminAuthError('');
+              }}
+              className="absolute top-5 right-5 p-2 rounded-full hover:bg-[#F4F1EA] text-[#8A8A88] hover:text-[#2C2C1E] transition-colors cursor-pointer z-10"
+              aria-label="Back to role selection"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="relative z-10">
+              {/* Icon Box */}
+              <div className="w-14 h-14 rounded-2xl bg-[#2C3A2B] text-white flex items-center justify-center mb-5 shadow-sm border border-[#E6E1D3]">
+                <ShieldCheck className="w-7 h-7 text-amber-200" />
+              </div>
+
+              <div className="flex items-center gap-2 mb-1.5">
+                <h2 className="font-serif text-3xl font-bold text-[#2C3A2B] tracking-tight">
+                  Admin Sign In
+                </h2>
+                <span className="text-[10px] uppercase font-bold tracking-wider px-2.5 py-0.5 rounded-full bg-[#F4F1EA] text-[#2C3A2B] border border-[#E6E1D3]">
+                  Manager
+                </span>
+              </div>
+              <p className="text-xs text-[#5A5A40] leading-relaxed">
+                Enter your administrator credentials to access the workspace.
+              </p>
+
+              {/* Sign In Form - strictly Sign In, nothing else */}
+              <form onSubmit={handleAdminAuth} className="mt-6 space-y-4">
+                {adminAuthError && (
+                  <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center gap-2">
+                    <AlertTriangle className="w-4 h-4 shrink-0 text-rose-600" />
+                    <span>{adminAuthError}</span>
+                  </div>
+                )}
+
+                {/* Admin ID / Email */}
+                <div>
+                  <label className="block text-[11px] font-bold text-[#5A5A40] uppercase tracking-wider mb-1">
+                    Admin ID or Email
+                  </label>
+                  <div className="relative">
+                    <Mail className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8A8A88]" />
+                    <input
+                      type="text"
+                      value={adminId}
+                      onChange={e => setAdminId(e.target.value)}
+                      placeholder="admin@workspace.com or ADMIN-01"
+                      required
+                      className="w-full pl-10 pr-3.5 py-2.5 bg-white border border-[#E6E1D3] rounded-xl text-xs text-[#2C2C1E] placeholder-[#8A8A88] focus:border-[#2C3A2B] focus:ring-2 focus:ring-[#2C3A2B]/20 outline-none transition-all font-mono"
+                    />
+                  </div>
+                </div>
+
+                {/* Password */}
+                <div>
+                  <label className="block text-[11px] font-bold text-[#5A5A40] uppercase tracking-wider mb-1">
+                    Password
+                  </label>
+                  <div className="relative">
+                    <Lock className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8A8A88]" />
+                    <input
+                      type={showAdminPassword ? 'text' : 'password'}
+                      value={adminPassword}
+                      onChange={e => setAdminPassword(e.target.value)}
+                      placeholder="Enter admin password"
+                      required
+                      className="w-full pl-10 pr-10 py-2.5 bg-white border border-[#E6E1D3] rounded-xl text-xs text-[#2C2C1E] placeholder-[#8A8A88] focus:border-[#2C3A2B] focus:ring-2 focus:ring-[#2C3A2B]/20 outline-none transition-all"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowAdminPassword(prev => !prev)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8A8A88] hover:text-[#2C2C1E] transition-colors p-1"
+                    >
+                      {showAdminPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Sign In Button */}
+                <button
+                  type="submit"
+                  className="w-full py-3.5 px-5 rounded-2xl bg-[#8B5A2B] hover:bg-[#724822] text-white text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2.5 shadow-md hover:shadow-xl transition-all cursor-pointer mt-3"
+                >
+                  <span>SIGN IN AS ADMIN</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+
+                {/* Back Link */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowAdminSignIn(false);
+                    setAdminAuthError('');
+                  }}
+                  className="w-full py-2 text-xs font-semibold text-[#8B8B7A] hover:text-[#2C2C1E] transition-colors cursor-pointer text-center"
+                >
+                  ← Back to Selection
+                </button>
+              </form>
+            </div>
+          </motion.div>
+        </div>
+      );
+    }
+
     return (
       <div className="py-6 sm:py-12 flex flex-col items-center justify-center min-h-[72vh]">
         {/* ========================================================================= */}
@@ -219,7 +364,10 @@ export const DashboardPage: React.FC = () => {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               transition={{ delay: 0.32, duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
               whileHover={{ y: -8, scale: 1.02 }}
-              onClick={() => loginAs('admin')}
+              onClick={() => {
+                setAdminAuthError('');
+                setShowAdminSignIn(true);
+              }}
               className="group relative bg-white border border-[#E6E1D3] rounded-[28px] p-8 sm:p-9 shadow-sm hover:shadow-[0_32px_64px_-12px_rgba(139,90,43,0.32)] transition-all duration-300 overflow-hidden cursor-pointer hover:border-[#8B5A2B] hover:ring-8 hover:ring-[#8B5A2B]/20 flex flex-col justify-between"
             >
               {/* Top right decorative arc watermark */}
@@ -248,7 +396,8 @@ export const DashboardPage: React.FC = () => {
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  loginAs('admin');
+                  setAdminAuthError('');
+                  setShowAdminSignIn(true);
                 }}
                 className="w-full py-3.5 px-5 rounded-2xl bg-[#8B5A2B] text-white text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2.5 shadow-md hover:shadow-2xl group-hover:bg-[#724822] group-hover:scale-[1.02] transition-all cursor-pointer"
               >
