@@ -7,13 +7,9 @@ import {
   AlertTriangle,
   Info,
   X,
-  ExternalLink,
-  ChevronDown,
-  LogOut,
-  ShoppingCart
+  LogOut
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
-import { formatINR } from '../../utils/pricing';
 
 interface HeaderProps {
   onToggleSidebar: () => void;
@@ -29,9 +25,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
     setActiveTab,
     userRole,
     loginAs,
-    logout,
-    validation,
-    toggleCart
+    logout
   } = useApp();
 
   const [showNotifications, setShowNotifications] = useState(false);
@@ -162,64 +156,17 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
           )}
         </div>
 
-        {/* Bundle Cart Option in Corner */}
-        <button
-          onClick={toggleCart}
-          aria-label="View bundle cart"
-          className={`relative flex items-center gap-2 px-3 py-1.5 rounded-xl border transition-all duration-200 cursor-pointer hover:scale-105 active:scale-95 ${validation.filledSlotCount > 0
-            ? 'bg-[#2C3A2B] hover:bg-[#1E281D] text-white border-[#2C3A2B] shadow-xs hover:shadow-md'
-            : 'bg-[#F4F1EA] hover:bg-[#E6E1D3] text-[#5A5A40] border-[#E6E1D3] hover:shadow-2xs'
-            }`}
-          title={`Bundle Cart: ${validation.filledSlotCount} of ${validation.totalSlotCount} slots filled`}
-        >
-          <div className="relative flex items-center justify-center">
-            <ShoppingCart className="w-4 h-4 transition-transform group-hover:scale-110" />
-            {validation.filledSlotCount > 0 && (
-              <span className="absolute -top-2 -right-2.5 min-w-4 h-4 px-1 rounded-full bg-amber-400 text-[#2C2C1E] font-bold text-[10px] flex items-center justify-center shadow-xs animate-badge-pulse">
-                {validation.filledSlotCount}
-              </span>
-            )}
-          </div>
-          <span className="hidden sm:inline font-semibold text-xs font-mono">
-            {validation.filledSlotCount > 0 ? formatINR(validation.landedPrice.landedPrice) : 'Cart'}
-          </span>
-        </button>
-
-        {/* Active Role Pill in Header */}
-        <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-[#E6E1D3] bg-[#F4F1EA] text-xs shadow-2xs">
-          <span className="text-[#8B8B7A] text-[10px] font-bold uppercase tracking-wider">Role:</span>
-          {userRole === 'admin' ? (
-            <span className="font-bold text-[#8B5A2B] flex items-center gap-1">
-              <span>Admin</span>
-            </span>
-          ) : userRole === 'customer' ? (
-            <span className="font-bold text-[#2C3A2B] flex items-center gap-1">
-              <span>Customer</span>
-            </span>
-          ) : (
-            <button
-              onClick={() => setActiveTab('dashboard')}
-              className="text-[#2C3A2B] font-bold hover:underline cursor-pointer"
-            >
-              Front Page (Login)
-            </button>
-          )}
-        </div>
-
-        {/* User Profile Avatar with Initials "TA" */}
+        {/* User Profile Avatar on Top Right Corner */}
         <div className="relative" ref={profileRef}>
           <button
             onClick={() => setShowProfile(prev => !prev)}
             aria-label="User profile settings"
-            className="flex items-center gap-2 pl-1 pr-1.5 py-1 rounded-xl hover:bg-[#F4F1EA] transition-colors cursor-pointer"
+            title="Tanmay Anand"
+            className="flex items-center justify-center p-0.5 rounded-full hover:ring-2 hover:ring-[#2C3A2B]/20 transition-all cursor-pointer group"
           >
-            <div className="w-7 h-7 rounded-full bg-[#2C3A2B] text-white flex items-center justify-center font-bold text-xs tracking-tight shadow-2xs ring-1 ring-[#E6E1D3]">
+            <div className="w-8 h-8 rounded-full bg-[#2C3A2B] text-white flex items-center justify-center font-bold text-xs tracking-tight shadow-xs ring-2 ring-[#E6E1D3] group-hover:ring-[#2C3A2B] transition-transform group-hover:scale-105">
               TA
             </div>
-            <span className="hidden sm:inline text-xs font-medium text-[#2C2C1E]">
-              {userRole === 'admin' ? 'Admin' : userRole === 'customer' ? 'Customer' : 'Guest'}
-            </span>
-            <ChevronDown className="w-3 h-3 text-[#8B8B7A]" />
           </button>
 
           {showProfile && (
@@ -235,7 +182,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
               </div>
 
               {/* Role Actions */}
-              <div className="p-1 border-b border-[#E6E1D3] mb-1 space-y-1">
+              <div className="p-1 space-y-1">
                 {userRole !== 'customer' && (
                   <button
                     onClick={() => {
@@ -246,18 +193,6 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
                   >
                     <span>Login as Customer</span>
                     <span className="text-[10px] font-mono text-[#8B8B7A]">Shopper</span>
-                  </button>
-                )}
-                {userRole !== 'admin' && (
-                  <button
-                    onClick={() => {
-                      loginAs('admin');
-                      setShowProfile(false);
-                    }}
-                    className="w-full text-left px-3 py-1.5 rounded-xl text-xs font-medium text-[#8B5A2B] hover:bg-[#F4F1EA] flex items-center justify-between cursor-pointer"
-                  >
-                    <span>Login as Admin</span>
-                    <span className="text-[10px] font-mono text-[#8B8B7A]">Manager</span>
                   </button>
                 )}
                 {userRole && (
@@ -272,42 +207,9 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
                   </button>
                 )}
               </div>
-
-              <button
-                onClick={() => {
-                  setActiveTab('evidence');
-                  setShowProfile(false);
-                }}
-                className="w-full text-left px-3 py-1.5 rounded-xl text-xs text-[#2C2C1E] hover:bg-[#F4F1EA] flex items-center justify-between cursor-pointer"
-              >
-                <span>Project Evidence Log</span>
-                <ExternalLink className="w-3 h-3 text-[#8B8B7A]" />
-              </button>
-              <button
-                onClick={() => {
-                  setActiveTab('settings');
-                  setShowProfile(false);
-                }}
-                className="w-full text-left px-3 py-1.5 rounded-xl text-xs text-[#2C2C1E] hover:bg-[#F4F1EA] cursor-pointer"
-              >
-                Fixture & Rule Configuration
-              </button>
             </div>
           )}
         </div>
-
-        {/* Top-Right Corner Logout Button */}
-        {userRole && (
-          <button
-            onClick={() => logout()}
-            aria-label="Logout"
-            title="Log out and return to homepage"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#F4F1EA] hover:bg-rose-50 text-[#5A5A40] hover:text-rose-700 border border-[#E6E1D3] hover:border-rose-200 text-xs font-semibold shadow-2xs transition-all cursor-pointer group shrink-0"
-          >
-            <LogOut className="w-3.5 h-3.5 text-[#8B8B7A] group-hover:text-rose-600 transition-colors" />
-            <span className="hidden sm:inline">Logout</span>
-          </button>
-        )}
       </div>
     </header>
   );
