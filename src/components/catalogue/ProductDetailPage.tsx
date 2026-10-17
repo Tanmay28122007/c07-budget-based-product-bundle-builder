@@ -57,7 +57,6 @@ export const ProductDetailPage: React.FC = () => {
     setActiveTab
   } = useApp();
 
-  const [activeThumbnail, setActiveThumbnail] = useState<'primary' | 'angle' | 'spec'>('primary');
   const [copiedLink, setCopiedLink] = useState(false);
   const [imgError, setImgError] = useState(false);
 
@@ -211,60 +210,6 @@ export const ProductDetailPage: React.FC = () => {
                 <span>C07 Benchmark Asset · {product.id}</span>
               </span>
             </div>
-          </div>
-
-          {/* Interactive Thumbnails Selector */}
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setActiveThumbnail('primary')}
-              className={`flex-1 p-2 rounded-2xl border transition-all cursor-pointer flex items-center gap-3 bg-white ${
-                activeThumbnail === 'primary'
-                  ? 'border-[#2C3A2B] ring-2 ring-[#2C3A2B]/15 shadow-xs'
-                  : 'border-[#E6E1D3] hover:border-[#8B8B7A]'
-              }`}
-            >
-              <div className="w-12 h-12 rounded-xl bg-[#FDFBF7] p-1 flex items-center justify-center shrink-0">
-                <img src={imgSrc} alt="Primary" className="w-full h-full object-contain mix-blend-multiply" />
-              </div>
-              <div className="text-left min-w-0">
-                <div className="text-xs font-bold text-[#2C3A2B] truncate">Primary Shot</div>
-                <div className="text-[10px] text-[#8B8B7A]">Studio angle</div>
-              </div>
-            </button>
-
-            <button
-              onClick={() => setActiveThumbnail('angle')}
-              className={`flex-1 p-2 rounded-2xl border transition-all cursor-pointer flex items-center gap-3 bg-white ${
-                activeThumbnail === 'angle'
-                  ? 'border-[#2C3A2B] ring-2 ring-[#2C3A2B]/15 shadow-xs'
-                  : 'border-[#E6E1D3] hover:border-[#8B8B7A]'
-              }`}
-            >
-              <div className="w-12 h-12 rounded-xl bg-[#F5F5EC] p-1 flex items-center justify-center shrink-0 text-[#8B8B7A]">
-                <Package className="w-6 h-6 text-[#8B5A2B]" />
-              </div>
-              <div className="text-left min-w-0">
-                <div className="text-xs font-bold text-[#2C3A2B] truncate">Specs & Scale</div>
-                <div className="text-[10px] text-[#8B8B7A]">Dimensions</div>
-              </div>
-            </button>
-
-            <button
-              onClick={() => setActiveThumbnail('spec')}
-              className={`flex-1 p-2 rounded-2xl border transition-all cursor-pointer flex items-center gap-3 bg-white ${
-                activeThumbnail === 'spec'
-                  ? 'border-[#2C3A2B] ring-2 ring-[#2C3A2B]/15 shadow-xs'
-                  : 'border-[#E6E1D3] hover:border-[#8B8B7A]'
-              }`}
-            >
-              <div className="w-12 h-12 rounded-xl bg-[#E8EEDD] p-1 flex items-center justify-center shrink-0 text-[#2C3A2B]">
-                <ShieldCheck className="w-6 h-6 text-emerald-700" />
-              </div>
-              <div className="text-left min-w-0">
-                <div className="text-xs font-bold text-[#2C3A2B] truncate">Verified</div>
-                <div className="text-[10px] text-[#8B8B7A]">Quality tested</div>
-              </div>
-            </button>
           </div>
         </div>
 
