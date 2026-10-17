@@ -585,29 +585,6 @@ export const CheckoutPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Prominent Demo Notice Banner */}
-      <div className="p-4 rounded-2xl bg-gradient-to-r from-amber-50 via-amber-50/70 to-[#FDFBF7] border border-amber-300/80 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div className="flex items-start gap-3">
-          <div className="p-2 bg-amber-100 rounded-xl text-amber-800 shrink-0 mt-0.5">
-            <AlertTriangle className="w-4 h-4" />
-          </div>
-          <div>
-            <div className="text-xs font-bold text-amber-900 uppercase tracking-wide">
-              Frontend-Only Demo Environment
-            </div>
-            <p className="text-xs text-amber-800/90 leading-relaxed mt-0.5">
-              No live payment gateway is connected. No actual debit/credit cards, UPI PINs, or banking credentials are collected or charged. This is an academic simulation of a complete e-commerce checkout flow.
-            </p>
-          </div>
-        </div>
-
-        <button
-          onClick={handleAutofillDemo}
-          className="shrink-0 px-3.5 py-1.5 rounded-xl text-xs font-semibold text-amber-900 bg-amber-100 hover:bg-amber-200 border border-amber-300 transition-colors cursor-pointer shadow-2xs"
-        >
-          Autofill Test Details
-        </button>
-      </div>
 
       {/* Main Grid: Left Column (Forms) + Right Column (Order Summary) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">

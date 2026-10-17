@@ -23,6 +23,7 @@ import {
   Eye,
   SlidersHorizontal,
   BookmarkPlus,
+  CreditCard,
   X
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
@@ -53,6 +54,7 @@ export const CompareBundlesPage: React.FC<CompareBundlesPageProps> = ({ initialM
     loadSavedBundle,
     deleteSavedBundle,
     setActiveTab,
+    initiateCheckout,
     toggleAssistant,
     userRole
   } = useApp();
@@ -676,7 +678,16 @@ export const CompareBundlesPage: React.FC<CompareBundlesPageProps> = ({ initialM
                   </p>
                 </div>
 
-
+                {/* BUY NOW Button */}
+                <button
+                  onClick={() => initiateCheckout()}
+                  disabled={!validation.isValid}
+                  className="w-full py-3 px-4 rounded-xl text-xs font-bold text-white bg-[#2C3A2B] hover:bg-[#3A4D39] disabled:bg-stone-300 disabled:cursor-not-allowed shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer"
+                  title={validation.isValid ? 'Proceed to Checkout & Simulated Payment' : 'Ensure bundle is complete, valid, and within budget to proceed'}
+                >
+                  <CreditCard className="w-4 h-4 text-emerald-300" />
+                  <span>BUY NOW — {formatINR(validation.landedPrice.landedPrice)}</span>
+                </button>
 
                 {/* Export Buttons */}
                 <div className="pt-2 flex items-center gap-2">
@@ -1071,10 +1082,19 @@ export const CompareBundlesPage: React.FC<CompareBundlesPageProps> = ({ initialM
                             {b.id === 'active_workspace' ? (
                               <div className="flex items-center gap-2">
                                 <button
-                                  onClick={() => setViewMode('workspace')}
-                                  className="px-3.5 py-1.5 rounded-xl text-xs font-semibold text-white bg-[#2C3A2B] hover:bg-[#3A4D39] shadow-2xs cursor-pointer"
+                                  onClick={() => initiateCheckout()}
+                                  disabled={!b.validation.isValid}
+                                  className="px-3.5 py-1.5 rounded-xl text-xs font-bold text-white bg-emerald-800 hover:bg-emerald-900 disabled:bg-stone-300 disabled:cursor-not-allowed shadow-2xs cursor-pointer inline-flex items-center gap-1.5"
+                                  title="Buy active bundle"
                                 >
-                                  Edit in Workspace
+                                  <CreditCard className="w-3.5 h-3.5" />
+                                  <span>BUY NOW</span>
+                                </button>
+                                <button
+                                  onClick={() => setViewMode('workspace')}
+                                  className="px-3 py-1.5 rounded-xl text-xs font-semibold text-[#2C3A2B] bg-[#F4F1EA] hover:bg-[#E6E1D3] border border-[#E6E1D3] shadow-2xs cursor-pointer"
+                                >
+                                  Edit
                                 </button>
                                 <button
                                   onClick={handleSnapshotActive}
@@ -1087,10 +1107,26 @@ export const CompareBundlesPage: React.FC<CompareBundlesPageProps> = ({ initialM
                             ) : (
                               <div className="flex items-center gap-2">
                                 <button
-                                  onClick={() => loadSavedBundle(b)}
-                                  className="px-3.5 py-1.5 rounded-xl text-xs font-semibold text-white bg-[#2C3A2B] hover:bg-[#3A4D39] shadow-2xs cursor-pointer"
+                                  onClick={() => {
+                                    initiateCheckout({
+                                      bundleName: b.name,
+                                      items: Object.values(b.items)
+                                        .filter((prod): prod is Product => prod !== null)
+                                        .map(prod => ({ product: prod, quantity: 1 }))
+                                    });
+                                  }}
+                                  disabled={!b.validation.isValid}
+                                  className="px-3.5 py-1.5 rounded-xl text-xs font-bold text-white bg-emerald-800 hover:bg-emerald-900 disabled:bg-stone-300 disabled:cursor-not-allowed shadow-2xs cursor-pointer inline-flex items-center gap-1.5"
+                                  title={`Buy ${b.name}`}
                                 >
-                                  Load Bundle
+                                  <CreditCard className="w-3.5 h-3.5" />
+                                  <span>BUY NOW</span>
+                                </button>
+                                <button
+                                  onClick={() => loadSavedBundle(b)}
+                                  className="px-3 py-1.5 rounded-xl text-xs font-semibold text-[#2C3A2B] bg-[#F4F1EA] hover:bg-[#E6E1D3] border border-[#E6E1D3] shadow-2xs cursor-pointer"
+                                >
+                                  Load
                                 </button>
                                 <button
                                   onClick={() => deleteSavedBundle(b.id)}
