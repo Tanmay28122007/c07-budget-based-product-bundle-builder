@@ -21,7 +21,6 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
   const {
-    fixture,
     searchQuery,
     setSearchQuery,
     notifications,
@@ -71,11 +70,6 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
 
       {/* Center / Right Controls */}
       <div className="flex items-center gap-3">
-        {/* Activity Selector */}
-        <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-[#E6E1D3] bg-[#F4F1EA]/80 text-xs">
-          <span className="text-[#5A5A40]">Activity:</span>
-          <span className="font-semibold text-[#2C3A2B]">{fixture.activity.name}</span>
-        </div>
 
         {/* Global Search Bar */}
         <div className="relative w-36 sm:w-48 lg:w-64">
