@@ -757,10 +757,7 @@
         "image": "../assets/P60.png"
       }
     ],
-    "required_slots": [
-      "Mouse",
-      "Keyboard"
-    ],
+    "required_slots": [],
     "budget_inr": 2200,
     "shipping_inr": 100,
     "compatible_port": "usb-c",

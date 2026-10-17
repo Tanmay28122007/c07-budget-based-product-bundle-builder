@@ -29,7 +29,16 @@ export function runReferenceRequestTest(
   shippingRule: ShippingRule,
   taxRule: TaxRule
 ): TestExecutionResult {
-  const activeSlots = requiredSlots.filter(s => ref.requiredSlotIds.includes(s.id));
+  const activeSlots: RequiredSlot[] = ref.requiredSlotIds.map(slotName => {
+    const existing = requiredSlots.find(s => s.id === slotName);
+    return existing || {
+      id: slotName,
+      label: slotName,
+      category: slotName,
+      description: `Required ${slotName}`,
+      priority: 'required' as const
+    };
+  });
 
   let actualResult = '';
   let compatibilityOutcome: TestExecutionResult['compatibilityOutcome'] = 'Compatible';

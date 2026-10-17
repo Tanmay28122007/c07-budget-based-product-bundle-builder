@@ -4,7 +4,7 @@ import fixtureJson from './fixture.json';
 export function mapC07Fixture(raw: any = fixtureJson): FixtureData {
   const records = raw.records || {};
   const rawProducts = records.products || [];
-  const rawSlots = records.required_slots || ['Mouse', 'Keyboard'];
+  const rawSlots: string[] = records.required_slots || [];
   const rawRequests = records.reference_requests || [];
 
   const products: Product[] = rawProducts.map((p: any) => {
@@ -62,7 +62,7 @@ export function mapC07Fixture(raw: any = fixtureJson): FixtureData {
       title: `Reference Request ${req.id} (Budget: ₹${Number(req.budget_inr).toLocaleString('en-IN')})`,
       budget: req.budget_inr,
       activityId: 'c07-bundle',
-      requiredSlotIds: req.required_slots || rawSlots,
+      requiredSlotIds: req.required_slots || (rawSlots.length > 0 ? rawSlots : ['Mouse', 'Keyboard']),
       description: `Target budget ₹${req.budget_inr} with shipping fee ₹${req.shipping_inr} and ${req.required_port || 'usb-c'} port. Expected: ${hasExpected ? req.expected_ids.join(', ') : 'None (Infeasible)'}.`,
       expectedFeasible: hasExpected,
       expectedLandedPriceMax: req.expected_total_inr ?? undefined,

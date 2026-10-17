@@ -486,7 +486,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   // Fixture State
   const [fixture, setFixture] = useState<FixtureData>(() => {
     try {
-      const saved = localStorage.getItem('c07_fixture_v2');
+      localStorage.removeItem('c07_fixture_v2');
+      const saved = localStorage.getItem('c07_fixture_v3');
       if (saved) {
         const parsed = JSON.parse(saved);
         if (parsed?.products?.length && parsed?.activity) {
@@ -507,6 +508,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     if (fixture.products.length < C07_DEFAULT_FIXTURE.products.length) {
       setFixture(C07_DEFAULT_FIXTURE);
       try {
+        localStorage.removeItem('c07_fixture_v3');
         localStorage.removeItem('c07_fixture_v2');
       } catch {}
     }
@@ -522,25 +524,21 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   const [currentItems, setCurrentItems] = useState<Record<string, Product | null>>(() => {
     try {
-      const saved = localStorage.getItem('c07_current_items_v2');
+      const saved = localStorage.getItem('c07_current_items_v3') || localStorage.getItem('c07_current_items_v2');
       if (saved) {
         const parsed = JSON.parse(saved);
-        // Verify slots match currently loaded fixture
-        const hasMatchingSlots = fixture.activity.requiredSlots.every(s => s.id in parsed);
-        if (hasMatchingSlots) return parsed;
+        // Remove stale Mouse and Keyboard slots
+        delete parsed['Mouse'];
+        delete parsed['Keyboard'];
+        return parsed;
       }
     } catch (e) {
       console.warn('Could not load saved current items:', e);
     }
-    // Initialize with default benchmark items if available (P07 Mouse & P08 Keyboard)
     const initial: Record<string, Product | null> = {};
     for (const slot of fixture.activity.requiredSlots) {
       initial[slot.id] = null;
     }
-    const p07 = fixture.products.find(p => p.id === 'P07');
-    const p08 = fixture.products.find(p => p.id === 'P08');
-    if (p07 && initial['Mouse'] !== undefined) initial['Mouse'] = p07;
-    if (p08 && initial['Keyboard'] !== undefined) initial['Keyboard'] = p08;
     return initial;
   });
 
