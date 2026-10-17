@@ -44,7 +44,9 @@ export const BundleBuilderPage: React.FC = () => {
   const [optimizerPreference, setOptimizerPreference] = useState<'lowest_cost' | 'best_value'>('lowest_cost');
   const [optimizationFeedback, setOptimizationFeedback] = useState<string | null>(null);
 
-  const budgetPresets = [35000, 55000, 75000, 95000, 120000];
+  const budgetPresets = fixture.activity.defaultBudget <= 10000 
+    ? [1000, 1999, 2000, 2200, 3000]
+    : [35000, 55000, 75000, 95000, 120000];
 
   const handleRunOptimizer = () => {
     const res = optimizeBundle(optimizerPreference);
@@ -69,7 +71,7 @@ export const BundleBuilderPage: React.FC = () => {
 
   const handleExportCSV = () => {
     const csv = exportBundleToCSV(
-      'Work from Home Setup',
+      fixture.activity.name,
       fixture.activity.name,
       budget,
       currentItems,
@@ -81,7 +83,7 @@ export const BundleBuilderPage: React.FC = () => {
 
   const handleExportJSON = () => {
     const data = {
-      bundleName: 'Work from Home Setup',
+      bundleName: fixture.activity.name,
       activity: fixture.activity,
       budget,
       selectedItems: currentItems,

@@ -277,14 +277,34 @@ export const ProductCataloguePage: React.FC = () => {
 
                       {/* Key Attributes Badges */}
                       <div className="mt-3 flex flex-wrap gap-1.5 text-[10px] font-mono text-[#5A5A40]">
-                        {p.weightKg > 0 && (
+                        {p.attributes.size && (
                           <span className="px-2 py-0.5 rounded-md bg-[#FDFBF7] border border-[#E6E1D3]">
-                            {p.weightKg} kg
+                            Size: {p.attributes.size}
+                          </span>
+                        )}
+                        {p.attributes.colour && (
+                          <span className="px-2 py-0.5 rounded-md bg-[#FDFBF7] border border-[#E6E1D3]">
+                            {p.attributes.colour}
+                          </span>
+                        )}
+                        {p.attributes.unitCostInr && (
+                          <span className="px-2 py-0.5 rounded-md bg-[#FDFBF7] border border-[#E6E1D3]">
+                            Cost: {formatINR(p.attributes.unitCostInr)}
                           </span>
                         )}
                         {p.attributes.connector && (
                           <span className="px-2 py-0.5 rounded-md bg-[#FDFBF7] border border-[#E6E1D3] uppercase">
                             {p.attributes.connector}
+                          </span>
+                        )}
+                        {p.attributes.compatibleWith?.length ? (
+                          <span className="px-2 py-0.5 rounded-md bg-[#FDFBF7] border border-[#E6E1D3]">
+                            {p.attributes.compatibleWith.join(', ')}
+                          </span>
+                        ) : null}
+                        {p.weightKg > 0 && !p.attributes.size && (
+                          <span className="px-2 py-0.5 rounded-md bg-[#FDFBF7] border border-[#E6E1D3]">
+                            {p.weightKg} kg
                           </span>
                         )}
                         {p.attributes.deskWidthCm && (
@@ -429,9 +449,15 @@ export const ProductCataloguePage: React.FC = () => {
 
                         <td className="py-3.5 px-4 text-[11px] text-[#5A5A40]">
                           <div className="space-y-0.5 font-mono">
-                            {p.weightKg > 0 && <span>Weight: {p.weightKg}kg</span>}
-                            {p.attributes.deskWidthCm && <span> · Width: {p.attributes.deskWidthCm}cm</span>}
+                            {p.attributes.size && <span>Size: {p.attributes.size}</span>}
+                            {p.attributes.colour && <span> · Colour: {p.attributes.colour}</span>}
+                            {p.attributes.unitCostInr && <span> · Cost: {formatINR(p.attributes.unitCostInr)}</span>}
                             {p.attributes.connector && <span> · Port: {p.attributes.connector.toUpperCase()}</span>}
+                            {p.attributes.compatibleWith?.length ? (
+                              <span> · Comp: {p.attributes.compatibleWith.join(', ')}</span>
+                            ) : null}
+                            {p.weightKg > 0 && !p.attributes.size && <span> · Weight: {p.weightKg}kg</span>}
+                            {p.attributes.deskWidthCm && <span> · Width: {p.attributes.deskWidthCm}cm</span>}
                             {p.attributes.ergonomicGrade && <span> · {p.attributes.ergonomicGrade}</span>}
                             {p.incompatibleProductIds?.length ? (
                               <span className="block text-[#C05621] font-sans text-[10px]">
@@ -542,13 +568,21 @@ export const ProductCataloguePage: React.FC = () => {
                 Compatibility Specifications
               </span>
               <div className="grid grid-cols-2 gap-2 text-xs font-mono bg-[#FDFBF7] p-3.5 rounded-xl border border-[#E6E1D3] text-[#2C3A2B]">
-                <div>Weight: {viewingProduct.weightKg} kg</div>
                 <div>Category: {viewingProduct.category}</div>
-                {viewingProduct.attributes.deskWidthCm && (
-                  <div>Width: {viewingProduct.attributes.deskWidthCm} cm</div>
-                )}
+                {viewingProduct.attributes.size && <div>Size: {viewingProduct.attributes.size}</div>}
+                {viewingProduct.attributes.colour && <div>Colour: {viewingProduct.attributes.colour}</div>}
+                {viewingProduct.attributes.unitCostInr && <div>Unit Cost: {formatINR(viewingProduct.attributes.unitCostInr)}</div>}
                 {viewingProduct.attributes.connector && (
                   <div>Port: {viewingProduct.attributes.connector.toUpperCase()}</div>
+                )}
+                {viewingProduct.attributes.compatibleWith?.length ? (
+                  <div>Compatibility: {viewingProduct.attributes.compatibleWith.join(', ')}</div>
+                ) : null}
+                {viewingProduct.weightKg > 0 && !viewingProduct.attributes.size && (
+                  <div>Weight: {viewingProduct.weightKg} kg</div>
+                )}
+                {viewingProduct.attributes.deskWidthCm && (
+                  <div>Width: {viewingProduct.attributes.deskWidthCm} cm</div>
                 )}
                 {viewingProduct.attributes.ergonomicGrade && (
                   <div>Grade: {viewingProduct.attributes.ergonomicGrade}</div>

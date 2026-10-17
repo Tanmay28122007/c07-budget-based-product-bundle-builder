@@ -1,0 +1,322 @@
+{
+  "case_id": "C07",
+  "synthetic": true,
+  "data_version": "v3.2",
+  "currency": "INR unless explicitly stated",
+  "missing_values": "null means unknown, never zero",
+  "records": {
+    "products": [
+      {
+        "product_id": "P01",
+        "title": "Blue Tshirt",
+        "category": "Tshirt",
+        "size": "M",
+        "colour": "Blue",
+        "price_inr": 500,
+        "unit_cost_inr": 300,
+        "stock": 0,
+        "compatible_with": [],
+        "image": "../assets/P01.png"
+      },
+      {
+        "product_id": "P02",
+        "title": "Blue Tshirt",
+        "category": "Tshirt",
+        "size": "M",
+        "colour": "Blue",
+        "price_inr": 550,
+        "unit_cost_inr": 330,
+        "stock": 10,
+        "compatible_with": [],
+        "image": "../assets/P02.png"
+      },
+      {
+        "product_id": "P03",
+        "title": "Red Tshirt",
+        "category": "Tshirt",
+        "size": "M",
+        "colour": "Red",
+        "price_inr": 450,
+        "unit_cost_inr": 270,
+        "stock": 5,
+        "compatible_with": [],
+        "image": "../assets/P03.png"
+      },
+      {
+        "product_id": "P04",
+        "title": "Blue Tshirt",
+        "category": "Tshirt",
+        "size": "L",
+        "colour": "Blue",
+        "price_inr": 500,
+        "unit_cost_inr": 300,
+        "stock": 7,
+        "compatible_with": [],
+        "image": "../assets/P04.png"
+      },
+      {
+        "product_id": "P05",
+        "title": "Blue Mug",
+        "category": "Mug",
+        "size": "One",
+        "colour": "Blue",
+        "price_inr": 250,
+        "unit_cost_inr": 150,
+        "stock": 15,
+        "compatible_with": [],
+        "image": "../assets/P05.png"
+      },
+      {
+        "product_id": "P06",
+        "title": "Red Mug",
+        "category": "Mug",
+        "size": "One",
+        "colour": "Red",
+        "price_inr": 300,
+        "unit_cost_inr": 180,
+        "stock": 0,
+        "compatible_with": [],
+        "image": "../assets/P06.png"
+      },
+      {
+        "product_id": "P07",
+        "title": "Black Mouse",
+        "category": "Mouse",
+        "size": "One",
+        "colour": "Black",
+        "price_inr": 700,
+        "unit_cost_inr": 420,
+        "stock": 20,
+        "compatible_with": [
+          "usb-c"
+        ],
+        "image": "../assets/P07.png"
+      },
+      {
+        "product_id": "P08",
+        "title": "Black Keyboard",
+        "category": "Keyboard",
+        "size": "One",
+        "colour": "Black",
+        "price_inr": 1200,
+        "unit_cost_inr": 720,
+        "stock": 5,
+        "compatible_with": [
+          "usb-c"
+        ],
+        "image": "../assets/P08.png"
+      },
+      {
+        "product_id": "P09",
+        "title": "Grey Hub",
+        "category": "Hub",
+        "size": "One",
+        "colour": "Grey",
+        "price_inr": 900,
+        "unit_cost_inr": 540,
+        "stock": 8,
+        "compatible_with": [
+          "usb-c"
+        ],
+        "image": "../assets/P09.png"
+      },
+      {
+        "product_id": "P10",
+        "title": "Green Bottle",
+        "category": "Bottle",
+        "size": "One",
+        "colour": "Green",
+        "price_inr": 450,
+        "unit_cost_inr": 270,
+        "stock": 12,
+        "compatible_with": [],
+        "image": "../assets/P10.png"
+      },
+      {
+        "product_id": "P11",
+        "title": "Blue Notebook",
+        "category": "Notebook",
+        "size": "One",
+        "colour": "Blue",
+        "price_inr": 200,
+        "unit_cost_inr": 120,
+        "stock": 30,
+        "compatible_with": [],
+        "image": "../assets/P11.png"
+      },
+      {
+        "product_id": "P12",
+        "title": "Grey Backpack",
+        "category": "Backpack",
+        "size": "One",
+        "colour": "Grey",
+        "price_inr": 1500,
+        "unit_cost_inr": 900,
+        "stock": 3,
+        "compatible_with": [],
+        "image": "../assets/P12.png"
+      }
+    ],
+    "required_slots": [
+      "Mouse",
+      "Keyboard"
+    ],
+    "budget_inr": 2200,
+    "shipping_inr": 100,
+    "compatible_port": "usb-c",
+    "expected_ids": [
+      "P07",
+      "P08"
+    ],
+    "expected_total_inr": 2000,
+    "reference_requests": [
+      {
+        "id": "B1",
+        "required_slots": [
+          "Mouse",
+          "Keyboard"
+        ],
+        "budget_inr": 1999,
+        "shipping_inr": 100,
+        "required_port": "usb-c",
+        "expected_ids": [],
+        "expected_total_inr": null
+      },
+      {
+        "id": "B2",
+        "required_slots": [
+          "Mouse",
+          "Keyboard"
+        ],
+        "budget_inr": 2000,
+        "shipping_inr": 100,
+        "required_port": "usb-c",
+        "expected_ids": [
+          "P07",
+          "P08"
+        ],
+        "expected_total_inr": 2000
+      },
+      {
+        "id": "B3",
+        "required_slots": [
+          "Mouse",
+          "Keyboard"
+        ],
+        "budget_inr": 2100,
+        "shipping_inr": 100,
+        "required_port": "usb-c",
+        "expected_ids": [
+          "P07",
+          "P08"
+        ],
+        "expected_total_inr": 2000
+      },
+      {
+        "id": "B4",
+        "required_slots": [
+          "Mouse",
+          "Keyboard"
+        ],
+        "budget_inr": 2200,
+        "shipping_inr": 100,
+        "required_port": "usb-c",
+        "expected_ids": [
+          "P07",
+          "P08"
+        ],
+        "expected_total_inr": 2000
+      },
+      {
+        "id": "B5",
+        "required_slots": [
+          "Mouse",
+          "Keyboard"
+        ],
+        "budget_inr": 2500,
+        "shipping_inr": 100,
+        "required_port": "usb-c",
+        "expected_ids": [
+          "P07",
+          "P08"
+        ],
+        "expected_total_inr": 2000
+      },
+      {
+        "id": "B6",
+        "required_slots": [
+          "Mouse",
+          "Keyboard"
+        ],
+        "budget_inr": 1000,
+        "shipping_inr": 100,
+        "required_port": "usb-c",
+        "expected_ids": [],
+        "expected_total_inr": null
+      },
+      {
+        "id": "B7",
+        "required_slots": [
+          "Mouse",
+          "Keyboard"
+        ],
+        "budget_inr": 1900,
+        "shipping_inr": 100,
+        "required_port": "usb-c",
+        "expected_ids": [],
+        "expected_total_inr": null
+      },
+      {
+        "id": "B8",
+        "required_slots": [
+          "Mouse",
+          "Keyboard"
+        ],
+        "budget_inr": 2001,
+        "shipping_inr": 100,
+        "required_port": "usb-c",
+        "expected_ids": [
+          "P07",
+          "P08"
+        ],
+        "expected_total_inr": 2000
+      },
+      {
+        "id": "B9",
+        "required_slots": [
+          "Mouse",
+          "Keyboard"
+        ],
+        "budget_inr": 3000,
+        "shipping_inr": 100,
+        "required_port": "usb-c",
+        "expected_ids": [
+          "P07",
+          "P08"
+        ],
+        "expected_total_inr": 2000
+      },
+      {
+        "id": "B10",
+        "required_slots": [
+          "Mouse",
+          "Keyboard"
+        ],
+        "budget_inr": 4000,
+        "shipping_inr": 100,
+        "required_port": "usb-c",
+        "expected_ids": [
+          "P07",
+          "P08"
+        ],
+        "expected_total_inr": 2000
+      }
+    ]
+  },
+  "public_checks": [
+    "Every bundle fills all required slots and satisfies the supplied compatibility matrix.",
+    "Total stays within budget on ten reference requests, including delivery charges where defined.",
+    "Replacement either preserves validity or explains why no feasible bundle exists."
+  ],
+  "limit": "Small teaching fixture for a bounded prototype. Market demand, willingness to pay and production performance remain unproven."
+}

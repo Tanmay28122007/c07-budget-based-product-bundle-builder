@@ -14,7 +14,7 @@ import {
   ProjectEvidenceRecord,
   NegotiatedScope
 } from '../types';
-import { DEFAULT_SYNTHETIC_FIXTURE } from '../data/defaultFixture';
+import { DEFAULT_SYNTHETIC_FIXTURE, mapC07Fixture } from '../data/defaultFixture';
 import { validateBundle } from '../utils/bundleValidation';
 import { findValidBundle, OptimizationResult } from '../utils/bundleOptimizer';
 import { runAllTests, runReferenceRequestTest, EDGE_CASE_TESTS } from '../utils/testRunner';
@@ -338,7 +338,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   // Fixture State
   const [fixture, setFixture] = useState<FixtureData>(() => {
     try {
-      const saved = localStorage.getItem('c07_fixture_v1');
+      const saved = localStorage.getItem('c07_fixture_v2');
       if (saved) {
         const parsed = JSON.parse(saved);
         if (parsed?.products?.length && parsed?.activity) return parsed;
@@ -353,14 +353,19 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   // Bundle State
   const [budget, setBudgetState] = useState<number>(() => {
-    const saved = localStorage.getItem('c07_budget_v1');
-    return saved ? Number(saved) : (fixture.activity.defaultBudget || 75000);
+    const saved = localStorage.getItem('c07_budget_v2');
+    return saved ? Number(saved) : (fixture.activity.defaultBudget || 2200);
   });
 
   const [currentItems, setCurrentItems] = useState<Record<string, Product | null>>(() => {
     try {
-      const saved = localStorage.getItem('c07_current_items_v1');
-      if (saved) return JSON.parse(saved);
+      const saved = localStorage.getItem('c07_current_items_v2');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        // Verify slots match currently loaded fixture
+        const hasMatchingSlots = fixture.activity.requiredSlots.every(s => s.id in parsed);
+        if (hasMatchingSlots) return parsed;
+      }
     } catch (e) {
       console.warn('Could not load saved current items:', e);
     }
@@ -459,8 +464,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   // Persist important data
   useEffect(() => {
     try {
-      localStorage.setItem('c07_budget_v1', budget.toString());
-      localStorage.setItem('c07_current_items_v1', JSON.stringify(currentItems));
+      localStorage.setItem('c07_budget_v2', budget.toString());
+      localStorage.setItem('c07_current_items_v2', JSON.stringify(currentItems));
       localStorage.setItem('c07_saved_bundles_v1', JSON.stringify(savedBundles));
       localStorage.setItem('c07_test_results_v1', JSON.stringify(testResults));
       localStorage.setItem('c07_unit_economics_v1', JSON.stringify(unitEconomics));
@@ -723,29 +728,35 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }, 250);
   };
 
-  const loadFixtureData = (data: FixtureData): { success: boolean; error?: string } => {
+  const loadFixtureData = (data: any): { success: boolean; error?: string } => {
     try {
-      if (!data || !data.activity || !Array.isArray(data.products)) {
-        return { success: false, error: "Invalid fixture format: missing activity or products array." };
+      let targetFixture: FixtureData;
+      if (data?.records?.products || data?.case_id) {
+        targetFixture = mapC07Fixture(data);
+      } else if (data?.activity && Array.isArray(data?.products)) {
+        targetFixture = data as FixtureData;
+      } else {
+        return { success: false, error: "Invalid fixture format: missing records.products or activity schema." };
       }
-      if (!Array.isArray(data.activity.requiredSlots) || data.activity.requiredSlots.length === 0) {
+
+      if (!Array.isArray(targetFixture.activity.requiredSlots) || targetFixture.activity.requiredSlots.length === 0) {
         return { success: false, error: "Invalid fixture: activity must have at least one required slot." };
       }
 
-      setFixture(data);
-      localStorage.setItem('c07_fixture_v1', JSON.stringify(data));
+      setFixture(targetFixture);
+      localStorage.setItem('c07_fixture_v2', JSON.stringify(targetFixture));
 
       // Reset current items to match new slots
       const emptyItems: Record<string, Product | null> = {};
-      for (const slot of data.activity.requiredSlots) {
+      for (const slot of targetFixture.activity.requiredSlots) {
         emptyItems[slot.id] = null;
       }
       setCurrentItems(emptyItems);
-      if (data.activity.defaultBudget) {
-        setBudget(data.activity.defaultBudget);
+      if (targetFixture.activity.defaultBudget) {
+        setBudget(targetFixture.activity.defaultBudget);
       }
 
-      addNotification("Fixture Loaded", `Successfully loaded ${data.products.length} products and ${data.activity.requiredSlots.length} slots.`, 'success');
+      addNotification("Fixture Loaded", `Successfully loaded ${targetFixture.products.length} products and ${targetFixture.activity.requiredSlots.length} slots.`, 'success');
       return { success: true };
     } catch (err: any) {
       return { success: false, error: err?.message || "Failed parsing fixture." };
@@ -754,14 +765,19 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   const resetFixtureToDefault = () => {
     setFixture(DEFAULT_SYNTHETIC_FIXTURE);
+    localStorage.removeItem('c07_fixture_v2');
     localStorage.removeItem('c07_fixture_v1');
+    localStorage.removeItem('c07_budget_v2');
+    localStorage.removeItem('c07_budget_v1');
+    localStorage.removeItem('c07_current_items_v2');
+    localStorage.removeItem('c07_current_items_v1');
     const emptyItems: Record<string, Product | null> = {};
     for (const slot of DEFAULT_SYNTHETIC_FIXTURE.activity.requiredSlots) {
       emptyItems[slot.id] = null;
     }
     setCurrentItems(emptyItems);
     setBudget(DEFAULT_SYNTHETIC_FIXTURE.activity.defaultBudget);
-    addNotification("Fixture Reset", "Restored default synthetic C07 Work from Home fixture.", 'info');
+    addNotification("Fixture Reset", "Restored default C07 benchmark dataset (fixture.json).", 'info');
   };
 
   const updateShippingRule = (rule: Partial<ShippingRule>) => {

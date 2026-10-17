@@ -124,19 +124,19 @@ export const SettingsPage: React.FC = () => {
           <div className="flex items-center gap-2">
             <span className="text-xs font-bold text-[#2C3A2B]">Active Source of Truth:</span>
             <span
-              className={`text-xs font-mono px-2.5 py-0.5 rounded-full font-semibold ${
+              className={`text-[11px] font-mono px-3 py-1 rounded-full font-semibold ${
                 isCustomFixture
-                  ? 'bg-[#A3B18A]/25 text-[#2C3A2B] border border-[#A3B18A]/40'
-                  : 'bg-[#F5F5EC] text-[#5A5A40] border border-[#E6E1D3]'
+                  ? 'bg-[#8B5A2B]/15 text-[#8B5A2B] border border-[#8B5A2B]/30'
+                  : 'bg-[#A3B18A]/20 text-[#2C3A2B] border border-[#A3B18A]/40'
               }`}
             >
-              {isCustomFixture ? 'Custom Imported Fixture' : 'Synthetic Preview Fixture (C07)'}
+              {isCustomFixture ? 'Custom Imported Fixture' : 'C07 Default Dataset (fixture.json)'}
             </span>
           </div>
           <p className="text-xs text-[#5A5A40] mt-1">
             {isCustomFixture
-              ? `Loaded version ${fixture.version || '1.0'}: ${fixture.products.length} products and ${fixture.activity.requiredSlots.length} required slots.`
-              : 'The official Starter_Data/C07/fixture.json was not present in the runtime. Running in synthetic baseline demo mode with all required business rules active.'}
+              ? `Loaded custom version ${fixture.version || '1.0'}: ${fixture.products.length} products and ${fixture.activity.requiredSlots.length} required slots.`
+              : `Official C07 fixture active: ${fixture.products.length} products (P01–P12), ${fixture.activity.requiredSlots.length} required slots (${fixture.activity.requiredSlots.map(s => s.label).join(', ')}), default budget ₹${fixture.activity.defaultBudget.toLocaleString('en-IN')}.`}
           </p>
         </div>
 

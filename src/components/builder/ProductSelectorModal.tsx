@@ -205,12 +205,18 @@ export const ProductSelectorModal: React.FC<ProductSelectorModalProps> = ({
 
                         {/* Specs & Attributes List */}
                         <div className="mt-2.5 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-[#5A5A40] font-mono">
-                          {product.weightKg > 0 && <span>Weight: {product.weightKg}kg</span>}
-                          {product.attributes.deskWidthCm && (
-                            <span>Width: {product.attributes.deskWidthCm}cm</span>
-                          )}
+                          {product.attributes.size && <span>Size: {product.attributes.size}</span>}
+                          {product.attributes.colour && <span>Colour: {product.attributes.colour}</span>}
+                          {product.attributes.unitCostInr && <span>Unit Cost: {formatINR(product.attributes.unitCostInr)}</span>}
                           {product.attributes.connector && (
                             <span>Port: {product.attributes.connector.toUpperCase()}</span>
+                          )}
+                          {product.attributes.compatibleWith?.length ? (
+                            <span>Interface: {product.attributes.compatibleWith.join(', ')}</span>
+                          ) : null}
+                          {product.weightKg > 0 && !product.attributes.size && <span>Weight: {product.weightKg}kg</span>}
+                          {product.attributes.deskWidthCm && (
+                            <span>Width: {product.attributes.deskWidthCm}cm</span>
                           )}
                           {product.attributes.ergonomicGrade && (
                             <span>Grade: {product.attributes.ergonomicGrade}</span>

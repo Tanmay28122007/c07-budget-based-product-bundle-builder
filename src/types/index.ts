@@ -9,6 +9,11 @@ export interface Product {
   model: string;
   description: string;
   weightKg: number;
+  image?: string;
+  unitCostInr?: number;
+  size?: string;
+  colour?: string;
+  compatibleWith?: string[];
   attributes: {
     connector?: 'usb-c' | 'thunderbolt' | 'hdmi' | 'wireless' | 'wired';
     deskWidthCm?: number;
@@ -22,6 +27,12 @@ export interface Product {
     chairSeatHeightCm?: { min: number; max: number };
     lightMountType?: 'screen_clamp' | 'weighted_base';
     ergonomicGrade?: 'Tier-1' | 'Tier-2' | 'Standard';
+    size?: string;
+    colour?: string;
+    compatibleWith?: string[];
+    unitCostInr?: number;
+    image?: string;
+    [key: string]: any;
   };
   incompatibleProductIds?: string[];
   notes?: string;
@@ -115,6 +126,8 @@ export interface ReferenceRequest {
   description: string;
   expectedFeasible: boolean;
   expectedLandedPriceMax?: number;
+  expectedIds?: string[];
+  requiredPort?: string;
   notes: string;
 }
 

@@ -1,6 +1,116 @@
-import { FixtureData } from '../types';
+import { FixtureData, Product, RequiredSlot, ReferenceRequest } from '../types';
+import fixtureJson from './fixture.json';
 
-export const DEFAULT_SYNTHETIC_FIXTURE: FixtureData = {
+export function mapC07Fixture(raw: any = fixtureJson): FixtureData {
+  const records = raw.records || {};
+  const rawProducts = records.products || [];
+  const rawSlots = records.required_slots || ['Mouse', 'Keyboard'];
+  const rawRequests = records.reference_requests || [];
+
+  const products: Product[] = rawProducts.map((p: any) => {
+    const isUsbC = Array.isArray(p.compatible_with) && p.compatible_with.includes('usb-c');
+    const inStock = typeof p.stock === 'number' ? p.stock > 0 : Boolean(p.inStock);
+    const stockQty = typeof p.stock === 'number' ? p.stock : (p.stockQuantity ?? (inStock ? 10 : 0));
+    const price = p.price_inr ?? p.price ?? 0;
+    const unitCost = p.unit_cost_inr ?? p.unitCostInr ?? Math.round(price * 0.6);
+
+    return {
+      id: p.product_id || p.id,
+      name: p.title || p.name,
+      category: p.category,
+      price: price,
+      inStock: inStock,
+      stockQuantity: stockQty,
+      brand: p.category === 'Mouse' || p.category === 'Keyboard' || p.category === 'Hub' 
+        ? 'Peripherals' 
+        : p.category === 'Tshirt' || p.category === 'Backpack' 
+        ? 'C07 Apparel' 
+        : 'C07 Essentials',
+      model: p.product_id || p.id,
+      description: `${p.colour || ''} ${p.title || p.name}${p.size && p.size !== 'One' ? ' (Size: ' + p.size + ')' : ''} · Unit Cost: ₹${unitCost}`,
+      weightKg: p.category === 'Backpack' ? 1.0 : p.category === 'Keyboard' ? 0.7 : p.category === 'Mouse' ? 0.2 : 0.4,
+      image: p.image,
+      unitCostInr: unitCost,
+      size: p.size,
+      colour: p.colour,
+      compatibleWith: p.compatible_with || [],
+      attributes: {
+        connector: isUsbC ? 'usb-c' : undefined,
+        size: p.size,
+        colour: p.colour,
+        unitCostInr: unitCost,
+        image: p.image,
+        compatibleWith: p.compatible_with || [],
+        rawStock: p.stock
+      },
+      incompatibleProductIds: []
+    };
+  });
+
+  const requiredSlots: RequiredSlot[] = rawSlots.map((slotName: string) => ({
+    id: slotName,
+    label: slotName,
+    category: slotName,
+    description: `Required ${slotName} peripheral compatible with ${records.compatible_port || 'usb-c'}.`,
+    priority: 'required'
+  }));
+
+  const referenceRequests: ReferenceRequest[] = rawRequests.map((req: any) => {
+    const hasExpected = Array.isArray(req.expected_ids) && req.expected_ids.length > 0;
+    return {
+      id: req.id,
+      title: `Reference Request ${req.id} (Budget: ₹${Number(req.budget_inr).toLocaleString('en-IN')})`,
+      budget: req.budget_inr,
+      activityId: 'c07-bundle',
+      requiredSlotIds: req.required_slots || rawSlots,
+      description: `Target budget ₹${req.budget_inr} with shipping fee ₹${req.shipping_inr} and ${req.required_port || 'usb-c'} port. Expected: ${hasExpected ? req.expected_ids.join(', ') : 'None (Infeasible)'}.`,
+      expectedFeasible: hasExpected,
+      expectedLandedPriceMax: req.expected_total_inr ?? undefined,
+      expectedIds: req.expected_ids || [],
+      requiredPort: req.required_port || 'usb-c',
+      notes: `Expected Landed Total: ${req.expected_total_inr ? '₹' + req.expected_total_inr : 'Infeasible (Null)'}`
+    };
+  });
+
+  return {
+    version: raw.data_version ? `v${raw.data_version}-c07` : '3.2.0-c07',
+    isSynthetic: true,
+    activity: {
+      id: raw.case_id || 'C07',
+      name: 'C07 Product Bundle',
+      description: 'Budget-based product bundle builder satisfying compatibility matrix and required slot constraints.',
+      defaultBudget: records.budget_inr || 2200,
+      requiredSlots
+    },
+    products,
+    shippingRule: {
+      baseFee: records.shipping_inr ?? 100,
+      freeShippingThreshold: 999999, // Flat shipping charge in C07 benchmark
+      heavyItemSurchargePerItem: 0,
+      heavyThresholdKg: 999
+    },
+    taxRule: {
+      taxRate: 0, // Benchmark total 2000 = 700 (mouse) + 1200 (keyboard) + 100 (shipping)
+      taxName: 'Tax Included (0% extra)'
+    },
+    compatibilityRules: [
+      {
+        id: 'c07_port_compatibility',
+        name: 'USB-C Peripheral Port Compatibility',
+        categoryA: 'Mouse',
+        categoryB: 'Keyboard',
+        description: 'Selected peripheral devices must support the specified USB-C connection standard.',
+        validatorType: 'explicit_id_block'
+      }
+    ],
+    referenceRequests
+  };
+}
+
+export const C07_DEFAULT_FIXTURE: FixtureData = mapC07Fixture(fixtureJson);
+export const DEFAULT_SYNTHETIC_FIXTURE: FixtureData = C07_DEFAULT_FIXTURE;
+
+export const WFH_SYNTHETIC_FIXTURE: FixtureData = {
   version: "1.0.0-synthetic-c07",
   isSynthetic: true,
   activity: {

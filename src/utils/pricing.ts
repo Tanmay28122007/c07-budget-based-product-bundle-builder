@@ -47,8 +47,9 @@ export function calculateLandedPrice(
   const netShipping = productSubtotal > 0 ? baseShipping + heavySurcharge : 0;
   const shippingFee = productSubtotal > 0 ? (shippingRule.baseFee + heavySurcharge) : 0;
 
-  // Tax calculation (e.g. 18% GST on product subtotal)
-  const taxAmount = Math.round(productSubtotal * (taxRule.taxRate || 0.18));
+  // Tax calculation (e.g. 18% GST or 0% when tax is included)
+  const taxRate = typeof taxRule.taxRate === 'number' ? taxRule.taxRate : 0.18;
+  const taxAmount = Math.round(productSubtotal * taxRate);
 
   const landedPrice = productSubtotal + netShipping + taxAmount;
   const remainingBudget = budget - landedPrice;
