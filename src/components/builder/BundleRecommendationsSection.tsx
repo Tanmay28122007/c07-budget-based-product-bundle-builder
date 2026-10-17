@@ -289,10 +289,7 @@ export const BundleRecommendationsSection: React.FC<BundleRecommendationsSection
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold tracking-wider uppercase bg-[#2C3A2B] text-amber-200 shadow-2xs">
-                Bundles Explorer
-              </span>
-              <span className="text-xs text-[#8B8B7A] font-mono">
+              <span className="text-xs text-[#8B8B7A] font-mono font-semibold">
                 {bundles.length} bundles available
               </span>
             </div>
@@ -328,59 +325,32 @@ export const BundleRecommendationsSection: React.FC<BundleRecommendationsSection
           </div>
         </div>
 
-        {/* Filter Controls: Must-Have Product & Target Budget */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
-          {/* Insert Specific Required Item */}
-          <div>
-            <label className="text-[10px] font-mono uppercase tracking-wider text-[#8B8B7A] font-bold block mb-1.5">
-              Insert Must-Have Product
-            </label>
-            <form onSubmit={handleAddRequirement} className="flex items-center gap-1.5">
-              <select
-                value={selectedProductIdInput}
-                onChange={(e) => setSelectedProductIdInput(e.target.value)}
-                className="flex-1 py-2.5 px-3 rounded-xl text-xs bg-[#FDFBF7] border border-[#E6E1D3] text-[#2C3A2B] focus:outline-none focus:border-[#2C3A2B] shadow-2xs cursor-pointer truncate"
-              >
-                <option value="">+ Choose product to insert...</option>
-                {fixture.products.map(p => (
-                  <option key={p.id} value={p.id}>
-                    {p.name} ({formatINR(p.price)})
-                  </option>
-                ))}
-              </select>
-              <button
-                type="submit"
-                disabled={!selectedProductIdInput}
-                className="px-4 py-2.5 rounded-xl text-xs font-bold text-white bg-[#2C3A2B] hover:bg-[#1E281D] disabled:bg-[#E6E1D3] disabled:text-[#8B8B7A] disabled:cursor-not-allowed transition-colors shadow-2xs shrink-0 cursor-pointer"
-              >
-                Insert
-              </button>
-            </form>
-          </div>
-
-          {/* Target Budget Filter */}
-          <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <label className="text-[10px] font-mono uppercase tracking-wider text-[#8B8B7A] font-bold">
-                Target Budget
-              </label>
-              <span className="font-mono text-xs font-bold text-[#2C3A2B]">
-                {formatINR(appBudget)}
-              </span>
-            </div>
-
-            <div className="flex items-center gap-2 pt-1.5">
-              <input
-                type="range"
-                min="10000"
-                max="250000"
-                step="5000"
-                value={appBudget}
-                onChange={(e) => setBudget(Number(e.target.value))}
-                className="w-full accent-[#2C3A2B] cursor-pointer"
-              />
-            </div>
-          </div>
+        {/* Filter Controls: Must-Have Product */}
+        <div className="pt-2 max-w-xl">
+          <label className="text-[10px] font-mono uppercase tracking-wider text-[#8B8B7A] font-bold block mb-1.5">
+            Insert Must-Have Product
+          </label>
+          <form onSubmit={handleAddRequirement} className="flex items-center gap-2">
+            <select
+              value={selectedProductIdInput}
+              onChange={(e) => setSelectedProductIdInput(e.target.value)}
+              className="flex-1 py-2.5 px-3 rounded-xl text-xs bg-[#FDFBF7] border border-[#E6E1D3] text-[#2C3A2B] focus:outline-none focus:border-[#2C3A2B] shadow-2xs cursor-pointer truncate"
+            >
+              <option value="">+ Choose product to insert...</option>
+              {fixture.products.map(p => (
+                <option key={p.id} value={p.id}>
+                  {p.name} ({formatINR(p.price)})
+                </option>
+              ))}
+            </select>
+            <button
+              type="submit"
+              disabled={!selectedProductIdInput}
+              className="px-4 py-2.5 rounded-xl text-xs font-bold text-white bg-[#2C3A2B] hover:bg-[#1E281D] disabled:bg-[#E6E1D3] disabled:text-[#8B8B7A] disabled:cursor-not-allowed transition-colors shadow-2xs shrink-0 cursor-pointer"
+            >
+              Insert
+            </button>
+          </form>
         </div>
 
         {/* Active Requirements List / Filter Chips */}
