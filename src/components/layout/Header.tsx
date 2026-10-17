@@ -9,7 +9,6 @@ import {
   X,
   ExternalLink,
   ChevronDown,
-  Sparkles,
   LogOut
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
@@ -27,7 +26,6 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
     markNotificationsRead,
     clearNotifications,
     setActiveTab,
-    toggleAssistant,
     userRole,
     loginAs,
     logout
@@ -94,19 +92,6 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
             </button>
           )}
         </div>
-
-        {/* AI Assistant Button */}
-        <button
-          onClick={toggleAssistant}
-          aria-label="Open AI Assistant"
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#F4F1EA] hover:bg-[#E6E1D3]/70 text-[#2C3A2B] font-medium text-xs border border-[#E6E1D3] shadow-2xs transition-all cursor-pointer group"
-        >
-          <Sparkles className="w-3.5 h-3.5 text-[#8B5A2B] group-hover:rotate-12 transition-transform" />
-          <span className="hidden sm:inline font-semibold">AI Assistant</span>
-          <span className="px-1.5 py-0.2 rounded-md bg-[#8B5A2B]/15 text-[10px] font-mono font-bold text-[#8B5A2B]">
-            Gemini
-          </span>
-        </button>
 
         {/* Notifications Popover */}
         <div className="relative" ref={notifRef}>
