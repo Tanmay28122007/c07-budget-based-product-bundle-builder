@@ -160,7 +160,7 @@ If no API action is needed, simply provide helpful guidance, comparisons, or ans
           apiKey,
           httpOptions: {
             headers: {
-              'User-Agent': 'aistudio-build'
+              'User-Agent': 'bundle-builder'
             }
           }
         });
