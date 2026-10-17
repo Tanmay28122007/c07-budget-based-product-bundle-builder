@@ -477,10 +477,6 @@ Choose your preferred language below or ask me anything to assemble, optimize, o
                     <h3 className="font-serif font-bold text-xs sm:text-sm text-[#2C2C1E] truncate">
                       Sahay AI
                     </h3>
-                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-mono font-medium bg-[#A3B18A]/20 text-[#2C3A2B] border border-[#A3B18A]/40 shrink-0">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                      Live
-                    </span>
                   </div>
                   <p className="text-[10px] text-[#8A8A88] truncate">Hardware Feasibility & Optimization</p>
                 </div>
