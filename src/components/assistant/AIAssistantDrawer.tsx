@@ -79,11 +79,11 @@ export const AIAssistantDrawer: React.FC = () => {
     {
       id: 'msg-welcome',
       role: 'assistant',
-      text: `Welcome to your **AI Bundle Assistant**! 
+      text: `Welcome to **Sahay AI**! 
 
-I am your intelligent Workspace & Hardware Bundle Consultant powered by Gemini.
+I am your intelligent Workspace & Hardware Bundle Consultant.
 
-Choose your preferred language below or ask me anything to optimize your setup:`,
+Choose your preferred language below or ask me anything to assemble, optimize, or troubleshoot your workstation setup:`,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }
   ]);
@@ -284,32 +284,79 @@ Choose your preferred language below or ask me anything to optimize your setup:`
     ]);
   };
 
-  // Helper to format basic markdown text (bold, lists, code)
+  // Helper to format rich markdown text (headings, bullet lists, numbered lists, dividers, pills, badges)
   const renderFormattedText = (text: string) => {
     const lines = text.split('\n');
     return lines.map((line, idx) => {
-      // Bullet points
-      if (line.startsWith('- ') || line.startsWith('* ')) {
-        const content = line.substring(2);
+      const trimmed = line.trimStart();
+      const indent = line.length - trimmed.length;
+
+      // Headings
+      if (trimmed.startsWith('### ')) {
         return (
-          <li key={idx} className="ml-4 list-disc text-stone-700 my-0.5 leading-relaxed">
-            {renderInlineMarkdown(content)}
-          </li>
+          <h4 key={idx} className="font-serif font-bold text-[#2C3A2B] text-xs sm:text-sm mt-3 mb-1">
+            {renderInlineMarkdown(trimmed.replace('### ', ''))}
+          </h4>
         );
       }
-      // Numbered lists
-      if (/^\d+\.\s/.test(line)) {
-        const content = line.replace(/^\d+\.\s/, '');
+      if (trimmed.startsWith('## ')) {
         return (
-          <li key={idx} className="ml-4 list-decimal text-stone-700 my-0.5 leading-relaxed">
-            {renderInlineMarkdown(content)}
-          </li>
+          <h3 key={idx} className="font-serif font-bold text-[#2C3A2B] text-sm sm:text-base mt-3.5 mb-1.5">
+            {renderInlineMarkdown(trimmed.replace('## ', ''))}
+          </h3>
         );
       }
-      // Empty lines
-      if (!line.trim()) {
-        return <div key={idx} className="h-2" />;
+      if (trimmed.startsWith('# ')) {
+        return (
+          <h2 key={idx} className="font-serif font-bold text-[#2C3A2B] text-base mt-4 mb-2">
+            {renderInlineMarkdown(trimmed.replace('# ', ''))}
+          </h2>
+        );
       }
+
+      // Horizontal Rule / Divider
+      if (trimmed === '---' || trimmed.startsWith('---')) {
+        return <hr key={idx} className="my-2.5 border-[#E6E1D3]" />;
+      }
+
+      // Bullet points (handles *, -, • and any leading indentation)
+      if (trimmed.startsWith('* ') || trimmed.startsWith('- ') || trimmed.startsWith('• ')) {
+        const content = trimmed.substring(2);
+        return (
+          <div
+            key={idx}
+            className={`flex items-start gap-2 my-1 text-stone-800 ${
+              indent >= 2 ? 'ml-5 text-[11px]' : 'ml-1'
+            }`}
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-[#8B5A2B] mt-1.5 shrink-0" />
+            <div className="flex-1 leading-relaxed">
+              {renderInlineMarkdown(content)}
+            </div>
+          </div>
+        );
+      }
+
+      // Numbered lists (e.g., "1. ", "4. ")
+      const numMatch = trimmed.match(/^(\d+)\.\s+(.*)$/);
+      if (numMatch) {
+        return (
+          <div key={idx} className={`flex items-start gap-2 my-1.5 text-stone-800 ${indent >= 2 ? 'ml-5' : 'ml-0'}`}>
+            <span className="font-mono font-bold text-[10px] text-[#8B5A2B] bg-[#F4F1EA] px-1.5 py-0.5 rounded-md shrink-0 border border-[#E6E1D3]">
+              {numMatch[1]}
+            </span>
+            <div className="flex-1 leading-relaxed font-medium">
+              {renderInlineMarkdown(numMatch[2])}
+            </div>
+          </div>
+        );
+      }
+
+      // Empty line / paragraph break
+      if (!trimmed) {
+        return <div key={idx} className="h-1.5" />;
+      }
+
       // Regular paragraph
       return (
         <p key={idx} className="text-stone-700 my-1 leading-relaxed">
@@ -320,42 +367,56 @@ Choose your preferred language below or ask me anything to optimize your setup:`
   };
 
   const renderInlineMarkdown = (str: string) => {
-    const parts = [];
+    const parts: React.ReactNode[] = [];
     let remaining = str;
     let keyIdx = 0;
 
     while (remaining.length > 0) {
       const boldMatch = remaining.match(/\*\*(.+?)\*\*/);
       const codeMatch = remaining.match(/`([^`]+)`/);
+      const hwMatch = remaining.match(/\b([A-Z]{3}-\d{3})\b/);
 
       const boldIdx = boldMatch ? remaining.indexOf(boldMatch[0]) : -1;
       const codeIdx = codeMatch ? remaining.indexOf(codeMatch[0]) : -1;
+      const hwIdx = hwMatch ? remaining.indexOf(hwMatch[0]) : -1;
 
-      if (boldIdx === -1 && codeIdx === -1) {
+      const candidates = [
+        { type: 'bold', idx: boldIdx, match: boldMatch },
+        { type: 'code', idx: codeIdx, match: codeMatch },
+        { type: 'hw', idx: hwIdx, match: hwMatch }
+      ].filter(c => c.idx !== -1).sort((a, b) => a.idx - b.idx);
+
+      if (candidates.length === 0) {
         parts.push(<span key={keyIdx++}>{remaining}</span>);
         break;
       }
 
-      if (boldIdx !== -1 && (codeIdx === -1 || boldIdx < codeIdx)) {
-        if (boldIdx > 0) {
-          parts.push(<span key={keyIdx++}>{remaining.substring(0, boldIdx)}</span>);
-        }
+      const earliest = candidates[0];
+      if (earliest.idx > 0) {
+        parts.push(<span key={keyIdx++}>{remaining.substring(0, earliest.idx)}</span>);
+      }
+
+      if (earliest.type === 'bold') {
         parts.push(
           <strong key={keyIdx++} className="font-semibold text-stone-900">
-            {boldMatch![1]}
+            {earliest.match![1]}
           </strong>
         );
-        remaining = remaining.substring(boldIdx + boldMatch![0].length);
-      } else if (codeIdx !== -1) {
-        if (codeIdx > 0) {
-          parts.push(<span key={keyIdx++}>{remaining.substring(0, codeIdx)}</span>);
-        }
+        remaining = remaining.substring(earliest.idx + earliest.match![0].length);
+      } else if (earliest.type === 'code') {
         parts.push(
-          <code key={keyIdx++} className="px-1.5 py-0.5 rounded-md bg-[#F4F1EA] font-mono text-[11px] text-[#2C3A2B] border border-[#E6E1D3]">
-            {codeMatch![1]}
+          <code key={keyIdx++} className="px-1.5 py-0.5 rounded-md bg-[#F4F1EA] font-mono text-[11px] text-[#8B5A2B] border border-[#E6E1D3]">
+            {earliest.match![1]}
           </code>
         );
-        remaining = remaining.substring(codeIdx + codeMatch![0].length);
+        remaining = remaining.substring(earliest.idx + earliest.match![0].length);
+      } else if (earliest.type === 'hw') {
+        parts.push(
+          <span key={keyIdx++} className="inline-flex items-center px-1.5 py-0.2 mx-0.5 rounded-md bg-[#F4F1EA] font-mono font-semibold text-[10px] text-[#2C3A2B] border border-[#E6E1D3]">
+            {earliest.match![1]}
+          </span>
+        );
+        remaining = remaining.substring(earliest.idx + earliest.match![0].length);
       }
     }
 
@@ -370,7 +431,7 @@ Choose your preferred language below or ask me anything to optimize your setup:`
       {/* Floating Trigger Button in Bottom-Right */}
       <button
         onClick={toggleAssistant}
-        aria-label="Toggle AI Assistant"
+        aria-label="Toggle Sahay AI Assistant"
         className="fixed bottom-6 right-6 z-40 p-4 rounded-full shadow-2xl transition-all duration-300 hover:scale-105 active:scale-95 focus:outline-none flex items-center justify-center gap-2 cursor-pointer border-2 border-white/50"
         style={{
           background: 'linear-gradient(135deg, #2C3A2B 0%, #1B281B 100%)',
@@ -414,7 +475,7 @@ Choose your preferred language below or ask me anything to optimize your setup:`
                 <div className="min-w-0">
                   <div className="flex items-center gap-1.5">
                     <h3 className="font-serif font-bold text-xs sm:text-sm text-[#2C2C1E] truncate">
-                      AI Bundle Assistant
+                      Sahay AI
                     </h3>
                     <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-mono font-medium bg-[#A3B18A]/20 text-[#2C3A2B] border border-[#A3B18A]/40 shrink-0">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
@@ -551,9 +612,9 @@ Choose your preferred language below or ask me anything to optimize your setup:`
                     className={`flex flex-col ${isUser ? 'items-end' : 'items-start'}`}
                   >
                     <div
-                      className={`max-w-[85%] p-3 text-xs shadow-xs whitespace-pre-wrap ${
+                      className={`max-w-[88%] p-3 text-xs shadow-xs ${
                         isUser
-                          ? 'bg-[#2C3A2B] text-white rounded-t-2xl rounded-bl-2xl'
+                          ? 'bg-[#2C3A2B] text-white rounded-t-2xl rounded-bl-2xl whitespace-pre-wrap'
                           : 'bg-white border border-[#E6E1D3] text-[#2C2C1E] rounded-t-2xl rounded-br-2xl'
                       }`}
                     >
@@ -561,7 +622,7 @@ Choose your preferred language below or ask me anything to optimize your setup:`
                       {isUser ? (
                         <p className="leading-relaxed whitespace-pre-wrap">{msg.text}</p>
                       ) : (
-                        renderFormattedText(msg.text)
+                        <div className="space-y-0.5">{renderFormattedText(msg.text)}</div>
                       )}
 
                       {/* Action Cards */}
@@ -842,7 +903,7 @@ Choose your preferred language below or ask me anything to optimize your setup:`
                     ? 'अपना संदेश लिखें (जैसे: बजट अनुकूल बंडल बनाएं)...'
                     : selectedLang === 'gu'
                     ? 'તમારો સંદેશ લખો (જેમ કે: બજેટ અનુકૂળ બંડલ બનાવો)...'
-                    : 'Ask Gemini to build, optimize, or fix your bundle...'
+                    : 'Ask Sahay AI to build, optimize, or fix your bundle...'
                 }
                 disabled={isLoading}
                 className="flex-1 bg-[#F4F1EA] border-none rounded-full px-4 py-2.5 text-xs focus:ring-1 focus:ring-[#2C3A2B] outline-none placeholder-[#8A8A88] text-[#2C2C1E]"

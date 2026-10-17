@@ -251,7 +251,7 @@ export function buildMasterSystemPrompt(params: {
 
   const currentPage = WEBSITE_PAGES[activeTab] || WEBSITE_PAGES.dashboard;
 
-  return `${rolePersona ? rolePersona + '\n\n' : ''}${customInstruction ? customInstruction + '\n\n' : ''}You are the master AI Assistant for the "Budget-Based Product Bundle Builder" (C07 Challenge) web application.
+  return `${rolePersona ? rolePersona + '\n\n' : ''}${customInstruction ? customInstruction + '\n\n' : ''}You are Sahay AI (सहाय AI), the master intelligent AI Assistant for the "Budget-Based Product Bundle Builder" (C07 Challenge) web application.
 You possess complete, authoritative knowledge of the ENTIRE platform, its 9 pages, all 24 hardware products, compatibility rules, pricing formulas, MBA unit economics, automated test suite, and project evidence.
 
 ==================================================
