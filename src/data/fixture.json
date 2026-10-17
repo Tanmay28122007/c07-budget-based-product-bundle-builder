@@ -154,7 +154,7 @@
         "unit_cost_inr": 150,
         "stock": 25,
         "compatible_with": [],
-        "image": "../assets/P11.png"
+        "image": "../assets/P13.png"
       },
       {
         "product_id": "P14",
@@ -166,7 +166,7 @@
         "unit_cost_inr": 210,
         "stock": 18,
         "compatible_with": [],
-        "image": "../assets/P11.png"
+        "image": "../assets/P14.png"
       },
       {
         "product_id": "P15",
@@ -178,7 +178,7 @@
         "unit_cost_inr": 130,
         "stock": 40,
         "compatible_with": [],
-        "image": "../assets/P11.png"
+        "image": "../assets/P15.png"
       },
       {
         "product_id": "P16",
@@ -190,7 +190,7 @@
         "unit_cost_inr": 100,
         "stock": 50,
         "compatible_with": [],
-        "image": "../assets/P11.png"
+        "image": "../assets/P16.png"
       },
       {
         "product_id": "P12",
@@ -214,7 +214,7 @@
         "unit_cost_inr": 990,
         "stock": 8,
         "compatible_with": [],
-        "image": "../assets/P12.png"
+        "image": "../assets/P19.png"
       },
       {
         "product_id": "P20",
@@ -226,7 +226,7 @@
         "unit_cost_inr": 800,
         "stock": 14,
         "compatible_with": [],
-        "image": "../assets/P12.png"
+        "image": "../assets/P20.png"
       },
       {
         "product_id": "P17",
@@ -238,7 +238,7 @@
         "unit_cost_inr": 320,
         "stock": 15,
         "compatible_with": [],
-        "image": "../assets/P10.png"
+        "image": "../assets/P17.png"
       },
       {
         "product_id": "P18",
@@ -250,7 +250,73 @@
         "unit_cost_inr": 250,
         "stock": 22,
         "compatible_with": [],
-        "image": "../assets/P10.png"
+        "image": "../assets/P18.png"
+      },
+      {
+        "product_id": "P21",
+        "title": "White Ceramic Coffee Mug",
+        "category": "Mug",
+        "size": "350ml",
+        "colour": "White",
+        "price_inr": 280,
+        "unit_cost_inr": 160,
+        "stock": 25,
+        "compatible_with": [],
+        "image": "../assets/P21.png"
+      },
+      {
+        "product_id": "P22",
+        "title": "Matte Black Travel Tumbler",
+        "category": "Mug",
+        "size": "450ml",
+        "colour": "Black",
+        "price_inr": 390,
+        "unit_cost_inr": 220,
+        "stock": 18,
+        "compatible_with": [],
+        "image": "../assets/P22.png"
+      },
+      {
+        "product_id": "P23",
+        "title": "Ergonomic Wireless Mouse",
+        "category": "Mouse",
+        "size": "Medium",
+        "colour": "White",
+        "price_inr": 890,
+        "unit_cost_inr": 500,
+        "stock": 12,
+        "compatible_with": [
+          "usb-c"
+        ],
+        "image": "../assets/P23.png"
+      },
+      {
+        "product_id": "P24",
+        "title": "Compact Mechanical Keyboard",
+        "category": "Keyboard",
+        "size": "Tenkeyless",
+        "colour": "Grey",
+        "price_inr": 1450,
+        "unit_cost_inr": 850,
+        "stock": 8,
+        "compatible_with": [
+          "usb-c"
+        ],
+        "image": "../assets/P24.png"
+      },
+      {
+        "product_id": "P25",
+        "title": "Multi-Port Aluminum Type-C Hub",
+        "category": "Hub",
+        "size": "7-in-1",
+        "colour": "Silver",
+        "price_inr": 1150,
+        "unit_cost_inr": 680,
+        "stock": 15,
+        "compatible_with": [
+          "usb-c"
+        ],
+        "image": "../assets/P25.png"
       }
     ],
     "required_slots": [
