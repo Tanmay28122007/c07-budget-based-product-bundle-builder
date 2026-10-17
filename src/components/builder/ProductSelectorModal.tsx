@@ -7,7 +7,9 @@ import {
   ArrowUpDown,
   ShieldAlert,
   Info,
-  PackageCheck
+  PackageCheck,
+  PackageSearch,
+  RotateCcw
 } from 'lucide-react';
 import { Product, RequiredSlot } from '../../types';
 import { useApp } from '../../context/AppContext';
@@ -25,7 +27,7 @@ export const ProductSelectorModal: React.FC<ProductSelectorModalProps> = ({
   isOpen,
   onClose
 }) => {
-  const { fixture, currentItems, selectProduct } = useApp();
+  const { fixture, currentItems, selectProduct, budget, validation } = useApp();
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState<'price_asc' | 'price_desc' | 'availability'>('price_asc');
   const [showOnlyCompatible, setShowOnlyCompatible] = useState(false);
@@ -40,7 +42,8 @@ export const ProductSelectorModal: React.FC<ProductSelectorModalProps> = ({
   // Evaluate candidate compatibility & eligibility for each product
   const evaluatedProducts = useMemo(() => {
     return productsForSlot.map(product => {
-      const inStock = product.inStock && (product.stockQuantity === undefined || product.stockQuantity > 0);
+      const stockQty = product.stockQuantity ?? (product.inStock ? 1 : 0);
+      const inStock = product.inStock && stockQty > 0;
       const { isCompatible, reasons } = checkCandidateCompatibility(product, currentItems, slot.id);
 
       // Check if product is already assigned to a DIFFERENT slot (duplicate slot violation)
@@ -52,6 +55,7 @@ export const ProductSelectorModal: React.FC<ProductSelectorModalProps> = ({
 
       return {
         product,
+        stockQty,
         inStock,
         isCompatible,
         incompatibilityReasons: reasons,
@@ -83,7 +87,7 @@ export const ProductSelectorModal: React.FC<ProductSelectorModalProps> = ({
         } else {
           // Availability sort: In-stock first, then higher stock count
           if (a.inStock === b.inStock) {
-            return (b.product.stockQuantity || 0) - (a.product.stockQuantity || 0);
+            return (b.stockQty || 0) - (a.stockQty || 0);
           }
           return a.inStock ? -1 : 1;
         }
@@ -101,9 +105,20 @@ export const ProductSelectorModal: React.FC<ProductSelectorModalProps> = ({
             <div className="text-[11px] font-semibold text-[#8B5A2B] uppercase tracking-wider">
               Select Product for Slot
             </div>
-            <h2 className="font-serif text-lg font-bold text-[#2C3A2B]">
+            <h2 className="font-serif text-lg font-bold text-[#2C3A2B] leading-tight">
               {slot.label} ({slot.category})
             </h2>
+            <div className="flex items-center gap-2 mt-1 text-xs">
+              <span className="text-[#5A5A40]">
+                Budget: <span className="font-mono font-bold text-[#2C3A2B]">{formatINR(budget)}</span>
+              </span>
+              <span className="text-[#E6E1D3]">·</span>
+              <span className={`font-mono font-semibold ${validation.landedPrice.isOverBudget ? 'text-rose-600' : 'text-emerald-700'}`}>
+                {validation.landedPrice.isOverBudget
+                  ? `Over Budget by ${formatINR(Math.abs(validation.landedPrice.remainingBudget))}`
+                  : `${formatINR(validation.landedPrice.remainingBudget)} remaining`}
+              </span>
+            </div>
           </div>
           <button
             onClick={onClose}
@@ -123,8 +138,18 @@ export const ProductSelectorModal: React.FC<ProductSelectorModalProps> = ({
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
                 placeholder="Search by product name, model, spec..."
-                className="w-full pl-9 pr-3 py-2 text-xs bg-[#F4F1EA]/70 focus:bg-white border border-[#E6E1D3] rounded-xl focus:outline-hidden focus:border-[#2C3A2B] text-[#2C2C1E]"
+                className="w-full pl-9 pr-8 py-2 text-xs bg-[#F4F1EA]/70 focus:bg-white border border-[#E6E1D3] rounded-xl focus:outline-hidden focus:border-[#2C3A2B] text-[#2C2C1E]"
               />
+              {searchTerm && (
+                <button
+                  type="button"
+                  onClick={() => setSearchTerm('')}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#8B8B7A] hover:text-[#2C2C1E] p-0.5"
+                  title="Clear search"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
             </div>
 
             <div className="flex items-center gap-2">
@@ -157,13 +182,33 @@ export const ProductSelectorModal: React.FC<ProductSelectorModalProps> = ({
         {/* Product Cards List */}
         <div className="flex-1 overflow-y-auto p-4 space-y-3">
           {filteredAndSortedProducts.length === 0 ? (
-            <div className="p-8 text-center text-xs text-[#8B8B7A] bg-[#FDFBF7] rounded-xl border border-dashed border-[#E6E1D3]">
-              No products found matching your current filter criteria.
+            /* Empty Filter / Search State */
+            <div className="p-8 text-center bg-[#FDFBF7] rounded-2xl border border-dashed border-[#E6E1D3] space-y-2.5">
+              <div className="w-10 h-10 rounded-full bg-[#F4F1EA] mx-auto flex items-center justify-center text-[#8B8B7A]">
+                <PackageSearch className="w-5 h-5" />
+              </div>
+              <p className="text-xs font-semibold text-[#2C3A2B]">No matching products found</p>
+              <p className="text-[11px] text-[#5A5A40] max-w-sm mx-auto">
+                No items match your active search "{searchTerm}" or filter criteria. Try clearing filters to see all available {slot.category} items.
+              </p>
+              {(searchTerm || showOnlyCompatible) && (
+                <button
+                  onClick={() => {
+                    setSearchTerm('');
+                    setShowOnlyCompatible(false);
+                  }}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-[#2C3A2B] bg-white border border-[#E6E1D3] rounded-xl hover:bg-[#F4F1EA] transition-colors cursor-pointer shadow-2xs"
+                >
+                  <RotateCcw className="w-3 h-3 text-[#8B5A2B]" />
+                  Reset Filters & Search
+                </button>
+              )}
             </div>
           ) : (
             filteredAndSortedProducts.map(
               ({
                 product,
+                stockQty,
                 inStock,
                 isCompatible,
                 incompatibilityReasons,
@@ -171,6 +216,8 @@ export const ProductSelectorModal: React.FC<ProductSelectorModalProps> = ({
                 isEligible
               }) => {
                 const isSelected = currentlySelected?.id === product.id;
+                const isOutOfStock = !inStock || stockQty === 0;
+                const isLowStock = !isOutOfStock && stockQty <= 5;
 
                 return (
                   <div
@@ -179,7 +226,7 @@ export const ProductSelectorModal: React.FC<ProductSelectorModalProps> = ({
                       isSelected
                         ? 'border-[#2C3A2B] bg-[#A3B18A]/10 shadow-sm ring-2 ring-[#2C3A2B]/20'
                         : isEligible
-                        ? 'border-[#E6E1D3] hover:border-[#8B5A2B] hover:-translate-y-1.5 hover:shadow-lg bg-white'
+                        ? 'border-[#E6E1D3] hover:border-[#8B5A2B] hover:-translate-y-1 hover:shadow-md bg-white'
                         : 'border-[#E6E1D3] bg-[#F4F1EA]/60 opacity-80'
                     }`}
                   >
@@ -205,36 +252,50 @@ export const ProductSelectorModal: React.FC<ProductSelectorModalProps> = ({
 
                         {/* Specs & Attributes List */}
                         <div className="mt-2.5 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-[#5A5A40] font-mono">
-                          {product.attributes.size && <span>Size: {product.attributes.size}</span>}
-                          {product.attributes.colour && <span>Colour: {product.attributes.colour}</span>}
-                          {product.attributes.unitCostInr && <span>Unit Cost: {formatINR(product.attributes.unitCostInr)}</span>}
+                          {product.attributes.size && (
+                            <span className="px-2 py-0.5 rounded bg-[#F4F1EA] border border-[#E6E1D3]">
+                              Size: {product.attributes.size}
+                            </span>
+                          )}
+                          {product.attributes.colour && (
+                            <span className="px-2 py-0.5 rounded bg-[#F4F1EA] border border-[#E6E1D3]">
+                              Colour: {product.attributes.colour}
+                            </span>
+                          )}
+                          {product.attributes.unitCostInr && (
+                            <span className="px-2 py-0.5 rounded bg-[#F4F1EA] border border-[#E6E1D3]">
+                              Cost: {formatINR(product.attributes.unitCostInr)}
+                            </span>
+                          )}
                           {product.attributes.connector && (
-                            <span>Port: {product.attributes.connector.toUpperCase()}</span>
+                            <span className="px-2 py-0.5 rounded bg-[#F4F1EA] border border-[#E6E1D3] uppercase">
+                              Port: {product.attributes.connector}
+                            </span>
                           )}
                           {product.attributes.compatibleWith?.length ? (
-                            <span>Interface: {product.attributes.compatibleWith.join(', ')}</span>
+                            <span className="px-2 py-0.5 rounded bg-[#F4F1EA] border border-[#E6E1D3]">
+                              Interface: {product.attributes.compatibleWith.join(', ')}
+                            </span>
                           ) : null}
-                          {product.weightKg > 0 && !product.attributes.size && <span>Weight: {product.weightKg}kg</span>}
-                          {product.attributes.deskWidthCm && (
-                            <span>Width: {product.attributes.deskWidthCm}cm</span>
-                          )}
-                          {product.attributes.ergonomicGrade && (
-                            <span>Grade: {product.attributes.ergonomicGrade}</span>
+                          {product.weightKg > 0 && !product.attributes.size && (
+                            <span className="px-2 py-0.5 rounded bg-[#F4F1EA] border border-[#E6E1D3]">
+                              Weight: {product.weightKg}kg
+                            </span>
                           )}
                         </div>
 
                         {/* Status Badges / Incompatibility notices */}
-                        <div className="mt-3 space-y-1">
-                          {!inStock && (
-                            <div className="text-[11px] text-rose-700 font-medium flex items-center gap-1.5">
-                              <AlertTriangle className="w-3.5 h-3.5 text-rose-600" />
-                              Out of stock (0 units remaining in warehouse).
+                        <div className="mt-3 space-y-1.5">
+                          {isOutOfStock && (
+                            <div className="text-[11px] text-rose-700 font-semibold flex items-center gap-1.5 bg-rose-50 px-2.5 py-1 rounded-lg border border-rose-200">
+                              <AlertTriangle className="w-3.5 h-3.5 text-rose-600 shrink-0" />
+                              Out of stock in warehouse (0 units available).
                             </div>
                           )}
 
                           {assignedToOtherSlot && (
-                            <div className="text-[11px] text-amber-700 font-medium flex items-center gap-1.5">
-                              <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
+                            <div className="text-[11px] text-amber-700 font-semibold flex items-center gap-1.5 bg-amber-50 px-2.5 py-1 rounded-lg border border-amber-200">
+                              <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
                               Already assigned to slot "{assignedToOtherSlot}". Duplicate slots prohibited.
                             </div>
                           )}
@@ -256,13 +317,28 @@ export const ProductSelectorModal: React.FC<ProductSelectorModalProps> = ({
                       </div>
 
                       {/* Right Price & Select Button */}
-                      <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-2 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-[#E6E1D3]">
+                      <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-2.5 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-[#E6E1D3]">
                         <div className="text-right">
-                          <div className="text-base font-bold font-mono tabular-nums text-[#8B5A2B]">
+                          <div className="text-base font-bold font-mono tabular-nums text-[#2C3A2B]">
                             {formatINR(product.price)}
                           </div>
-                          <div className="text-[10px] text-[#8B8B7A]">
-                            {inStock ? `${product.stockQuantity} in stock` : 'Unavailable'}
+                          <div className="mt-0.5">
+                            {isOutOfStock ? (
+                              <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-rose-700 bg-rose-50 px-2 py-0.5 rounded-full border border-rose-200">
+                                <span className="w-1.5 h-1.5 rounded-full bg-rose-600" />
+                                Out of Stock
+                              </span>
+                            ) : isLowStock ? (
+                              <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
+                                <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                                {stockQty} left
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-[#2C3A2B] bg-[#A3B18A]/20 px-2 py-0.5 rounded-full border border-[#A3B18A]/40">
+                                <span className="w-1.5 h-1.5 rounded-full bg-[#588157]" />
+                                {stockQty} in stock
+                              </span>
+                            )}
                           </div>
                         </div>
 
@@ -272,11 +348,11 @@ export const ProductSelectorModal: React.FC<ProductSelectorModalProps> = ({
                             selectProduct(slot.id, product);
                             onClose();
                           }}
-                          className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer ${
+                          className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs ${
                             isSelected
-                              ? 'bg-[#2C3A2B] text-white shadow-2xs'
+                              ? 'bg-[#2C3A2B] text-white'
                               : isEligible
-                              ? 'bg-[#8B5A2B] hover:bg-[#743815] text-white shadow-2xs'
+                              ? 'bg-[#2C3A2B] hover:bg-[#3A4D39] text-white hover:shadow-xs'
                               : 'bg-[#F4F1EA] text-[#8B8B7A] cursor-not-allowed border border-[#E6E1D3]'
                           }`}
                         >
@@ -287,6 +363,10 @@ export const ProductSelectorModal: React.FC<ProductSelectorModalProps> = ({
                             </>
                           ) : isEligible ? (
                             'Select Product'
+                          ) : isOutOfStock ? (
+                            'Out of Stock'
+                          ) : !isCompatible ? (
+                            'Incompatible'
                           ) : (
                             'Ineligible'
                           )}

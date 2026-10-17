@@ -14,7 +14,9 @@ import {
   Plus,
   LayoutGrid,
   List,
-  Check
+  Check,
+  PackageSearch,
+  RotateCcw
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { Product } from '../../types';
@@ -70,6 +72,13 @@ export const ProductCataloguePage: React.FC = () => {
         return a.id.localeCompare(b.id);
       });
   }, [fixture.products, selectedCategory, selectedStockStatus, search, sortField]);
+
+  const handleResetFilters = () => {
+    setSearch('');
+    setSelectedCategory('all');
+    setSelectedStockStatus('all');
+    setSortField('price_asc');
+  };
 
   const handleExportCatalogueCSV = () => {
     const csv = exportCatalogueToCSV(fixture.products);
@@ -133,8 +142,18 @@ export const ProductCataloguePage: React.FC = () => {
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder="Search by ID, name, brand, or specifications..."
-              className="w-full pl-9 pr-3.5 py-2 text-xs bg-[#FDFBF7] focus:bg-white border border-[#E6E1D3] rounded-xl text-[#2C3A2B] focus:outline-hidden focus:ring-1 focus:ring-[#2C3A2B]"
+              className="w-full pl-9 pr-8 py-2 text-xs bg-[#FDFBF7] focus:bg-white border border-[#E6E1D3] rounded-xl text-[#2C3A2B] focus:outline-hidden focus:ring-1 focus:ring-[#2C3A2B]"
             />
+            {search && (
+              <button
+                type="button"
+                onClick={() => setSearch('')}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#8B8B7A] hover:text-[#2C2C1E] p-0.5"
+                title="Clear search"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
           </div>
 
           {/* Category Filter */}
@@ -219,8 +238,21 @@ export const ProductCataloguePage: React.FC = () => {
       {viewMode === 'grid' ? (
         <div className="space-y-4">
           {filteredProducts.length === 0 ? (
-            <div className="bg-white border border-[#E6E1D3] rounded-[24px] p-12 text-center text-xs text-[#5A5A40]">
-              No products matched the active filters or search terms.
+            <div className="bg-white border border-[#E6E1D3] rounded-[24px] p-12 text-center space-y-3">
+              <div className="w-12 h-12 rounded-2xl bg-[#F4F1EA] text-[#8B8B7A] mx-auto flex items-center justify-center">
+                <PackageSearch className="w-6 h-6" />
+              </div>
+              <h3 className="font-serif text-base font-bold text-[#2C3A2B]">No Matching Products Found</h3>
+              <p className="text-xs text-[#5A5A40] max-w-sm mx-auto">
+                No products match your search or active category/stock filters. Try adjusting your search term or reset all filters.
+              </p>
+              <button
+                onClick={handleResetFilters}
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold text-[#2C3A2B] bg-[#F4F1EA] hover:bg-[#E6E1D3] border border-[#E6E1D3] rounded-xl transition-colors cursor-pointer shadow-2xs"
+              >
+                <RotateCcw className="w-3.5 h-3.5 text-[#8B5A2B]" />
+                Reset All Filters
+              </button>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
@@ -402,8 +434,18 @@ export const ProductCataloguePage: React.FC = () => {
               <tbody className="divide-y divide-[#E6E1D3]/50">
                 {filteredProducts.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="py-12 text-center text-xs text-[#5A5A40]">
-                      No products matched the active filters or search terms.
+                    <td colSpan={7} className="py-12 text-center">
+                      <div className="w-10 h-10 rounded-xl bg-[#F4F1EA] text-[#8B8B7A] mx-auto flex items-center justify-center mb-2">
+                        <PackageSearch className="w-5 h-5" />
+                      </div>
+                      <p className="font-semibold text-xs text-[#2C3A2B] mb-1">No products matched the active filters</p>
+                      <button
+                        onClick={handleResetFilters}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-[#2C3A2B] bg-[#F4F1EA] hover:bg-[#E6E1D3] border border-[#E6E1D3] rounded-xl transition-colors cursor-pointer shadow-2xs mt-1"
+                      >
+                        <RotateCcw className="w-3.5 h-3.5 text-[#8B5A2B]" />
+                        Reset All Filters
+                      </button>
                     </td>
                   </tr>
                 ) : (

@@ -9,6 +9,10 @@ import {
   AlertCircle,
   HelpCircle,
   PackageCheck,
+  PackagePlus,
+  ShieldAlert,
+  Wallet,
+  TrendingDown,
   FileJson,
   FileSpreadsheet,
   Check,
@@ -232,22 +236,95 @@ export const BundleBuilderPage: React.FC = () => {
 
       {/* Main Layout: Required Product Slots (Left) + Sticky Budget Summary (Right) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-        {/* Left 2 Columns: Slots Grid */}
+        {/* Left 2 Columns: Slots Grid & Context Alerts */}
         <div className="lg:col-span-2 space-y-4">
-          <div className="flex items-center justify-between pb-1 border-b border-stone-200/80">
+          {/* Slot Header Bar */}
+          <div className="flex items-center justify-between pb-2 border-b border-[#E6E1D3]/80">
             <div>
-              <h2 className="text-sm font-bold text-stone-900">
+              <h2 className="font-serif text-base font-bold text-[#2C3A2B]">
                 Step 3: Required Product Slots
               </h2>
-              <p className="text-xs text-stone-500">
-                Each required category must be filled with a compatible, in-stock item.
+              <p className="text-xs text-[#5A5A40] mt-0.5">
+                Every bundle must fill all required categories with compatible, in-stock items.
               </p>
             </div>
-            <span className="text-xs font-mono text-stone-500">
-              {validation.filledSlotCount} of {validation.totalSlotCount} slots filled
-            </span>
+            <div className="flex items-center gap-2">
+              <span className={`text-xs font-mono font-semibold px-2.5 py-1 rounded-lg border ${
+                validation.isComplete
+                  ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                  : validation.filledSlotCount > 0
+                  ? 'bg-amber-50 text-amber-800 border-amber-200'
+                  : 'bg-[#F4F1EA] text-[#5A5A40] border-[#E6E1D3]'
+              }`}>
+                {validation.filledSlotCount} of {validation.totalSlotCount} slots filled
+              </span>
+            </div>
           </div>
 
+          {/* Empty State Banner (when no slots filled yet) */}
+          {validation.filledSlotCount === 0 && (
+            <div className="p-5 rounded-[22px] bg-[#FDFBF7] border border-dashed border-[#D6CFBF] shadow-2xs flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="flex items-start gap-3.5">
+                <div className="w-10 h-10 rounded-2xl bg-[#2C3A2B] text-amber-200 flex items-center justify-center shrink-0 shadow-xs">
+                  <PackagePlus className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-serif text-sm font-bold text-[#2C3A2B]">Your Bundle is Currently Empty</h3>
+                  <p className="text-xs text-[#5A5A40] mt-0.5 leading-relaxed">
+                    Select items for each required slot below, or let the intelligent optimizer find the best compatible configuration within your {formatINR(budget)} budget.
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={handleRunOptimizer}
+                className="shrink-0 inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-[#2C3A2B] hover:bg-[#3A4D39] rounded-xl transition-all shadow-xs hover:shadow-md cursor-pointer"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                Auto-Fill Optimal Bundle
+              </button>
+            </div>
+          )}
+
+          {/* Over-Budget Alert Banner (when total exceeds budget) */}
+          {validation.landedPrice.isOverBudget && (
+            <div className="p-4 rounded-[22px] bg-rose-50 border border-rose-200 text-xs text-rose-900 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex items-start gap-3">
+                <AlertTriangle className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
+                <div>
+                  <div className="font-serif font-bold text-rose-800 text-sm">
+                    Over Budget by {formatINR(Math.abs(validation.landedPrice.remainingBudget))}
+                  </div>
+                  <p className="text-rose-700 mt-0.5 leading-relaxed">
+                    Total landed cost of {formatINR(validation.landedPrice.landedPrice)} exceeds your budget limit of {formatINR(budget)}. Swap items with lower-priced alternatives or increase your budget.
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={handleRunOptimizer}
+                className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-rose-800 bg-white hover:bg-rose-100 border border-rose-300 rounded-xl transition-colors cursor-pointer self-start sm:self-auto shadow-2xs"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-rose-600" />
+                Auto-Fit to Budget
+              </button>
+            </div>
+          )}
+
+          {/* Compatibility Violation Alert Banner */}
+          {validation.compatibilityViolations.length > 0 && (
+            <div className="p-4 rounded-[22px] bg-rose-50 border border-rose-200 text-xs text-rose-900 shadow-2xs flex items-start gap-3">
+              <ShieldAlert className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
+              <div>
+                <div className="font-serif font-bold text-rose-800 text-sm">
+                  Compatibility Matrix Conflict
+                </div>
+                <p className="text-rose-700 mt-0.5 leading-relaxed">
+                  {validation.compatibilityViolations[0].message}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Slots Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {fixture.activity.requiredSlots.map(slot => (
               <RequiredSlotCard
@@ -257,6 +334,7 @@ export const BundleBuilderPage: React.FC = () => {
                 onOpenSelector={() => setActiveSlotForSelection(slot)}
                 onRemove={() => removeProduct(slot.id)}
                 compatibilityViolations={validation.compatibilityViolations}
+                availableCount={fixture.products.filter(p => p.category === slot.category).length}
               />
             ))}
           </div>
@@ -264,90 +342,99 @@ export const BundleBuilderPage: React.FC = () => {
 
         {/* Right 1 Column: Sticky Landed Pricing & Validation Summary Panel */}
         <div className="sticky top-20 space-y-4">
-          <div className="bg-white border border-stone-200/90 rounded-2xl shadow-sm p-5 space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-stone-100">
-              <h3 className="text-sm font-bold text-stone-900">Budget Summary</h3>
-              {/* Overall Validity State Tag */}
+          <div className="bg-white border border-[#E6E1D3] rounded-[24px] shadow-sm p-5 space-y-4">
+            {/* Summary Header & Badge */}
+            <div className="flex items-center justify-between pb-3 border-b border-[#E6E1D3]/80">
+              <h3 className="font-serif text-sm font-bold text-[#2C3A2B]">Budget & Landed Cost</h3>
               {validation.isValid ? (
-                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-100 text-emerald-800">
-                  Valid Setup
+                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#A3B18A]/25 text-[#2C3A2B] border border-[#A3B18A]/50 flex items-center gap-1">
+                  <Check className="w-3 h-3 text-[#2C3A2B]" /> Valid Bundle
                 </span>
-              ) : !validation.isComplete ? (
-                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-amber-100 text-amber-800">
-                  Incomplete
+              ) : validation.landedPrice.isOverBudget ? (
+                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-rose-50 text-rose-700 border border-rose-200 flex items-center gap-1">
+                  <AlertTriangle className="w-3 h-3 text-rose-600" /> Over Budget
+                </span>
+              ) : validation.compatibilityViolations.length > 0 ? (
+                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-rose-50 text-rose-700 border border-rose-200 flex items-center gap-1">
+                  <ShieldAlert className="w-3 h-3 text-rose-600" /> Conflict
+                </span>
+              ) : validation.filledSlotCount === 0 ? (
+                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#F4F1EA] text-[#5A5A40] border border-[#E6E1D3]">
+                  Empty Bundle
                 </span>
               ) : (
-                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-rose-100 text-rose-800">
-                  Invalid
+                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-800 border border-amber-200 flex items-center gap-1">
+                  <AlertCircle className="w-3 h-3 text-amber-600" /> Incomplete ({validation.filledSlotCount}/{validation.totalSlotCount})
                 </span>
               )}
             </div>
 
-            {/* Price Stack Calculation */}
-            <div className="space-y-2.5 text-xs">
-              <div className="flex items-center justify-between text-stone-600">
-                <span>Product Subtotal ({validation.filledSlotCount} items)</span>
-                <span className="font-mono tabular-nums font-medium text-stone-900">
-                  {formatINR(validation.landedPrice.productSubtotal)}
+            {/* KPI Metric Tiles: Landed Total & Remaining Budget */}
+            <div className="grid grid-cols-2 gap-2.5">
+              {/* Landed Total Metric */}
+              <div className="p-3 rounded-2xl bg-[#FDFBF7] border border-[#E6E1D3]">
+                <span className="text-[10px] font-mono font-bold text-[#8B5A2B] uppercase tracking-wider block">
+                  Landed Total
+                </span>
+                <div className={`text-lg sm:text-xl font-bold font-mono tabular-nums mt-0.5 ${
+                  validation.landedPrice.isOverBudget ? 'text-rose-600' : 'text-[#2C3A2B]'
+                }`}>
+                  {formatINR(validation.landedPrice.landedPrice)}
+                </div>
+                <span className="text-[10px] text-[#5A5A40] block mt-0.5">
+                  {validation.filledSlotCount} items + charges
                 </span>
               </div>
 
-              <div className="flex items-center justify-between text-stone-600">
-                <div className="flex items-center gap-1">
-                  <span>Shipping Fee</span>
-                  {validation.landedPrice.shippingDiscount > 0 && (
-                    <span className="text-[10px] text-emerald-700 font-medium">Free Tier</span>
-                  )}
+              {/* Remaining Budget Metric */}
+              <div className="p-3 rounded-2xl bg-[#FDFBF7] border border-[#E6E1D3]">
+                <span className="text-[10px] font-mono font-bold text-[#8B5A2B] uppercase tracking-wider block">
+                  {validation.landedPrice.isOverBudget ? 'Budget Deficit' : 'Remaining Budget'}
+                </span>
+                <div className={`text-lg sm:text-xl font-bold font-mono tabular-nums mt-0.5 ${
+                  validation.landedPrice.isOverBudget
+                    ? 'text-rose-600'
+                    : validation.landedPrice.remainingBudget === 0 && validation.filledSlotCount > 0
+                    ? 'text-[#2C3A2B]'
+                    : 'text-emerald-700'
+                }`}>
+                  {validation.landedPrice.isOverBudget
+                    ? `-${formatINR(Math.abs(validation.landedPrice.remainingBudget))}`
+                    : `+${formatINR(validation.landedPrice.remainingBudget)}`}
                 </div>
-                <div className="text-right">
-                  <span className="font-mono tabular-nums font-medium text-stone-900">
-                    {formatINR(validation.landedPrice.netShipping)}
-                  </span>
-                  {validation.landedPrice.heavyItemCount > 0 && (
-                    <span className="text-[10px] text-stone-400 block font-mono">
-                      (incl. {validation.landedPrice.heavyItemCount} heavy items)
+                <div className="mt-0.5">
+                  {validation.landedPrice.isOverBudget ? (
+                    <span className="text-[10px] font-semibold text-rose-700 bg-rose-50 px-1.5 py-0.2 rounded border border-rose-200">
+                      Exceeded
+                    </span>
+                  ) : validation.landedPrice.remainingBudget === 0 && validation.filledSlotCount > 0 ? (
+                    <span className="text-[10px] font-semibold text-emerald-800 bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200">
+                      Exact Fit
+                    </span>
+                  ) : (
+                    <span className="text-[10px] font-semibold text-emerald-800 bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200">
+                      Within Budget
                     </span>
                   )}
                 </div>
               </div>
-
-              <div className="flex items-center justify-between text-stone-600">
-                <div className="flex items-center gap-1">
-                  <span>Taxes (18% GST)</span>
-                  <span className="text-[10px] text-stone-400">Standard rate</span>
-                </div>
-                <span className="font-mono tabular-nums font-medium text-stone-900">
-                  {formatINR(validation.landedPrice.taxAmount)}
-                </span>
-              </div>
-
-              <div className="pt-2.5 border-t border-[#E6E1D3] flex items-center justify-between font-bold text-sm">
-                <span className="font-serif text-[#2C3A2B]">Final Landed Price</span>
-                <span
-                  className={`font-mono tabular-nums ${
-                    validation.landedPrice.isOverBudget ? 'text-rose-600' : 'text-[#8B5A2B]'
-                  }`}
-                >
-                  {formatINR(validation.landedPrice.landedPrice)}
-                </span>
-              </div>
             </div>
 
             {/* Budget Progress Meter */}
-            <div className="pt-2 border-t border-[#E6E1D3] space-y-1.5">
+            <div className="pt-2 border-t border-[#E6E1D3]/80 space-y-1.5">
               <div className="flex items-center justify-between text-[11px]">
-                <span className="text-[#5A5A40]">Customer Budget:</span>
+                <span className="text-[#5A5A40]">Budget Allocation:</span>
                 <span className="font-mono font-bold text-[#2C3A2B]">{formatINR(budget)}</span>
               </div>
 
               <div className="w-full h-2.5 bg-[#F4F1EA] rounded-full overflow-hidden border border-[#E6E1D3] relative shadow-inner">
                 <div
-                  className={`h-full transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] rounded-full relative overflow-hidden ${
+                  className={`h-full transition-all duration-500 rounded-full ${
                     validation.landedPrice.isOverBudget
-                      ? 'bg-rose-500 shadow-[0_0_12px_rgba(244,63,94,0.4)]'
+                      ? 'bg-rose-500'
                       : validation.landedPrice.budgetUtilisationPercent > 90
-                      ? 'bg-amber-500 shadow-[0_0_12px_rgba(245,158,11,0.4)]'
-                      : 'bg-gradient-to-r from-[#2C3A2B] to-[#496148] shadow-[0_0_12px_rgba(44,58,43,0.3)]'
+                      ? 'bg-amber-500'
+                      : 'bg-[#2C3A2B]'
                   }`}
                   style={{
                     width: `${Math.min(validation.landedPrice.budgetUtilisationPercent, 100)}%`
@@ -359,21 +446,76 @@ export const BundleBuilderPage: React.FC = () => {
                 <span>{validation.landedPrice.budgetUtilisationPercent.toFixed(1)}% utilised</span>
                 <span className={validation.landedPrice.isOverBudget ? 'text-rose-600 font-semibold' : 'text-emerald-700 font-medium'}>
                   {validation.landedPrice.isOverBudget
-                    ? `Over by ${formatINR(Math.abs(validation.landedPrice.remainingBudget))}`
-                    : `${formatINR(validation.landedPrice.remainingBudget)} remaining`}
+                    ? `${formatINR(Math.abs(validation.landedPrice.remainingBudget))} over limit`
+                    : `${formatINR(validation.landedPrice.remainingBudget)} headroom`}
+                </span>
+              </div>
+            </div>
+
+            {/* Price Stack Breakdown */}
+            <div className="pt-2 border-t border-[#E6E1D3]/80 space-y-2 text-xs">
+              <div className="flex items-center justify-between text-[#5A5A40]">
+                <span>Product Subtotal ({validation.filledSlotCount} items)</span>
+                <span className="font-mono tabular-nums font-semibold text-[#2C3A2B]">
+                  {formatINR(validation.landedPrice.productSubtotal)}
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between text-[#5A5A40]">
+                <div className="flex items-center gap-1">
+                  <span>Shipping Fee</span>
+                  {validation.landedPrice.shippingDiscount > 0 ? (
+                    <span className="text-[10px] text-emerald-700 font-semibold">(Free Tier)</span>
+                  ) : (
+                    <span className="text-[10px] text-[#8B8B7A]">(Flat Rate)</span>
+                  )}
+                </div>
+                <span className="font-mono tabular-nums font-semibold text-[#2C3A2B]">
+                  {formatINR(validation.landedPrice.netShipping)}
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between text-[#5A5A40]">
+                <div className="flex items-center gap-1">
+                  <span>Taxes</span>
+                  <span className="text-[10px] text-[#8B8B7A]">
+                    {fixture.taxRule.taxName || (fixture.taxRule.taxRate > 0 ? `${(fixture.taxRule.taxRate * 100).toFixed(0)}% GST` : 'Tax Included')}
+                  </span>
+                </div>
+                <span className="font-mono tabular-nums font-semibold text-[#2C3A2B]">
+                  {formatINR(validation.landedPrice.taxAmount)}
+                </span>
+              </div>
+
+              <div className="pt-2.5 border-t border-[#E6E1D3] flex items-center justify-between font-bold text-sm">
+                <span className="font-serif text-[#2C3A2B]">Total Landed Price</span>
+                <span
+                  className={`font-mono tabular-nums text-base ${
+                    validation.landedPrice.isOverBudget ? 'text-rose-600' : 'text-[#2C3A2B]'
+                  }`}
+                >
+                  {formatINR(validation.landedPrice.landedPrice)}
                 </span>
               </div>
             </div>
 
             {/* Status Narrative Callout */}
-            <div className="p-3.5 rounded-xl bg-[#FDFBF7] border border-[#E6E1D3] text-xs">
-              <div className="font-serif font-bold text-[#2C3A2B] flex items-center gap-1.5 mb-1">
+            <div className={`p-3.5 rounded-xl border text-xs ${
+              validation.isValid
+                ? 'bg-emerald-50/60 border-emerald-200 text-emerald-900'
+                : validation.landedPrice.isOverBudget
+                ? 'bg-rose-50/60 border-rose-200 text-rose-900'
+                : 'bg-[#FDFBF7] border-[#E6E1D3] text-[#2C3A2B]'
+            }`}>
+              <div className="font-serif font-bold flex items-center gap-1.5 mb-1">
                 {validation.isValid ? (
                   <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700" />
+                ) : validation.landedPrice.isOverBudget ? (
+                  <AlertTriangle className="w-3.5 h-3.5 text-rose-600" />
                 ) : (
-                  <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
+                  <AlertCircle className="w-3.5 h-3.5 text-amber-600" />
                 )}
-                Verification Status
+                Bundle Status
               </div>
               <p className="text-[11px] text-[#5A5A40] leading-relaxed">
                 {validation.statusMessage}
@@ -386,20 +528,20 @@ export const BundleBuilderPage: React.FC = () => {
                 <div className="flex items-center justify-between mb-1">
                   <div className="flex items-center gap-1.5 font-serif font-bold text-[#2C3A2B] text-[11px]">
                     <Sparkles className="w-3.5 h-3.5 text-[#8B5A2B]" />
-                    <span>Need AI Optimization?</span>
+                    <span>Need Help Optimizing?</span>
                   </div>
                   <span className="text-[9px] font-mono px-1.5 py-0.2 rounded-md bg-[#8B5A2B]/15 text-[#8B5A2B] font-bold">
-                    Gemini
+                    Sahay AI
                   </span>
                 </div>
                 <p className="text-[11px] text-[#5A5A40] mb-2 leading-relaxed">
-                  Let Gemini diagnose your configuration conflicts and automatically assemble an optimal, compatible setup.
+                  Let Sahay AI diagnose configuration conflicts or auto-fit products to respect your budget limit.
                 </p>
                 <button
                   onClick={toggleAssistant}
-                  className="w-full py-2 px-3 rounded-xl text-xs font-semibold bg-[#8B5A2B] hover:bg-[#743815] text-white flex items-center justify-center gap-1.5 shadow-2xs transition-colors cursor-pointer"
+                  className="w-full py-2 px-3 rounded-xl text-xs font-semibold bg-[#2C3A2B] hover:bg-[#3A4D39] text-white flex items-center justify-center gap-1.5 shadow-2xs transition-colors cursor-pointer"
                 >
-                  <span>Resolve with AI Assistant</span>
+                  <span>Resolve with Sahay AI</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </button>
               </div>
@@ -409,17 +551,17 @@ export const BundleBuilderPage: React.FC = () => {
             <div className="pt-2 flex items-center gap-2">
               <button
                 onClick={handleExportCSV}
-                className="flex-1 py-1.5 px-2 text-xs font-medium text-[#2C2C1E] hover:bg-[#F4F1EA] border border-[#E6E1D3] rounded-xl flex items-center justify-center gap-1 transition-colors cursor-pointer"
+                className="flex-1 py-1.5 px-2 text-xs font-medium text-[#2C2C1E] hover:bg-[#F4F1EA] border border-[#E6E1D3] rounded-xl flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
               >
                 <FileSpreadsheet className="w-3.5 h-3.5 text-[#8B8B7A]" />
-                CSV
+                Export CSV
               </button>
               <button
                 onClick={handleExportJSON}
-                className="flex-1 py-1.5 px-2 text-xs font-medium text-[#2C2C1E] hover:bg-[#F4F1EA] border border-[#E6E1D3] rounded-xl flex items-center justify-center gap-1 transition-colors cursor-pointer"
+                className="flex-1 py-1.5 px-2 text-xs font-medium text-[#2C2C1E] hover:bg-[#F4F1EA] border border-[#E6E1D3] rounded-xl flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
               >
                 <FileJson className="w-3.5 h-3.5 text-[#8B8B7A]" />
-                JSON
+                Export JSON
               </button>
             </div>
           </div>
