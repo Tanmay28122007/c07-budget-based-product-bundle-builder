@@ -32,7 +32,6 @@ import {
 } from '../services/supabaseClient';
 
 export type UserRole = 'customer' | 'admin' | null;
-export type { UserProfile };
 
 export interface AppNotification {
   id: string;
