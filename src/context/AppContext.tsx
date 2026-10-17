@@ -74,6 +74,7 @@ interface AppContextType {
   selectProduct: (slotId: string, product: Product) => void;
   removeProduct: (slotId: string) => void;
   resetBundle: () => void;
+  setBundleItems: (items: Record<string, Product | null>, newBudget?: number) => void;
   optimizeBundle: (preference?: 'lowest_cost' | 'best_value') => OptimizationResult;
 
   // Saved & Compared Bundles
@@ -764,6 +765,13 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     addNotification("Bundle Reset", "Cleared all selected products from slots.", 'info');
   };
 
+  const setBundleItems = (items: Record<string, Product | null>, newBudget?: number) => {
+    if (newBudget && newBudget > 0) {
+      setBudget(newBudget);
+    }
+    setCurrentItems(items);
+  };
+
   const applyBundleRecommendation = (itemsMap: Record<string, string>, newBudget?: number) => {
     if (newBudget && newBudget > 0) {
       setBudget(newBudget);
@@ -1083,6 +1091,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         selectProduct,
         removeProduct,
         resetBundle,
+        setBundleItems,
         optimizeBundle,
 
         savedBundles,
