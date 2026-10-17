@@ -16,8 +16,7 @@ import {
   Package,
   Check,
   MessageSquare,
-  Loader2,
-  Languages
+  Loader2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useApp } from '../../context/AppContext';
@@ -378,26 +377,29 @@ Choose your preferred language below or ask me anything to optimize your setup:`
       <AnimatePresence>
         {isAssistantOpen && (
           <motion.div
-            initial={{ opacity: 0, y: 24, scale: 0.95 }}
+            initial={{ opacity: 0, y: 20, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 24, scale: 0.95 }}
-            transition={{ duration: 0.22, ease: 'easeOut' }}
-            className={`fixed bottom-24 right-4 sm:right-6 bg-[#FDFBF7] rounded-2xl shadow-2xl flex flex-col z-50 border border-[#E6E1D3] overflow-hidden transition-all duration-300 ${
+            exit={{ opacity: 0, y: 16, scale: 0.96 }}
+            transition={{ type: 'spring', damping: 28, stiffness: 340, mass: 0.85 }}
+            className={`fixed bottom-24 right-4 sm:right-6 bg-[#FDFBF7] rounded-3xl shadow-2xl flex flex-col z-50 border border-[#E6E1D3] overflow-hidden transition-all duration-300 ${
               isExpanded
                 ? 'w-[95vw] sm:w-[680px] h-[82vh] max-h-[780px]'
                 : 'w-[94vw] sm:w-[440px] h-[580px] max-h-[82vh]'
             }`}
           >
             {/* Header */}
-            <div className="bg-white px-4 py-3 flex items-center justify-between shadow-xs z-10 border-b border-[#E6E1D3]">
+            <div className="bg-white/95 backdrop-blur-md px-4 py-3 flex items-center justify-between shadow-xs z-10 border-b border-[#E6E1D3]">
               <div className="flex items-center space-x-2.5 min-w-0">
-                <div className="w-9 h-9 rounded-full flex items-center justify-center bg-[#2C3A2B] text-emerald-300 shadow-xs shrink-0">
+                <div className="w-8 h-8 rounded-xl flex items-center justify-center bg-[#2C3A2B] text-emerald-300 shadow-xs shrink-0">
                   <Sparkles className="w-4 h-4 text-amber-300" />
                 </div>
                 <div className="min-w-0">
                   <div className="flex items-center gap-1.5">
-                    <h3 className="font-bold text-sm text-[#2C2C1E] truncate">AI Bundle Assistant</h3>
-                    <span className="px-1.5 py-0.5 rounded-full text-[9px] font-mono font-medium bg-[#A3B18A]/25 text-[#2C3A2B] border border-[#A3B18A]/40 shrink-0">
+                    <h3 className="font-serif font-bold text-xs sm:text-sm text-[#2C2C1E] truncate">
+                      AI Bundle Assistant
+                    </h3>
+                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-mono font-medium bg-[#A3B18A]/20 text-[#2C3A2B] border border-[#A3B18A]/40 shrink-0">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                       Live
                     </span>
                   </div>
@@ -406,9 +408,9 @@ Choose your preferred language below or ask me anything to optimize your setup:`
               </div>
 
               {/* Controls & Language Switcher */}
-              <div className="flex items-center gap-1.5 shrink-0">
+              <div className="flex items-center gap-1 shrink-0">
                 {/* Language Switch Pills */}
-                <div className="flex items-center gap-0.5 bg-[#F4F1EA] p-1 rounded-full border border-[#E6E1D3]">
+                <div className="flex items-center gap-0.5 bg-[#F4F1EA] p-0.5 rounded-full border border-[#E6E1D3]">
                   <button
                     type="button"
                     onClick={() => handleLanguageSelect('en')}
@@ -438,7 +440,6 @@ Choose your preferred language below or ask me anything to optimize your setup:`
                   </button>
                 </div>
 
-
                 {/* Full Chat button */}
                 <button
                   onClick={() => {
@@ -446,7 +447,7 @@ Choose your preferred language below or ask me anything to optimize your setup:`
                     setIsAssistantOpen(false);
                   }}
                   title="Open dedicated full-page Gemini Chatbot"
-                  className="p-1.5 hover:bg-[#F4F1EA] text-[#8B5A2B] rounded-full transition-colors cursor-pointer"
+                  className="p-1.5 hover:bg-[#F4F1EA] text-[#8B5A2B] rounded-lg transition-colors cursor-pointer"
                 >
                   <Bot className="w-4 h-4" />
                 </button>
@@ -455,7 +456,7 @@ Choose your preferred language below or ask me anything to optimize your setup:`
                 <button
                   onClick={handleClearHistory}
                   title="Clear conversation"
-                  className="p-1.5 hover:bg-[#F4F1EA] text-[#8A8A88] rounded-full transition-colors cursor-pointer"
+                  className="p-1.5 hover:bg-[#F4F1EA] text-[#8A8A88] rounded-lg transition-colors cursor-pointer"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
@@ -464,7 +465,7 @@ Choose your preferred language below or ask me anything to optimize your setup:`
                 <button
                   onClick={() => setIsExpanded(prev => !prev)}
                   title={isExpanded ? 'Collapse' : 'Expand'}
-                  className="hidden sm:block p-1.5 hover:bg-[#F4F1EA] text-[#8A8A88] rounded-full transition-colors cursor-pointer"
+                  className="hidden sm:block p-1.5 hover:bg-[#F4F1EA] text-[#8A8A88] rounded-lg transition-colors cursor-pointer"
                 >
                   {isExpanded ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
                 </button>
@@ -472,7 +473,7 @@ Choose your preferred language below or ask me anything to optimize your setup:`
                 {/* Close Button */}
                 <button
                   onClick={() => setIsAssistantOpen(false)}
-                  className="p-1.5 hover:bg-[#F4F1EA] text-[#8A8A88] rounded-full transition-colors cursor-pointer"
+                  className="p-1.5 hover:bg-[#F4F1EA] text-[#8A8A88] rounded-lg transition-colors cursor-pointer"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -524,8 +525,11 @@ Choose your preferred language below or ask me anything to optimize your setup:`
               {messages.map((msg, index) => {
                 const isUser = msg.role === 'user';
                 return (
-                  <div
+                  <motion.div
                     key={msg.id}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.2, ease: [0.2, 0.8, 0.2, 1] }}
                     className={`flex flex-col ${isUser ? 'items-end' : 'items-start'}`}
                   >
                     <div
@@ -540,42 +544,6 @@ Choose your preferred language below or ask me anything to optimize your setup:`
                         <p className="leading-relaxed whitespace-pre-wrap">{msg.text}</p>
                       ) : (
                         renderFormattedText(msg.text)
-                      )}
-
-                      {/* Interactive Language Selector on First Greeting */}
-                      {index === 0 && !isUser && (
-                        <div className="mt-4 pt-3 border-t border-[#E6E1D3]/70 flex flex-col gap-2">
-                          <span className="text-[11px] font-semibold text-[#5A5A40] flex items-center gap-1">
-                            <Languages className="w-3.5 h-3.5 text-[#8B5A2B]" />
-                            Choose preferred language:
-                          </span>
-                          <div className="grid grid-cols-1 gap-1.5">
-                            <button
-                              type="button"
-                              onClick={() => handleLanguageSelect('en')}
-                              className="w-full py-1.5 px-3 bg-[#FDFBF7] hover:bg-[#2C3A2B] hover:text-white border border-[#E6E1D3] rounded-xl text-left text-xs font-medium transition-colors flex items-center justify-between text-[#2C2C1E] cursor-pointer"
-                            >
-                              <span>🇬🇧 English</span>
-                              <span className="text-[10px] opacity-70">Workspace Consultant</span>
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => handleLanguageSelect('hi')}
-                              className="w-full py-1.5 px-3 bg-[#FDFBF7] hover:bg-[#2C3A2B] hover:text-white border border-[#E6E1D3] rounded-xl text-left text-xs font-medium transition-colors flex items-center justify-between text-[#2C2C1E] cursor-pointer"
-                            >
-                              <span>🇮🇳 हिंदी (Hindi)</span>
-                              <span className="text-[10px] opacity-70">हिंदी में सहायता प्राप्त करें</span>
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => handleLanguageSelect('gu')}
-                              className="w-full py-1.5 px-3 bg-[#FDFBF7] hover:bg-[#2C3A2B] hover:text-white border border-[#E6E1D3] rounded-xl text-left text-xs font-medium transition-colors flex items-center justify-between text-[#2C2C1E] cursor-pointer"
-                            >
-                              <span>🇮🇳 ગુજરાતી (Gujarati)</span>
-                              <span className="text-[10px] opacity-70">ગુજરાતીમાં સહાય મેળવો</span>
-                            </button>
-                          </div>
-                        </div>
                       )}
 
                       {/* Action Cards */}
@@ -733,7 +701,7 @@ Choose your preferred language below or ask me anything to optimize your setup:`
                         {msg.timestamp}
                       </div>
                     </div>
-                  </div>
+                  </motion.div>
                 );
               })}
 
