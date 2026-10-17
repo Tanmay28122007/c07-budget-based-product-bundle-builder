@@ -62,7 +62,7 @@ export const ProductSelectorModal: React.FC<ProductSelectorModalProps> = ({
   }, [productsForSlot, currentItems, slot.id]);
 
   // Apply search, filters, and sorting
-  const filteredProducts = useMemo(() => {
+  const filteredAndSortedProducts = useMemo(() => {
     return evaluatedProducts
       .filter(({ product, isCompatible }) => {
         if (showOnlyCompatible && !isCompatible) return false;
@@ -93,47 +93,47 @@ export const ProductSelectorModal: React.FC<ProductSelectorModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-stone-900/50 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
-      <div className="bg-white rounded-2xl max-w-3xl w-full border border-stone-200 shadow-xl overflow-hidden flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-[#2C2C1E]/50 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
+      <div className="bg-white rounded-[24px] max-w-3xl w-full border border-[#E6E1D3] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
         {/* Header */}
-        <div className="px-5 py-4 border-b border-stone-100 flex items-center justify-between bg-stone-50/50">
+        <div className="px-6 py-4 border-b border-[#E6E1D3] flex items-center justify-between bg-[#FDFBF7]">
           <div>
-            <div className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider">
+            <div className="text-[11px] font-semibold text-[#8B5A2B] uppercase tracking-wider">
               Select Product for Slot
             </div>
-            <h2 className="text-base font-bold text-stone-900">
+            <h2 className="font-serif text-lg font-bold text-[#2C3A2B]">
               {slot.label} ({slot.category})
             </h2>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-stone-400 hover:text-stone-700 hover:bg-stone-200/60 transition-colors"
+            className="p-1.5 rounded-xl text-[#8B8B7A] hover:text-[#2C2C1E] hover:bg-[#F4F1EA] transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Search, Filter & Sort Bar */}
-        <div className="p-4 border-b border-stone-100 bg-white space-y-3">
+        <div className="p-4 border-b border-[#E6E1D3] bg-white space-y-3">
           <div className="flex flex-col sm:flex-row gap-2.5">
             <div className="relative flex-1">
-              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[#8B8B7A]" />
               <input
                 type="text"
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
                 placeholder="Search by product name, model, spec..."
-                className="w-full pl-9 pr-3 py-2 text-xs bg-stone-50 focus:bg-white border border-stone-200 rounded-lg focus:outline-hidden focus:ring-1 focus:ring-indigo-800"
+                className="w-full pl-9 pr-3 py-2 text-xs bg-[#F4F1EA]/70 focus:bg-white border border-[#E6E1D3] rounded-xl focus:outline-hidden focus:border-[#2C3A2B] text-[#2C2C1E]"
               />
             </div>
 
             <div className="flex items-center gap-2">
-              <div className="flex items-center gap-1.5 text-xs text-stone-600 bg-stone-50 border border-stone-200 px-2.5 py-1.5 rounded-lg">
-                <ArrowUpDown className="w-3.5 h-3.5 text-stone-400" />
+              <div className="flex items-center gap-1.5 text-xs text-[#5A5A40] bg-[#F4F1EA] border border-[#E6E1D3] px-3 py-1.5 rounded-xl">
+                <ArrowUpDown className="w-3.5 h-3.5 text-[#8B5A2B]" />
                 <select
                   value={sortBy}
                   onChange={e => setSortBy(e.target.value as any)}
-                  className="bg-transparent text-xs text-stone-800 focus:outline-hidden cursor-pointer"
+                  className="bg-transparent text-xs text-[#2C3A2B] font-medium focus:outline-hidden cursor-pointer"
                 >
                   <option value="price_asc">Price: Low to High</option>
                   <option value="price_desc">Price: High to Low</option>
@@ -141,27 +141,27 @@ export const ProductSelectorModal: React.FC<ProductSelectorModalProps> = ({
                 </select>
               </div>
 
-              <label className="flex items-center gap-1.5 text-xs text-stone-600 cursor-pointer select-none px-2 py-1.5 hover:bg-stone-50 rounded-lg">
+              <label className="flex items-center gap-1.5 text-xs text-[#5A5A40] cursor-pointer select-none">
                 <input
                   type="checkbox"
                   checked={showOnlyCompatible}
                   onChange={e => setShowOnlyCompatible(e.target.checked)}
-                  className="rounded text-indigo-900 focus:ring-indigo-800"
+                  className="rounded text-[#2C3A2B] focus:ring-[#2C3A2B]"
                 />
-                <span>Compatible only</span>
+                <span>Compatible Only</span>
               </label>
             </div>
           </div>
         </div>
 
-        {/* Product Cards Grid / List */}
+        {/* Product Cards List */}
         <div className="flex-1 overflow-y-auto p-4 space-y-3">
-          {filteredProducts.length === 0 ? (
-            <div className="text-center py-12 text-stone-400 text-xs">
-              No matching products found for this category.
+          {filteredAndSortedProducts.length === 0 ? (
+            <div className="p-8 text-center text-xs text-[#8B8B7A] bg-[#FDFBF7] rounded-xl border border-dashed border-[#E6E1D3]">
+              No products found matching your current filter criteria.
             </div>
           ) : (
-            filteredProducts.map(
+            filteredAndSortedProducts.map(
               ({
                 product,
                 inStock,
@@ -175,36 +175,36 @@ export const ProductSelectorModal: React.FC<ProductSelectorModalProps> = ({
                 return (
                   <div
                     key={product.id}
-                    className={`p-4 rounded-xl border transition-all ${
+                    className={`p-4 rounded-2xl border transition-all ${
                       isSelected
-                        ? 'border-indigo-700 bg-indigo-50/20 shadow-2xs'
+                        ? 'border-[#2C3A2B] bg-[#A3B18A]/10 shadow-xs'
                         : isEligible
-                        ? 'border-stone-200 hover:border-stone-300 bg-white'
-                        : 'border-stone-200 bg-stone-50/70 opacity-85'
+                        ? 'border-[#E6E1D3] hover:border-[#8B5A2B] bg-white'
+                        : 'border-[#E6E1D3] bg-[#F4F1EA]/60 opacity-80'
                     }`}
                   >
                     <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                          <span className="text-[11px] font-mono text-stone-400">
+                          <span className="text-[11px] font-mono text-[#8B8B7A]">
                             {product.id}
                           </span>
-                          <span className="text-stone-300">·</span>
-                          <span className="text-[11px] font-semibold text-stone-500 uppercase">
+                          <span className="text-[#E6E1D3]">·</span>
+                          <span className="text-[11px] font-semibold text-[#8B5A2B] uppercase">
                             {product.brand}
                           </span>
                         </div>
 
-                        <h3 className="text-sm font-semibold text-stone-900 mt-0.5">
+                        <h3 className="font-serif text-sm font-bold text-[#2C3A2B] mt-0.5">
                           {product.name}
                         </h3>
 
-                        <p className="text-xs text-stone-600 mt-1 line-clamp-2 leading-relaxed">
+                        <p className="text-xs text-[#5A5A40] mt-1 line-clamp-2 leading-relaxed">
                           {product.description}
                         </p>
 
                         {/* Specs & Attributes List */}
-                        <div className="mt-2.5 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-stone-500 font-mono">
+                        <div className="mt-2.5 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-[#5A5A40] font-mono">
                           {product.weightKg > 0 && <span>Weight: {product.weightKg}kg</span>}
                           {product.attributes.deskWidthCm && (
                             <span>Width: {product.attributes.deskWidthCm}cm</span>
@@ -234,7 +234,7 @@ export const ProductSelectorModal: React.FC<ProductSelectorModalProps> = ({
                           )}
 
                           {!isCompatible && (
-                            <div className="p-2 rounded bg-rose-50 border border-rose-200/70 text-[11px] text-rose-800 space-y-1">
+                            <div className="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-[11px] text-rose-800 space-y-1">
                               <div className="font-semibold flex items-center gap-1">
                                 <ShieldAlert className="w-3.5 h-3.5 text-rose-600" />
                                 Compatibility Conflict:
@@ -250,12 +250,12 @@ export const ProductSelectorModal: React.FC<ProductSelectorModalProps> = ({
                       </div>
 
                       {/* Right Price & Select Button */}
-                      <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-2 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-stone-100">
+                      <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-2 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-[#E6E1D3]">
                         <div className="text-right">
-                          <div className="text-base font-bold font-mono tabular-nums text-stone-900">
+                          <div className="text-base font-bold font-mono tabular-nums text-[#8B5A2B]">
                             {formatINR(product.price)}
                           </div>
-                          <div className="text-[10px] text-stone-500">
+                          <div className="text-[10px] text-[#8B8B7A]">
                             {inStock ? `${product.stockQuantity} in stock` : 'Unavailable'}
                           </div>
                         </div>
@@ -266,12 +266,12 @@ export const ProductSelectorModal: React.FC<ProductSelectorModalProps> = ({
                             selectProduct(slot.id, product);
                             onClose();
                           }}
-                          className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 ${
+                          className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-colors flex items-center gap-1.5 cursor-pointer ${
                             isSelected
-                              ? 'bg-emerald-700 text-white'
+                              ? 'bg-[#2C3A2B] text-white shadow-2xs'
                               : isEligible
-                              ? 'bg-indigo-900 hover:bg-indigo-800 text-white shadow-2xs'
-                              : 'bg-stone-200 text-stone-400 cursor-not-allowed'
+                              ? 'bg-[#8B5A2B] hover:bg-[#743815] text-white shadow-2xs'
+                              : 'bg-[#F4F1EA] text-[#8B8B7A] cursor-not-allowed border border-[#E6E1D3]'
                           }`}
                         >
                           {isSelected ? (
@@ -295,13 +295,13 @@ export const ProductSelectorModal: React.FC<ProductSelectorModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="px-5 py-3 border-t border-stone-100 bg-stone-50/50 flex items-center justify-between text-xs text-stone-500">
+        <div className="px-6 py-3 border-t border-[#E6E1D3] bg-[#FDFBF7] flex items-center justify-between text-xs text-[#5A5A40]">
           <span>
-            Showing {filteredProducts.length} of {productsForSlot.length} available items
+            Showing {filteredAndSortedProducts.length} of {productsForSlot.length} available items
           </span>
           <button
             onClick={onClose}
-            className="px-3 py-1.5 rounded-lg border border-stone-200 text-stone-700 hover:bg-stone-100 font-medium"
+            className="px-3.5 py-1.5 rounded-xl border border-[#E6E1D3] text-[#2C2C1E] hover:bg-[#F4F1EA] font-medium transition-colors cursor-pointer"
           >
             Close
           </button>

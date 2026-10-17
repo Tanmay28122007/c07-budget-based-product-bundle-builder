@@ -8,9 +8,6 @@ import {
   TrendingUp,
   FileCode2,
   Settings,
-  ShieldAlert,
-  SlidersHorizontal,
-  ChevronRight,
   Sparkles,
   Bot
 } from 'lucide-react';
@@ -48,7 +45,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     },
     {
       id: 'chat',
-      label: 'Gemini Chatbot',
+      label: 'Gemini Assistant',
       icon: Bot,
       badge: 'AI'
     },
@@ -74,7 +71,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       id: 'business',
       label: 'Business Insights',
       icon: TrendingUp,
-      badge: 'MBA'
+      badge: 'Unit Econ'
     },
     {
       id: 'evidence',
@@ -95,29 +92,30 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       {/* Mobile Backdrop */}
       {isOpen && (
         <div
-          className="fixed inset-0 z-40 bg-stone-900/40 backdrop-blur-xs lg:hidden"
+          className="fixed inset-0 z-40 bg-[#2C2C1E]/40 backdrop-blur-xs lg:hidden"
           onClick={onClose}
         />
       )}
 
       {/* Sidebar Container */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-stone-200/80 flex flex-col transition-transform duration-200 ease-out lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 w-64 bg-[#FDFBF7] border-r border-[#E6E1D3] flex flex-col transition-transform duration-200 ease-out lg:translate-x-0 ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
-        {/* Brand / Logo Zone */}
-        <div className="h-16 px-5 border-b border-stone-200/80 flex items-center justify-between">
+        {/* Brand / Emblem Zone */}
+        <div className="h-18 px-5 border-b border-[#E6E1D3] flex items-center justify-between bg-white/70">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-indigo-900 text-white flex items-center justify-center font-bold text-sm shadow-xs tracking-tight">
-              C07
+            {/* Indian Flag Emblem Badge */}
+            <div className="w-9 h-9 rounded-full bg-[#2C3A2B] text-white flex items-center justify-center text-sm shadow-xs ring-2 ring-[#E6E1D3] shrink-0">
+              <span className="scale-110">🇮🇳</span>
             </div>
             <div>
-              <div className="text-sm font-semibold tracking-tight text-stone-900 leading-tight">
-                Bundle Builder
+              <div className="font-serif text-sm font-bold tracking-tight text-[#2C3A2B] leading-tight">
+                Vocal-Local OS
               </div>
-              <div className="text-[11px] text-stone-500 font-medium">
-                Work from Home Studio
+              <div className="text-[11px] text-[#5A5A40] font-medium">
+                Product Bundle Builder
               </div>
             </div>
           </div>
@@ -125,7 +123,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
 
         {/* Navigation Section */}
         <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-          <div className="px-3 pb-2 text-[10px] font-semibold text-stone-400 uppercase tracking-wider">
+          <div className="px-3 pb-2 text-[10px] font-semibold text-[#8B8B7A] uppercase tracking-wider">
             Workspace
           </div>
 
@@ -139,25 +137,27 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                   setActiveTab(item.id);
                   onClose();
                 }}
-                className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-colors ${
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-all ${
                   isActive
-                    ? 'bg-indigo-50 text-indigo-950 font-semibold shadow-2xs'
-                    : 'text-stone-600 hover:text-stone-900 hover:bg-stone-100/70'
+                    ? 'bg-[#2C3A2B] text-white font-semibold shadow-xs'
+                    : 'text-[#5A5A40] hover:text-[#2C3A2B] hover:bg-[#F4F1EA]'
                 }`}
               >
                 <div className="flex items-center gap-2.5">
                   <Icon
                     className={`w-4 h-4 transition-colors ${
-                      isActive ? 'text-indigo-900' : 'text-stone-400 group-hover:text-stone-600'
+                      isActive ? 'text-emerald-300' : 'text-[#8B8B7A]'
                     }`}
                   />
-                  <span>{item.label}</span>
+                  <span className={isActive ? 'font-serif' : ''}>{item.label}</span>
                 </div>
 
                 {item.badge && (
                   <span
-                    className={`text-[11px] font-mono tabular-nums ${
-                      isActive ? 'text-indigo-900 font-bold' : 'text-stone-500'
+                    className={`text-[11px] font-mono tabular-nums px-1.5 py-0.2 rounded-md ${
+                      isActive
+                        ? 'bg-white/20 text-white font-bold'
+                        : 'bg-[#F4F1EA] text-[#8B5A2B] border border-[#E6E1D3]'
                     }`}
                   >
                     {item.badge}
@@ -168,7 +168,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           })}
 
           <div className="pt-3 pb-1">
-            <div className="px-3 pb-2 text-[10px] font-semibold text-stone-400 uppercase tracking-wider">
+            <div className="px-3 pb-2 text-[10px] font-semibold text-[#8B8B7A] uppercase tracking-wider">
               AI Tools
             </div>
             <button
@@ -176,13 +176,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                 toggleAssistant();
                 onClose();
               }}
-              className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-semibold bg-gradient-to-r from-indigo-900 to-indigo-800 text-white shadow-xs hover:from-indigo-950 hover:to-indigo-900 transition-all cursor-pointer group"
+              className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold bg-[#8B5A2B] hover:bg-[#743815] text-white shadow-xs transition-all cursor-pointer group"
             >
               <div className="flex items-center gap-2.5">
-                <Sparkles className="w-4 h-4 text-indigo-200 group-hover:rotate-12 transition-transform" />
+                <Sparkles className="w-4 h-4 text-amber-200 group-hover:rotate-12 transition-transform" />
                 <span>AI Assistant</span>
               </div>
-              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-sm bg-white/20 text-white font-medium">
+              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-md bg-white/20 text-white font-medium">
                 Gemini
               </span>
             </button>
@@ -190,24 +190,24 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         </nav>
 
         {/* Fixture & Mode Status Footer */}
-        <div className="p-3 border-t border-stone-200/80 bg-stone-50/60">
-          <div className="px-2 py-2 rounded-md bg-white border border-stone-200/70 text-xs">
-            <div className="flex items-center justify-between text-[11px] text-stone-500 mb-1">
-              <span>Fixture Data</span>
-              <span className="font-mono text-stone-700">
-                {isCustomFixture ? 'Loaded JSON' : 'Synthetic C07'}
+        <div className="p-3 border-t border-[#E6E1D3] bg-[#F4F1EA]/60">
+          <div className="px-3 py-2 rounded-xl bg-white border border-[#E6E1D3] text-xs shadow-2xs">
+            <div className="flex items-center justify-between text-[11px] text-[#5A5A40] mb-1">
+              <span>Inventory Set</span>
+              <span className="font-mono text-[#2C3A2B] font-semibold">
+                {isCustomFixture ? 'Loaded JSON' : 'Vocal-Local C07'}
               </span>
             </div>
-            <div className="text-[11px] text-stone-500 flex items-center justify-between">
+            <div className="text-[11px] text-[#5A5A40] flex items-center justify-between">
               <span>Activity</span>
-              <span className="font-medium text-stone-800">{fixture.activity.name}</span>
+              <span className="font-medium text-[#2C3A2B]">{fixture.activity.name}</span>
             </div>
             {!isCustomFixture && (
-              <div className="mt-2 pt-2 border-t border-stone-100 flex items-center justify-between text-[10px] text-amber-700">
-                <span>Demo mode (synthetic)</span>
+              <div className="mt-2 pt-2 border-t border-[#E6E1D3] flex items-center justify-between text-[10px] text-[#8B5A2B]">
+                <span>Educational Demo</span>
                 <button
                   onClick={() => setActiveTab('settings')}
-                  className="font-medium hover:underline text-indigo-700"
+                  className="font-medium hover:underline text-[#8B5A2B]"
                 >
                   Upload JSON
                 </button>

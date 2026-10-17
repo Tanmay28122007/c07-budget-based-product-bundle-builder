@@ -88,10 +88,10 @@ export const CompareBundlesPage: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-bold tracking-tight text-stone-900">
+          <h1 className="text-2xl font-serif font-bold tracking-tight text-[#2C3A2B]">
             Compare Bundles
           </h1>
-          <p className="text-xs text-stone-500 mt-0.5">
+          <p className="text-xs text-[#5A5A40] mt-0.5">
             Evaluate final landed prices, component tradeoffs, and compatibility across setups.
           </p>
         </div>
@@ -101,17 +101,17 @@ export const CompareBundlesPage: React.FC = () => {
             onClick={() => {
               saveCurrentBundle('Workspace Snapshot');
             }}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-stone-700 bg-white hover:bg-stone-50 border border-stone-200 rounded-lg shadow-2xs transition-colors"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium text-[#2C3A2B] bg-white hover:bg-[#F4F1EA] border border-[#E6E1D3] rounded-xl shadow-2xs transition-colors"
           >
-            <PlusCircle className="w-3.5 h-3.5 text-stone-500" />
+            <PlusCircle className="w-3.5 h-3.5 text-[#5A5A40]" />
             Snapshot Active Setup
           </button>
           {bundlesToCompare.length > 0 && (
             <button
               onClick={handleExportComparison}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-stone-700 bg-white hover:bg-stone-50 border border-stone-200 rounded-lg shadow-2xs transition-colors"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium text-[#2C3A2B] bg-white hover:bg-[#F4F1EA] border border-[#E6E1D3] rounded-xl shadow-2xs transition-colors"
             >
-              <FileSpreadsheet className="w-3.5 h-3.5 text-stone-500" />
+              <FileSpreadsheet className="w-3.5 h-3.5 text-[#5A5A40]" />
               Export Comparison CSV
             </button>
           )}
@@ -119,30 +119,30 @@ export const CompareBundlesPage: React.FC = () => {
       </div>
 
       {/* Saved Bundles Selector Strip */}
-      <div className="p-4 bg-white border border-stone-200/80 rounded-xl shadow-2xs">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider">
+      <div className="p-5 bg-white border border-[#E6E1D3] rounded-[24px] shadow-xs">
+        <div className="flex items-center justify-between mb-3">
+          <span className="text-[11px] font-semibold text-[#5A5A40] uppercase tracking-wider">
             Select Bundles to Compare (Up to 3)
           </span>
-          <span className="text-xs text-stone-400 font-mono">
+          <span className="text-xs text-[#5A5A40] font-mono">
             {selectedBundleIds.length} of 3 selected
           </span>
         </div>
 
         {savedBundles.length === 0 ? (
-          <div className="text-center py-6 border border-dashed border-stone-200 rounded-lg text-xs text-stone-400 space-y-2">
+          <div className="text-center py-8 border border-dashed border-[#E6E1D3] rounded-2xl bg-[#FDFBF7] text-xs text-[#5A5A40] space-y-2">
             <p>No saved bundles currently in memory.</p>
             <button
               onClick={() => {
                 saveCurrentBundle('Current Setup');
               }}
-              className="px-3 py-1 text-xs font-semibold text-indigo-900 bg-indigo-50 border border-indigo-200 rounded-lg hover:bg-indigo-100"
+              className="px-3.5 py-1.5 text-xs font-semibold text-[#2C3A2B] bg-[#F5F5EC] border border-[#E6E1D3] rounded-xl hover:bg-[#F4F1EA]"
             >
               Save Current Workspace Setup
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
             {savedBundles.map(bundle => {
               const isChecked = selectedBundleIds.includes(bundle.id);
               const isValid = bundle.validation.isValid;
@@ -151,31 +151,31 @@ export const CompareBundlesPage: React.FC = () => {
                 <div
                   key={bundle.id}
                   onClick={() => toggleSelectBundle(bundle.id)}
-                  className={`p-3 rounded-lg border text-xs cursor-pointer transition-all flex flex-col justify-between ${
+                  className={`p-3.5 rounded-2xl border text-xs cursor-pointer transition-all flex flex-col justify-between ${
                     isChecked
-                      ? 'border-indigo-800 bg-indigo-50/30 shadow-2xs'
-                      : 'border-stone-200 bg-stone-50/50 hover:bg-stone-50'
+                      ? 'border-[#2C3A2B] bg-[#F5F5EC] shadow-2xs'
+                      : 'border-[#E6E1D3] bg-[#FDFBF7] hover:bg-[#F4F1EA]'
                   }`}
                 >
                   <div>
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="font-semibold text-stone-900 line-clamp-1">
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="font-semibold text-[#2C3A2B] line-clamp-1">
                         {bundle.name}
                       </span>
                       {isValid ? (
-                        <span className="text-[10px] text-emerald-700 font-medium">Valid</span>
+                        <span className="text-[10px] text-[#2C3A2B] bg-[#A3B18A]/25 border border-[#A3B18A]/40 px-1.5 py-0.5 rounded font-medium">Valid</span>
                       ) : (
-                        <span className="text-[10px] text-rose-700 font-medium">Invalid</span>
+                        <span className="text-[10px] text-[#C05621] bg-[#C05621]/10 border border-[#C05621]/20 px-1.5 py-0.5 rounded font-medium">Invalid</span>
                       )}
                     </div>
-                    <div className="text-sm font-bold font-mono tabular-nums text-stone-800">
+                    <div className="text-sm font-bold font-mono tabular-nums text-[#2C3A2B]">
                       {formatINR(bundle.validation.landedPrice.landedPrice)}
                     </div>
                   </div>
 
-                  <div className="mt-2 pt-2 border-t border-stone-200/50 flex items-center justify-between text-[11px]">
-                    <span className="text-stone-400 font-mono text-[10px]">{bundle.savedAt}</span>
-                    <span className={`font-semibold ${isChecked ? 'text-indigo-900' : 'text-stone-500'}`}>
+                  <div className="mt-3 pt-2.5 border-t border-[#E6E1D3] flex items-center justify-between text-[11px]">
+                    <span className="text-[#5A5A40] font-mono text-[10px]">{bundle.savedAt}</span>
+                    <span className={`font-semibold ${isChecked ? 'text-[#8B5A2B]' : 'text-[#5A5A40]'}`}>
                       {isChecked ? 'Comparing' : 'Click to compare'}
                     </span>
                   </div>
@@ -188,16 +188,16 @@ export const CompareBundlesPage: React.FC = () => {
 
       {/* Comparison Grid & Visual Price Chart */}
       {bundlesToCompare.length === 0 ? (
-        <div className="p-12 text-center bg-white rounded-xl border border-stone-200/80 text-stone-400 text-xs">
+        <div className="p-12 text-center bg-white rounded-[24px] border border-[#E6E1D3] text-[#5A5A40] text-xs">
           Select at least one saved bundle above to inspect its landed breakdown.
         </div>
       ) : (
         <div className="space-y-6">
           {/* Visual Landed Price Indicator Bar Chart */}
-          <div className="p-5 bg-white border border-stone-200/80 rounded-xl shadow-2xs space-y-4">
+          <div className="p-6 bg-white border border-[#E6E1D3] rounded-[24px] shadow-xs space-y-4">
             <div>
-              <h3 className="text-sm font-bold text-stone-900">Final Landed Price Comparison</h3>
-              <p className="text-xs text-stone-500">
+              <h3 className="text-base font-serif font-bold text-[#2C3A2B]">Final Landed Price Comparison</h3>
+              <p className="text-xs text-[#5A5A40]">
                 Visualizing total payable amount (Subtotal + Net Shipping + 18% GST) against budget baseline.
               </p>
             </div>
@@ -209,34 +209,34 @@ export const CompareBundlesPage: React.FC = () => {
                 const isBestPrice = b.validation.isValid && landed === minLandedPrice;
 
                 return (
-                  <div key={b.id} className="space-y-1">
+                  <div key={b.id} className="space-y-1.5">
                     <div className="flex items-center justify-between text-xs">
                       <div className="flex items-center gap-2">
-                        <span className="font-semibold text-stone-900">{b.name}</span>
+                        <span className="font-semibold text-[#2C3A2B]">{b.name}</span>
                         {isBestPrice && (
-                          <span className="text-[10px] font-semibold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                          <span className="text-[10px] font-semibold text-[#2C3A2B] bg-[#A3B18A]/25 px-2 py-0.5 rounded-full border border-[#A3B18A]/40">
                             Lowest Landed Cost
                           </span>
                         )}
                         {!b.validation.isValid && (
-                          <span className="text-[10px] text-rose-700 bg-rose-50 px-1.5 py-0.5 rounded">
+                          <span className="text-[10px] text-[#C05621] bg-[#C05621]/10 px-2 py-0.5 rounded-full border border-[#C05621]/20">
                             Violates Rules
                           </span>
                         )}
                       </div>
-                      <span className="font-mono font-bold tabular-nums text-stone-900">
+                      <span className="font-mono font-bold tabular-nums text-[#2C3A2B]">
                         {formatINR(landed)}
                       </span>
                     </div>
 
-                    <div className="w-full h-3 bg-stone-100 rounded-full overflow-hidden">
+                    <div className="w-full h-3 bg-[#F4F1EA] rounded-full overflow-hidden">
                       <div
                         className={`h-full rounded-full transition-all duration-300 ${
                           !b.validation.isValid
-                            ? 'bg-rose-400'
+                            ? 'bg-[#C05621]'
                             : isBestPrice
-                            ? 'bg-emerald-600'
-                            : 'bg-indigo-800'
+                            ? 'bg-[#A3B18A]'
+                            : 'bg-[#2C3A2B]'
                         }`}
                         style={{ width: `${Math.min(percentOfMax, 100)}%` }}
                       />
@@ -248,38 +248,38 @@ export const CompareBundlesPage: React.FC = () => {
           </div>
 
           {/* Deep Side-by-Side Comparison Matrix */}
-          <div className="bg-white border border-stone-200/80 rounded-xl shadow-2xs overflow-hidden">
+          <div className="bg-white border border-[#E6E1D3] rounded-[24px] shadow-xs overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse">
                 <thead>
-                  <tr className="bg-stone-50/80 border-b border-stone-200 text-[11px] font-semibold text-stone-600 uppercase">
-                    <th className="py-3 px-4 w-48">Feature / Metric</th>
+                  <tr className="bg-[#F5F5EC]/70 border-b border-[#E6E1D3] text-[11px] font-serif font-bold text-[#2C3A2B] uppercase">
+                    <th className="py-3.5 px-4 w-48">Feature / Metric</th>
                     {bundlesToCompare.map(b => (
-                      <th key={b.id} className="py-3 px-4 min-w-[220px]">
-                        <div className="text-xs font-bold text-stone-900">{b.name}</div>
-                        <div className="text-[10px] text-stone-400 font-mono font-normal">
+                      <th key={b.id} className="py-3.5 px-4 min-w-[220px]">
+                        <div className="text-xs font-bold text-[#2C3A2B]">{b.name}</div>
+                        <div className="text-[10px] text-[#5A5A40] font-mono font-normal">
                           ID: {b.id}
                         </div>
                       </th>
                     ))}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-stone-100">
+                <tbody className="divide-y divide-[#E6E1D3]/50">
                   {/* Validity Status */}
-                  <tr className="bg-stone-50/30">
-                    <td className="py-3 px-4 font-semibold text-stone-700">Overall Validity</td>
+                  <tr className="bg-[#FDFBF7]">
+                    <td className="py-3 px-4 font-semibold text-[#2C3A2B]">Overall Validity</td>
                     {bundlesToCompare.map(b => (
                       <td key={b.id} className="py-3 px-4">
                         {b.validation.isValid ? (
-                          <span className="inline-flex items-center gap-1 text-emerald-800 font-semibold text-xs">
-                            <Check className="w-3.5 h-3.5" /> Valid Purchase Ready
+                          <span className="inline-flex items-center gap-1 text-[#2C3A2B] font-semibold text-xs">
+                            <Check className="w-3.5 h-3.5 text-[#2C3A2B]" /> Valid Purchase Ready
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 text-rose-700 font-semibold text-xs">
+                          <span className="inline-flex items-center gap-1 text-[#C05621] font-semibold text-xs">
                             <AlertTriangle className="w-3.5 h-3.5" /> Rule Non-Compliant
                           </span>
                         )}
-                        <span className="text-[11px] text-stone-500 block mt-0.5">
+                        <span className="text-[11px] text-[#5A5A40] block mt-0.5">
                           {b.validation.statusMessage}
                         </span>
                       </td>
@@ -288,9 +288,9 @@ export const CompareBundlesPage: React.FC = () => {
 
                   {/* Customer Budget */}
                   <tr>
-                    <td className="py-3 px-4 text-stone-600">Customer Budget</td>
+                    <td className="py-3 px-4 text-[#5A5A40]">Customer Budget</td>
                     {bundlesToCompare.map(b => (
-                      <td key={b.id} className="py-3 px-4 font-mono font-medium text-stone-900">
+                      <td key={b.id} className="py-3 px-4 font-mono font-medium text-[#2C3A2B]">
                         {formatINR(b.budget)}
                       </td>
                     ))}
@@ -298,9 +298,9 @@ export const CompareBundlesPage: React.FC = () => {
 
                   {/* Product Subtotal */}
                   <tr>
-                    <td className="py-3 px-4 text-stone-600">Product Subtotal</td>
+                    <td className="py-3 px-4 text-[#5A5A40]">Product Subtotal</td>
                     {bundlesToCompare.map(b => (
-                      <td key={b.id} className="py-3 px-4 font-mono font-medium text-stone-800">
+                      <td key={b.id} className="py-3 px-4 font-mono font-medium text-[#2C3A2B]">
                         {formatINR(b.validation.landedPrice.productSubtotal)}
                       </td>
                     ))}
@@ -308,13 +308,13 @@ export const CompareBundlesPage: React.FC = () => {
 
                   {/* Shipping Fee */}
                   <tr>
-                    <td className="py-3 px-4 text-stone-600">Net Shipping</td>
+                    <td className="py-3 px-4 text-[#5A5A40]">Net Shipping</td>
                     {bundlesToCompare.map(b => (
-                      <td key={b.id} className="py-3 px-4 font-mono text-stone-700">
+                      <td key={b.id} className="py-3 px-4 font-mono text-[#2C3A2B]">
                         {formatINR(b.validation.landedPrice.netShipping)}
                         {b.validation.landedPrice.shippingDiscount > 0 && (
-                          <span className="text-[10px] text-emerald-700 ml-1.5 font-sans font-medium">
-                            (Free Shipping Tier)
+                          <span className="text-[10px] text-[#2C3A2B] bg-[#A3B18A]/25 border border-[#A3B18A]/40 px-1.5 py-0.5 rounded ml-1.5 font-sans font-medium">
+                            Free Shipping Tier
                           </span>
                         )}
                       </td>
@@ -323,29 +323,29 @@ export const CompareBundlesPage: React.FC = () => {
 
                   {/* Taxes */}
                   <tr>
-                    <td className="py-3 px-4 text-stone-600">Taxes (18% GST)</td>
+                    <td className="py-3 px-4 text-[#5A5A40]">Taxes (18% GST)</td>
                     {bundlesToCompare.map(b => (
-                      <td key={b.id} className="py-3 px-4 font-mono text-stone-700">
+                      <td key={b.id} className="py-3 px-4 font-mono text-[#2C3A2B]">
                         {formatINR(b.validation.landedPrice.taxAmount)}
                       </td>
                     ))}
                   </tr>
 
                   {/* Final Landed Price */}
-                  <tr className="bg-stone-50/60 font-bold">
-                    <td className="py-3.5 px-4 text-stone-900">Final Landed Price</td>
+                  <tr className="bg-[#F5F5EC]/60 font-bold">
+                    <td className="py-3.5 px-4 text-[#2C3A2B]">Final Landed Price</td>
                     {bundlesToCompare.map(b => {
                       const isBest = b.validation.isValid && b.validation.landedPrice.landedPrice === minLandedPrice;
                       return (
                         <td
                           key={b.id}
                           className={`py-3.5 px-4 font-mono text-sm ${
-                            isBest ? 'text-emerald-800' : 'text-stone-900'
+                            isBest ? 'text-[#2C3A2B]' : 'text-[#2C3A2B]'
                           }`}
                         >
                           {formatINR(b.validation.landedPrice.landedPrice)}
                           {isBest && (
-                            <span className="block text-[10px] text-emerald-700 font-sans font-semibold">
+                            <span className="block text-[10px] text-[#8B5A2B] font-sans font-semibold">
                               Best Value Choice
                             </span>
                           )}
@@ -356,14 +356,14 @@ export const CompareBundlesPage: React.FC = () => {
 
                   {/* Remaining Budget Buffer */}
                   <tr>
-                    <td className="py-3 px-4 text-stone-600">Remaining Budget Buffer</td>
+                    <td className="py-3 px-4 text-[#5A5A40]">Remaining Budget Buffer</td>
                     {bundlesToCompare.map(b => (
                       <td
                         key={b.id}
                         className={`py-3 px-4 font-mono font-medium ${
                           b.validation.landedPrice.isOverBudget
-                            ? 'text-rose-600'
-                            : 'text-stone-800'
+                            ? 'text-[#C05621]'
+                            : 'text-[#2C3A2B]'
                         }`}
                       >
                         {formatINR(b.validation.landedPrice.remainingBudget)}
@@ -374,7 +374,7 @@ export const CompareBundlesPage: React.FC = () => {
                   {/* Required Slots Breakdown */}
                   {fixture.activity.requiredSlots.map(slot => (
                     <tr key={slot.id}>
-                      <td className="py-3 px-4 text-stone-500 font-medium">
+                      <td className="py-3 px-4 text-[#5A5A40] font-medium">
                         {slot.label} ({slot.category})
                       </td>
                       {bundlesToCompare.map(b => {
@@ -383,15 +383,15 @@ export const CompareBundlesPage: React.FC = () => {
                           <td key={b.id} className="py-3 px-4">
                             {item ? (
                               <div>
-                                <span className="font-semibold text-stone-900 block line-clamp-1">
+                                <span className="font-semibold text-[#2C3A2B] block line-clamp-1">
                                   {item.name}
                                 </span>
-                                <span className="text-[11px] font-mono text-stone-500">
+                                <span className="text-[11px] font-mono text-[#5A5A40]">
                                   {formatINR(item.price)} · {item.id}
                                 </span>
                               </div>
                             ) : (
-                              <span className="text-stone-400 italic">Empty Slot</span>
+                              <span className="text-[#5A5A40]/60 italic">Empty Slot</span>
                             )}
                           </td>
                         );
@@ -400,20 +400,20 @@ export const CompareBundlesPage: React.FC = () => {
                   ))}
 
                   {/* Action Row */}
-                  <tr className="bg-stone-50/50">
-                    <td className="py-3 px-4 text-stone-600 font-semibold">Workspace Action</td>
+                  <tr className="bg-[#F5F5EC]/40">
+                    <td className="py-3.5 px-4 text-[#2C3A2B] font-semibold">Workspace Action</td>
                     {bundlesToCompare.map(b => (
-                      <td key={b.id} className="py-3 px-4">
+                      <td key={b.id} className="py-3.5 px-4">
                         <div className="flex items-center gap-2">
                           <button
                             onClick={() => loadSavedBundle(b)}
-                            className="px-3 py-1.5 rounded-lg text-xs font-semibold text-white bg-indigo-900 hover:bg-indigo-800 shadow-2xs"
+                            className="px-3.5 py-1.5 rounded-xl text-xs font-semibold text-white bg-[#2C3A2B] hover:bg-[#3A4D39] shadow-2xs"
                           >
                             Load Into Builder
                           </button>
                           <button
                             onClick={() => deleteSavedBundle(b.id)}
-                            className="p-1.5 text-stone-400 hover:text-rose-600 rounded-lg hover:bg-stone-100"
+                            className="p-1.5 text-[#5A5A40] hover:text-[#C05621] rounded-lg hover:bg-[#F4F1EA]"
                             title="Delete this record"
                           >
                             <Trash2 className="w-4 h-4" />

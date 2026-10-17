@@ -13,7 +13,9 @@ import {
   AlertTriangle,
   Check,
   ShieldCheck,
-  FolderOpen
+  UserCheck,
+  Building2,
+  Lock
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { formatINR } from '../../utils/pricing';
@@ -81,442 +83,527 @@ export const DashboardPage: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Page Title & Contextual Actions */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-xl font-bold tracking-tight text-stone-900">
-            Bundle Builder Dashboard
-          </h1>
-          <p className="text-xs text-stone-500 mt-0.5">
-            Manage product bundles, validate compatibility, and optimise spending.
-          </p>
+    <div className="space-y-10 py-2">
+      {/* ========================================================================= */}
+      {/* THEME HERO SECTION (Matches Reference Screen Exactly)                    */}
+      {/* ========================================================================= */}
+      <section className="text-center pt-2 pb-4 relative">
+        {/* Top Flag Emblem Circle with ambient glowing rings */}
+        <div className="relative inline-block mb-6">
+          <div className="absolute -inset-3 bg-[#A3B18A]/25 rounded-full blur-md animate-pulse" />
+          <div className="absolute -top-4 -left-4 w-3 h-3 bg-[#A3B18A]/30 rounded-full blur-2xs" />
+          <div className="absolute -bottom-2 -right-4 w-4 h-4 bg-[#8B5A2B]/20 rounded-full blur-2xs" />
+          <div className="absolute top-1/2 -left-6 w-2.5 h-2.5 bg-[#A3B18A]/40 rounded-full blur-2xs" />
+
+          <div className="relative w-16 h-16 rounded-full bg-[#2C3A2B] text-white flex items-center justify-center text-2xl shadow-md ring-4 ring-[#E6E1D3]/80">
+            <span className="scale-125 select-none">🇮🇳</span>
+          </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => optimizeBundle('lowest_cost')}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-stone-700 bg-white border border-stone-200 hover:bg-stone-50 rounded-lg shadow-2xs transition-colors"
-          >
-            <Sparkles className="w-3.5 h-3.5 text-indigo-700" />
-            Auto-Find Valid Setup
-          </button>
-          <button
+        {/* Hero Serif Title & Subtitle */}
+        <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-[#2C3A2B] mb-3">
+          Vocal-Local Village OS
+        </h1>
+        <p className="text-[#5A5A40] text-sm sm:text-base max-w-xl mx-auto leading-relaxed">
+          Welcome to the Digital Gram Panchayat & Commerce OS. Please select your role to continue.
+        </p>
+
+        {/* Signature Two Role Cards (Citizen & Sarpanch) */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto mt-8 text-left">
+          {/* Card 1: Citizen */}
+          <div
             onClick={() => setActiveTab('builder')}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-indigo-900 hover:bg-indigo-800 rounded-lg shadow-xs transition-colors"
+            className="group relative bg-white border border-[#E6E1D3] rounded-[24px] p-8 shadow-xs hover:shadow-lg transition-all duration-300 overflow-hidden cursor-pointer hover:-translate-y-0.5"
           >
-            Continue Building
-            <ArrowRight className="w-3.5 h-3.5" />
-          </button>
-        </div>
-      </div>
+            {/* Top right decorative arc watermark */}
+            <div className="absolute top-0 right-0 w-28 h-28 bg-[#F5F5EC]/70 rounded-bl-[100px] pointer-events-none transition-transform group-hover:scale-105" />
 
-      {/* Summary KPI Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-        {/* Metric 1: Available Products */}
-        <div className="p-4 bg-white border border-stone-200/80 rounded-xl shadow-2xs">
-          <div className="flex items-center justify-between text-stone-500 mb-2">
-            <span className="text-[11px] font-medium uppercase tracking-wider">Available Products</span>
-            <Package className="w-4 h-4 text-stone-400" />
+            {/* Icon Box */}
+            <div className="w-12 h-12 rounded-xl bg-[#F4F1EA] text-[#2C3A2B] flex items-center justify-center mb-6 border border-[#E6E1D3] shadow-2xs group-hover:bg-[#2C3A2B] group-hover:text-white transition-colors">
+              <UserCheck className="w-6 h-6" />
+            </div>
+
+            <h2 className="font-serif text-2xl font-bold text-[#2C3A2B] mb-2 group-hover:text-[#8B5A2B] transition-colors">
+              Citizen
+            </h2>
+            <p className="text-[#5A5A40] text-sm leading-relaxed mb-6">
+              Access live bundles, check hardware compatibility, and optimize budget for your workstation.
+            </p>
+
+            <div className="text-xs font-bold text-[#8B5A2B] uppercase tracking-wider flex items-center gap-1.5 group-hover:gap-2.5 transition-all">
+              <span>ENTER PORTAL</span>
+              <ArrowRight className="w-4 h-4" />
+            </div>
           </div>
-          <div className="text-xl font-bold font-mono tabular-nums text-stone-900">
-            {availableProductsCount}
-            <span className="text-xs font-normal text-stone-400 ml-1">/ {fixture.products.length} in stock</span>
+
+          {/* Card 2: Sarpanch */}
+          <div
+            onClick={() => setActiveTab('business')}
+            className="group relative bg-white border border-[#E6E1D3] rounded-[24px] p-8 shadow-xs hover:shadow-lg transition-all duration-300 overflow-hidden cursor-pointer hover:-translate-y-0.5"
+          >
+            {/* Top right decorative arc watermark */}
+            <div className="absolute top-0 right-0 w-28 h-28 bg-[#F5F5EC]/70 rounded-bl-[100px] pointer-events-none transition-transform group-hover:scale-105" />
+
+            {/* Icon Box */}
+            <div className="w-12 h-12 rounded-xl bg-[#F4F1EA] text-[#2C3A2B] flex items-center justify-center mb-6 border border-[#E6E1D3] shadow-2xs group-hover:bg-[#2C3A2B] group-hover:text-white transition-colors">
+              <ShieldCheck className="w-6 h-6" />
+            </div>
+
+            <h2 className="font-serif text-2xl font-bold text-[#2C3A2B] mb-2 group-hover:text-[#8B5A2B] transition-colors">
+              Sarpanch
+            </h2>
+            <p className="text-[#5A5A40] text-sm leading-relaxed mb-6">
+              Admin login to manage village records, review automated test suites, and audit landed economics.
+            </p>
+
+            <div className="text-xs font-bold text-[#8B5A2B] uppercase tracking-wider flex items-center gap-1.5 group-hover:gap-2.5 transition-all">
+              <span>SECURE LOGIN</span>
+              <ArrowRight className="w-4 h-4" />
+            </div>
           </div>
-          <p className="text-[11px] text-stone-500 mt-1">Live active inventory</p>
+        </div>
+      </section>
+
+      {/* ========================================================================= */}
+      {/* WORKSPACE OPERATIONS & DASHBOARD OVERVIEW                                 */}
+      {/* ========================================================================= */}
+      <div className="space-y-6 pt-4 border-t border-[#E6E1D3]">
+        {/* Title bar */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h2 className="font-serif text-2xl font-bold tracking-tight text-[#2C3A2B]">
+              Workspace Overview & Inventory
+            </h2>
+            <p className="text-xs text-[#5A5A40] mt-0.5">
+              Live validation telemetry for {fixture.activity.name}
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => optimizeBundle('lowest_cost')}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-[#2C2C1E] bg-white border border-[#E6E1D3] hover:bg-[#F4F1EA] rounded-xl shadow-2xs transition-colors cursor-pointer"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-[#8B5A2B]" />
+              Auto-Find Valid Setup
+            </button>
+            <button
+              onClick={() => setActiveTab('builder')}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-[#2C3A2B] hover:bg-[#3A4D39] rounded-xl shadow-xs transition-colors cursor-pointer"
+            >
+              Open Builder
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
         </div>
 
-        {/* Metric 2: Required Slots */}
-        <div className="p-4 bg-white border border-stone-200/80 rounded-xl shadow-2xs">
-          <div className="flex items-center justify-between text-stone-500 mb-2">
-            <span className="text-[11px] font-medium uppercase tracking-wider">Required Slots</span>
-            <Layers className="w-4 h-4 text-stone-400" />
+        {/* Summary KPI Cards */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3.5">
+          {/* Metric 1 */}
+          <div className="p-4 bg-white border border-[#E6E1D3] rounded-2xl shadow-2xs">
+            <div className="flex items-center justify-between text-[#5A5A40] mb-2">
+              <span className="text-[11px] font-medium uppercase tracking-wider">Available Products</span>
+              <Package className="w-4 h-4 text-[#8B8B7A]" />
+            </div>
+            <div className="text-xl font-bold font-mono tabular-nums text-[#2C3A2B]">
+              {availableProductsCount}
+              <span className="text-xs font-normal text-[#8B8B7A] ml-1">/ {fixture.products.length}</span>
+            </div>
+            <p className="text-[11px] text-[#5A5A40] mt-1">Live in-stock catalogue</p>
           </div>
-          <div className="text-xl font-bold font-mono tabular-nums text-stone-900">
-            {validation.filledSlotCount}
-            <span className="text-xs font-normal text-stone-400 ml-1">/ {totalRequiredSlots} filled</span>
+
+          {/* Metric 2 */}
+          <div className="p-4 bg-white border border-[#E6E1D3] rounded-2xl shadow-2xs">
+            <div className="flex items-center justify-between text-[#5A5A40] mb-2">
+              <span className="text-[11px] font-medium uppercase tracking-wider">Required Slots</span>
+              <Layers className="w-4 h-4 text-[#8B8B7A]" />
+            </div>
+            <div className="text-xl font-bold font-mono tabular-nums text-[#2C3A2B]">
+              {validation.filledSlotCount}
+              <span className="text-xs font-normal text-[#8B8B7A] ml-1">/ {totalRequiredSlots} filled</span>
+            </div>
+            <p className="text-[11px] text-[#5A5A40] mt-1">
+              {validation.isComplete ? 'All slots assigned' : `${validation.missingSlotIds.length} slots empty`}
+            </p>
           </div>
-          <p className="text-[11px] text-stone-500 mt-1">
-            {validation.isComplete ? 'All slots assigned' : `${validation.missingSlotIds.length} slots empty`}
-          </p>
+
+          {/* Metric 3 */}
+          <div className="p-4 bg-white border border-[#E6E1D3] rounded-2xl shadow-2xs">
+            <div className="flex items-center justify-between text-[#5A5A40] mb-2">
+              <span className="text-[11px] font-medium uppercase tracking-wider">Valid Bundles</span>
+              <CheckCircle2 className="w-4 h-4 text-emerald-700" />
+            </div>
+            <div className="text-xl font-bold font-mono tabular-nums text-[#2C3A2B]">
+              {validSavedBundlesCount}
+              <span className="text-xs font-normal text-[#8B8B7A] ml-1">saved</span>
+            </div>
+            <p className="text-[11px] text-[#5A5A40] mt-1">Zero rule violations</p>
+          </div>
+
+          {/* Metric 4 */}
+          <div className="p-4 bg-white border border-[#E6E1D3] rounded-2xl shadow-2xs">
+            <div className="flex items-center justify-between text-[#5A5A40] mb-2">
+              <span className="text-[11px] font-medium uppercase tracking-wider">Avg Bundle Cost</span>
+              <Coins className="w-4 h-4 text-[#8B5A2B]" />
+            </div>
+            <div className="text-xl font-bold font-mono tabular-nums text-[#2C3A2B]">
+              {avgBundleCost !== null ? formatINR(avgBundleCost) : 'Pending setup'}
+            </div>
+            <p className="text-[11px] text-[#5A5A40] mt-1">Final landed price</p>
+          </div>
+
+          {/* Metric 5 */}
+          <div className="p-4 bg-white border border-[#E6E1D3] rounded-2xl shadow-2xs col-span-2 md:col-span-1">
+            <div className="flex items-center justify-between text-[#5A5A40] mb-2">
+              <span className="text-[11px] font-medium uppercase tracking-wider">Compliance Rate</span>
+              <TrendingUp className="w-4 h-4 text-[#8B5A2B]" />
+            </div>
+            <div className="text-xl font-bold font-mono tabular-nums text-[#2C3A2B]">
+              {complianceRateStr}
+            </div>
+            <p className="text-[11px] text-[#5A5A40] mt-1">Rule & budget bounds</p>
+          </div>
         </div>
 
-        {/* Metric 3: Valid Bundles */}
-        <div className="p-4 bg-white border border-stone-200/80 rounded-xl shadow-2xs">
-          <div className="flex items-center justify-between text-stone-500 mb-2">
-            <span className="text-[11px] font-medium uppercase tracking-wider">Valid Bundles</span>
-            <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-          </div>
-          <div className="text-xl font-bold font-mono tabular-nums text-stone-900">
-            {validSavedBundlesCount}
-            <span className="text-xs font-normal text-stone-400 ml-1">saved</span>
-          </div>
-          <p className="text-[11px] text-stone-500 mt-1">Zero rule violations</p>
-        </div>
-
-        {/* Metric 4: Average Bundle Cost */}
-        <div className="p-4 bg-white border border-stone-200/80 rounded-xl shadow-2xs">
-          <div className="flex items-center justify-between text-stone-500 mb-2">
-            <span className="text-[11px] font-medium uppercase tracking-wider">Avg Bundle Cost</span>
-            <Coins className="w-4 h-4 text-stone-400" />
-          </div>
-          <div className="text-xl font-bold font-mono tabular-nums text-stone-900">
-            {avgBundleCost !== null ? formatINR(avgBundleCost) : 'Not yet measured'}
-          </div>
-          <p className="text-[11px] text-stone-500 mt-1">Final landed price</p>
-        </div>
-
-        {/* Metric 5: Budget Compliance Rate */}
-        <div className="p-4 bg-white border border-stone-200/80 rounded-xl shadow-2xs col-span-2 md:col-span-1">
-          <div className="flex items-center justify-between text-stone-500 mb-2">
-            <span className="text-[11px] font-medium uppercase tracking-wider">Compliance Rate</span>
-            <TrendingUp className="w-4 h-4 text-teal-600" />
-          </div>
-          <div className="text-xl font-bold font-mono tabular-nums text-stone-900">
-            {complianceRateStr}
-          </div>
-          <p className="text-[11px] text-stone-500 mt-1">Rule & budget bounds</p>
-        </div>
-      </div>
-
-      {/* Main Grid: Current Bundle Card + Budget Utilisation */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left 2 Columns: Current Bundle Card */}
-        <div className="lg:col-span-2 space-y-6">
-          <div className="bg-white border border-stone-200/80 rounded-xl shadow-2xs p-5">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 border-b border-stone-100">
-              <div>
-                <div className="text-xs font-medium text-stone-500 uppercase tracking-wider">
-                  Active Configuration
+        {/* Main Grid: Current Bundle Card + Budget Utilisation */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left 2 Columns: Current Bundle Card */}
+          <div className="lg:col-span-2 space-y-6">
+            <div className="bg-white border border-[#E6E1D3] rounded-[24px] shadow-xs p-6 relative overflow-hidden">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 border-b border-[#E6E1D3]">
+                <div>
+                  <div className="text-xs font-semibold text-[#8B5A2B] uppercase tracking-wider">
+                    Active Configuration
+                  </div>
+                  <h3 className="font-serif text-lg font-bold text-[#2C3A2B]">
+                    {fixture.activity.name} Workstation
+                  </h3>
                 </div>
-                <h2 className="text-base font-bold text-stone-900">
-                  {fixture.activity.name} Workstation
-                </h2>
+
+                {/* Status Indicator */}
+                <div className="flex items-center gap-2">
+                  {validation.isValid ? (
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#A3B18A]/25 text-[#2C3A2B] text-xs font-semibold border border-[#A3B18A]/50">
+                      <Check className="w-3.5 h-3.5" />
+                      Valid Bundle
+                    </span>
+                  ) : !validation.isComplete ? (
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 text-amber-800 text-xs font-semibold border border-amber-200">
+                      <AlertTriangle className="w-3.5 h-3.5" />
+                      Incomplete ({validation.filledSlotCount}/{validation.totalSlotCount})
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-50 text-rose-800 text-xs font-semibold border border-rose-200">
+                      <AlertCircle className="w-3.5 h-3.5" />
+                      Constraint Violations
+                    </span>
+                  )}
+                </div>
               </div>
 
-              {/* Status Indicator */}
-              <div className="flex items-center gap-2">
-                {validation.isValid ? (
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-800 text-xs font-medium border border-emerald-200/70">
-                    <Check className="w-3.5 h-3.5" />
-                    Valid Bundle
+              {/* Price & Budget Breakdown Grid */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 py-4 border-b border-[#E6E1D3]">
+                <div>
+                  <span className="text-[11px] text-[#5A5A40] block">Customer Budget</span>
+                  <span className="text-sm font-bold font-mono tabular-nums text-[#2C3A2B]">
+                    {formatINR(budget)}
                   </span>
-                ) : !validation.isComplete ? (
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-amber-50 text-amber-800 text-xs font-medium border border-amber-200/70">
-                    <AlertTriangle className="w-3.5 h-3.5" />
-                    Incomplete ({validation.filledSlotCount}/{validation.totalSlotCount})
+                </div>
+                <div>
+                  <span className="text-[11px] text-[#5A5A40] block">Product Subtotal</span>
+                  <span className="text-sm font-semibold font-mono tabular-nums text-[#2C2C1E]">
+                    {formatINR(validation.landedPrice.productSubtotal)}
                   </span>
-                ) : (
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-rose-50 text-rose-800 text-xs font-medium border border-rose-200/70">
-                    <AlertCircle className="w-3.5 h-3.5" />
-                    Constraint Violations
+                </div>
+                <div>
+                  <span className="text-[11px] text-[#5A5A40] block">Shipping & Taxes</span>
+                  <span className="text-sm font-semibold font-mono tabular-nums text-[#2C2C1E]">
+                    {formatINR(validation.landedPrice.netShipping + validation.landedPrice.taxAmount)}
                   </span>
+                  <span className="text-[10px] text-[#8B8B7A] block font-mono">
+                    Ship: {formatINR(validation.landedPrice.netShipping)} · GST: {formatINR(validation.landedPrice.taxAmount)}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-[11px] text-[#5A5A40] block">Final Landed Price</span>
+                  <span
+                    className={`text-sm font-bold font-mono tabular-nums ${
+                      validation.landedPrice.isOverBudget ? 'text-rose-600' : 'text-[#8B5A2B]'
+                    }`}
+                  >
+                    {formatINR(validation.landedPrice.landedPrice)}
+                  </span>
+                </div>
+              </div>
+
+              {/* Status Message & Limiting Factor Notice */}
+              <div className="py-3">
+                <div className="text-xs text-[#5A5A40] flex items-start gap-2">
+                  <span className="font-semibold text-[#2C3A2B] shrink-0">Status note:</span>
+                  <span className="leading-relaxed">{validation.statusMessage}</span>
+                </div>
+                {validation.compatibilityViolations.length > 0 && (
+                  <div className="mt-2 p-3 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-800">
+                    <div className="font-semibold flex items-center gap-1.5">
+                      <AlertCircle className="w-3.5 h-3.5 text-rose-600" />
+                      Compatibility conflict detected:
+                    </div>
+                    <p className="mt-1 leading-relaxed text-rose-700">
+                      {validation.compatibilityViolations[0].message}
+                    </p>
+                  </div>
                 )}
               </div>
-            </div>
 
-            {/* Price & Budget Breakdown Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 py-4 border-b border-stone-100">
-              <div>
-                <span className="text-[11px] text-stone-500 block">Customer Budget</span>
-                <span className="text-sm font-bold font-mono tabular-nums text-stone-900">
-                  {formatINR(budget)}
-                </span>
-              </div>
-              <div>
-                <span className="text-[11px] text-stone-500 block">Product Subtotal</span>
-                <span className="text-sm font-semibold font-mono tabular-nums text-stone-800">
-                  {formatINR(validation.landedPrice.productSubtotal)}
-                </span>
-              </div>
-              <div>
-                <span className="text-[11px] text-stone-500 block">Shipping & Taxes</span>
-                <span className="text-sm font-semibold font-mono tabular-nums text-stone-800">
-                  {formatINR(validation.landedPrice.netShipping + validation.landedPrice.taxAmount)}
-                </span>
-                <span className="text-[10px] text-stone-400 block font-mono">
-                  Ship: {formatINR(validation.landedPrice.netShipping)} · GST: {formatINR(validation.landedPrice.taxAmount)}
-                </span>
-              </div>
-              <div>
-                <span className="text-[11px] text-stone-500 block">Final Landed Price</span>
-                <span
-                  className={`text-sm font-bold font-mono tabular-nums ${
-                    validation.landedPrice.isOverBudget ? 'text-rose-600' : 'text-indigo-950'
-                  }`}
-                >
-                  {formatINR(validation.landedPrice.landedPrice)}
-                </span>
+              {/* Bottom Actions */}
+              <div className="pt-3 flex flex-wrap items-center justify-between gap-3 border-t border-[#E6E1D3]">
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setActiveTab('builder')}
+                    className="px-4 py-2 text-xs font-semibold text-white bg-[#2C3A2B] hover:bg-[#3A4D39] rounded-xl shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer"
+                  >
+                    Continue Building
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    onClick={resetBundle}
+                    className="px-3 py-2 text-xs font-medium text-[#5A5A40] hover:text-[#2C2C1E] hover:bg-[#F4F1EA] rounded-xl transition-colors flex items-center gap-1 cursor-pointer"
+                  >
+                    <RotateCcw className="w-3 h-3" />
+                    Reset Slots
+                  </button>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={handleExportBundle}
+                    className="px-3 py-2 text-xs font-medium text-[#2C2C1E] hover:bg-[#F4F1EA] border border-[#E6E1D3] rounded-xl transition-colors flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <Download className="w-3.5 h-3.5 text-[#8B8B7A]" />
+                    Export Bundle CSV
+                  </button>
+                </div>
               </div>
             </div>
 
-            {/* Status Message & Limiting Factor Notice */}
-            <div className="py-3">
-              <div className="text-xs text-stone-600 flex items-start gap-2">
-                <span className="font-semibold text-stone-800 shrink-0">Status note:</span>
-                <span className="leading-relaxed">{validation.statusMessage}</span>
-              </div>
-              {validation.compatibilityViolations.length > 0 && (
-                <div className="mt-2 p-3 rounded-lg bg-rose-50 border border-rose-200/70 text-xs text-rose-800">
-                  <div className="font-semibold flex items-center gap-1.5">
-                    <AlertCircle className="w-3.5 h-3.5 text-rose-600" />
-                    Compatibility conflict detected:
-                  </div>
-                  <p className="mt-1 leading-relaxed text-rose-700">
-                    {validation.compatibilityViolations[0].message}
+            {/* Required Slot Status Card */}
+            <div className="bg-white border border-[#E6E1D3] rounded-[24px] shadow-xs p-6">
+              <div className="flex items-center justify-between pb-3 border-b border-[#E6E1D3]">
+                <div>
+                  <h3 className="font-serif text-base font-bold text-[#2C3A2B]">Required Product Slots</h3>
+                  <p className="text-xs text-[#5A5A40]">
+                    Current assignment and inventory status across all {fixture.activity.requiredSlots.length} categories.
                   </p>
+                </div>
+                <button
+                  onClick={() => setActiveTab('builder')}
+                  className="text-xs font-bold text-[#8B5A2B] hover:underline"
+                >
+                  Manage in Builder
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 pt-3">
+                {fixture.activity.requiredSlots.map(slot => {
+                  const prod = currentItems[slot.id];
+                  const isAssigned = Boolean(prod);
+                  const isInStock = prod ? (prod.inStock && (prod.stockQuantity === undefined || prod.stockQuantity > 0)) : true;
+
+                  return (
+                    <div
+                      key={slot.id}
+                      className="p-3.5 rounded-xl border border-[#E6E1D3] bg-[#FDFBF7] flex flex-col justify-between"
+                    >
+                      <div>
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-[11px] font-semibold text-[#2C3A2B] uppercase tracking-wider">
+                            {slot.label}
+                          </span>
+                          {isAssigned ? (
+                            isInStock ? (
+                              <span className="text-[10px] text-emerald-700 font-medium flex items-center gap-1">
+                                <Check className="w-3 h-3" /> Filled
+                              </span>
+                            ) : (
+                              <span className="text-[10px] text-rose-700 font-medium flex items-center gap-1">
+                                <AlertCircle className="w-3 h-3" /> Out of stock
+                              </span>
+                            )
+                          ) : (
+                            <span className="text-[10px] text-[#8B8B7A] font-medium">Empty</span>
+                          )}
+                        </div>
+
+                        {prod ? (
+                          <div className="mt-1">
+                            <div className="text-xs font-medium text-[#2C2C1E] line-clamp-1">{prod.name}</div>
+                            <div className="text-[11px] font-mono tabular-nums text-[#8B5A2B] font-semibold mt-0.5">
+                              {formatINR(prod.price)}
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="mt-1 text-xs text-[#8B8B7A] italic">
+                            No product selected
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="mt-2.5 pt-2 border-t border-[#E6E1D3] flex items-center justify-end">
+                        <button
+                          onClick={() => setActiveTab('builder')}
+                          className="text-[11px] font-bold text-[#8B5A2B] hover:text-[#743815] uppercase tracking-wider"
+                        >
+                          {isAssigned ? 'Replace →' : 'Select →'}
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column: Budget Utilisation & Quick Actions */}
+          <div className="space-y-6">
+            {/* Budget Utilisation Card */}
+            <div className="bg-white border border-[#E6E1D3] rounded-[24px] shadow-xs p-6">
+              <h3 className="font-serif text-base font-bold text-[#2C3A2B] mb-1">Budget Utilisation</h3>
+              <p className="text-xs text-[#5A5A40] mb-4">
+                Real-time expenditure vs customer limit
+              </p>
+
+              {/* Visual Progress Bar */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-[#5A5A40] font-medium">Landed Expenditure</span>
+                  <span className="font-mono tabular-nums font-bold text-[#2C3A2B]">
+                    {validation.landedPrice.budgetUtilisationPercent.toFixed(1)}%
+                  </span>
+                </div>
+
+                <div className="w-full h-3 bg-[#F4F1EA] rounded-full overflow-hidden border border-[#E6E1D3]">
+                  <div
+                    className={`h-full transition-all duration-300 rounded-full ${
+                      validation.landedPrice.isOverBudget
+                        ? 'bg-rose-500'
+                        : validation.landedPrice.budgetUtilisationPercent > 90
+                        ? 'bg-amber-500'
+                        : 'bg-[#2C3A2B]'
+                    }`}
+                    style={{
+                      width: `${Math.min(validation.landedPrice.budgetUtilisationPercent, 100)}%`
+                    }}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between text-[11px] pt-1">
+                  <div className="text-[#5A5A40]">
+                    Spent: <span className="font-mono font-medium text-[#2C2C1E]">{formatINR(validation.landedPrice.landedPrice)}</span>
+                  </div>
+                  <div className={validation.landedPrice.isOverBudget ? 'text-rose-600 font-semibold' : 'text-[#5A5A40]'}>
+                    {validation.landedPrice.isOverBudget ? 'Exceeded: ' : 'Remaining: '}
+                    <span className="font-mono font-bold text-[#2C3A2B]">
+                      {formatINR(Math.abs(validation.landedPrice.remainingBudget))}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {validation.landedPrice.isOverBudget && (
+                <div className="mt-4 p-3 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-800 flex items-start gap-2">
+                  <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+                  <div>
+                    <span className="font-semibold">Over Budget Alert:</span> Configuration exceeds limit by {formatINR(Math.abs(validation.landedPrice.remainingBudget))}. Adjust slots or increase budget.
+                  </div>
                 </div>
               )}
             </div>
 
-            {/* Bottom Actions */}
-            <div className="pt-3 flex flex-wrap items-center justify-between gap-3 border-t border-stone-100">
-              <div className="flex items-center gap-2">
+            {/* Quick Actions */}
+            <div className="bg-white border border-[#E6E1D3] rounded-[24px] shadow-xs p-6">
+              <h3 className="font-serif text-base font-bold text-[#2C3A2B] mb-3">Quick Actions</h3>
+
+              <div className="space-y-2">
                 <button
                   onClick={() => setActiveTab('builder')}
-                  className="px-3 py-1.5 text-xs font-semibold text-white bg-indigo-900 hover:bg-indigo-800 rounded-lg shadow-2xs transition-colors flex items-center gap-1.5"
+                  className="w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-medium text-[#2C2C1E] hover:bg-[#F4F1EA] border border-[#E6E1D3] flex items-center justify-between transition-colors"
                 >
-                  Continue Building
-                  <ArrowRight className="w-3.5 h-3.5" />
+                  <span className="font-medium">Open Bundle Builder</span>
+                  <ArrowRight className="w-3.5 h-3.5 text-[#8B5A2B]" />
                 </button>
-                <button
-                  onClick={resetBundle}
-                  className="px-3 py-1.5 text-xs font-medium text-stone-600 hover:text-stone-900 hover:bg-stone-100 rounded-lg transition-colors flex items-center gap-1"
-                >
-                  <RotateCcw className="w-3 h-3" />
-                  Reset Slots
-                </button>
-              </div>
 
-              <div className="flex items-center gap-2">
                 <button
-                  onClick={handleExportBundle}
-                  className="px-3 py-1.5 text-xs font-medium text-stone-700 hover:bg-stone-100 border border-stone-200 rounded-lg transition-colors flex items-center gap-1.5"
+                  onClick={() => setActiveTab('catalogue')}
+                  className="w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-medium text-[#2C2C1E] hover:bg-[#F4F1EA] border border-[#E6E1D3] flex items-center justify-between transition-colors"
                 >
-                  <Download className="w-3.5 h-3.5 text-stone-500" />
-                  Export Bundle CSV
+                  <span className="font-medium">Browse Product Catalogue</span>
+                  <ArrowRight className="w-3.5 h-3.5 text-[#8B5A2B]" />
+                </button>
+
+                <button
+                  onClick={() => setActiveTab('compare')}
+                  className="w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-medium text-[#2C2C1E] hover:bg-[#F4F1EA] border border-[#E6E1D3] flex items-center justify-between transition-colors"
+                >
+                  <span className="font-medium">Compare Saved Bundles</span>
+                  <span className="text-[11px] font-mono text-[#8B5A2B]">{savedBundles.length} saved</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    runTestSuite();
+                    setActiveTab('tests');
+                  }}
+                  className="w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-medium text-[#2C2C1E] hover:bg-[#F4F1EA] border border-[#E6E1D3] flex items-center justify-between transition-colors"
+                >
+                  <span className="font-medium">Run Validation Suite</span>
+                  <span className="text-[11px] font-mono text-[#2C3A2B] font-bold">20 tests</span>
+                </button>
+
+                <button
+                  onClick={handleExportTests}
+                  className="w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-medium text-[#2C2C1E] hover:bg-[#F4F1EA] border border-[#E6E1D3] flex items-center justify-between transition-colors"
+                >
+                  <span className="font-medium">Export Test Log (CSV)</span>
+                  <Download className="w-3.5 h-3.5 text-[#8B8B7A]" />
                 </button>
               </div>
             </div>
-          </div>
 
-          {/* Section C: Required Slot Status Card */}
-          <div className="bg-white border border-stone-200/80 rounded-xl shadow-2xs p-5">
-            <div className="flex items-center justify-between pb-3 border-b border-stone-100">
-              <div>
-                <h3 className="text-sm font-bold text-stone-900">Required Product Slots</h3>
-                <p className="text-xs text-stone-500">
-                  Current assignment and inventory availability across all {fixture.activity.requiredSlots.length} categories.
-                </p>
-              </div>
-              <button
-                onClick={() => setActiveTab('builder')}
-                className="text-xs font-medium text-indigo-700 hover:underline"
-              >
-                Manage in Builder
-              </button>
-            </div>
+            {/* Saved Bundle Records */}
+            <div className="bg-white border border-[#E6E1D3] rounded-[24px] shadow-xs p-6">
+              <h3 className="font-serif text-base font-bold text-[#2C3A2B] mb-1">Saved Bundle Records</h3>
+              <p className="text-xs text-[#5A5A40] mb-3">
+                Locally saved setups in browser storage
+              </p>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 pt-3">
-              {fixture.activity.requiredSlots.map(slot => {
-                const prod = currentItems[slot.id];
-                const isAssigned = Boolean(prod);
-                const isInStock = prod ? (prod.inStock && (prod.stockQuantity === undefined || prod.stockQuantity > 0)) : true;
-
-                return (
-                  <div
-                    key={slot.id}
-                    className="p-3 rounded-lg border border-stone-200/80 bg-stone-50/50 flex flex-col justify-between"
-                  >
-                    <div>
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-[11px] font-semibold text-stone-700 uppercase tracking-wider">
-                          {slot.label}
-                        </span>
-                        {isAssigned ? (
-                          isInStock ? (
-                            <span className="text-[10px] text-emerald-700 font-medium flex items-center gap-1">
-                              <Check className="w-3 h-3" /> Filled
-                            </span>
-                          ) : (
-                            <span className="text-[10px] text-rose-700 font-medium flex items-center gap-1">
-                              <AlertCircle className="w-3 h-3" /> Out of stock
-                            </span>
-                          )
-                        ) : (
-                          <span className="text-[10px] text-stone-400 font-medium">Empty</span>
-                        )}
+              {savedBundles.length === 0 ? (
+                <div className="text-center py-6 text-xs text-[#8B8B7A] border border-dashed border-[#E6E1D3] rounded-xl bg-[#FDFBF7]">
+                  No saved bundles yet. Build and save a setup to compare later.
+                </div>
+              ) : (
+                <div className="space-y-2 max-h-52 overflow-y-auto">
+                  {savedBundles.slice(0, 4).map(b => (
+                    <div
+                      key={b.id}
+                      className="p-3 rounded-xl border border-[#E6E1D3] bg-[#FDFBF7] flex items-center justify-between text-xs"
+                    >
+                      <div>
+                        <div className="font-serif font-bold text-[#2C3A2B] line-clamp-1">{b.name}</div>
+                        <div className="text-[10px] text-[#5A5A40] font-mono">
+                          {formatINR(b.validation.landedPrice.landedPrice)} · {b.savedAt}
+                        </div>
                       </div>
-
-                      {prod ? (
-                        <div className="mt-1">
-                          <div className="text-xs font-medium text-stone-900 line-clamp-1">{prod.name}</div>
-                          <div className="text-[11px] font-mono tabular-nums text-stone-600 mt-0.5">
-                            {formatINR(prod.price)}
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="mt-1 text-xs text-stone-400 italic">
-                          No product selected
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="mt-2 pt-2 border-t border-stone-200/60 flex items-center justify-end">
                       <button
-                        onClick={() => setActiveTab('builder')}
-                        className="text-[11px] font-medium text-indigo-700 hover:text-indigo-900"
+                        onClick={() => loadSavedBundle(b)}
+                        className="px-2.5 py-1 text-[11px] font-bold text-[#8B5A2B] hover:bg-white rounded-lg border border-transparent hover:border-[#E6E1D3]"
                       >
-                        {isAssigned ? 'Replace' : 'Select'}
+                        Load
                       </button>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-
-        {/* Right Column: Budget Utilisation & Quick Actions */}
-        <div className="space-y-6">
-          {/* Section B: Budget Utilisation Card */}
-          <div className="bg-white border border-stone-200/80 rounded-xl shadow-2xs p-5">
-            <h3 className="text-sm font-bold text-stone-900 mb-1">Budget Utilisation</h3>
-            <p className="text-xs text-stone-500 mb-4">
-              Real-time expenditure vs customer limit
-            </p>
-
-            {/* Visual Progress Bar */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-stone-600 font-medium">Landed Expenditure</span>
-                <span className="font-mono tabular-nums font-semibold text-stone-900">
-                  {validation.landedPrice.budgetUtilisationPercent.toFixed(1)}%
-                </span>
-              </div>
-
-              <div className="w-full h-2.5 bg-stone-100 rounded-full overflow-hidden">
-                <div
-                  className={`h-full transition-all duration-300 rounded-full ${
-                    validation.landedPrice.isOverBudget
-                      ? 'bg-rose-500'
-                      : validation.landedPrice.budgetUtilisationPercent > 90
-                      ? 'bg-amber-500'
-                      : 'bg-indigo-700'
-                  }`}
-                  style={{
-                    width: `${Math.min(validation.landedPrice.budgetUtilisationPercent, 100)}%`
-                  }}
-                />
-              </div>
-
-              <div className="flex items-center justify-between text-[11px] pt-1">
-                <div className="text-stone-500">
-                  Spent: <span className="font-mono font-medium text-stone-800">{formatINR(validation.landedPrice.landedPrice)}</span>
+                  ))}
                 </div>
-                <div className={validation.landedPrice.isOverBudget ? 'text-rose-600 font-semibold' : 'text-stone-600'}>
-                  {validation.landedPrice.isOverBudget ? 'Exceeded by: ' : 'Remaining: '}
-                  <span className="font-mono font-medium">
-                    {formatINR(Math.abs(validation.landedPrice.remainingBudget))}
-                  </span>
-                </div>
-              </div>
+              )}
             </div>
-
-            {validation.landedPrice.isOverBudget && (
-              <div className="mt-4 p-2.5 rounded-lg bg-rose-50 border border-rose-200 text-xs text-rose-800 flex items-start gap-2">
-                <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
-                <div>
-                  <span className="font-semibold">Over Budget Alert:</span> The selected configuration exceeds the specified limit by {formatINR(Math.abs(validation.landedPrice.remainingBudget))}. Adjust slots or increase budget.
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Section E: Quick Actions */}
-          <div className="bg-white border border-stone-200/80 rounded-xl shadow-2xs p-5">
-            <h3 className="text-sm font-bold text-stone-900 mb-3">Quick Actions</h3>
-
-            <div className="space-y-2">
-              <button
-                onClick={() => setActiveTab('builder')}
-                className="w-full text-left px-3 py-2 rounded-lg text-xs font-medium text-stone-700 hover:bg-stone-50 border border-stone-200/80 flex items-center justify-between"
-              >
-                <span>Open Bundle Builder</span>
-                <ArrowRight className="w-3.5 h-3.5 text-stone-400" />
-              </button>
-
-              <button
-                onClick={() => setActiveTab('catalogue')}
-                className="w-full text-left px-3 py-2 rounded-lg text-xs font-medium text-stone-700 hover:bg-stone-50 border border-stone-200/80 flex items-center justify-between"
-              >
-                <span>Browse Product Catalogue</span>
-                <ArrowRight className="w-3.5 h-3.5 text-stone-400" />
-              </button>
-
-              <button
-                onClick={() => setActiveTab('compare')}
-                className="w-full text-left px-3 py-2 rounded-lg text-xs font-medium text-stone-700 hover:bg-stone-50 border border-stone-200/80 flex items-center justify-between"
-              >
-                <span>Compare Saved Bundles</span>
-                <span className="text-[11px] font-mono text-stone-400">{savedBundles.length} saved</span>
-              </button>
-
-              <button
-                onClick={() => {
-                  runTestSuite();
-                  setActiveTab('tests');
-                }}
-                className="w-full text-left px-3 py-2 rounded-lg text-xs font-medium text-stone-700 hover:bg-stone-50 border border-stone-200/80 flex items-center justify-between"
-              >
-                <span>Run Validation Suite</span>
-                <span className="text-[11px] font-mono text-indigo-700 font-semibold">20 tests</span>
-              </button>
-
-              <button
-                onClick={handleExportTests}
-                className="w-full text-left px-3 py-2 rounded-lg text-xs font-medium text-stone-700 hover:bg-stone-50 border border-stone-200/80 flex items-center justify-between"
-              >
-                <span>Export Test Log (CSV)</span>
-                <Download className="w-3.5 h-3.5 text-stone-400" />
-              </button>
-            </div>
-          </div>
-
-          {/* Section D: Recent Bundle Activity */}
-          <div className="bg-white border border-stone-200/80 rounded-xl shadow-2xs p-5">
-            <h3 className="text-sm font-bold text-stone-900 mb-1">Saved Bundle Records</h3>
-            <p className="text-xs text-stone-500 mb-3">
-              Locally saved setups in browser storage
-            </p>
-
-            {savedBundles.length === 0 ? (
-              <div className="text-center py-6 text-xs text-stone-400 border border-dashed border-stone-200 rounded-lg">
-                No saved bundles yet. Build and save a setup to compare later.
-              </div>
-            ) : (
-              <div className="space-y-2 max-h-52 overflow-y-auto">
-                {savedBundles.slice(0, 4).map(b => (
-                  <div
-                    key={b.id}
-                    className="p-2.5 rounded-lg border border-stone-200/70 bg-stone-50/60 flex items-center justify-between text-xs"
-                  >
-                    <div>
-                      <div className="font-semibold text-stone-900 line-clamp-1">{b.name}</div>
-                      <div className="text-[10px] text-stone-500 font-mono">
-                        {formatINR(b.validation.landedPrice.landedPrice)} · {b.savedAt}
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => loadSavedBundle(b)}
-                      className="px-2 py-1 text-[11px] font-medium text-indigo-700 hover:bg-white rounded border border-transparent hover:border-stone-200"
-                    >
-                      Load
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
         </div>
       </div>

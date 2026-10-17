@@ -1,1 +1,58 @@
 @import "tailwindcss";
+
+@theme {
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-serif: 'Playfair Display', ui-serif, Georgia, serif;
+
+  --color-heritage-950: #1a241b;
+  --color-heritage-900: #223225;
+  --color-heritage-800: #2c3a2b;
+  --color-heritage-700: #3a4d39;
+  --color-heritage-600: #496148;
+  --color-heritage-500: #5a6d59;
+  --color-heritage-200: #c2cfbf;
+  --color-heritage-100: #e2ebe0;
+  --color-heritage-50: #f2f6f1;
+
+  --color-terracotta-900: #5c2c11;
+  --color-terracotta-800: #743815;
+  --color-terracotta-700: #8b5a2b;
+  --color-terracotta-600: #b85b28;
+  --color-terracotta-500: #d46a43;
+  --color-terracotta-400: #e27d56;
+  --color-terracotta-100: #fde8df;
+  --color-terracotta-50: #fff5f0;
+
+  --color-sand-50: #fdfbf7;
+  --color-sand-100: #f5f5ec;
+  --color-sand-200: #f4f1ea;
+  --color-sand-300: #e6e1d3;
+  --color-sand-400: #d5cebc;
+}
+
+body {
+  background-color: #FDFBF7;
+  color: #2C2C1E;
+  font-family: var(--font-sans);
+  min-height: 100vh;
+}
+
+h1, h2, h3, .font-serif {
+  font-family: var(--font-serif);
+}
+
+/* Warm Parchment Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #F4F1EA;
+}
+::-webkit-scrollbar-thumb {
+  background: #D5CEBC;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #8B5A2B;
+}

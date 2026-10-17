@@ -18,7 +18,8 @@ import {
   Layers,
   ChevronDown,
   Info,
-  Check
+  Check,
+  MessageSquare
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { formatINR } from '../../utils/pricing';
@@ -324,7 +325,7 @@ Click a quick prompt below or ask me anything!`,
           parts.push(<span key={keyIdx++}>{remaining.substring(0, codeIdx)}</span>);
         }
         parts.push(
-          <code key={keyIdx++} className="px-1.5 py-0.5 rounded-md bg-stone-100 font-mono text-[11px] text-indigo-900 border border-stone-200">
+          <code key={keyIdx++} className="px-1.5 py-0.5 rounded-md bg-[#F4F1EA] font-mono text-[11px] text-[#2C3A2B] border border-[#E6E1D3]">
             {codeMatch![1]}
           </code>
         );
@@ -340,30 +341,22 @@ Click a quick prompt below or ask me anything!`,
 
   return (
     <>
-      {/* Floating Bottom-Right Trigger Button */}
+      {/* Floating Bottom-Right Trigger Button (matches reference theme) */}
       {!isAssistantOpen && (
         <button
           onClick={toggleAssistant}
           aria-label="Open AI Assistant"
-          className="fixed bottom-6 right-6 z-40 flex items-center gap-2.5 px-4 py-3 rounded-full bg-gradient-to-r from-indigo-900 to-indigo-800 text-white shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer border border-indigo-700/50 group"
+          className="fixed bottom-6 right-6 z-40 flex items-center justify-center w-14 h-14 rounded-full bg-[#D46A43] hover:bg-[#b05534] text-white shadow-[0_8px_25px_rgba(212,106,67,0.4)] hover:shadow-2xl hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer border-2 border-white/40 group"
         >
           <div className="relative flex items-center justify-center">
-            <Sparkles className="w-5 h-5 text-indigo-200 group-hover:rotate-12 transition-transform" />
+            <MessageSquare className="w-6 h-6 text-white group-hover:scale-110 transition-transform" />
             <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-400 rounded-full animate-ping" />
-            <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-500 rounded-full" />
-          </div>
-          <div className="flex flex-col text-left">
-            <span className="text-xs font-semibold tracking-tight leading-none">
-              AI Assistant
-            </span>
-            <span className="text-[10px] text-indigo-200 font-mono mt-0.5">
-              Gemini 3.8 Flash
-            </span>
+            <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-500 rounded-full ring-2 ring-white" />
           </div>
 
           {violationCount > 0 && (
-            <span className="ml-1 px-2 py-0.5 rounded-full bg-amber-500 text-stone-950 font-bold text-[10px] animate-pulse">
-              {violationCount} issue{violationCount > 1 ? 's' : ''}
+            <span className="absolute -top-1.5 -left-1.5 px-2 py-0.5 rounded-full bg-[#8B5A2B] text-white font-bold text-[10px] shadow-sm animate-pulse">
+              {violationCount}
             </span>
           )}
         </button>
@@ -374,28 +367,28 @@ Click a quick prompt below or ask me anything!`,
         <div className="fixed inset-0 z-50 pointer-events-none flex justify-end">
           {/* Backdrop on mobile */}
           <div
-            className="fixed inset-0 bg-stone-900/30 backdrop-blur-2xs pointer-events-auto lg:hidden"
+            className="fixed inset-0 bg-[#2C2C1E]/40 backdrop-blur-2xs pointer-events-auto lg:hidden"
             onClick={() => setIsAssistantOpen(false)}
           />
 
           {/* Drawer Body */}
           <aside
-            className={`pointer-events-auto flex flex-col bg-white border-l border-stone-200 shadow-2xl transition-all duration-200 ease-out h-full ${
+            className={`pointer-events-auto flex flex-col bg-[#FDFBF7] border-l border-[#E6E1D3] shadow-2xl transition-all duration-200 ease-out h-full ${
               isExpanded ? 'w-full md:w-[680px]' : 'w-full sm:w-[440px]'
             }`}
           >
             {/* Top Bar */}
-            <div className="px-4 py-3 border-b border-stone-200 flex items-center justify-between bg-stone-50/90 gap-2">
+            <div className="px-4 py-3 border-b border-[#E6E1D3] flex items-center justify-between bg-white gap-2">
               <div className="flex items-center gap-2 min-w-0">
-                <div className="w-8 h-8 rounded-lg bg-indigo-900 text-white flex items-center justify-center shadow-xs shrink-0">
-                  <Sparkles className="w-4 h-4 text-indigo-200" />
+                <div className="w-8 h-8 rounded-xl bg-[#2C3A2B] text-white flex items-center justify-center shadow-xs shrink-0">
+                  <Sparkles className="w-4 h-4 text-amber-200" />
                 </div>
                 <div className="min-w-0">
                   <div className="flex items-center gap-1.5">
-                    <span className="text-xs font-semibold text-stone-900 truncate">
-                      Gemini Assistant
+                    <span className="text-xs font-serif font-bold text-[#2C3A2B] truncate">
+                      Vocal-Local Assistant
                     </span>
-                    <span className="px-1.5 py-0.2 rounded-full text-[9px] font-mono font-medium bg-emerald-100 text-emerald-800 border border-emerald-200 shrink-0">
+                    <span className="px-1.5 py-0.2 rounded-full text-[9px] font-mono font-medium bg-[#A3B18A]/20 text-[#2C3A2B] border border-[#A3B18A]/40 shrink-0">
                       Live
                     </span>
                   </div>
@@ -403,7 +396,7 @@ Click a quick prompt below or ask me anything!`,
                     <select
                       value={drawerModel}
                       onChange={e => setDrawerModel(e.target.value as any)}
-                      className="text-[10px] font-mono font-semibold bg-white border border-stone-200 rounded px-1.5 py-0.5 text-stone-700 cursor-pointer"
+                      className="text-[10px] font-mono font-semibold bg-[#F4F1EA] border border-[#E6E1D3] rounded px-1.5 py-0.5 text-[#2C3A2B] cursor-pointer"
                     >
                       <option value="gemini-3.8-flash">gemini-3.8-flash</option>
                       <option value="gemini-3.1-flash-lite">gemini-3.1-flash-lite</option>
@@ -413,36 +406,36 @@ Click a quick prompt below or ask me anything!`,
                 </div>
               </div>
 
-              <div className="flex items-center gap-1 text-stone-400 shrink-0">
+              <div className="flex items-center gap-1 text-[#8B8B7A] shrink-0">
                 <button
                   onClick={() => {
                     setActiveTab('chat');
                     setIsAssistantOpen(false);
                   }}
                   title="Open dedicated full-page Gemini Chatbot"
-                  className="px-2 py-1 text-[11px] font-semibold text-indigo-950 bg-indigo-100/70 hover:bg-indigo-100 rounded-md transition-colors flex items-center gap-1 cursor-pointer"
+                  className="px-2 py-1 text-[11px] font-semibold text-[#8B5A2B] bg-[#F4F1EA] hover:bg-[#E6E1D3] rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
                 >
-                  <Bot className="w-3.5 h-3.5 text-indigo-700" />
+                  <Bot className="w-3.5 h-3.5 text-[#8B5A2B]" />
                   <span className="hidden sm:inline">Full Chat</span>
                 </button>
                 <button
                   onClick={handleClearHistory}
                   title="Clear chat history"
-                  className="p-1.5 hover:text-stone-700 hover:bg-stone-200/60 rounded-md transition-colors cursor-pointer"
+                  className="p-1.5 hover:text-[#2C2C1E] hover:bg-[#F4F1EA] rounded-lg transition-colors cursor-pointer"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                 </button>
                 <button
                   onClick={() => setIsExpanded(prev => !prev)}
                   title={isExpanded ? 'Compact drawer' : 'Expand drawer'}
-                  className="hidden sm:block p-1.5 hover:text-stone-700 hover:bg-stone-200/60 rounded-md transition-colors cursor-pointer"
+                  className="hidden sm:block p-1.5 hover:text-[#2C2C1E] hover:bg-[#F4F1EA] rounded-lg transition-colors cursor-pointer"
                 >
                   {isExpanded ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
                 </button>
                 <button
                   onClick={() => setIsAssistantOpen(false)}
                   title="Close assistant"
-                  className="p-1.5 hover:text-stone-700 hover:bg-stone-200/60 rounded-md transition-colors cursor-pointer"
+                  className="p-1.5 hover:text-[#2C2C1E] hover:bg-[#F4F1EA] rounded-lg transition-colors cursor-pointer"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -450,18 +443,18 @@ Click a quick prompt below or ask me anything!`,
             </div>
 
             {/* Context Status Ribbon */}
-            <div className="px-4 py-2 bg-indigo-50/60 border-b border-indigo-100 flex items-center justify-between text-xs">
+            <div className="px-4 py-2 bg-[#F4F1EA] border-b border-[#E6E1D3] flex items-center justify-between text-xs">
               <div className="flex items-center gap-2 min-w-0">
-                <div className="flex items-center gap-1 text-stone-700 text-[11px]">
-                  <span className="text-stone-500">Budget:</span>
-                  <span className="font-mono font-semibold text-stone-900">{formatINR(budget)}</span>
+                <div className="flex items-center gap-1 text-[#5A5A40] text-[11px]">
+                  <span>Budget:</span>
+                  <span className="font-mono font-semibold text-[#2C3A2B]">{formatINR(budget)}</span>
                 </div>
-                <span className="text-stone-300">|</span>
+                <span className="text-[#E6E1D3]">|</span>
                 <div className="flex items-center gap-1 text-[11px]">
-                  <span className="text-stone-500">Landed:</span>
+                  <span className="text-[#5A5A40]">Landed:</span>
                   <span
                     className={`font-mono font-semibold ${
-                      isOverBudget ? 'text-rose-600' : 'text-emerald-700'
+                      isOverBudget ? 'text-rose-600' : 'text-[#2C3A2B]'
                     }`}
                   >
                     {formatINR(validation.landedPrice.landedPrice)}
@@ -476,12 +469,12 @@ Click a quick prompt below or ask me anything!`,
                     {violationCount} Conflict{violationCount > 1 ? 's' : ''}
                   </span>
                 ) : validation.isComplete ? (
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200 flex items-center gap-1">
-                    <CheckCircle2 className="w-3 h-3" />
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#A3B18A]/30 text-[#2C3A2B] border border-[#A3B18A]/50 flex items-center gap-1">
+                    <CheckCircle2 className="w-3 h-3 text-[#2C3A2B]" />
                     Feasible
                   </span>
                 ) : (
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-stone-100 text-stone-600 border border-stone-200">
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-white text-[#5A5A40] border border-[#E6E1D3]">
                     {validation.filledSlotCount}/{validation.totalSlotCount} Slots
                   </span>
                 )}
@@ -489,13 +482,13 @@ Click a quick prompt below or ask me anything!`,
             </div>
 
             {/* Quick Prompts Bar */}
-            <div className="px-4 py-2 border-b border-stone-100 bg-stone-50/40 flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+            <div className="px-4 py-2 border-b border-[#E6E1D3] bg-[#FDFBF7] flex items-center gap-1.5 overflow-x-auto no-scrollbar">
               {quickPrompts.map((qp, i) => (
                 <button
                   key={i}
                   disabled={isLoading}
                   onClick={() => handleSendMessage(qp.prompt)}
-                  className="shrink-0 px-2.5 py-1 text-[11px] font-medium rounded-full bg-white border border-stone-200 text-stone-700 hover:text-indigo-950 hover:border-indigo-300 hover:bg-indigo-50/50 transition-colors cursor-pointer disabled:opacity-50"
+                  className="shrink-0 px-2.5 py-1 text-[11px] font-medium rounded-full bg-white border border-[#E6E1D3] text-[#5A5A40] hover:text-[#2C3A2B] hover:border-[#8B5A2B] hover:bg-[#F4F1EA] transition-colors cursor-pointer disabled:opacity-50"
                 >
                   {qp.label}
                 </button>
@@ -512,20 +505,20 @@ Click a quick prompt below or ask me anything!`,
                     className={`flex gap-3 text-xs ${isUser ? 'justify-end' : 'justify-start'}`}
                   >
                     {!isUser && (
-                      <div className="w-7 h-7 rounded-full bg-indigo-900 text-white shrink-0 flex items-center justify-center shadow-xs">
-                        <Bot className="w-4 h-4 text-indigo-200" />
+                      <div className="w-7 h-7 rounded-full bg-[#2C3A2B] text-white shrink-0 flex items-center justify-center shadow-xs">
+                        <Bot className="w-4 h-4 text-emerald-300" />
                       </div>
                     )}
 
                     <div
                       className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 shadow-2xs ${
                         isUser
-                          ? 'bg-indigo-900 text-white rounded-tr-xs'
-                          : 'bg-stone-50 border border-stone-200/80 rounded-tl-xs'
+                          ? 'bg-[#2C3A2B] text-white rounded-tr-xs'
+                          : 'bg-white border border-[#E6E1D3] rounded-tl-xs text-[#2C2C1E]'
                       }`}
                     >
                       {/* Message Content */}
-                      <div className={isUser ? 'text-white' : 'text-stone-800'}>
+                      <div className={isUser ? 'text-white' : 'text-[#2C2C1E]'}>
                         {isUser ? (
                           <p className="leading-relaxed whitespace-pre-wrap">{msg.text}</p>
                         ) : (
@@ -535,16 +528,16 @@ Click a quick prompt below or ask me anything!`,
 
                       {/* Interactive Action Card */}
                       {!isUser && msg.action && (
-                        <div className="mt-3 pt-3 border-t border-stone-200/80">
+                        <div className="mt-3 pt-3 border-t border-[#E6E1D3]">
                           {msg.action.type === 'apply_bundle' && (
-                            <div className="p-3 bg-white border border-indigo-200 rounded-xl shadow-xs">
+                            <div className="p-3 bg-[#FDFBF7] border border-[#E6E1D3] rounded-xl shadow-xs">
                               <div className="flex items-center justify-between mb-2">
-                                <div className="flex items-center gap-1.5 font-semibold text-stone-900 text-[11px]">
-                                  <Package className="w-3.5 h-3.5 text-indigo-700" />
+                                <div className="flex items-center gap-1.5 font-serif font-bold text-[#2C3A2B] text-[11px]">
+                                  <Package className="w-3.5 h-3.5 text-[#8B5A2B]" />
                                   <span>{msg.action.title || 'Recommended Setup'}</span>
                                 </div>
                                 {msg.action.budget && (
-                                  <span className="font-mono text-[10px] px-1.5 py-0.5 rounded-md bg-indigo-50 text-indigo-900 font-medium border border-indigo-100">
+                                  <span className="font-mono text-[10px] px-1.5 py-0.5 rounded-md bg-[#F4F1EA] text-[#8B5A2B] font-medium border border-[#E6E1D3]">
                                     Target: {formatINR(msg.action.budget)}
                                   </span>
                                 )}
@@ -558,12 +551,12 @@ Click a quick prompt below or ask me anything!`,
                                     return (
                                       <div
                                         key={slotId}
-                                        className="flex items-center justify-between text-[10px] text-stone-600 bg-stone-50 px-2 py-1 rounded-md"
+                                        className="flex items-center justify-between text-[10px] text-[#5A5A40] bg-white border border-[#E6E1D3]/50 px-2 py-1 rounded-md"
                                       >
-                                        <span className="font-medium text-stone-800">
+                                        <span className="font-medium text-[#2C3A2B]">
                                           {slot?.label || slotId}:
                                         </span>
-                                        <span className="font-mono text-stone-700 truncate max-w-[180px]">
+                                        <span className="font-mono text-[#5A5A40] truncate max-w-[180px]">
                                           {prod?.name || prodId} ({prod ? formatINR(prod.price) : ''})
                                         </span>
                                       </div>
@@ -577,8 +570,8 @@ Click a quick prompt below or ask me anything!`,
                                 disabled={msg.actionApplied}
                                 className={`w-full py-1.5 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all ${
                                   msg.actionApplied
-                                    ? 'bg-emerald-50 text-emerald-800 border border-emerald-200 cursor-default'
-                                    : 'bg-indigo-900 hover:bg-indigo-950 text-white shadow-xs cursor-pointer'
+                                    ? 'bg-[#A3B18A]/30 text-[#2C3A2B] border border-[#A3B18A] cursor-default'
+                                    : 'bg-[#8B5A2B] hover:bg-[#743815] text-white shadow-xs cursor-pointer'
                                 }`}
                               >
                                 {msg.actionApplied ? (
@@ -597,20 +590,20 @@ Click a quick prompt below or ask me anything!`,
                           )}
 
                           {msg.action.type === 'swap_product' && (
-                            <div className="p-3 bg-white border border-amber-200 rounded-xl shadow-xs">
-                              <div className="flex items-center gap-1.5 font-semibold text-stone-900 text-[11px] mb-1">
-                                <RefreshCw className="w-3.5 h-3.5 text-amber-600" />
+                            <div className="p-3 bg-[#FDFBF7] border border-[#E6E1D3] rounded-xl shadow-xs">
+                              <div className="flex items-center gap-1.5 font-serif font-bold text-[#2C3A2B] text-[11px] mb-1">
+                                <RefreshCw className="w-3.5 h-3.5 text-[#8B5A2B]" />
                                 <span>Suggested Product Replacement</span>
                               </div>
-                              <p className="text-[11px] text-stone-600 mb-2 leading-relaxed">
+                              <p className="text-[11px] text-[#5A5A40] mb-2 leading-relaxed">
                                 {msg.action.reason}
                               </p>
                               {msg.action.productId && (
-                                <div className="text-[10px] bg-amber-50/60 p-2 rounded-md mb-2 border border-amber-100 flex items-center justify-between">
-                                  <span className="font-medium text-stone-800">
+                                <div className="text-[10px] bg-white p-2 rounded-md mb-2 border border-[#E6E1D3] flex items-center justify-between">
+                                  <span className="font-medium text-[#2C3A2B]">
                                     Target Item:
                                   </span>
-                                  <span className="font-mono text-stone-700">
+                                  <span className="font-mono text-[#5A5A40]">
                                     {fixture.products.find(p => p.id === msg.action?.productId)?.name || msg.action.productId}
                                   </span>
                                 </div>
@@ -620,8 +613,8 @@ Click a quick prompt below or ask me anything!`,
                                 disabled={msg.actionApplied}
                                 className={`w-full py-1.5 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all ${
                                   msg.actionApplied
-                                    ? 'bg-emerald-50 text-emerald-800 border border-emerald-200 cursor-default'
-                                    : 'bg-amber-600 hover:bg-amber-700 text-white shadow-xs cursor-pointer'
+                                    ? 'bg-[#A3B18A]/30 text-[#2C3A2B] border border-[#A3B18A] cursor-default'
+                                    : 'bg-[#D46A43] hover:bg-[#b05534] text-white shadow-xs cursor-pointer'
                                 }`}
                               >
                                 {msg.actionApplied ? (
@@ -640,17 +633,17 @@ Click a quick prompt below or ask me anything!`,
                           )}
 
                           {msg.action.type === 'set_budget' && (
-                            <div className="p-3 bg-white border border-indigo-200 rounded-xl shadow-xs">
+                            <div className="p-3 bg-[#FDFBF7] border border-[#E6E1D3] rounded-xl shadow-xs">
                               <div className="flex items-center justify-between mb-1">
-                                <span className="font-semibold text-stone-900 text-[11px]">
+                                <span className="font-serif font-bold text-[#2C3A2B] text-[11px]">
                                   Adjust Target Budget
                                 </span>
-                                <span className="font-mono font-bold text-indigo-900 text-xs">
+                                <span className="font-mono font-bold text-[#8B5A2B] text-xs">
                                   {formatINR(msg.action.budget || 0)}
                                 </span>
                               </div>
                               {msg.action.reason && (
-                                <p className="text-[11px] text-stone-600 mb-2 leading-relaxed">
+                                <p className="text-[11px] text-[#5A5A40] mb-2 leading-relaxed">
                                   {msg.action.reason}
                                 </p>
                               )}
@@ -659,8 +652,8 @@ Click a quick prompt below or ask me anything!`,
                                 disabled={msg.actionApplied}
                                 className={`w-full py-1.5 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all ${
                                   msg.actionApplied
-                                    ? 'bg-emerald-50 text-emerald-800 border border-emerald-200 cursor-default'
-                                    : 'bg-indigo-900 hover:bg-indigo-950 text-white shadow-xs cursor-pointer'
+                                    ? 'bg-[#A3B18A]/30 text-[#2C3A2B] border border-[#A3B18A] cursor-default'
+                                    : 'bg-[#8B5A2B] hover:bg-[#743815] text-white shadow-xs cursor-pointer'
                                 }`}
                               >
                                 {msg.actionApplied ? (
@@ -683,7 +676,7 @@ Click a quick prompt below or ask me anything!`,
                       {/* Timestamp */}
                       <div
                         className={`text-[9px] mt-1.5 flex justify-end ${
-                          isUser ? 'text-indigo-200' : 'text-stone-400'
+                          isUser ? 'text-emerald-200' : 'text-[#8B8B7A]'
                         }`}
                       >
                         {msg.timestamp}
@@ -691,7 +684,7 @@ Click a quick prompt below or ask me anything!`,
                     </div>
 
                     {isUser && (
-                      <div className="w-7 h-7 rounded-full bg-stone-800 text-white shrink-0 flex items-center justify-center text-[10px] font-bold">
+                      <div className="w-7 h-7 rounded-full bg-[#8B5A2B] text-white shrink-0 flex items-center justify-center text-[10px] font-bold">
                         U
                       </div>
                     )}
@@ -701,14 +694,14 @@ Click a quick prompt below or ask me anything!`,
 
               {isLoading && (
                 <div className="flex gap-3 text-xs justify-start">
-                  <div className="w-7 h-7 rounded-full bg-indigo-900 text-white shrink-0 flex items-center justify-center shadow-xs">
-                    <Bot className="w-4 h-4 text-indigo-200 animate-pulse" />
+                  <div className="w-7 h-7 rounded-full bg-[#2C3A2B] text-white shrink-0 flex items-center justify-center shadow-xs">
+                    <Bot className="w-4 h-4 text-emerald-300 animate-pulse" />
                   </div>
-                  <div className="bg-stone-50 border border-stone-200 rounded-2xl rounded-tl-xs px-4 py-3 shadow-2xs flex items-center gap-2 text-stone-600">
-                    <span className="w-2 h-2 rounded-full bg-indigo-600 animate-bounce" />
-                    <span className="w-2 h-2 rounded-full bg-indigo-600 animate-bounce [animation-delay:0.2s]" />
-                    <span className="w-2 h-2 rounded-full bg-indigo-600 animate-bounce [animation-delay:0.4s]" />
-                    <span className="text-[11px] font-medium text-stone-500 ml-1">
+                  <div className="bg-white border border-[#E6E1D3] rounded-2xl rounded-tl-xs px-4 py-3 shadow-2xs flex items-center gap-2 text-[#5A5A40]">
+                    <span className="w-2 h-2 rounded-full bg-[#8B5A2B] animate-bounce" />
+                    <span className="w-2 h-2 rounded-full bg-[#8B5A2B] animate-bounce [animation-delay:0.2s]" />
+                    <span className="w-2 h-2 rounded-full bg-[#8B5A2B] animate-bounce [animation-delay:0.4s]" />
+                    <span className="text-[11px] font-medium text-[#5A5A40] ml-1">
                       Gemini is analyzing catalogue constraints...
                     </span>
                   </div>
@@ -719,7 +712,7 @@ Click a quick prompt below or ask me anything!`,
             </div>
 
             {/* Input Bar */}
-            <div className="p-3 border-t border-stone-200 bg-white">
+            <div className="p-3 border-t border-[#E6E1D3] bg-white">
               <form
                 onSubmit={e => {
                   e.preventDefault();
@@ -741,7 +734,7 @@ Click a quick prompt below or ask me anything!`,
                     }}
                     placeholder="Ask Gemini to build, optimize, or fix your bundle..."
                     disabled={isLoading}
-                    className="w-full resize-none p-2.5 pr-10 text-xs bg-stone-50 hover:bg-stone-100/60 focus:bg-white border border-stone-200 rounded-xl focus:outline-hidden focus:ring-1 focus:ring-indigo-800 transition-colors placeholder:text-stone-400"
+                    className="w-full resize-none p-2.5 pr-10 text-xs bg-[#F4F1EA]/70 hover:bg-[#F4F1EA] focus:bg-white border border-[#E6E1D3] rounded-xl focus:outline-hidden focus:border-[#2C3A2B] transition-colors placeholder:text-[#8B8B7A] text-[#2C2C1E]"
                   />
                 </div>
 
@@ -749,12 +742,12 @@ Click a quick prompt below or ask me anything!`,
                   type="submit"
                   disabled={!inputMessage.trim() || isLoading}
                   aria-label="Send message to AI assistant"
-                  className="p-2.5 rounded-xl bg-indigo-900 hover:bg-indigo-950 disabled:opacity-40 text-white shadow-xs transition-colors shrink-0 cursor-pointer disabled:cursor-not-allowed"
+                  className="p-2.5 rounded-xl bg-[#8B5A2B] hover:bg-[#743815] disabled:opacity-40 text-white shadow-xs transition-colors shrink-0 cursor-pointer disabled:cursor-not-allowed"
                 >
                   <Send className="w-4 h-4" />
                 </button>
               </form>
-              <div className="mt-1.5 flex items-center justify-between text-[10px] text-stone-400 px-1 font-mono">
+              <div className="mt-1.5 flex items-center justify-between text-[10px] text-[#8B8B7A] px-1 font-mono">
                 <span>Press Enter to send, Shift+Enter for new line</span>
                 <span>Context-Aware Gemini Assistant</span>
               </div>

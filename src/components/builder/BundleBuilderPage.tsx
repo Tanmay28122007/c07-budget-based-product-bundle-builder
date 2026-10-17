@@ -96,53 +96,53 @@ export const BundleBuilderPage: React.FC = () => {
       {/* Page Title & Controls */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-bold tracking-tight text-stone-900">
+          <h1 className="font-serif text-2xl font-bold tracking-tight text-[#2C3A2B]">
             Build a Bundle
           </h1>
-          <p className="text-xs text-stone-500 mt-0.5">
+          <p className="text-xs text-[#5A5A40] mt-0.5">
             Assemble a complete set of compatible products within a fixed budget.
           </p>
         </div>
 
         {/* Global Action Buttons */}
         <div className="flex flex-wrap items-center gap-2">
-          <div className="flex items-center rounded-lg border border-stone-200 bg-white p-0.5 shadow-2xs">
+          <div className="flex items-center rounded-xl border border-[#E6E1D3] bg-white p-0.5 shadow-2xs">
             <select
               value={optimizerPreference}
               onChange={e => setOptimizerPreference(e.target.value as any)}
-              className="text-xs text-stone-600 bg-transparent px-2 py-1 focus:outline-hidden cursor-pointer"
+              className="text-xs text-[#2C2C1E] bg-transparent px-2.5 py-1 focus:outline-hidden cursor-pointer"
             >
               <option value="lowest_cost">Lowest Cost</option>
               <option value="best_value">Best Value</option>
             </select>
             <button
               onClick={handleRunOptimizer}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-indigo-900 hover:bg-indigo-800 rounded-md transition-colors"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-[#2C3A2B] hover:bg-[#3A4D39] rounded-lg transition-colors cursor-pointer"
             >
-              <Sparkles className="w-3.5 h-3.5" />
+              <Sparkles className="w-3.5 h-3.5 text-amber-300" />
               Find a Valid Bundle
             </button>
           </div>
 
           <button
             onClick={toggleAssistant}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-indigo-900 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-lg shadow-2xs transition-colors cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-[#8B5A2B] bg-[#F4F1EA] hover:bg-[#E6E1D3] border border-[#E6E1D3] rounded-xl shadow-2xs transition-colors cursor-pointer"
           >
-            <Sparkles className="w-3.5 h-3.5 text-indigo-700" />
+            <Sparkles className="w-3.5 h-3.5 text-[#8B5A2B]" />
             AI Assistant
           </button>
 
           <button
             onClick={() => setShowSaveModal(true)}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-stone-700 bg-white hover:bg-stone-50 border border-stone-200 rounded-lg shadow-2xs transition-colors"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-[#2C2C1E] bg-white hover:bg-[#F4F1EA] border border-[#E6E1D3] rounded-xl shadow-2xs transition-colors cursor-pointer"
           >
-            <Save className="w-3.5 h-3.5 text-stone-500" />
+            <Save className="w-3.5 h-3.5 text-[#8B8B7A]" />
             Save Bundle
           </button>
 
           <button
             onClick={() => setShowResetConfirm(true)}
-            className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-stone-600 hover:text-stone-900 hover:bg-stone-100 rounded-lg transition-colors"
+            className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-[#5A5A40] hover:text-[#2C2C1E] hover:bg-[#F4F1EA] rounded-xl transition-colors cursor-pointer"
             title="Reset all product slots"
           >
             <RotateCcw className="w-3.5 h-3.5" />
@@ -170,32 +170,32 @@ export const BundleBuilderPage: React.FC = () => {
       {/* Step 1 & Step 2 Configuration Strip */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Step 1: Activity Selector */}
-        <div className="p-4 bg-white border border-stone-200/80 rounded-xl shadow-2xs">
-          <span className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider block mb-1">
+        <div className="p-5 bg-white border border-[#E6E1D3] rounded-[24px] shadow-xs">
+          <span className="text-[11px] font-semibold text-[#8B5A2B] uppercase tracking-wider block mb-1">
             Step 1: Activity Context
           </span>
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-sm font-bold text-stone-900">{fixture.activity.name}</div>
-              <p className="text-xs text-stone-500 mt-0.5 line-clamp-1">
+              <div className="font-serif text-base font-bold text-[#2C3A2B]">{fixture.activity.name}</div>
+              <p className="text-xs text-[#5A5A40] mt-0.5 line-clamp-1">
                 {fixture.activity.description}
               </p>
             </div>
-            <span className="text-xs font-mono px-2 py-1 rounded bg-stone-100 text-stone-700 font-medium shrink-0">
+            <span className="text-xs font-mono px-2.5 py-1 rounded-lg bg-[#F4F1EA] text-[#2C3A2B] font-semibold border border-[#E6E1D3] shrink-0">
               {fixture.activity.requiredSlots.length} Slots
             </span>
           </div>
         </div>
 
         {/* Step 2: Budget Input */}
-        <div className="p-4 bg-white border border-stone-200/80 rounded-xl shadow-2xs">
-          <span className="text-[11px] font-semibold text-stone-500 uppercase tracking-wider block mb-1">
+        <div className="p-5 bg-white border border-[#E6E1D3] rounded-[24px] shadow-xs">
+          <span className="text-[11px] font-semibold text-[#8B5A2B] uppercase tracking-wider block mb-1">
             Step 2: Total Budget (₹)
           </span>
 
           <div className="flex flex-col sm:flex-row sm:items-center gap-2">
             <div className="relative flex-1">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-stone-500 font-mono text-xs">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8B8B7A] font-mono text-xs">
                 ₹
               </span>
               <input
@@ -204,7 +204,7 @@ export const BundleBuilderPage: React.FC = () => {
                 step="1000"
                 value={budget}
                 onChange={e => setBudget(Number(e.target.value))}
-                className="w-full pl-7 pr-3 py-1.5 text-sm font-mono font-bold text-stone-900 bg-stone-50 focus:bg-white border border-stone-200 rounded-lg focus:outline-hidden focus:ring-1 focus:ring-indigo-800"
+                className="w-full pl-7 pr-3 py-1.5 text-sm font-mono font-bold text-[#2C3A2B] bg-[#F4F1EA]/70 focus:bg-white border border-[#E6E1D3] rounded-xl focus:outline-hidden focus:border-[#2C3A2B]"
               />
             </div>
 
@@ -214,10 +214,10 @@ export const BundleBuilderPage: React.FC = () => {
                 <button
                   key={preset}
                   onClick={() => setBudget(preset)}
-                  className={`px-2 py-1 text-[11px] font-mono rounded border transition-colors shrink-0 ${
+                  className={`px-2.5 py-1 text-[11px] font-mono rounded-lg border transition-colors shrink-0 cursor-pointer ${
                     budget === preset
-                      ? 'bg-indigo-900 text-white border-indigo-900 font-semibold'
-                      : 'bg-stone-50 hover:bg-stone-100 text-stone-600 border-stone-200'
+                      ? 'bg-[#2C3A2B] text-white border-[#2C3A2B] font-semibold'
+                      : 'bg-[#F4F1EA] hover:bg-[#E6E1D3] text-[#5A5A40] border-[#E6E1D3]'
                   }`}
                 >
                   ₹{(preset / 1000).toFixed(0)}k
@@ -319,11 +319,11 @@ export const BundleBuilderPage: React.FC = () => {
                 </span>
               </div>
 
-              <div className="pt-2.5 border-t border-stone-200 flex items-center justify-between font-bold text-sm">
-                <span className="text-stone-900">Final Landed Price</span>
+              <div className="pt-2.5 border-t border-[#E6E1D3] flex items-center justify-between font-bold text-sm">
+                <span className="font-serif text-[#2C3A2B]">Final Landed Price</span>
                 <span
                   className={`font-mono tabular-nums ${
-                    validation.landedPrice.isOverBudget ? 'text-rose-600' : 'text-indigo-950'
+                    validation.landedPrice.isOverBudget ? 'text-rose-600' : 'text-[#8B5A2B]'
                   }`}
                 >
                   {formatINR(validation.landedPrice.landedPrice)}
@@ -332,20 +332,20 @@ export const BundleBuilderPage: React.FC = () => {
             </div>
 
             {/* Budget Progress Meter */}
-            <div className="pt-2 border-t border-stone-100 space-y-1.5">
+            <div className="pt-2 border-t border-[#E6E1D3] space-y-1.5">
               <div className="flex items-center justify-between text-[11px]">
-                <span className="text-stone-500">Customer Budget:</span>
-                <span className="font-mono font-semibold text-stone-900">{formatINR(budget)}</span>
+                <span className="text-[#5A5A40]">Customer Budget:</span>
+                <span className="font-mono font-bold text-[#2C3A2B]">{formatINR(budget)}</span>
               </div>
 
-              <div className="w-full h-2 bg-stone-100 rounded-full overflow-hidden">
+              <div className="w-full h-2.5 bg-[#F4F1EA] rounded-full overflow-hidden border border-[#E6E1D3]">
                 <div
                   className={`h-full transition-all duration-300 rounded-full ${
                     validation.landedPrice.isOverBudget
                       ? 'bg-rose-500'
                       : validation.landedPrice.budgetUtilisationPercent > 90
                       ? 'bg-amber-500'
-                      : 'bg-indigo-800'
+                      : 'bg-[#2C3A2B]'
                   }`}
                   style={{
                     width: `${Math.min(validation.landedPrice.budgetUtilisationPercent, 100)}%`
@@ -353,7 +353,7 @@ export const BundleBuilderPage: React.FC = () => {
                 />
               </div>
 
-              <div className="flex items-center justify-between text-[11px] text-stone-500">
+              <div className="flex items-center justify-between text-[11px] text-[#5A5A40]">
                 <span>{validation.landedPrice.budgetUtilisationPercent.toFixed(1)}% utilised</span>
                 <span className={validation.landedPrice.isOverBudget ? 'text-rose-600 font-semibold' : 'text-emerald-700 font-medium'}>
                   {validation.landedPrice.isOverBudget
@@ -364,38 +364,38 @@ export const BundleBuilderPage: React.FC = () => {
             </div>
 
             {/* Status Narrative Callout */}
-            <div className="p-3 rounded-xl bg-stone-50 border border-stone-200/70 text-xs">
-              <div className="font-semibold text-stone-800 flex items-center gap-1.5 mb-1">
+            <div className="p-3.5 rounded-xl bg-[#FDFBF7] border border-[#E6E1D3] text-xs">
+              <div className="font-serif font-bold text-[#2C3A2B] flex items-center gap-1.5 mb-1">
                 {validation.isValid ? (
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700" />
                 ) : (
                   <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
                 )}
                 Verification Status
               </div>
-              <p className="text-[11px] text-stone-600 leading-relaxed">
+              <p className="text-[11px] text-[#5A5A40] leading-relaxed">
                 {validation.statusMessage}
               </p>
             </div>
 
             {/* AI Assistant Context Helper */}
             {(!validation.isValid || validation.compatibilityViolations.length > 0) && (
-              <div className="p-3 rounded-xl bg-gradient-to-br from-indigo-50/90 to-purple-50/60 border border-indigo-200/80 text-xs">
+              <div className="p-3.5 rounded-2xl bg-[#FDFBF7] border border-[#E6E1D3] text-xs shadow-2xs">
                 <div className="flex items-center justify-between mb-1">
-                  <div className="flex items-center gap-1.5 font-semibold text-indigo-950 text-[11px]">
-                    <Sparkles className="w-3.5 h-3.5 text-indigo-700" />
+                  <div className="flex items-center gap-1.5 font-serif font-bold text-[#2C3A2B] text-[11px]">
+                    <Sparkles className="w-3.5 h-3.5 text-[#8B5A2B]" />
                     <span>Need AI Optimization?</span>
                   </div>
-                  <span className="text-[9px] font-mono px-1 py-0.5 rounded bg-indigo-100 text-indigo-800 font-semibold">
+                  <span className="text-[9px] font-mono px-1.5 py-0.2 rounded-md bg-[#8B5A2B]/15 text-[#8B5A2B] font-bold">
                     Gemini
                   </span>
                 </div>
-                <p className="text-[11px] text-stone-600 mb-2 leading-relaxed">
+                <p className="text-[11px] text-[#5A5A40] mb-2 leading-relaxed">
                   Let Gemini diagnose your configuration conflicts and automatically assemble an optimal, compatible setup.
                 </p>
                 <button
                   onClick={toggleAssistant}
-                  className="w-full py-1.5 px-3 rounded-lg text-xs font-semibold bg-indigo-900 hover:bg-indigo-950 text-white flex items-center justify-center gap-1.5 shadow-2xs transition-colors cursor-pointer"
+                  className="w-full py-2 px-3 rounded-xl text-xs font-semibold bg-[#8B5A2B] hover:bg-[#743815] text-white flex items-center justify-center gap-1.5 shadow-2xs transition-colors cursor-pointer"
                 >
                   <span>Resolve with AI Assistant</span>
                   <ArrowRight className="w-3.5 h-3.5" />
@@ -407,16 +407,16 @@ export const BundleBuilderPage: React.FC = () => {
             <div className="pt-2 flex items-center gap-2">
               <button
                 onClick={handleExportCSV}
-                className="flex-1 py-1.5 px-2 text-xs font-medium text-stone-700 hover:bg-stone-100 border border-stone-200 rounded-lg flex items-center justify-center gap-1 transition-colors"
+                className="flex-1 py-1.5 px-2 text-xs font-medium text-[#2C2C1E] hover:bg-[#F4F1EA] border border-[#E6E1D3] rounded-xl flex items-center justify-center gap-1 transition-colors cursor-pointer"
               >
-                <FileSpreadsheet className="w-3.5 h-3.5 text-stone-500" />
+                <FileSpreadsheet className="w-3.5 h-3.5 text-[#8B8B7A]" />
                 CSV
               </button>
               <button
                 onClick={handleExportJSON}
-                className="flex-1 py-1.5 px-2 text-xs font-medium text-stone-700 hover:bg-stone-100 border border-stone-200 rounded-lg flex items-center justify-center gap-1 transition-colors"
+                className="flex-1 py-1.5 px-2 text-xs font-medium text-[#2C2C1E] hover:bg-[#F4F1EA] border border-[#E6E1D3] rounded-xl flex items-center justify-center gap-1 transition-colors cursor-pointer"
               >
-                <FileJson className="w-3.5 h-3.5 text-stone-500" />
+                <FileJson className="w-3.5 h-3.5 text-[#8B8B7A]" />
                 JSON
               </button>
             </div>
@@ -435,16 +435,16 @@ export const BundleBuilderPage: React.FC = () => {
 
       {/* Save Bundle Modal */}
       {showSaveModal && (
-        <div className="fixed inset-0 z-50 bg-stone-900/50 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full border border-stone-200 p-5 shadow-xl space-y-4">
-            <h3 className="text-base font-bold text-stone-900">Save Bundle Setup</h3>
-            <p className="text-xs text-stone-500">
+        <div className="fixed inset-0 z-50 bg-[#2C2C1E]/50 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-[24px] max-w-md w-full border border-[#E6E1D3] p-6 shadow-2xl space-y-4">
+            <h3 className="font-serif text-lg font-bold text-[#2C3A2B]">Save Bundle Setup</h3>
+            <p className="text-xs text-[#5A5A40]">
               Save this bundle configuration to your browser storage for comparison and audit trails.
             </p>
 
             <form onSubmit={handleSaveSubmit} className="space-y-3">
               <div>
-                <label className="text-xs font-medium text-stone-700 block mb-1">
+                <label className="text-xs font-semibold text-[#2C3A2B] block mb-1">
                   Bundle Name
                 </label>
                 <input
@@ -453,12 +453,12 @@ export const BundleBuilderPage: React.FC = () => {
                   placeholder="e.g., Budget Ergonomic WFH Setup"
                   value={bundleNameInput}
                   onChange={e => setBundleNameInput(e.target.value)}
-                  className="w-full px-3 py-1.5 text-xs border border-stone-200 rounded-lg focus:outline-hidden focus:ring-1 focus:ring-indigo-800"
+                  className="w-full px-3 py-2 text-xs border border-[#E6E1D3] bg-[#F4F1EA]/60 focus:bg-white rounded-xl focus:outline-hidden focus:border-[#2C3A2B] text-[#2C2C1E]"
                 />
               </div>
 
               <div>
-                <label className="text-xs font-medium text-stone-700 block mb-1">
+                <label className="text-xs font-semibold text-[#2C3A2B] block mb-1">
                   Notes / Rationales (Optional)
                 </label>
                 <textarea
@@ -466,7 +466,7 @@ export const BundleBuilderPage: React.FC = () => {
                   placeholder="e.g., Selected for Tier-1 lumbar support and dual-screen compatibility."
                   value={bundleNotesInput}
                   onChange={e => setBundleNotesInput(e.target.value)}
-                  className="w-full px-3 py-1.5 text-xs border border-stone-200 rounded-lg focus:outline-hidden focus:ring-1 focus:ring-indigo-800"
+                  className="w-full px-3 py-2 text-xs border border-[#E6E1D3] bg-[#F4F1EA]/60 focus:bg-white rounded-xl focus:outline-hidden focus:border-[#2C3A2B] text-[#2C2C1E]"
                 />
               </div>
 
@@ -474,13 +474,13 @@ export const BundleBuilderPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setShowSaveModal(false)}
-                  className="px-3 py-1.5 text-xs text-stone-600 hover:bg-stone-100 rounded-lg font-medium"
+                  className="px-3.5 py-1.5 text-xs text-[#5A5A40] hover:bg-[#F4F1EA] rounded-xl font-medium cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-3.5 py-1.5 text-xs font-semibold text-white bg-indigo-900 hover:bg-indigo-800 rounded-lg shadow-2xs"
+                  className="px-4 py-1.5 text-xs font-semibold text-white bg-[#8B5A2B] hover:bg-[#743815] rounded-xl shadow-xs cursor-pointer"
                 >
                   Confirm Save
                 </button>
@@ -492,16 +492,16 @@ export const BundleBuilderPage: React.FC = () => {
 
       {/* Reset Confirmation Modal */}
       {showResetConfirm && (
-        <div className="fixed inset-0 z-50 bg-stone-900/50 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-sm w-full border border-stone-200 p-5 shadow-xl space-y-4">
-            <h3 className="text-sm font-bold text-stone-900">Reset Current Workspace?</h3>
-            <p className="text-xs text-stone-600 leading-relaxed">
+        <div className="fixed inset-0 z-50 bg-[#2C2C1E]/50 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-[24px] max-w-sm w-full border border-[#E6E1D3] p-6 shadow-2xl space-y-4">
+            <h3 className="font-serif text-base font-bold text-[#2C3A2B]">Reset Current Workspace?</h3>
+            <p className="text-xs text-[#5A5A40] leading-relaxed">
               This will clear all selected products from the slots. You can reload previously saved bundles at any time.
             </p>
             <div className="flex items-center justify-end gap-2 pt-2">
               <button
                 onClick={() => setShowResetConfirm(false)}
-                className="px-3 py-1.5 text-xs text-stone-600 hover:bg-stone-100 rounded-lg font-medium"
+                className="px-3.5 py-1.5 text-xs text-[#5A5A40] hover:bg-[#F4F1EA] rounded-xl font-medium cursor-pointer"
               >
                 Cancel
               </button>
@@ -510,7 +510,7 @@ export const BundleBuilderPage: React.FC = () => {
                   resetBundle();
                   setShowResetConfirm(false);
                 }}
-                className="px-3.5 py-1.5 text-xs font-semibold text-white bg-rose-600 hover:bg-rose-700 rounded-lg shadow-2xs"
+                className="px-4 py-1.5 text-xs font-semibold text-white bg-rose-700 hover:bg-rose-800 rounded-xl shadow-xs cursor-pointer"
               >
                 Clear All Slots
               </button>

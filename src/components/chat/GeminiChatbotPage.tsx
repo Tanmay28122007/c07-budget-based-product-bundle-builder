@@ -458,7 +458,7 @@ Please provide an in-depth ergonomic & procurement evaluation for this product b
           parts.push(<span key={keyIdx++}>{remaining.substring(0, codeIdx)}</span>);
         }
         parts.push(
-          <code key={keyIdx++} className="px-1.5 py-0.5 rounded-md bg-stone-100 font-mono text-[11px] text-indigo-900 border border-stone-200">
+          <code key={keyIdx++} className="px-1.5 py-0.5 rounded-md bg-[#F4F1EA] font-mono text-[11px] text-[#2C3A2B] border border-[#E6E1D3]">
             {codeMatch![1]}
           </code>
         );
@@ -471,26 +471,26 @@ Please provide an in-depth ergonomic & procurement evaluation for this product b
   return (
     <div className="space-y-4 max-w-5xl mx-auto pb-10">
       {/* Header Banner */}
-      <div className="bg-white border border-stone-200/90 rounded-2xl p-5 shadow-2xs">
+      <div className="bg-white border border-[#E6E1D3] rounded-[24px] p-6 shadow-xs">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-start gap-3.5">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-900 to-indigo-800 text-white flex items-center justify-center shadow-xs shrink-0 mt-0.5">
-              <Bot className="w-5 h-5 text-indigo-200" />
+            <div className="w-10 h-10 rounded-xl bg-[#2C3A2B] text-white flex items-center justify-center shadow-xs shrink-0 mt-0.5">
+              <Bot className="w-5 h-5 text-emerald-300" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-lg font-bold text-stone-900 tracking-tight">
+                <h1 className="font-serif text-xl font-bold text-[#2C3A2B] tracking-tight">
                   Gemini Chatbot
                 </h1>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-semibold bg-indigo-50 text-indigo-900 border border-indigo-200">
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-semibold bg-[#F4F1EA] text-[#8B5A2B] border border-[#E6E1D3]">
                   Multi-Turn
                 </span>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-semibold bg-[#A3B18A]/20 text-[#2C3A2B] border border-[#A3B18A]/40 flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse" />
                   Live Engine
                 </span>
               </div>
-              <p className="text-xs text-stone-500 mt-0.5">
+              <p className="text-xs text-[#5A5A40] mt-0.5">
                 Multi-turn conversational intelligence tailored for workspace configuration, rapid hardware checking, and procurement analytics.
               </p>
             </div>
@@ -500,25 +500,25 @@ Please provide an in-depth ergonomic & procurement evaluation for this product b
           <div className="flex items-center gap-2">
             <button
               onClick={handleExportMarkdown}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-stone-700 bg-white hover:bg-stone-50 border border-stone-200 rounded-lg shadow-2xs transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-[#2C2C1E] bg-white hover:bg-[#F4F1EA] border border-[#E6E1D3] rounded-xl shadow-2xs transition-colors cursor-pointer"
               title="Export chat transcript as Markdown"
             >
-              <Download className="w-3.5 h-3.5 text-stone-500" />
+              <Download className="w-3.5 h-3.5 text-[#8B8B7A]" />
               <span>Export</span>
             </button>
             <button
               onClick={handleClearChat}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-stone-700 bg-white hover:bg-stone-50 border border-stone-200 rounded-lg shadow-2xs transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-[#2C2C1E] bg-white hover:bg-[#F4F1EA] border border-[#E6E1D3] rounded-xl shadow-2xs transition-colors cursor-pointer"
               title="Clear chat history"
             >
-              <Trash2 className="w-3.5 h-3.5 text-stone-500" />
+              <Trash2 className="w-3.5 h-3.5 text-[#8B8B7A]" />
               <span>Clear</span>
             </button>
           </div>
         </div>
 
         {/* Role Selector Strip */}
-        <div className="mt-5 pt-4 border-t border-stone-100 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
+        <div className="mt-5 pt-4 border-t border-[#E6E1D3] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
           {(Object.keys(ROLE_DEFINITIONS) as ChatbotRole[]).map(roleKey => {
             const r = ROLE_DEFINITIONS[roleKey];
             const Icon = r.icon;
@@ -529,21 +529,21 @@ Please provide an in-depth ergonomic & procurement evaluation for this product b
                 onClick={() => handleRoleChange(roleKey)}
                 className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
                   isSelected
-                    ? 'bg-indigo-50/80 border-indigo-400 ring-1 ring-indigo-400 shadow-2xs'
-                    : 'bg-stone-50/70 border-stone-200/80 hover:bg-stone-100/80'
+                    ? 'bg-[#FDFBF7] border-[#2C3A2B] ring-1 ring-[#2C3A2B] shadow-2xs'
+                    : 'bg-[#F4F1EA]/60 border-[#E6E1D3] hover:bg-[#F4F1EA]'
                 }`}
               >
                 <div className="flex items-center justify-between mb-1.5">
-                  <div className="flex items-center gap-2 font-semibold text-xs text-stone-900">
-                    <Icon className={`w-3.5 h-3.5 ${isSelected ? 'text-indigo-900' : 'text-stone-500'}`} />
+                  <div className="flex items-center gap-2 font-semibold text-xs text-[#2C3A2B]">
+                    <Icon className={`w-3.5 h-3.5 ${isSelected ? 'text-[#8B5A2B]' : 'text-[#8B8B7A]'}`} />
                     <span className="truncate">{r.name}</span>
                   </div>
                 </div>
                 <div className="flex items-center justify-between mt-1 text-[10px]">
-                  <span className={`font-mono px-1.5 py-0.2 rounded ${isSelected ? 'bg-indigo-200/70 text-indigo-900 font-bold' : 'bg-stone-200 text-stone-600'}`}>
+                  <span className={`font-mono px-1.5 py-0.2 rounded ${isSelected ? 'bg-[#2C3A2B] text-white font-bold' : 'bg-[#E6E1D3] text-[#5A5A40]'}`}>
                     {r.defaultModel}
                   </span>
-                  <span className="text-stone-400 font-medium">{r.badge}</span>
+                  <span className="text-[#8B8B7A] font-medium">{r.badge}</span>
                 </div>
               </button>
             );
@@ -585,14 +585,14 @@ Please provide an in-depth ergonomic & procurement evaluation for this product b
                 type="checkbox"
                 checked={attachWorkspaceContext}
                 onChange={e => setAttachWorkspaceContext(e.target.checked)}
-                className="rounded border-stone-300 text-indigo-900 focus:ring-indigo-800 h-3.5 w-3.5"
+                className="rounded border-[#E6E1D3] text-[#2C3A2B] focus:ring-[#2C3A2B] h-3.5 w-3.5"
               />
-              <span className="text-stone-600 font-medium text-xs">
+              <span className="text-[#5A5A40] font-medium text-xs">
                 Sync Workspace Context
               </span>
             </label>
             {attachWorkspaceContext && (
-              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200">
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#A3B18A]/25 text-[#2C3A2B] border border-[#A3B18A]/40">
                 ₹{budget.toLocaleString('en-IN')} Budget ({validation.filledSlotCount}/{validation.totalSlotCount} Slots)
               </span>
             )}
@@ -699,7 +699,7 @@ Please provide an in-depth ergonomic & procurement evaluation for this product b
                   max="300000"
                   value={targetBudgetInput}
                   onChange={e => setTargetBudgetInput(Number(e.target.value) || 0)}
-                  className="w-full px-2.5 py-1.5 text-xs font-mono font-semibold border border-stone-200 rounded-lg focus:outline-hidden focus:ring-1 focus:ring-indigo-800"
+                  className="w-full px-2.5 py-1.5 text-xs font-mono font-semibold border border-[#E6E1D3] rounded-lg bg-white text-[#2C3A2B] focus:outline-hidden focus:ring-1 focus:ring-[#2C3A2B]"
                 />
               </div>
               <div className="flex items-center gap-1 overflow-x-auto no-scrollbar pt-0.5">
@@ -707,7 +707,7 @@ Please provide an in-depth ergonomic & procurement evaluation for this product b
                   <button
                     key={amt}
                     onClick={() => setTargetBudgetInput(amt)}
-                    className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-stone-100 hover:bg-indigo-50 hover:text-indigo-900 text-stone-600 border border-stone-200 cursor-pointer"
+                    className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-[#F5F5EC] hover:bg-[#F4F1EA] text-[#2C3A2B] border border-[#E6E1D3] cursor-pointer"
                   >
                     ₹{(amt / 1000)}k
                   </button>
@@ -716,18 +716,18 @@ Please provide an in-depth ergonomic & procurement evaluation for this product b
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-[11px] font-semibold text-stone-600 block">
+              <label className="text-[11px] font-semibold text-[#2C3A2B] block">
                 Assembly Strategy
               </label>
               <select
                 value={bundlePriority}
                 onChange={e => setBundlePriority(e.target.value as any)}
-                className="w-full px-2.5 py-1.5 text-xs font-medium border border-stone-200 rounded-lg focus:outline-hidden focus:ring-1 focus:ring-indigo-800 bg-white cursor-pointer"
+                className="w-full px-2.5 py-1.5 text-xs font-medium border border-[#E6E1D3] rounded-lg focus:outline-hidden focus:ring-1 focus:ring-[#2C3A2B] bg-white text-[#2C3A2B] cursor-pointer"
               >
                 <option value="ergonomic_tier1">Ergonomic Tier-1 & Spine Alignment</option>
                 <option value="cost_effective">Cost-Effective Maximum Savings</option>
               </select>
-              <p className="text-[10px] text-stone-500 line-clamp-1">
+              <p className="text-[10px] text-[#5A5A40] line-clamp-1">
                 {bundlePriority === 'ergonomic_tier1'
                   ? '3D armrests, lumbar support, dual QHD monitor support'
                   : 'Meets activity slot requirements at the lowest landed cost'}
@@ -738,9 +738,9 @@ Please provide an in-depth ergonomic & procurement evaluation for this product b
               <button
                 disabled={isLoading}
                 onClick={handleTriggerAssemblyGuide}
-                className="w-full py-2.5 px-3 rounded-xl bg-indigo-900 hover:bg-indigo-950 text-white text-xs font-semibold flex items-center justify-center gap-2 shadow-xs cursor-pointer transition-colors disabled:opacity-50"
+                className="w-full py-2.5 px-3 rounded-xl bg-[#2C3A2B] hover:bg-[#3A4D39] text-white text-xs font-semibold flex items-center justify-center gap-2 shadow-xs cursor-pointer transition-colors disabled:opacity-50"
               >
-                <Sparkles className="w-3.5 h-3.5 text-indigo-200" />
+                <Sparkles className="w-3.5 h-3.5 text-[#F5F5EC]" />
                 <span>Ask Gemini to Assemble Bundle</span>
               </button>
             </div>
@@ -827,10 +827,10 @@ Please provide an in-depth ergonomic & procurement evaluation for this product b
                       setSelectedCatalogueCategory(cat);
                       setSelectedProductId('');
                     }}
-                    className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-all cursor-pointer ${
+                    className={`px-3 py-1 rounded-xl text-[11px] font-medium transition-all cursor-pointer ${
                       selectedCatalogueCategory === cat
-                        ? 'bg-indigo-900 text-white font-semibold shadow-2xs'
-                        : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
+                        ? 'bg-[#2C3A2B] text-white font-semibold shadow-xs'
+                        : 'bg-[#F5F5EC] text-[#5A5A40] hover:bg-[#F4F1EA] border border-[#E6E1D3]'
                     }`}
                   >
                     {cat === 'all' ? 'All Categories' : cat.replace(/_/g, ' ')}
@@ -890,10 +890,10 @@ Please provide an in-depth ergonomic & procurement evaluation for this product b
       </div>
 
       {/* Main Conversation Container */}
-      <div className="bg-white border border-stone-200/90 rounded-2xl shadow-sm flex flex-col min-h-[560px]">
+      <div className="bg-white border border-[#E6E1D3] rounded-[24px] shadow-sm flex flex-col min-h-[560px]">
         {/* Role Quick Prompts Strip */}
-        <div className="p-3 bg-stone-50/60 border-b border-stone-100 flex items-center gap-2 overflow-x-auto no-scrollbar">
-          <span className="text-[11px] font-semibold text-stone-400 uppercase tracking-wider shrink-0 mr-1">
+        <div className="p-3 bg-[#FDFBF7] border-b border-[#E6E1D3] flex items-center gap-2 overflow-x-auto no-scrollbar">
+          <span className="text-[11px] font-semibold text-[#8B8B7A] uppercase tracking-wider shrink-0 mr-1">
             Starters:
           </span>
           {ROLE_DEFINITIONS[activeRole].starterPrompts.map((prompt, i) => (
@@ -901,7 +901,7 @@ Please provide an in-depth ergonomic & procurement evaluation for this product b
               key={i}
               disabled={isLoading}
               onClick={() => handleSendMessage(prompt)}
-              className="shrink-0 px-3 py-1 text-xs font-medium rounded-full bg-white border border-stone-200 text-stone-700 hover:text-indigo-950 hover:border-indigo-300 hover:bg-indigo-50/50 transition-colors cursor-pointer disabled:opacity-50"
+              className="shrink-0 px-3 py-1 text-xs font-medium rounded-full bg-white border border-[#E6E1D3] text-[#5A5A40] hover:text-[#2C3A2B] hover:border-[#8B5A2B] hover:bg-[#F4F1EA] transition-colors cursor-pointer disabled:opacity-50"
             >
               {prompt}
             </button>
@@ -918,25 +918,25 @@ Please provide an in-depth ergonomic & procurement evaluation for this product b
                 className={`flex gap-3 text-xs ${isUser ? 'justify-end' : 'justify-start'}`}
               >
                 {!isUser && (
-                  <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-900 to-indigo-800 text-white shrink-0 flex items-center justify-center shadow-xs">
-                    <Bot className="w-4 h-4 text-indigo-200" />
+                  <div className="w-8 h-8 rounded-xl bg-[#2C3A2B] text-white shrink-0 flex items-center justify-center shadow-xs">
+                    <Bot className="w-4 h-4 text-emerald-300" />
                   </div>
                 )}
 
                 <div
                   className={`max-w-[85%] rounded-2xl px-4 py-3 shadow-2xs ${
                     isUser
-                      ? 'bg-indigo-900 text-white rounded-tr-xs'
-                      : 'bg-stone-50/90 border border-stone-200/80 rounded-tl-xs'
+                      ? 'bg-[#2C3A2B] text-white rounded-tr-xs'
+                      : 'bg-[#FDFBF7] border border-[#E6E1D3] rounded-tl-xs'
                   }`}
                 >
                   {/* Message Meta Header */}
                   <div className="flex items-center justify-between gap-3 mb-1.5 pb-1 border-b border-current/10">
-                    <span className={`font-semibold text-[11px] ${isUser ? 'text-indigo-200' : 'text-indigo-950'}`}>
+                    <span className={`font-semibold text-[11px] ${isUser ? 'text-emerald-200' : 'text-[#8B5A2B]'}`}>
                       {isUser ? 'You' : `Gemini (${msg.model || selectedModel})`}
                     </span>
                     <div className="flex items-center gap-2">
-                      <span className={`text-[10px] font-mono ${isUser ? 'text-indigo-200' : 'text-stone-400'}`}>
+                      <span className={`text-[10px] font-mono ${isUser ? 'text-emerald-200' : 'text-[#8B8B7A]'}`}>
                         {msg.timestamp}
                       </span>
                       {!isUser && (
@@ -964,14 +964,14 @@ Please provide an in-depth ergonomic & procurement evaluation for this product b
                   {!isUser && msg.action && (
                     <div className="mt-3 pt-3 border-t border-stone-200/80">
                       {msg.action.type === 'apply_bundle' && (
-                        <div className="p-3.5 bg-white border border-indigo-200 rounded-xl shadow-xs">
+                        <div className="p-3.5 bg-white border border-[#E6E1D3] rounded-2xl shadow-xs">
                           <div className="flex items-center justify-between mb-2">
-                            <div className="flex items-center gap-1.5 font-semibold text-stone-900 text-xs">
-                              <Package className="w-4 h-4 text-indigo-700" />
+                            <div className="flex items-center gap-1.5 font-semibold text-[#2C3A2B] text-xs">
+                              <Package className="w-4 h-4 text-[#8B5A2B]" />
                               <span>{msg.action.title || 'Recommended Bundle'}</span>
                             </div>
                             {msg.action.budget && (
-                              <span className="font-mono text-[11px] px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-900 font-semibold border border-indigo-100">
+                              <span className="font-mono text-[11px] px-2 py-0.5 rounded-full bg-[#F5F5EC] text-[#2C3A2B] font-semibold border border-[#E6E1D3]">
                                 Target: {formatINR(msg.action.budget)}
                               </span>
                             )}
@@ -985,12 +985,12 @@ Please provide an in-depth ergonomic & procurement evaluation for this product b
                                 return (
                                   <div
                                     key={slotId}
-                                    className="flex items-center justify-between text-xs text-stone-600 bg-stone-50 px-2.5 py-1.5 rounded-lg border border-stone-100"
+                                    className="flex items-center justify-between text-xs text-[#5A5A40] bg-[#FDFBF7] px-2.5 py-1.5 rounded-xl border border-[#E6E1D3]"
                                   >
-                                    <span className="font-medium text-stone-800">
+                                    <span className="font-medium text-[#2C3A2B]">
                                       {slot?.label || slotId}:
                                     </span>
-                                    <span className="font-mono text-stone-700 font-medium">
+                                    <span className="font-mono text-[#5A5A40] font-medium">
                                       {prod?.name || prodId} {prod ? `(${formatINR(prod.price)})` : ''}
                                     </span>
                                   </div>
@@ -1002,10 +1002,10 @@ Please provide an in-depth ergonomic & procurement evaluation for this product b
                           <button
                             onClick={() => handleApplyAction(msg.id, msg.action)}
                             disabled={msg.actionApplied}
-                            className={`w-full py-2 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all ${
+                            className={`w-full py-2 px-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-all ${
                               msg.actionApplied
-                                ? 'bg-emerald-50 text-emerald-800 border border-emerald-200 cursor-default'
-                                : 'bg-indigo-900 hover:bg-indigo-950 text-white shadow-xs cursor-pointer'
+                                ? 'bg-[#A3B18A]/25 text-[#2C3A2B] border border-[#A3B18A]/40 cursor-default'
+                                : 'bg-[#2C3A2B] hover:bg-[#3A4D39] text-white shadow-xs cursor-pointer'
                             }`}
                           >
                             {msg.actionApplied ? (
@@ -1024,21 +1024,21 @@ Please provide an in-depth ergonomic & procurement evaluation for this product b
                       )}
 
                       {msg.action.type === 'swap_product' && (
-                        <div className="p-3 bg-white border border-amber-200 rounded-xl shadow-xs">
-                          <div className="flex items-center gap-1.5 font-semibold text-stone-900 text-xs mb-1">
-                            <RefreshCw className="w-3.5 h-3.5 text-amber-600" />
+                        <div className="p-3 bg-white border border-[#F4E1A1] rounded-2xl shadow-xs">
+                          <div className="flex items-center gap-1.5 font-semibold text-[#2C3A2B] text-xs mb-1">
+                            <RefreshCw className="w-3.5 h-3.5 text-[#8B5A2B]" />
                             <span>Actionable Product Replacement</span>
                           </div>
-                          <p className="text-xs text-stone-600 mb-2 leading-relaxed">
+                          <p className="text-xs text-[#5A5A40] mb-2 leading-relaxed">
                             {msg.action.reason}
                           </p>
                           <button
                             onClick={() => handleApplyAction(msg.id, msg.action)}
                             disabled={msg.actionApplied}
-                            className={`w-full py-2 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all ${
+                            className={`w-full py-2 px-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-all ${
                               msg.actionApplied
-                                ? 'bg-emerald-50 text-emerald-800 border border-emerald-200 cursor-default'
-                                : 'bg-amber-600 hover:bg-amber-700 text-white shadow-xs cursor-pointer'
+                                ? 'bg-[#A3B18A]/25 text-[#2C3A2B] border border-[#A3B18A]/40 cursor-default'
+                                : 'bg-[#8B5A2B] hover:bg-[#743815] text-white shadow-xs cursor-pointer'
                             }`}
                           >
                             {msg.actionApplied ? (
@@ -1057,27 +1057,27 @@ Please provide an in-depth ergonomic & procurement evaluation for this product b
                       )}
 
                       {msg.action.type === 'set_budget' && (
-                        <div className="p-3 bg-white border border-indigo-200 rounded-xl shadow-xs">
+                        <div className="p-3 bg-white border border-[#E6E1D3] rounded-2xl shadow-xs">
                           <div className="flex items-center justify-between mb-1">
-                            <span className="font-semibold text-stone-900 text-xs">
+                            <span className="font-semibold text-[#2C3A2B] text-xs">
                               Update Customer Budget
                             </span>
-                            <span className="font-mono font-bold text-indigo-900 text-xs">
+                            <span className="font-mono font-bold text-[#2C3A2B] text-xs">
                               {formatINR(msg.action.budget || 0)}
                             </span>
                           </div>
                           {msg.action.reason && (
-                            <p className="text-xs text-stone-600 mb-2 leading-relaxed">
+                            <p className="text-xs text-[#5A5A40] mb-2 leading-relaxed">
                               {msg.action.reason}
                             </p>
                           )}
                           <button
                             onClick={() => handleApplyAction(msg.id, msg.action)}
                             disabled={msg.actionApplied}
-                            className={`w-full py-2 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all ${
+                            className={`w-full py-2 px-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-all ${
                               msg.actionApplied
-                                ? 'bg-emerald-50 text-emerald-800 border border-emerald-200 cursor-default'
-                                : 'bg-indigo-900 hover:bg-indigo-950 text-white shadow-xs cursor-pointer'
+                                ? 'bg-[#A3B18A]/25 text-[#2C3A2B] border border-[#A3B18A]/40 cursor-default'
+                                : 'bg-[#2C3A2B] hover:bg-[#3A4D39] text-white shadow-xs cursor-pointer'
                             }`}
                           >
                             {msg.actionApplied ? (
@@ -1099,7 +1099,7 @@ Please provide an in-depth ergonomic & procurement evaluation for this product b
                 </div>
 
                 {isUser && (
-                  <div className="w-8 h-8 rounded-xl bg-stone-800 text-white shrink-0 flex items-center justify-center text-xs font-bold shadow-xs">
+                  <div className="w-8 h-8 rounded-xl bg-[#2C3A2B] text-white shrink-0 flex items-center justify-center text-xs font-bold shadow-xs">
                     U
                   </div>
                 )}
@@ -1109,14 +1109,14 @@ Please provide an in-depth ergonomic & procurement evaluation for this product b
 
           {isLoading && (
             <div className="flex gap-3 text-xs justify-start">
-              <div className="w-8 h-8 rounded-xl bg-indigo-900 text-white shrink-0 flex items-center justify-center shadow-xs">
-                <Bot className="w-4 h-4 text-indigo-200 animate-pulse" />
+              <div className="w-8 h-8 rounded-xl bg-[#2C3A2B] text-white shrink-0 flex items-center justify-center shadow-xs">
+                <Bot className="w-4 h-4 text-[#F5F5EC] animate-pulse" />
               </div>
-              <div className="bg-stone-50 border border-stone-200 rounded-2xl rounded-tl-xs px-4 py-3 shadow-2xs flex items-center gap-2 text-stone-600">
-                <span className="w-2 h-2 rounded-full bg-indigo-600 animate-bounce" />
-                <span className="w-2 h-2 rounded-full bg-indigo-600 animate-bounce [animation-delay:0.2s]" />
-                <span className="w-2 h-2 rounded-full bg-indigo-600 animate-bounce [animation-delay:0.4s]" />
-                <span className="text-xs font-medium text-stone-500 ml-1">
+              <div className="bg-white border border-[#E6E1D3] rounded-2xl rounded-tl-xs px-4 py-3 shadow-2xs flex items-center gap-2 text-[#5A5A40]">
+                <span className="w-2 h-2 rounded-full bg-[#8B5A2B] animate-bounce" />
+                <span className="w-2 h-2 rounded-full bg-[#8B5A2B] animate-bounce [animation-delay:0.2s]" />
+                <span className="w-2 h-2 rounded-full bg-[#8B5A2B] animate-bounce [animation-delay:0.4s]" />
+                <span className="text-xs font-medium text-[#5A5A40] ml-1">
                   Gemini ({selectedModel}) is evaluating multi-turn context...
                 </span>
               </div>
@@ -1127,7 +1127,7 @@ Please provide an in-depth ergonomic & procurement evaluation for this product b
         </div>
 
         {/* Input Bar */}
-        <div className="p-4 border-t border-stone-200 bg-white rounded-b-2xl">
+        <div className="p-4 border-t border-[#E6E1D3] bg-white rounded-b-[24px]">
           <form
             onSubmit={e => {
               e.preventDefault();
@@ -1149,7 +1149,7 @@ Please provide an in-depth ergonomic & procurement evaluation for this product b
                 }}
                 placeholder={`Ask ${ROLE_DEFINITIONS[activeRole].name} with ${selectedModel}...`}
                 disabled={isLoading}
-                className="w-full resize-none p-3 text-xs bg-stone-50 hover:bg-stone-100/60 focus:bg-white border border-stone-200 rounded-xl focus:outline-hidden focus:ring-1 focus:ring-indigo-800 transition-colors placeholder:text-stone-400"
+                className="w-full resize-none p-3 text-xs bg-[#F4F1EA]/70 hover:bg-[#F4F1EA] focus:bg-white border border-[#E6E1D3] rounded-xl focus:outline-hidden focus:border-[#2C3A2B] transition-colors placeholder:text-[#8B8B7A] text-[#2C2C1E]"
               />
             </div>
 
@@ -1157,13 +1157,13 @@ Please provide an in-depth ergonomic & procurement evaluation for this product b
               type="submit"
               disabled={!inputMessage.trim() || isLoading}
               aria-label="Send message to Gemini"
-              className="p-3 rounded-xl bg-indigo-900 hover:bg-indigo-950 disabled:opacity-40 text-white shadow-xs transition-colors shrink-0 cursor-pointer disabled:cursor-not-allowed"
+              className="p-3 rounded-xl bg-[#8B5A2B] hover:bg-[#743815] disabled:opacity-40 text-white shadow-xs transition-colors shrink-0 cursor-pointer disabled:cursor-not-allowed"
             >
               <Send className="w-4 h-4" />
             </button>
           </form>
 
-          <div className="mt-2 flex items-center justify-between text-[11px] text-stone-400 px-1 font-mono">
+          <div className="mt-2 flex items-center justify-between text-[11px] text-[#8B8B7A] px-1 font-mono">
             <span>Press Enter to send, Shift+Enter for newline</span>
             <span>Role: {ROLE_DEFINITIONS[activeRole].name} • Model: {selectedModel}</span>
           </div>

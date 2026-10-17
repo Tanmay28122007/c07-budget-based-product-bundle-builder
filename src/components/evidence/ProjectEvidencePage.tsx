@@ -67,10 +67,10 @@ export const ProjectEvidencePage: React.FC = () => {
     <div className="space-y-8">
       {/* Title */}
       <div>
-        <h1 className="text-xl font-bold tracking-tight text-stone-900">
+        <h1 className="text-2xl font-serif font-bold tracking-tight text-[#2C3A2B]">
           Project Engineering Evidence & Scope Audit
         </h1>
-        <p className="text-xs text-stone-500 mt-0.5">
+        <p className="text-xs text-[#5A5A40] mt-0.5">
           Academic engineering change documentation, contractual boundaries, and verified test procedures.
         </p>
       </div>
@@ -78,21 +78,21 @@ export const ProjectEvidencePage: React.FC = () => {
       {/* Section A & B: Starting State vs Requested Change */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* A. Starting State */}
-        <div className="p-5 bg-white border border-stone-200/80 rounded-xl shadow-2xs space-y-3">
+        <div className="p-6 bg-white border border-[#E6E1D3] rounded-[24px] shadow-xs space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-semibold text-stone-400 uppercase tracking-wider">
+            <span className="text-[11px] font-semibold text-[#8B5A2B] uppercase tracking-wider">
               A · Baseline Starting State
             </span>
-            <span className="text-[10px] font-mono text-stone-500 bg-stone-100 px-2 py-0.5 rounded">
+            <span className="text-[10px] font-mono text-[#5A5A40] bg-[#F5F5EC] border border-[#E6E1D3] px-2.5 py-0.5 rounded-full">
               v0.1 Prototype
             </span>
           </div>
 
-          <h3 className="text-sm font-bold text-stone-900">Initial Prototype Capabilities & Limits</h3>
+          <h3 className="text-base font-serif font-bold text-[#2C3A2B]">Initial Prototype Capabilities & Limits</h3>
 
-          <div className="space-y-2 text-xs text-stone-600">
+          <div className="space-y-2 text-xs text-[#5A5A40]">
             <div>
-              <span className="font-semibold text-stone-800">Initial Capabilities:</span>
+              <span className="font-semibold text-[#2C3A2B]">Initial Capabilities:</span>
               <ul className="list-disc list-inside mt-1 space-y-1 pl-1">
                 <li>Simple manual item selector across arbitrary categories.</li>
                 <li>Basic product price summation (subtotal only).</li>
@@ -100,9 +100,9 @@ export const ProjectEvidencePage: React.FC = () => {
               </ul>
             </div>
 
-            <div className="pt-2 border-t border-stone-100">
-              <span className="font-semibold text-rose-800">Identified Limitations:</span>
-              <ul className="list-disc list-inside mt-1 space-y-1 pl-1 text-rose-900">
+            <div className="pt-2 border-t border-[#E6E1D3]">
+              <span className="font-semibold text-[#C05621]">Identified Limitations:</span>
+              <ul className="list-disc list-inside mt-1 space-y-1 pl-1 text-[#C05621]">
                 <li>Zero compatibility checking (allowed curved monitors with screenbars, wide chairs with narrow desks).</li>
                 <li>Omitted shipping charges and GST (surprise charges at checkout).</li>
                 <li>No automated optimization or budget feasibility search.</li>
@@ -112,35 +112,35 @@ export const ProjectEvidencePage: React.FC = () => {
         </div>
 
         {/* B. Requested Change */}
-        <div className="p-5 bg-white border border-stone-200/80 rounded-xl shadow-2xs space-y-3">
+        <div className="p-6 bg-white border border-[#E6E1D3] rounded-[24px] shadow-xs space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-semibold text-stone-400 uppercase tracking-wider">
+            <span className="text-[11px] font-semibold text-[#8B5A2B] uppercase tracking-wider">
               B · Architectural Additions
             </span>
-            <span className="text-[10px] font-mono text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-200">
+            <span className="text-[10px] font-mono text-[#2C3A2B] bg-[#A3B18A]/25 px-2.5 py-0.5 rounded-full border border-[#A3B18A]/40">
               C07 Specification
             </span>
           </div>
 
-          <h3 className="text-sm font-bold text-stone-900">Delivered Architectural Enhancements</h3>
+          <h3 className="text-base font-serif font-bold text-[#2C3A2B]">Delivered Architectural Enhancements</h3>
 
           <div className="space-y-3 text-xs">
-            <div className="p-3 bg-indigo-50/50 rounded-lg border border-indigo-100 space-y-1">
-              <span className="font-bold text-indigo-950 flex items-center gap-1.5">
-                <Check className="w-3.5 h-3.5 text-indigo-700" />
+            <div className="p-3.5 bg-[#F5F5EC] rounded-2xl border border-[#E6E1D3] space-y-1">
+              <span className="font-bold text-[#2C3A2B] flex items-center gap-1.5">
+                <Check className="w-3.5 h-3.5 text-[#2C3A2B]" />
                 1. Real-time Compatibility Validation Engine
               </span>
-              <p className="text-indigo-900 leading-relaxed text-[11px]">
+              <p className="text-[#5A5A40] leading-relaxed text-[11px]">
                 Validates desk overhang, armrest clearance, optical clamp bezel fit, and explicit port connections deterministically on every slot alteration.
               </p>
             </div>
 
-            <div className="p-3 bg-emerald-50/50 rounded-lg border border-emerald-100 space-y-1">
-              <span className="font-bold text-emerald-950 flex items-center gap-1.5">
-                <Check className="w-3.5 h-3.5 text-emerald-700" />
+            <div className="p-3.5 bg-[#A3B18A]/15 rounded-2xl border border-[#A3B18A]/40 space-y-1">
+              <span className="font-bold text-[#2C3A2B] flex items-center gap-1.5">
+                <Check className="w-3.5 h-3.5 text-[#2C3A2B]" />
                 2. Transparent Landed-Price Comparison
               </span>
-              <p className="text-emerald-900 leading-relaxed text-[11px]">
+              <p className="text-[#5A5A40] leading-relaxed text-[11px]">
                 Integrates weight-based heavy shipping fees, free shipping thresholds, and 18% GST with side-by-side multi-bundle comparison.
               </p>
             </div>
@@ -149,13 +149,13 @@ export const ProjectEvidencePage: React.FC = () => {
       </div>
 
       {/* Section C: Negotiated Scope */}
-      <div className="p-5 bg-white border border-stone-200/80 rounded-xl shadow-2xs space-y-4">
-        <div className="flex items-center justify-between pb-2 border-b border-stone-100">
+      <div className="p-6 bg-white border border-[#E6E1D3] rounded-[24px] shadow-xs space-y-4">
+        <div className="flex items-center justify-between pb-3 border-b border-[#E6E1D3]">
           <div>
-            <span className="text-[11px] font-semibold text-stone-400 uppercase tracking-wider block">
+            <span className="text-[11px] font-semibold text-[#8B5A2B] uppercase tracking-wider block">
               Section C · Contractual Agreement
             </span>
-            <h3 className="text-sm font-bold text-stone-900">Negotiated Scope & Acceptance Criteria</h3>
+            <h3 className="text-base font-serif font-bold text-[#2C3A2B]">Negotiated Scope & Acceptance Criteria</h3>
           </div>
 
           <button
@@ -163,9 +163,9 @@ export const ProjectEvidencePage: React.FC = () => {
               setScopeForm(negotiatedScope);
               setIsEditingScope(prev => !prev);
             }}
-            className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-stone-700 bg-stone-50 hover:bg-stone-100 border border-stone-200 rounded-lg"
+            className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-[#2C3A2B] bg-[#F5F5EC] hover:bg-[#F4F1EA] border border-[#E6E1D3] rounded-xl"
           >
-            <Edit2 className="w-3 h-3 text-stone-500" />
+            <Edit2 className="w-3.5 h-3.5 text-[#5A5A40]" />
             {isEditingScope ? 'Cancel' : 'Edit Scope Terms'}
           </button>
         </div>
@@ -173,52 +173,52 @@ export const ProjectEvidencePage: React.FC = () => {
         {isEditingScope ? (
           <form onSubmit={handleScopeSave} className="space-y-3 text-xs">
             <div>
-              <label className="font-semibold text-stone-700 block mb-1">
+              <label className="font-semibold text-[#2C3A2B] block mb-1">
                 Stakeholder / Source of Request
               </label>
               <input
                 type="text"
                 value={scopeForm.stakeholder}
                 onChange={e => setScopeForm({ ...scopeForm, stakeholder: e.target.value })}
-                className="w-full px-3 py-1.5 border border-stone-200 rounded-lg"
+                className="w-full px-3 py-2 border border-[#E6E1D3] rounded-xl bg-[#FDFBF7] text-[#2C3A2B]"
               />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
-                <label className="font-semibold text-stone-700 block mb-1">
+                <label className="font-semibold text-[#2C3A2B] block mb-1">
                   Agreed In-Scope Items
                 </label>
                 <textarea
                   rows={3}
                   value={scopeForm.agreedScope}
                   onChange={e => setScopeForm({ ...scopeForm, agreedScope: e.target.value })}
-                  className="w-full px-3 py-1.5 border border-stone-200 rounded-lg font-mono text-[11px]"
+                  className="w-full px-3 py-2 border border-[#E6E1D3] rounded-xl bg-[#FDFBF7] font-mono text-[11px] text-[#2C3A2B]"
                 />
               </div>
 
               <div>
-                <label className="font-semibold text-stone-700 block mb-1">
+                <label className="font-semibold text-[#2C3A2B] block mb-1">
                   Explicitly Out-of-Scope Items
                 </label>
                 <textarea
                   rows={3}
                   value={scopeForm.outOfScope}
                   onChange={e => setScopeForm({ ...scopeForm, outOfScope: e.target.value })}
-                  className="w-full px-3 py-1.5 border border-stone-200 rounded-lg font-mono text-[11px]"
+                  className="w-full px-3 py-2 border border-[#E6E1D3] rounded-xl bg-[#FDFBF7] font-mono text-[11px] text-[#2C3A2B]"
                 />
               </div>
             </div>
 
             <div>
-              <label className="font-semibold text-stone-700 block mb-1">
+              <label className="font-semibold text-[#2C3A2B] block mb-1">
                 Formal Acceptance Criteria
               </label>
               <textarea
                 rows={2}
                 value={scopeForm.acceptanceCriteria}
                 onChange={e => setScopeForm({ ...scopeForm, acceptanceCriteria: e.target.value })}
-                className="w-full px-3 py-1.5 border border-stone-200 rounded-lg font-mono text-[11px]"
+                className="w-full px-3 py-2 border border-[#E6E1D3] rounded-xl bg-[#FDFBF7] font-mono text-[11px] text-[#2C3A2B]"
               />
             </div>
 
@@ -226,13 +226,13 @@ export const ProjectEvidencePage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setIsEditingScope(false)}
-                className="px-3 py-1.5 text-xs text-stone-600 hover:bg-stone-100 rounded-lg"
+                className="px-3.5 py-2 text-xs text-[#5A5A40] hover:bg-[#F4F1EA] rounded-xl"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="px-3.5 py-1.5 text-xs font-semibold text-white bg-indigo-900 hover:bg-indigo-800 rounded-lg"
+                className="px-4 py-2 text-xs font-semibold text-white bg-[#2C3A2B] hover:bg-[#3A4D39] rounded-xl shadow-xs"
               >
                 Save Scope Changes
               </button>
@@ -242,16 +242,16 @@ export const ProjectEvidencePage: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
             <div className="space-y-3">
               <div>
-                <span className="text-[11px] text-stone-500 uppercase font-semibold block">Stakeholder / Source:</span>
-                <span className="font-medium text-stone-900">{negotiatedScope.stakeholder}</span>
+                <span className="text-[11px] text-[#5A5A40] uppercase font-semibold block">Stakeholder / Source:</span>
+                <span className="font-medium text-[#2C3A2B]">{negotiatedScope.stakeholder}</span>
               </div>
               <div>
-                <span className="text-[11px] text-stone-500 uppercase font-semibold block">Date of Agreement:</span>
-                <span className="font-mono text-stone-700">{negotiatedScope.agreementDate}</span>
+                <span className="text-[11px] text-[#5A5A40] uppercase font-semibold block">Date of Agreement:</span>
+                <span className="font-mono text-[#5A5A40]">{negotiatedScope.agreementDate}</span>
               </div>
               <div>
-                <span className="text-[11px] text-stone-500 uppercase font-semibold block">Agreed Scope:</span>
-                <p className="text-stone-700 mt-0.5 leading-relaxed bg-stone-50 p-2.5 rounded-lg border border-stone-200/60 font-mono text-[11px]">
+                <span className="text-[11px] text-[#5A5A40] uppercase font-semibold block">Agreed Scope:</span>
+                <p className="text-[#2C3A2B] mt-0.5 leading-relaxed bg-[#FDFBF7] p-3 rounded-xl border border-[#E6E1D3] font-mono text-[11px]">
                   {negotiatedScope.agreedScope}
                 </p>
               </div>
@@ -259,14 +259,14 @@ export const ProjectEvidencePage: React.FC = () => {
 
             <div className="space-y-3">
               <div>
-                <span className="text-[11px] text-stone-500 uppercase font-semibold block">Explicitly Out-of-Scope:</span>
-                <p className="text-stone-700 mt-0.5 leading-relaxed bg-stone-50 p-2.5 rounded-lg border border-stone-200/60 font-mono text-[11px]">
+                <span className="text-[11px] text-[#5A5A40] uppercase font-semibold block">Explicitly Out-of-Scope:</span>
+                <p className="text-[#5A5A40] mt-0.5 leading-relaxed bg-[#FDFBF7] p-3 rounded-xl border border-[#E6E1D3] font-mono text-[11px]">
                   {negotiatedScope.outOfScope}
                 </p>
               </div>
               <div>
-                <span className="text-[11px] text-stone-500 uppercase font-semibold block">Acceptance Criteria:</span>
-                <p className="text-stone-700 mt-0.5 leading-relaxed bg-stone-50 p-2.5 rounded-lg border border-stone-200/60 font-mono text-[11px]">
+                <span className="text-[11px] text-[#5A5A40] uppercase font-semibold block">Acceptance Criteria:</span>
+                <p className="text-[#2C3A2B] mt-0.5 leading-relaxed bg-[#FDFBF7] p-3 rounded-xl border border-[#E6E1D3] font-mono text-[11px]">
                   {negotiatedScope.acceptanceCriteria}
                 </p>
               </div>
@@ -276,18 +276,18 @@ export const ProjectEvidencePage: React.FC = () => {
       </div>
 
       {/* Section D: Final Evidence Log */}
-      <div className="p-5 bg-white border border-stone-200/80 rounded-xl shadow-2xs space-y-4">
-        <div className="flex items-center justify-between pb-2 border-b border-stone-100">
+      <div className="p-6 bg-white border border-[#E6E1D3] rounded-[24px] shadow-xs space-y-4">
+        <div className="flex items-center justify-between pb-3 border-b border-[#E6E1D3]">
           <div>
-            <span className="text-[11px] font-semibold text-stone-400 uppercase tracking-wider block">
+            <span className="text-[11px] font-semibold text-[#8B5A2B] uppercase tracking-wider block">
               Section D · Empirical Validation Log
             </span>
-            <h3 className="text-sm font-bold text-stone-900">Verified Engineering Evidence Records</h3>
+            <h3 className="text-base font-serif font-bold text-[#2C3A2B]">Verified Engineering Evidence Records</h3>
           </div>
 
           <button
             onClick={() => setShowAddEvidence(true)}
-            className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-white bg-indigo-900 hover:bg-indigo-800 rounded-lg shadow-2xs"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-white bg-[#2C3A2B] hover:bg-[#3A4D39] rounded-xl shadow-xs"
           >
             <Plus className="w-3.5 h-3.5" />
             Add Evidence Record
@@ -298,23 +298,23 @@ export const ProjectEvidencePage: React.FC = () => {
           {evidenceRecords.map(rec => (
             <div
               key={rec.id}
-              className="p-4 rounded-xl border border-stone-200 bg-stone-50/40 text-xs space-y-2 hover:border-stone-300 transition-colors"
+              className="p-4 rounded-2xl border border-[#E6E1D3] bg-[#FDFBF7] text-xs space-y-2 hover:border-[#2C3A2B]/40 transition-colors"
             >
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 pb-1 border-b border-stone-200/60">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 pb-2 border-b border-[#E6E1D3]">
                 <div className="flex items-center gap-2">
-                  <span className="font-mono font-bold text-indigo-950">{rec.evidenceId}</span>
-                  <span className="text-stone-300">·</span>
-                  <span className="font-bold text-stone-900">{rec.featureTested}</span>
+                  <span className="font-mono font-bold text-[#2C3A2B]">{rec.evidenceId}</span>
+                  <span className="text-[#E6E1D3]">·</span>
+                  <span className="font-bold text-[#2C3A2B]">{rec.featureTested}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="font-mono text-[11px] text-stone-500">{rec.referenceFile}</span>
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-semibold text-[11px]">
-                    <Check className="w-3 h-3 text-emerald-700" />
+                  <span className="font-mono text-[11px] text-[#5A5A40]">{rec.referenceFile}</span>
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#A3B18A]/25 border border-[#A3B18A]/40 text-[#2C3A2B] font-semibold text-[11px]">
+                    <Check className="w-3 h-3 text-[#2C3A2B]" />
                     {rec.status}
                   </span>
                   <button
                     onClick={() => deleteEvidenceRecord(rec.id)}
-                    className="p-1 text-stone-400 hover:text-rose-600 rounded"
+                    className="p-1.5 text-[#5A5A40] hover:text-[#C05621] rounded-lg"
                     title="Delete record"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
@@ -324,20 +324,20 @@ export const ProjectEvidencePage: React.FC = () => {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
                 <div>
-                  <span className="text-[10px] uppercase font-semibold text-stone-500 block">Procedure:</span>
-                  <p className="text-stone-700 mt-0.5 leading-relaxed">{rec.testProcedure}</p>
+                  <span className="text-[10px] uppercase font-semibold text-[#5A5A40] block">Procedure:</span>
+                  <p className="text-[#5A5A40] mt-0.5 leading-relaxed">{rec.testProcedure}</p>
                 </div>
                 <div>
-                  <span className="text-[10px] uppercase font-semibold text-stone-500 block">Expected Outcome:</span>
-                  <p className="text-stone-700 mt-0.5 leading-relaxed">{rec.expectedOutcome}</p>
+                  <span className="text-[10px] uppercase font-semibold text-[#5A5A40] block">Expected Outcome:</span>
+                  <p className="text-[#5A5A40] mt-0.5 leading-relaxed">{rec.expectedOutcome}</p>
                 </div>
               </div>
 
-              <div className="p-2.5 rounded-lg bg-white border border-stone-200/70 space-y-1">
-                <span className="text-[10px] uppercase font-semibold text-emerald-800 block">Actual Outcome & Verification:</span>
-                <p className="text-stone-800 leading-relaxed font-mono text-[11px]">{rec.actualOutcome}</p>
+              <div className="p-3 rounded-xl bg-white border border-[#E6E1D3] space-y-1">
+                <span className="text-[10px] uppercase font-semibold text-[#2C3A2B] block">Actual Outcome & Verification:</span>
+                <p className="text-[#2C3A2B] leading-relaxed font-mono text-[11px]">{rec.actualOutcome}</p>
                 {rec.notes && (
-                  <p className="text-stone-500 text-[10px] pt-1 border-t border-stone-100">{rec.notes}</p>
+                  <p className="text-[#5A5A40] text-[10px] pt-1.5 border-t border-[#E6E1D3]">{rec.notes}</p>
                 )}
               </div>
             </div>
@@ -346,60 +346,60 @@ export const ProjectEvidencePage: React.FC = () => {
       </div>
 
       {/* Section E: Change Summary & 30-Day Next-Step Plan */}
-      <div className="p-5 bg-white border border-stone-200/80 rounded-xl shadow-2xs space-y-5">
-        <div className="pb-2 border-b border-stone-100">
-          <span className="text-[11px] font-semibold text-stone-400 uppercase tracking-wider block">
+      <div className="p-6 bg-white border border-[#E6E1D3] rounded-[24px] shadow-xs space-y-5">
+        <div className="pb-3 border-b border-[#E6E1D3]">
+          <span className="text-[11px] font-semibold text-[#8B5A2B] uppercase tracking-wider block">
             Section E · Forward Strategy
           </span>
-          <h3 className="text-sm font-bold text-stone-900">Change Summary & 30-Day Phased Execution Plan</h3>
+          <h3 className="text-base font-serif font-bold text-[#2C3A2B]">Change Summary & 30-Day Phased Execution Plan</h3>
         </div>
 
         {/* 30-Day Timeline Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
           {/* Phase 1 */}
-          <div className="p-4 rounded-xl border border-indigo-200 bg-indigo-50/30 space-y-2">
-            <div className="flex items-center justify-between text-indigo-900">
+          <div className="p-4 rounded-2xl border border-[#E6E1D3] bg-[#F5F5EC] space-y-2">
+            <div className="flex items-center justify-between text-[#2C3A2B]">
               <span className="text-xs font-bold font-mono">Days 1–7</span>
-              <Calendar className="w-4 h-4 text-indigo-700" />
+              <Calendar className="w-4 h-4 text-[#2C3A2B]" />
             </div>
-            <h4 className="text-xs font-bold text-stone-900">Engineering Validation</h4>
-            <p className="text-[11px] text-stone-600 leading-relaxed">
+            <h4 className="text-xs font-serif font-bold text-[#2C3A2B]">Engineering Validation</h4>
+            <p className="text-[11px] text-[#5A5A40] leading-relaxed">
               Verify deterministic test runner on all 10 reference requests and 10 edge cases; eliminate any floating-point tax rounding discrepancies.
             </p>
           </div>
 
           {/* Phase 2 */}
-          <div className="p-4 rounded-xl border border-stone-200 bg-stone-50/50 space-y-2">
-            <div className="flex items-center justify-between text-stone-700">
+          <div className="p-4 rounded-2xl border border-[#E6E1D3] bg-[#FDFBF7] space-y-2">
+            <div className="flex items-center justify-between text-[#5A5A40]">
               <span className="text-xs font-bold font-mono">Days 8–14</span>
-              <Calendar className="w-4 h-4 text-stone-500" />
+              <Calendar className="w-4 h-4 text-[#5A5A40]" />
             </div>
-            <h4 className="text-xs font-bold text-stone-900">Five-Shopper Experiment</h4>
-            <p className="text-[11px] text-stone-600 leading-relaxed">
+            <h4 className="text-xs font-serif font-bold text-[#2C3A2B]">Five-Shopper Experiment</h4>
+            <p className="text-[11px] text-[#5A5A40] leading-relaxed">
               Conduct empirical think-aloud sessions across 5 target participant profiles to measure landed price comprehension and ergonomic trade-offs.
             </p>
           </div>
 
           {/* Phase 3 */}
-          <div className="p-4 rounded-xl border border-stone-200 bg-stone-50/50 space-y-2">
-            <div className="flex items-center justify-between text-stone-700">
+          <div className="p-4 rounded-2xl border border-[#E6E1D3] bg-[#FDFBF7] space-y-2">
+            <div className="flex items-center justify-between text-[#5A5A40]">
               <span className="text-xs font-bold font-mono">Days 15–21</span>
-              <Calendar className="w-4 h-4 text-stone-500" />
+              <Calendar className="w-4 h-4 text-[#5A5A40]" />
             </div>
-            <h4 className="text-xs font-bold text-stone-900">Retailer Interviews</h4>
-            <p className="text-[11px] text-stone-600 leading-relaxed">
+            <h4 className="text-xs font-serif font-bold text-[#2C3A2B]">Retailer Interviews</h4>
+            <p className="text-[11px] text-[#5A5A40] leading-relaxed">
               Interview 2 home-office furniture retailers to validate commercial fee willingness (Model 1 SaaS vs Model 2 4.5% commission).
             </p>
           </div>
 
           {/* Phase 4 */}
-          <div className="p-4 rounded-xl border border-emerald-200 bg-emerald-50/30 space-y-2">
-            <div className="flex items-center justify-between text-emerald-900">
+          <div className="p-4 rounded-2xl border border-[#A3B18A]/40 bg-[#A3B18A]/15 space-y-2">
+            <div className="flex items-center justify-between text-[#2C3A2B]">
               <span className="text-xs font-bold font-mono">Days 22–30</span>
-              <Calendar className="w-4 h-4 text-emerald-700" />
+              <Calendar className="w-4 h-4 text-[#2C3A2B]" />
             </div>
-            <h4 className="text-xs font-bold text-stone-900">Limited Storefront Pilot</h4>
-            <p className="text-[11px] text-stone-600 leading-relaxed">
+            <h4 className="text-xs font-serif font-bold text-[#2C3A2B]">Limited Storefront Pilot</h4>
+            <p className="text-[11px] text-[#5A5A40] leading-relaxed">
               Deploy embeddable bundle builder widget for 30 days under agreed merchant terms; benchmark return reduction and AOV expansion.
             </p>
           </div>
@@ -408,85 +408,85 @@ export const ProjectEvidencePage: React.FC = () => {
 
       {/* Add Evidence Modal */}
       {showAddEvidence && (
-        <div className="fixed inset-0 z-50 bg-stone-900/50 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-lg w-full border border-stone-200 shadow-xl p-5 space-y-4">
-            <h3 className="text-base font-bold text-stone-900">Record New Engineering Evidence</h3>
+        <div className="fixed inset-0 z-50 bg-[#2C3A2B]/40 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-[24px] max-w-lg w-full border border-[#E6E1D3] shadow-2xl p-6 space-y-4">
+            <h3 className="text-base font-serif font-bold text-[#2C3A2B]">Record New Engineering Evidence</h3>
 
             <form onSubmit={handleAddEvidenceSubmit} className="space-y-3 text-xs">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="font-semibold text-stone-700 block mb-1">Evidence ID</label>
+                  <label className="font-semibold text-[#2C3A2B] block mb-1">Evidence ID</label>
                   <input
                     type="text"
                     required
                     value={newEvidence.evidenceId}
                     onChange={e => setNewEvidence({ ...newEvidence, evidenceId: e.target.value })}
-                    className="w-full px-2.5 py-1.5 border border-stone-200 rounded-lg font-mono"
+                    className="w-full px-3 py-2 border border-[#E6E1D3] rounded-xl bg-[#FDFBF7] font-mono text-[#2C3A2B]"
                   />
                 </div>
                 <div>
-                  <label className="font-semibold text-stone-700 block mb-1">Feature Tested</label>
+                  <label className="font-semibold text-[#2C3A2B] block mb-1">Feature Tested</label>
                   <input
                     type="text"
                     required
                     placeholder="e.g. Weight-based Shipping"
                     value={newEvidence.featureTested}
                     onChange={e => setNewEvidence({ ...newEvidence, featureTested: e.target.value })}
-                    className="w-full px-2.5 py-1.5 border border-stone-200 rounded-lg"
+                    className="w-full px-3 py-2 border border-[#E6E1D3] rounded-xl bg-[#FDFBF7] text-[#2C3A2B]"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="font-semibold text-stone-700 block mb-1">Test Procedure</label>
+                <label className="font-semibold text-[#2C3A2B] block mb-1">Test Procedure</label>
                 <textarea
                   rows={2}
                   required
                   placeholder="Steps taken to verify feature..."
                   value={newEvidence.testProcedure}
                   onChange={e => setNewEvidence({ ...newEvidence, testProcedure: e.target.value })}
-                  className="w-full px-2.5 py-1.5 border border-stone-200 rounded-lg"
+                  className="w-full px-3 py-2 border border-[#E6E1D3] rounded-xl bg-[#FDFBF7] text-[#2C3A2B]"
                 />
               </div>
 
               <div>
-                <label className="font-semibold text-stone-700 block mb-1">Expected Outcome</label>
+                <label className="font-semibold text-[#2C3A2B] block mb-1">Expected Outcome</label>
                 <input
                   type="text"
                   required
                   value={newEvidence.expectedOutcome}
                   onChange={e => setNewEvidence({ ...newEvidence, expectedOutcome: e.target.value })}
-                  className="w-full px-2.5 py-1.5 border border-stone-200 rounded-lg"
+                  className="w-full px-3 py-2 border border-[#E6E1D3] rounded-xl bg-[#FDFBF7] text-[#2C3A2B]"
                 />
               </div>
 
               <div>
-                <label className="font-semibold text-stone-700 block mb-1">Actual Outcome</label>
+                <label className="font-semibold text-[#2C3A2B] block mb-1">Actual Outcome</label>
                 <input
                   type="text"
                   required
                   value={newEvidence.actualOutcome}
                   onChange={e => setNewEvidence({ ...newEvidence, actualOutcome: e.target.value })}
-                  className="w-full px-2.5 py-1.5 border border-stone-200 rounded-lg"
+                  className="w-full px-3 py-2 border border-[#E6E1D3] rounded-xl bg-[#FDFBF7] text-[#2C3A2B]"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="font-semibold text-stone-700 block mb-1">Code File Reference</label>
+                  <label className="font-semibold text-[#2C3A2B] block mb-1">Code File Reference</label>
                   <input
                     type="text"
                     value={newEvidence.referenceFile}
                     onChange={e => setNewEvidence({ ...newEvidence, referenceFile: e.target.value })}
-                    className="w-full px-2.5 py-1.5 border border-stone-200 rounded-lg font-mono"
+                    className="w-full px-3 py-2 border border-[#E6E1D3] rounded-xl bg-[#FDFBF7] font-mono text-[#2C3A2B]"
                   />
                 </div>
                 <div>
-                  <label className="font-semibold text-stone-700 block mb-1">Status</label>
+                  <label className="font-semibold text-[#2C3A2B] block mb-1">Status</label>
                   <select
                     value={newEvidence.status}
                     onChange={e => setNewEvidence({ ...newEvidence, status: e.target.value as any })}
-                    className="w-full px-2.5 py-1.5 border border-stone-200 rounded-lg"
+                    className="w-full px-3 py-2 border border-[#E6E1D3] rounded-xl bg-[#FDFBF7] text-[#2C3A2B]"
                   >
                     <option value="Verified">Verified</option>
                     <option value="Pending">Pending</option>
@@ -495,17 +495,17 @@ export const ProjectEvidencePage: React.FC = () => {
                 </div>
               </div>
 
-              <div className="pt-2 flex items-center justify-end gap-2 border-t border-stone-100">
+              <div className="pt-2 flex items-center justify-end gap-2 border-t border-[#E6E1D3]">
                 <button
                   type="button"
                   onClick={() => setShowAddEvidence(false)}
-                  className="px-3 py-1.5 text-xs text-stone-600 hover:bg-stone-100 rounded-lg"
+                  className="px-3.5 py-2 text-xs text-[#5A5A40] hover:bg-[#F4F1EA] rounded-xl"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-3.5 py-1.5 text-xs font-semibold text-white bg-indigo-900 hover:bg-indigo-800 rounded-lg shadow-2xs"
+                  className="px-4 py-2 text-xs font-semibold text-white bg-[#2C3A2B] hover:bg-[#3A4D39] rounded-xl shadow-xs"
                 >
                   Log Evidence
                 </button>

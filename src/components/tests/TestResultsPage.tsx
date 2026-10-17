@@ -64,16 +64,16 @@ export const TestResultsPage: React.FC = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-xl font-bold tracking-tight text-stone-900">
+            <h1 className="text-2xl font-serif font-bold tracking-tight text-[#2C3A2B]">
               Engineering Validation Suite
             </h1>
             {!isCustomFixture && (
-              <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-stone-100 text-stone-600 border border-stone-200">
+              <span className="text-[11px] font-mono px-2.5 py-0.5 rounded-full bg-[#F5F5EC] text-[#5A5A40] border border-[#E6E1D3]">
                 Synthetic Baseline
               </span>
             )}
           </div>
-          <p className="text-xs text-stone-500 mt-0.5">
+          <p className="text-xs text-[#5A5A40] mt-0.5">
             Deterministic verification of 10 reference requests and 10 engineering edge cases.
           </p>
         </div>
@@ -82,7 +82,7 @@ export const TestResultsPage: React.FC = () => {
           <button
             disabled={isTesting}
             onClick={() => runTestSuite()}
-            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold text-white bg-indigo-900 hover:bg-indigo-800 disabled:opacity-50 rounded-lg shadow-xs transition-colors"
+            className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-[#2C3A2B] hover:bg-[#3A4D39] disabled:opacity-50 rounded-xl shadow-xs transition-colors"
           >
             {isTesting ? (
               <RotateCw className="w-3.5 h-3.5 animate-spin" />
@@ -94,104 +94,104 @@ export const TestResultsPage: React.FC = () => {
 
           <button
             onClick={handleExportCSV}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-stone-700 bg-white hover:bg-stone-50 border border-stone-200 rounded-lg shadow-2xs transition-colors"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium text-[#2C3A2B] bg-white hover:bg-[#F4F1EA] border border-[#E6E1D3] rounded-xl shadow-2xs transition-colors"
           >
-            <FileSpreadsheet className="w-3.5 h-3.5 text-stone-500" />
+            <FileSpreadsheet className="w-3.5 h-3.5 text-[#5A5A40]" />
             Export CSV
           </button>
 
           <button
             onClick={handleExportJSON}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-stone-700 bg-white hover:bg-stone-50 border border-stone-200 rounded-lg shadow-2xs transition-colors"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium text-[#2C3A2B] bg-white hover:bg-[#F4F1EA] border border-[#E6E1D3] rounded-xl shadow-2xs transition-colors"
           >
-            <FileJson className="w-3.5 h-3.5 text-stone-500" />
+            <FileJson className="w-3.5 h-3.5 text-[#5A5A40]" />
             Export JSON
           </button>
         </div>
       </div>
 
       {/* Summary KPI Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-        <div className="p-4 bg-white border border-stone-200/80 rounded-xl shadow-2xs">
-          <span className="text-[11px] font-medium text-stone-500 uppercase tracking-wider block mb-1">
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3.5">
+        <div className="p-5 bg-white border border-[#E6E1D3] rounded-[24px] shadow-xs">
+          <span className="text-[11px] font-semibold text-[#5A5A40] uppercase tracking-wider block mb-1">
             Total Scenarios
           </span>
-          <div className="text-xl font-bold font-mono tabular-nums text-stone-900">
+          <div className="text-2xl font-bold font-mono tabular-nums text-[#2C3A2B]">
             {totalTests}
           </div>
-          <p className="text-[11px] text-stone-400 mt-0.5">10 Ref + 10 Edge</p>
+          <p className="text-[11px] text-[#5A5A40] mt-0.5">10 Ref + 10 Edge</p>
         </div>
 
-        <div className="p-4 bg-white border border-stone-200/80 rounded-xl shadow-2xs">
-          <span className="text-[11px] font-medium text-emerald-700 uppercase tracking-wider block mb-1">
+        <div className="p-5 bg-white border border-[#E6E1D3] rounded-[24px] shadow-xs">
+          <span className="text-[11px] font-semibold text-[#2C3A2B] uppercase tracking-wider block mb-1">
             Passed Tests
           </span>
-          <div className="text-xl font-bold font-mono tabular-nums text-emerald-800">
+          <div className="text-2xl font-bold font-mono tabular-nums text-[#2C3A2B]">
             {passedCount}
           </div>
-          <p className="text-[11px] text-stone-400 mt-0.5">Deterministic match</p>
+          <p className="text-[11px] text-[#5A5A40] mt-0.5">Deterministic match</p>
         </div>
 
-        <div className="p-4 bg-white border border-stone-200/80 rounded-xl shadow-2xs">
-          <span className="text-[11px] font-medium text-rose-700 uppercase tracking-wider block mb-1">
+        <div className="p-5 bg-white border border-[#E6E1D3] rounded-[24px] shadow-xs">
+          <span className="text-[11px] font-semibold text-[#C05621] uppercase tracking-wider block mb-1">
             Failed Tests
           </span>
-          <div className="text-xl font-bold font-mono tabular-nums text-rose-800">
+          <div className="text-2xl font-bold font-mono tabular-nums text-[#C05621]">
             {failedCount}
           </div>
-          <p className="text-[11px] text-stone-400 mt-0.5">Non-matching outcomes</p>
+          <p className="text-[11px] text-[#5A5A40] mt-0.5">Non-matching outcomes</p>
         </div>
 
-        <div className="p-4 bg-white border border-stone-200/80 rounded-xl shadow-2xs">
-          <span className="text-[11px] font-medium text-stone-500 uppercase tracking-wider block mb-1">
+        <div className="p-5 bg-white border border-[#E6E1D3] rounded-[24px] shadow-xs">
+          <span className="text-[11px] font-semibold text-[#5A5A40] uppercase tracking-wider block mb-1">
             Pending / Not Run
           </span>
-          <div className="text-xl font-bold font-mono tabular-nums text-stone-600">
+          <div className="text-2xl font-bold font-mono tabular-nums text-[#5A5A40]">
             {notRunCount}
           </div>
-          <p className="text-[11px] text-stone-400 mt-0.5">Unexecuted</p>
+          <p className="text-[11px] text-[#5A5A40] mt-0.5">Unexecuted</p>
         </div>
 
-        <div className="p-4 bg-white border border-stone-200/80 rounded-xl shadow-2xs col-span-2 sm:col-span-1">
-          <span className="text-[11px] font-medium text-indigo-900 uppercase tracking-wider block mb-1">
+        <div className="p-5 bg-white border border-[#E6E1D3] rounded-[24px] shadow-xs col-span-2 sm:col-span-1">
+          <span className="text-[11px] font-semibold text-[#8B5A2B] uppercase tracking-wider block mb-1">
             Pass Rate
           </span>
-          <div className="text-xl font-bold font-mono tabular-nums text-indigo-950">
+          <div className="text-2xl font-bold font-mono tabular-nums text-[#8B5A2B]">
             {executedCount > 0 ? `${passRate}%` : 'Not run'}
           </div>
-          <p className="text-[11px] text-stone-400 mt-0.5">{executedCount} of {totalTests} executed</p>
+          <p className="text-[11px] text-[#5A5A40] mt-0.5">{executedCount} of {totalTests} executed</p>
         </div>
       </div>
 
       {/* Filter Tabs Strip */}
-      <div className="p-3 bg-white border border-stone-200/80 rounded-xl shadow-2xs flex flex-col sm:flex-row items-center justify-between gap-3">
-        <div className="flex items-center gap-1 p-1 bg-stone-100 rounded-lg w-full sm:w-auto">
+      <div className="p-4 bg-white border border-[#E6E1D3] rounded-[24px] shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div className="flex items-center gap-1.5 p-1 bg-[#F5F5EC] border border-[#E6E1D3] rounded-2xl w-full sm:w-auto">
           <button
             onClick={() => setActiveTabFilter('all')}
-            className={`flex-1 sm:flex-none px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+            className={`flex-1 sm:flex-none px-3.5 py-1.5 text-xs font-medium rounded-xl transition-colors ${
               activeTabFilter === 'all'
-                ? 'bg-white text-stone-900 shadow-xs'
-                : 'text-stone-600 hover:text-stone-900'
+                ? 'bg-[#2C3A2B] text-white shadow-xs'
+                : 'text-[#5A5A40] hover:text-[#2C3A2B]'
             }`}
           >
             All Tests ({testResults.length})
           </button>
           <button
             onClick={() => setActiveTabFilter('reference')}
-            className={`flex-1 sm:flex-none px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+            className={`flex-1 sm:flex-none px-3.5 py-1.5 text-xs font-medium rounded-xl transition-colors ${
               activeTabFilter === 'reference'
-                ? 'bg-white text-stone-900 shadow-xs'
-                : 'text-stone-600 hover:text-stone-900'
+                ? 'bg-[#2C3A2B] text-white shadow-xs'
+                : 'text-[#5A5A40] hover:text-[#2C3A2B]'
             }`}
           >
             10 Reference Requests
           </button>
           <button
             onClick={() => setActiveTabFilter('edge_cases')}
-            className={`flex-1 sm:flex-none px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+            className={`flex-1 sm:flex-none px-3.5 py-1.5 text-xs font-medium rounded-xl transition-colors ${
               activeTabFilter === 'edge_cases'
-                ? 'bg-white text-stone-900 shadow-xs'
-                : 'text-stone-600 hover:text-stone-900'
+                ? 'bg-[#2C3A2B] text-white shadow-xs'
+                : 'text-[#5A5A40] hover:text-[#2C3A2B]'
             }`}
           >
             10 Edge Cases
@@ -199,11 +199,11 @@ export const TestResultsPage: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-2 text-xs">
-          <span className="text-stone-500">Status filter:</span>
+          <span className="text-[#5A5A40]">Status filter:</span>
           <select
             value={statusFilter}
             onChange={e => setStatusFilter(e.target.value as any)}
-            className="bg-stone-50 border border-stone-200 rounded-lg px-2.5 py-1 text-xs text-stone-800 focus:outline-hidden"
+            className="bg-[#FDFBF7] border border-[#E6E1D3] rounded-xl px-3 py-1.5 text-xs text-[#2C3A2B] focus:outline-hidden"
           >
             <option value="all">All Outcomes</option>
             <option value="passed">Passed Only</option>
@@ -213,9 +213,9 @@ export const TestResultsPage: React.FC = () => {
       </div>
 
       {/* Test Execution Table */}
-      <div className="bg-white border border-stone-200/80 rounded-xl shadow-2xs overflow-hidden">
+      <div className="bg-white border border-[#E6E1D3] rounded-[24px] shadow-xs overflow-hidden">
         {displayedResults.length === 0 ? (
-          <div className="p-12 text-center text-xs text-stone-400 space-y-3">
+          <div className="p-12 text-center text-xs text-[#5A5A40] space-y-3">
             <p>
               {testResults.length === 0
                 ? 'No tests have been executed yet in this session.'
@@ -224,7 +224,7 @@ export const TestResultsPage: React.FC = () => {
             {testResults.length === 0 && (
               <button
                 onClick={() => runTestSuite()}
-                className="px-3.5 py-1.5 text-xs font-semibold text-white bg-indigo-900 rounded-lg shadow-2xs hover:bg-indigo-800"
+                className="px-4 py-2 text-xs font-semibold text-white bg-[#2C3A2B] rounded-xl shadow-xs hover:bg-[#3A4D39]"
               >
                 Execute Validation Suite Now
               </button>
@@ -234,7 +234,7 @@ export const TestResultsPage: React.FC = () => {
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="bg-stone-50/80 border-b border-stone-200 text-[11px] font-semibold text-stone-600 uppercase tracking-wider">
+                <tr className="bg-[#F5F5EC]/70 border-b border-[#E6E1D3] text-[11px] font-serif font-bold text-[#2C3A2B] uppercase tracking-wider">
                   <th className="py-3 px-4">Test ID</th>
                   <th className="py-3 px-4">Scenario & Type</th>
                   <th className="py-3 px-4">Budget</th>
@@ -246,86 +246,86 @@ export const TestResultsPage: React.FC = () => {
                   <th className="py-3 px-4 text-right">Run</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-stone-100">
+              <tbody className="divide-y divide-[#E6E1D3]/50">
                 {displayedResults.map(t => (
-                  <tr key={t.testId} className="hover:bg-stone-50/70 transition-colors">
-                    <td className="py-3 px-4 font-mono font-bold text-stone-700">
+                  <tr key={t.testId} className="hover:bg-[#FDFBF7] transition-colors">
+                    <td className="py-3.5 px-4 font-mono font-bold text-[#5A5A40]">
                       {t.testId}
                     </td>
 
-                    <td className="py-3 px-4 max-w-xs">
-                      <div className="font-semibold text-stone-900 leading-tight">
+                    <td className="py-3.5 px-4 max-w-xs">
+                      <div className="font-semibold text-[#2C3A2B] leading-tight">
                         {t.title}
                       </div>
-                      <div className="text-[10px] text-stone-400 uppercase tracking-wider mt-0.5">
+                      <div className="text-[10px] text-[#8B5A2B] uppercase tracking-wider font-semibold mt-0.5">
                         {t.testType === 'reference_request' ? 'Reference Request' : 'Edge Case Rule'}
                       </div>
-                      <div className="text-[11px] text-stone-600 mt-1 leading-snug">
+                      <div className="text-[11px] text-[#5A5A40] mt-1 leading-snug">
                         {t.explanation}
                       </div>
                     </td>
 
-                    <td className="py-3 px-4 font-mono tabular-nums text-stone-800">
+                    <td className="py-3.5 px-4 font-mono tabular-nums text-[#2C3A2B]">
                       {formatINR(t.budget)}
                     </td>
 
-                    <td className="py-3 px-4">
-                      <div className="text-[11px] text-stone-500">
-                        <span className="font-semibold text-stone-700">Exp:</span> {t.expectedResult}
+                    <td className="py-3.5 px-4">
+                      <div className="text-[11px] text-[#5A5A40]">
+                        <span className="font-semibold text-[#2C3A2B]">Exp:</span> {t.expectedResult}
                       </div>
-                      <div className="text-[11px] font-semibold text-stone-900 mt-0.5">
-                        <span className="font-normal text-stone-500">Act:</span> {t.actualResult}
+                      <div className="text-[11px] font-semibold text-[#2C3A2B] mt-0.5">
+                        <span className="font-normal text-[#5A5A40]">Act:</span> {t.actualResult}
                       </div>
                     </td>
 
-                    <td className="py-3 px-4 font-mono tabular-nums font-semibold text-stone-900">
+                    <td className="py-3.5 px-4 font-mono tabular-nums font-semibold text-[#2C3A2B]">
                       {t.landedPrice > 0 ? formatINR(t.landedPrice) : '-'}
                     </td>
 
-                    <td className="py-3 px-4">
+                    <td className="py-3.5 px-4">
                       <span
-                        className={`text-[11px] font-medium px-2 py-0.5 rounded ${
+                        className={`text-[11px] font-medium px-2.5 py-0.5 rounded-full ${
                           t.compatibilityOutcome === 'Compatible'
-                            ? 'bg-emerald-50 text-emerald-800'
+                            ? 'bg-[#A3B18A]/25 text-[#2C3A2B] border border-[#A3B18A]/40'
                             : t.compatibilityOutcome === 'Incompatible'
-                            ? 'bg-rose-50 text-rose-800'
-                            : 'bg-stone-100 text-stone-600'
+                            ? 'bg-[#C05621]/15 text-[#C05621] border border-[#C05621]/30'
+                            : 'bg-[#F4F1EA] text-[#5A5A40] border border-[#E6E1D3]'
                         }`}
                       >
                         {t.compatibilityOutcome}
                       </span>
                     </td>
 
-                    <td className="py-3 px-4">
+                    <td className="py-3.5 px-4">
                       <span
-                        className={`text-[11px] font-medium px-2 py-0.5 rounded ${
+                        className={`text-[11px] font-medium px-2.5 py-0.5 rounded-full ${
                           t.stockOutcome === 'All In-Stock'
-                            ? 'bg-emerald-50 text-emerald-800'
-                            : 'bg-amber-50 text-amber-800'
+                            ? 'bg-[#A3B18A]/25 text-[#2C3A2B] border border-[#A3B18A]/40'
+                            : 'bg-[#FEF9C3] text-[#713F12] border border-[#F4E1A1]'
                         }`}
                       >
                         {t.stockOutcome}
                       </span>
                     </td>
 
-                    <td className="py-3 px-4">
+                    <td className="py-3.5 px-4">
                       {t.passed ? (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-emerald-100/70 text-emerald-900 font-bold text-xs">
-                          <Check className="w-3.5 h-3.5 text-emerald-700" />
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-[#A3B18A]/25 text-[#2C3A2B] border border-[#A3B18A]/40 font-bold text-xs">
+                          <Check className="w-3.5 h-3.5 text-[#2C3A2B]" />
                           PASS
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-rose-100 text-rose-900 font-bold text-xs">
-                          <XCircle className="w-3.5 h-3.5 text-rose-700" />
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-[#C05621]/15 text-[#C05621] border border-[#C05621]/30 font-bold text-xs">
+                          <XCircle className="w-3.5 h-3.5 text-[#C05621]" />
                           FAIL
                         </span>
                       )}
                     </td>
 
-                    <td className="py-3 px-4 text-right">
+                    <td className="py-3.5 px-4 text-right">
                       <button
                         onClick={() => runTestSuite(t.testId)}
-                        className="p-1 text-stone-400 hover:text-indigo-900 hover:bg-stone-100 rounded transition-colors"
+                        className="p-1.5 text-[#5A5A40] hover:text-[#2C3A2B] hover:bg-[#F4F1EA] rounded-lg transition-colors"
                         title="Re-run this individual test"
                       >
                         <Play className="w-3.5 h-3.5" />
@@ -338,7 +338,7 @@ export const TestResultsPage: React.FC = () => {
           </div>
         )}
 
-        <div className="p-3 border-t border-stone-200/80 bg-stone-50/50 flex items-center justify-between text-xs text-stone-500">
+        <div className="p-4 border-t border-[#E6E1D3] bg-[#F5F5EC]/50 flex items-center justify-between text-xs text-[#5A5A40]">
           <span>
             {displayedResults.length} test records listed · Real-time programmatic validation
           </span>
