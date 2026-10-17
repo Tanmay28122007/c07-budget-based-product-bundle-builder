@@ -239,3 +239,20 @@ export interface UserProfile {
   memberSince?: string;
 }
 
+export interface CheckoutBundleItem {
+  product: Product;
+  quantity: number;
+}
+
+export interface CheckoutBundleData {
+  items: CheckoutBundleItem[];
+  subtotal: number;
+  shippingFee: number;
+  shippingDiscount: number;
+  netShipping: number;
+  taxAmount: number;
+  total: number;
+  bundleName?: string;
+  source?: 'workspace' | 'cart' | 'recommendation' | 'saved';
+}
+

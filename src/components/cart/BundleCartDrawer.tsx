@@ -12,7 +12,9 @@ import {
   FileSpreadsheet,
   Layers,
   ShieldAlert,
-  Plus
+  Plus,
+  CreditCard,
+  Columns
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useApp } from '../../context/AppContext';
@@ -41,7 +43,8 @@ export const BundleCartDrawer: React.FC = () => {
     addItemToCart,
     removeProduct,
     resetBundle,
-    setActiveTab
+    setActiveTab,
+    initiateCheckout
   } = useApp();
 
   const [quickAddCategory, setQuickAddCategory] = useState<string>('all');
@@ -483,26 +486,30 @@ export const BundleCartDrawer: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Actions */}
+                  {/* Actions: BUY NOW Primary CTA */}
                   <div className="pt-2 flex flex-col gap-2">
                     <button
                       onClick={() => {
-                        setActiveTab('compare');
                         setIsCartOpen(false);
+                        initiateCheckout();
                       }}
-                      className="w-full py-2.5 px-4 rounded-xl text-xs font-bold uppercase tracking-wider text-white bg-[#2C3A2B] hover:bg-[#1E281D] shadow-xs flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-[0.99]"
+                      className="w-full py-3 px-4 rounded-xl text-xs font-bold uppercase tracking-wider text-white bg-[#2C3A2B] hover:bg-[#1E281D] shadow-md hover:shadow-lg flex items-center justify-center gap-2 transition-all cursor-pointer hover:scale-[1.01] active:scale-[0.99]"
                     >
-                      <span>Review in Compare Builder</span>
-                      <ArrowRight className="w-4 h-4" />
+                      <CreditCard className="w-4 h-4 text-amber-300" />
+                      <span>BUY NOW — {formatINR(validation.landedPrice.landedPrice)}</span>
+                      <ArrowRight className="w-4 h-4 ml-0.5" />
                     </button>
 
                     <div className="flex items-center gap-2">
                       <button
-                        onClick={handleExportCSV}
-                        className="flex-1 py-1.5 px-3 rounded-xl text-xs font-medium text-[#2C2C1E] bg-[#F4F1EA] hover:bg-[#E6E1D3] border border-[#E6E1D3] flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                        onClick={() => {
+                          setActiveTab('compare');
+                          setIsCartOpen(false);
+                        }}
+                        className="flex-1 py-2 px-3 rounded-xl text-xs font-semibold text-[#2C2C1E] bg-[#F4F1EA] hover:bg-[#E6E1D3] border border-[#E6E1D3] flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                       >
-                        <FileSpreadsheet className="w-3.5 h-3.5 text-[#5A5A40]" />
-                        <span>Export CSV</span>
+                        <Columns className="w-3.5 h-3.5 text-[#5A5A40]" />
+                        <span>Compare Builder</span>
                       </button>
 
                       <button
@@ -510,7 +517,7 @@ export const BundleCartDrawer: React.FC = () => {
                           setActiveTab('catalogue');
                           setIsCartOpen(false);
                         }}
-                        className="flex-1 py-1.5 px-3 rounded-xl text-xs font-medium text-[#2C2C1E] bg-[#F4F1EA] hover:bg-[#E6E1D3] border border-[#E6E1D3] flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                        className="flex-1 py-2 px-3 rounded-xl text-xs font-semibold text-[#2C2C1E] bg-[#F4F1EA] hover:bg-[#E6E1D3] border border-[#E6E1D3] flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                       >
                         <Layers className="w-3.5 h-3.5 text-[#5A5A40]" />
                         <span>Add More</span>

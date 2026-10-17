@@ -17,6 +17,7 @@ import { SettingsPage } from './components/settings/SettingsPage';
 import { GeminiChatbotPage } from './components/chat/GeminiChatbotPage';
 import { ProductDetailPage } from './components/catalogue/ProductDetailPage';
 import { ProfilePage } from './components/profile/ProfilePage';
+import { CheckoutPage } from './components/checkout/CheckoutPage';
 
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -45,6 +46,7 @@ const AppContent: React.FC = () => {
           {activeTab === 'evidence' && <ProjectEvidencePage />}
           {activeTab === 'settings' && <SettingsPage />}
           {activeTab === 'profile' && <ProfilePage />}
+          {activeTab === 'checkout' && <CheckoutPage />}
         </motion.div>
       </AnimatePresence>
     </AppLayout>

@@ -18,7 +18,8 @@ import {
   Check,
   ArrowRight,
   Trash2,
-  Plus
+  Plus,
+  CreditCard
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { RequiredSlot } from '../../types';
@@ -40,7 +41,8 @@ export const BundleBuilderPage: React.FC = () => {
     optimizeBundle,
     setActiveTab,
     toggleAssistant,
-    setIsCartOpen
+    setIsCartOpen,
+    initiateCheckout
   } = useApp();
 
   const [activeSlotForSelection, setActiveSlotForSelection] = useState<RequiredSlot | null>(null);
@@ -608,21 +610,16 @@ export const BundleBuilderPage: React.FC = () => {
 
 
 
-            {/* Export Buttons */}
-            <div className="pt-2 flex items-center gap-2">
+            {/* BUY NOW Button */}
+            <div className="pt-2">
               <button
-                onClick={handleExportCSV}
-                className="flex-1 py-1.5 px-2 text-xs font-medium text-[#2C2C1E] hover:bg-[#F4F1EA] border border-[#E6E1D3] rounded-xl flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                onClick={() => initiateCheckout()}
+                disabled={Object.values(currentItems).filter(Boolean).length === 0}
+                className="w-full py-3 px-4 rounded-xl text-xs font-bold uppercase tracking-wider text-white bg-[#2C3A2B] hover:bg-[#1E281D] shadow-md hover:shadow-lg flex items-center justify-center gap-2 transition-all cursor-pointer hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <FileSpreadsheet className="w-3.5 h-3.5 text-[#8B8B7A]" />
-                Export CSV
-              </button>
-              <button
-                onClick={handleExportJSON}
-                className="flex-1 py-1.5 px-2 text-xs font-medium text-[#2C2C1E] hover:bg-[#F4F1EA] border border-[#E6E1D3] rounded-xl flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
-              >
-                <FileJson className="w-3.5 h-3.5 text-[#8B8B7A]" />
-                Export JSON
+                <CreditCard className="w-4 h-4 text-amber-300" />
+                <span>BUY NOW — {formatINR(validation.landedPrice.landedPrice)}</span>
+                <ArrowRight className="w-4 h-4 ml-0.5" />
               </button>
             </div>
           </div>
