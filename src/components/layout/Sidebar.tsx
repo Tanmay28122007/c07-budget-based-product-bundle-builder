@@ -164,15 +164,22 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
-        {/* Brand / Emblem Zone */}
-        <div className="h-18 px-5 border-b border-[#E6E1D3] flex items-center justify-between bg-white/70">
+        {/* Brand / Emblem Zone - Clickable to return to homepage */}
+        <button
+          onClick={() => {
+            setActiveTab('dashboard');
+            onClose();
+          }}
+          title="Return to Homepage"
+          className="w-full h-18 px-5 border-b border-[#E6E1D3] flex items-center justify-between bg-white/70 hover:bg-white transition-colors cursor-pointer text-left group"
+        >
           <div className="flex items-center gap-3 min-w-0">
             {/* Brand Emblem Badge */}
-            <div className="w-9 h-9 rounded-xl bg-[#2C3A2B] text-white flex items-center justify-center text-sm shadow-xs ring-1 ring-[#E6E1D3] shrink-0">
+            <div className="w-9 h-9 rounded-xl bg-[#2C3A2B] group-hover:bg-[#3A4D39] text-white flex items-center justify-center text-sm shadow-xs ring-1 ring-[#E6E1D3] shrink-0 transition-all group-hover:scale-105">
               <PackagePlus className="w-5 h-5 text-amber-100" />
             </div>
             <div className="min-w-0">
-              <div className="font-serif text-xs font-bold tracking-tight text-[#2C3A2B] leading-tight">
+              <div className="font-serif text-xs font-bold tracking-tight text-[#2C3A2B] group-hover:text-[#8B5A2B] transition-colors leading-tight">
                 Budget Based Product Bundle Builder
               </div>
               <div className="text-[10px] text-[#5A5A40] font-medium">
@@ -180,7 +187,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
               </div>
             </div>
           </div>
-        </div>
+        </button>
 
         {/* Active Role Indicator Card */}
         <div className="mx-3 mt-3 p-2.5 rounded-xl bg-white border border-[#E6E1D3] shadow-2xs">
