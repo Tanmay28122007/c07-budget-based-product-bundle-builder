@@ -1,0 +1,6 @@
+{
+  "name": "Budget-Based Product Bundle Builder",
+  "description": "Assemble complete, compatible product bundles within budget with real-time compatibility validation, landed pricing, and business insights.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
