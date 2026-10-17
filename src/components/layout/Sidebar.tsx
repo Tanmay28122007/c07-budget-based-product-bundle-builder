@@ -8,8 +8,7 @@ import {
   TrendingUp,
   FileCode2,
   Settings,
-  ShoppingCart,
-  UserCircle2
+  ShoppingCart
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 
@@ -78,12 +77,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           label: 'Compare Builder',
           icon: Columns,
           badge: savedBundles.length > 0 ? `${savedBundles.length} saved` : (validation.filledSlotCount > 0 ? `${validation.filledSlotCount}/${validation.totalSlotCount}` : null)
-        },
-        {
-          id: 'profile',
-          label: 'My Profile',
-          icon: UserCircle2,
-          badge: 'Edit'
         }
       ]
     : userRole === 'customer'
@@ -105,12 +98,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           label: 'Bundle Cart',
           icon: ShoppingCart,
           badge: cartItemsCount > 0 ? `${cartItemsCount}` : null
-        },
-        {
-          id: 'profile',
-          label: 'My Profile',
-          icon: UserCircle2,
-          badge: 'Edit'
         }
       ]
     : [
@@ -131,12 +118,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           label: 'Bundle Cart',
           icon: ShoppingCart,
           badge: cartItemsCount > 0 ? `${cartItemsCount}` : null
-        },
-        {
-          id: 'profile',
-          label: 'My Profile',
-          icon: UserCircle2,
-          badge: 'Edit'
         }
       ];
 

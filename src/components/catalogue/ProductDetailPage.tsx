@@ -41,10 +41,6 @@ function getColourHex(colour?: string): string {
   if (c.includes('black')) return '#1E293B';
   if (c.includes('grey') || c.includes('gray')) return '#64748B';
   if (c.includes('green')) return '#16A34A';
-  if (c.includes('brown')) return '#8B5A2B';
-  if (c.includes('silver')) return '#94A3B8';
-  if (c.includes('khaki') || c.includes('tan')) return '#C3B091';
-  if (c.includes('white')) return '#FFFFFF';
   return '#9CA3AF';
 }
 
@@ -56,7 +52,6 @@ export const ProductDetailPage: React.FC = () => {
     closeProductDetails,
     currentItems,
     selectProduct,
-    addItemToCart,
     removeProduct,
     toggleCart,
     setActiveTab
@@ -90,13 +85,11 @@ export const ProductDetailPage: React.FC = () => {
   const isInBundle = !!bundleSlotEntry;
   const bundleSlotKey = bundleSlotEntry?.[0];
 
-  // All products belonging to the SAME product category/type (e.g. Notebooks)
-  const categoryProducts = fixture.products.filter(
-    p => p.category.toLowerCase() === product.category.toLowerCase()
-  );
-
-  // Other products from the SAME product category/type only (excluding the currently viewed item)
-  const sameCategoryProducts = categoryProducts.filter(p => p.id !== product.id);
+  // Related products (from same category or other catalogue items)
+  const relatedProducts = fixture.products
+    .filter(p => p.id !== product.id)
+    .sort((a, b) => (a.category === product.category ? -1 : 1))
+    .slice(0, 4);
 
   const imgSrc = getProductImageUrl(product.image, product.id);
 
@@ -375,76 +368,6 @@ export const ProductDetailPage: React.FC = () => {
             )}
           </div>
 
-          {/* Available Category Variations & Types */}
-          {categoryProducts.length > 1 && (
-            <div className="bg-white rounded-2xl border border-[#E6E1D3] p-4 sm:p-5 space-y-3 shadow-xs">
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-mono uppercase tracking-wider text-[#8B5A2B] font-bold flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-[#8B5A2B]" />
-                  <span>Available {product.category} Variations & Types</span>
-                </span>
-                <span className="text-[10px] font-mono text-[#8B8B7A] bg-[#F4F1EA] px-2 py-0.5 rounded-full border border-[#E6E1D3]">
-                  {categoryProducts.length} options
-                </span>
-              </div>
-              
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                {categoryProducts.map(variant => {
-                  const isCurrent = variant.id === product.id;
-                  const varImg = getProductImageUrl(variant.image, variant.id);
-                  const isVarInBundle = Object.values(currentItems).some(item => item?.id === variant.id);
-
-                  return (
-                    <button
-                      key={variant.id}
-                      type="button"
-                      onClick={() => openProductDetails(variant.id)}
-                      className={`flex items-center gap-3 p-2.5 rounded-xl text-left border transition-all cursor-pointer group/var ${
-                        isCurrent
-                          ? 'bg-[#E8EEDD] border-[#2C3A2B] ring-2 ring-[#2C3A2B]/20 shadow-xs'
-                          : 'bg-[#FDFBF7] hover:bg-white border-[#E6E1D3] hover:border-[#8B5A2B]/60 hover:shadow-2xs'
-                      }`}
-                    >
-                      <div className="w-10 h-10 rounded-lg bg-white border border-[#E6E1D3] p-1 flex items-center justify-center shrink-0 overflow-hidden">
-                        <img
-                          src={varImg}
-                          alt={variant.name}
-                          className="w-full h-full object-contain mix-blend-multiply group-hover/var:scale-105 transition-transform"
-                        />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-1.5">
-                          {variant.colour && (
-                            <span
-                              className="w-2.5 h-2.5 rounded-full border border-black/20 shrink-0"
-                              style={{ backgroundColor: getColourHex(variant.colour) }}
-                            />
-                          )}
-                          <span className="text-xs font-bold text-[#2C3A2B] truncate block">
-                            {variant.name}
-                          </span>
-                        </div>
-                        <div className="flex items-center justify-between text-[10px] font-mono mt-0.5">
-                          <span className="text-[#8B8B7A]">
-                            {variant.id} · {variant.size || variant.attributes?.size || 'Standard'}
-                          </span>
-                          <span className="font-bold text-[#2C3A2B]">{formatINR(variant.price)}</span>
-                        </div>
-                      </div>
-                      {isCurrent ? (
-                        <Check className="w-4 h-4 text-[#2C3A2B] shrink-0" />
-                      ) : isVarInBundle ? (
-                        <span className="text-[9px] font-mono font-bold text-emerald-800 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200 shrink-0">
-                          Bundle
-                        </span>
-                      ) : null}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
           {/* Bundle Slot Actions */}
           <div className="space-y-3 pt-2">
             {isInBundle ? (
@@ -459,32 +382,22 @@ export const ProductDetailPage: React.FC = () => {
                   </span>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3">
                   <button
                     type="button"
                     onClick={() => bundleSlotKey && removeProduct(bundleSlotKey)}
-                    className="flex-1 py-3 px-3 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all cursor-pointer bg-white hover:bg-rose-50 text-rose-700 border border-rose-200 shadow-2xs hover:shadow-xs active:scale-[0.99]"
+                    className="flex-1 py-3 px-4 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer bg-white hover:bg-rose-50 text-rose-700 border border-rose-200 shadow-2xs hover:shadow-xs active:scale-[0.99]"
                   >
                     <Trash2 className="w-4 h-4 text-rose-600" />
-                    <span>Remove</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => addItemToCart(product)}
-                    className="flex-1 py-3 px-3 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all cursor-pointer bg-white hover:bg-[#F4F1EA] text-[#2C3A2B] border border-[#E6E1D3] shadow-2xs hover:shadow-xs active:scale-[0.99]"
-                    title="Add another unit of this product to your bundle cart"
-                  >
-                    <Plus className="w-4 h-4 text-[#8B5A2B]" />
-                    <span>Add Another</span>
+                    <span>Remove from Bundle</span>
                   </button>
 
                   <button
                     onClick={toggleCart}
-                    className="flex-1 py-3 px-3 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all cursor-pointer bg-[#2C3A2B] hover:bg-[#1E281D] text-white shadow-xs hover:shadow-md active:scale-[0.99]"
+                    className="flex-1 py-3 px-4 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer bg-[#2C3A2B] hover:bg-[#1E281D] text-white shadow-xs hover:shadow-md active:scale-[0.99]"
                   >
                     <ShoppingCart className="w-4 h-4" />
-                    <span>View Cart</span>
+                    <span>View in Cart</span>
                   </button>
                 </div>
               </div>
@@ -492,7 +405,7 @@ export const ProductDetailPage: React.FC = () => {
               <div className="flex flex-col sm:flex-row items-stretch gap-3">
                 <button
                   disabled={!product.inStock}
-                  onClick={() => addItemToCart(product)}
+                  onClick={() => selectProduct(product.category, product)}
                   className={`flex-1 py-3.5 px-6 rounded-2xl text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer ${
                     product.inStock
                       ? 'bg-[#2C3A2B] hover:bg-[#1E281D] text-white shadow-md hover:shadow-lg active:scale-[0.99]'
@@ -500,7 +413,7 @@ export const ProductDetailPage: React.FC = () => {
                   }`}
                 >
                   <Plus className="w-4 h-4" />
-                  <span>{product.inStock ? `Add to Bundle Cart` : 'Out of Stock'}</span>
+                  <span>{product.inStock ? `Add to ${product.category} Slot` : 'Out of Stock'}</span>
                 </button>
 
                 <button
@@ -532,130 +445,74 @@ export const ProductDetailPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Exclusively Show Products of the Same Selected Category / Type */}
-      <div className="space-y-5 pt-8 border-t border-[#E6E1D3]">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#8B5A2B] bg-[#F4F1EA] px-2.5 py-0.5 rounded-full border border-[#E6E1D3]">
-                Category: {product.category}
-              </span>
-              <span className="text-xs font-mono text-[#8B8B7A]">
-                {sameCategoryProducts.length} other option{sameCategoryProducts.length === 1 ? '' : 's'}
-              </span>
+      {/* Related Products in Catalogue */}
+      {relatedProducts.length > 0 && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="font-serif text-xl font-bold text-[#2C3A2B]">
+                Explore More from C07 Essentials
+              </h3>
+              <p className="text-xs text-[#5A5A40]">
+                Complementary items designed to pair seamlessly in your bundle.
+              </p>
             </div>
-            <h3 className="font-serif text-2xl font-bold text-[#2C3A2B] mt-1.5">
-              Other {product.category}s in Catalogue
-            </h3>
-            <p className="text-xs text-[#5A5A40]">
-              Showing exclusively other {product.category.toLowerCase()} varieties and editions available for your bundle.
-            </p>
+            <button
+              onClick={closeProductDetails}
+              className="text-xs font-semibold text-[#8B5A2B] hover:text-[#5C3A1B] flex items-center gap-1 cursor-pointer"
+            >
+              <span>View All 12 Products</span>
+              <ChevronRight className="w-3.5 h-3.5" />
+            </button>
           </div>
 
-          <button
-            onClick={closeProductDetails}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white hover:bg-[#F4F1EA] border border-[#E6E1D3] text-xs font-semibold text-[#8B5A2B] hover:text-[#5C3A1B] transition-all cursor-pointer shadow-2xs self-start sm:self-auto"
-          >
-            <span>Back to All Categories</span>
-            <ChevronRight className="w-3.5 h-3.5" />
-          </button>
-        </div>
-
-        {sameCategoryProducts.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {sameCategoryProducts.map(rp => {
+            {relatedProducts.map(rp => {
               const rpImg = getProductImageUrl(rp.image, rp.id);
               const isRpInBundle = Object.values(currentItems).some(item => item?.id === rp.id);
               return (
                 <div
                   key={rp.id}
                   onClick={() => openProductDetails(rp.id)}
-                  className="bg-white rounded-2xl border border-[#E6E1D3] p-4 hover:border-[#2C3A2B] hover:shadow-md hover:-translate-y-1 transition-all duration-200 cursor-pointer group flex flex-col justify-between space-y-3"
+                  className="bg-white rounded-2xl border border-[#E6E1D3] p-4 hover:border-[#2C3A2B] hover:shadow-md transition-all cursor-pointer group flex flex-col justify-between space-y-3"
                 >
                   <div className="space-y-3">
                     <div className="aspect-square bg-[#FDFBF7] rounded-xl p-3 flex items-center justify-center border border-[#E6E1D3]/60 relative overflow-hidden">
                       <img
                         src={rpImg}
                         alt={rp.name}
-                        className="w-full h-full object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-300"
+                        className="w-full h-full object-contain mix-blend-multiply group-hover:scale-105 transition-transform"
                       />
                       <span className="absolute top-2 left-2 text-[9px] font-mono px-1.5 py-0.5 rounded bg-white/90 text-[#5A5A40] border border-[#E6E1D3]">
                         {rp.id}
                       </span>
-                      {rp.attributes?.colour && (
-                        <span
-                          className="absolute bottom-2 right-2 w-3.5 h-3.5 rounded-full border border-black/20 shadow-xs"
-                          style={{ backgroundColor: getColourHex(rp.attributes.colour) }}
-                          title={rp.attributes.colour}
-                        />
-                      )}
-                      {isRpInBundle && (
-                        <span className="absolute top-2 right-2 text-[9px] font-mono font-bold text-emerald-800 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
-                          In Bundle
-                        </span>
-                      )}
                     </div>
 
                     <div>
                       <span className="text-[9px] font-mono uppercase tracking-wider text-[#8B5A2B] font-bold block">
-                        {rp.category} {rp.attributes?.size ? `· ${rp.attributes.size}` : ''}
+                        {rp.category}
                       </span>
                       <h4 className="font-serif font-bold text-sm text-[#2C3A2B] group-hover:text-[#8B5A2B] transition-colors truncate mt-0.5">
                         {rp.name}
                       </h4>
-                      <p className="text-[11px] text-[#7A7A6A] line-clamp-1 mt-1">
-                        {rp.description || `${rp.colour} ${rp.category}`}
-                      </p>
                     </div>
                   </div>
 
                   <div className="flex items-center justify-between pt-2 border-t border-[#E6E1D3]/60">
-                    <div>
-                      <span className="font-mono font-bold text-sm text-[#2C3A2B] block">
-                        {formatINR(rp.price)}
-                      </span>
-                      {rp.inStock ? (
-                        <span className="text-[10px] text-emerald-700 font-semibold">In Stock</span>
-                      ) : (
-                        <span className="text-[10px] text-rose-600 font-semibold">Out of Stock</span>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      {rp.inStock && (
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            addItemToCart(rp);
-                          }}
-                          className="text-[11px] font-bold text-white bg-[#2C3A2B] hover:bg-[#1E281D] px-2.5 py-1 rounded-lg transition-all cursor-pointer flex items-center gap-1 shadow-2xs hover:scale-105 active:scale-95"
-                          title={`Add ${rp.name} to bundle cart`}
-                        >
-                          <Plus className="w-3 h-3" />
-                          <span>Add</span>
-                        </button>
-                      )}
-                      <span className="text-xs font-bold text-[#8B5A2B] group-hover:text-[#2C3A2B] flex items-center gap-0.5 bg-[#F4F1EA] group-hover:bg-[#E8EEDD] px-2.5 py-1 rounded-lg border border-[#E6E1D3] transition-colors">
-                        <span>View</span>
-                        <ChevronRight className="w-3 h-3" />
-                      </span>
-                    </div>
+                    <span className="font-mono font-bold text-sm text-[#2C3A2B]">
+                      {formatINR(rp.price)}
+                    </span>
+                    <span className="text-[11px] font-semibold text-[#8B5A2B] group-hover:underline flex items-center gap-0.5">
+                      <span>View</span>
+                      <ChevronRight className="w-3 h-3" />
+                    </span>
                   </div>
                 </div>
               );
             })}
           </div>
-        ) : (
-          <div className="p-8 text-center bg-white rounded-2xl border border-[#E6E1D3] space-y-2">
-            <p className="font-serif font-bold text-base text-[#2C3A2B]">
-              Only 1 {product.category} currently available
-            </p>
-            <p className="text-xs text-[#5A5A40]">
-              You are currently viewing the only {product.category.toLowerCase()} option in the catalogue.
-            </p>
-          </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };
