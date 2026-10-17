@@ -163,8 +163,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         </button>
 
         {/* Navigation Section */}
-        <nav className="flex-1 px-3 py-3 space-y-1 overflow-y-auto">
-          <div className="px-3 pb-2 text-[10px] font-semibold text-[#8B8B7A] uppercase tracking-wider">
+        <nav className="flex-1 px-3.5 py-4 space-y-2 overflow-y-auto">
+          <div className="px-3 pb-2.5 text-xs font-bold text-[#7A7A68] uppercase tracking-wider">
             Workspace
           </div>
 
@@ -178,24 +178,24 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                   setActiveTab(item.id);
                   onClose();
                 }}
-                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition-all ${
+                className={`w-full flex items-center justify-between px-3.5 py-3 rounded-2xl text-sm font-medium transition-all ${
                   isActive
-                    ? 'bg-[#2C3A2B] text-white font-semibold shadow-xs'
-                    : 'text-[#5A5A40] hover:text-[#2C3A2B] hover:bg-[#F4F1EA]'
+                    ? 'bg-[#2C3A2B] text-white font-semibold shadow-sm'
+                    : 'text-[#4A4A35] hover:text-[#2C3A2B] hover:bg-[#F4F1EA]'
                 }`}
               >
-                <div className="flex items-center gap-2.5">
+                <div className="flex items-center gap-3">
                   <Icon
-                    className={`w-4 h-4 transition-colors ${
-                      isActive ? 'text-emerald-300' : 'text-[#8B8B7A]'
+                    className={`w-5 h-5 transition-colors ${
+                      isActive ? 'text-emerald-300' : 'text-[#7A7A68]'
                     }`}
                   />
-                  <span className={isActive ? 'font-serif' : ''}>{item.label}</span>
+                  <span className={isActive ? 'font-serif font-bold text-[14.5px]' : 'font-medium'}>{item.label}</span>
                 </div>
 
                 {item.badge && (
                   <span
-                    className={`text-[11px] font-mono tabular-nums px-1.5 py-0.2 rounded-md ${
+                    className={`text-xs font-mono font-semibold tabular-nums px-2.5 py-0.5 rounded-lg ${
                       isActive
                         ? 'bg-white/20 text-white font-bold'
                         : 'bg-[#F4F1EA] text-[#8B5A2B] border border-[#E6E1D3]'
