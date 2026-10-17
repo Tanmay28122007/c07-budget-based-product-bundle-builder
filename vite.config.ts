@@ -11,6 +11,9 @@ export default defineConfig(() => {
         '@': path.resolve(import.meta.dirname ?? '.', '.'),
       },
     },
+    optimizeDeps: {
+      include: ['@supabase/supabase-js'],
+    },
     server: {
       hmr: process.env.DISABLE_HMR !== 'true',
       watch: process.env.DISABLE_HMR === 'true' ? null : {},
