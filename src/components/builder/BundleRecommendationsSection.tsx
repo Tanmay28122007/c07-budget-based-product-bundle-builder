@@ -35,7 +35,6 @@ import {
   generateRandomDatabaseBundles
 } from '../../utils/bundleRecommendations';
 import { fetchFilteredBundles, BundleApiResponse } from '../../services/apiClient';
-import { CreateBundleCatalogModal } from './CreateBundleCatalogModal';
 import { BundleAddOnsPanel } from './BundleAddOnsPanel';
 
 function getProductImageUrl(img?: string, id?: string): string {
@@ -70,7 +69,7 @@ export const BundleRecommendationsSection: React.FC<BundleRecommendationsSection
   onSelectBundle,
   onOpenWorkspace
 }) => {
-  const { fixture, budget: appBudget, setBudget, initiateCheckout, addNotification } = useApp();
+  const { fixture, budget: appBudget, setBudget, initiateCheckout, addNotification, setActiveTab } = useApp();
 
   // Search & Filter state
   const [bundleSearch, setBundleSearch] = useState<string>('');
@@ -85,8 +84,6 @@ export const BundleRecommendationsSection: React.FC<BundleRecommendationsSection
   const [exactOnly, setExactOnly] = useState<boolean>(false);
   const [expandedCardId, setExpandedCardId] = useState<string | null>(null);
 
-  // Modal for Create Bundle Catalogue
-  const [isCreateBundleModalOpen, setIsCreateBundleModalOpen] = useState<boolean>(false);
 
   // Reference bundle selected for Add-ons panel
   const [selectedReferenceBundleId, setSelectedReferenceBundleId] = useState<string | null>(null);
@@ -381,11 +378,11 @@ export const BundleRecommendationsSection: React.FC<BundleRecommendationsSection
         )}
       </div>
 
-      {/* 2. "CREATE BUNDLE" BUTTON (Clean button without green panel) */}
+      {/* 2. "CREATE BUNDLE" BUTTON (Redirects to Product Catalogue) */}
       <div className="flex items-center justify-between gap-4">
         <button
           type="button"
-          onClick={() => setIsCreateBundleModalOpen(true)}
+          onClick={() => setActiveTab('catalogue')}
           className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider text-white bg-[#2C3A2B] hover:bg-[#1E281D] transition-all cursor-pointer shadow-xs hover:shadow-md hover:scale-102 active:scale-98"
         >
           <PackagePlus className="w-4 h-4 text-amber-300" />
@@ -670,7 +667,7 @@ export const BundleRecommendationsSection: React.FC<BundleRecommendationsSection
             </button>
             <button
               type="button"
-              onClick={() => setIsCreateBundleModalOpen(true)}
+              onClick={() => setActiveTab('catalogue')}
               className="px-4 py-2 rounded-xl text-xs font-bold bg-[#2C3A2B] hover:bg-[#1E281D] text-white transition-colors cursor-pointer shadow-xs"
             >
               + Create Custom Bundle Instead
@@ -693,14 +690,6 @@ export const BundleRecommendationsSection: React.FC<BundleRecommendationsSection
         }}
       />
 
-      {/* ========================================================================= */}
-      {/* 5. CREATE BUNDLE CATALOG MODAL                                            */}
-      {/* ========================================================================= */}
-      <CreateBundleCatalogModal
-        isOpen={isCreateBundleModalOpen}
-        onClose={() => setIsCreateBundleModalOpen(false)}
-        onOpenWorkspace={onOpenWorkspace}
-      />
     </div>
   );
 };
