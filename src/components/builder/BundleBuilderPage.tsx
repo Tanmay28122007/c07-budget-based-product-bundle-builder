@@ -98,7 +98,7 @@ export const BundleBuilderPage: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in-up">
       {/* Page Title & Controls */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -112,7 +112,7 @@ export const BundleBuilderPage: React.FC = () => {
 
         {/* Global Action Buttons */}
         <div className="flex flex-wrap items-center gap-2">
-          <div className="flex items-center rounded-xl border border-[#E6E1D3] bg-white p-0.5 shadow-2xs">
+          <div className="flex items-center rounded-xl border border-[#E6E1D3] bg-white p-0.5 shadow-2xs hover:shadow-sm transition-shadow">
             <select
               value={optimizerPreference}
               onChange={e => setOptimizerPreference(e.target.value as any)}
@@ -123,7 +123,7 @@ export const BundleBuilderPage: React.FC = () => {
             </select>
             <button
               onClick={handleRunOptimizer}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-[#2C3A2B] hover:bg-[#3A4D39] rounded-lg transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-[#2C3A2B] hover:bg-[#3A4D39] rounded-lg transition-all cursor-pointer shadow-xs hover:shadow-md hover:scale-105 active:scale-95"
             >
               <Sparkles className="w-3.5 h-3.5 text-amber-300" />
               Find a Valid Bundle
@@ -132,7 +132,7 @@ export const BundleBuilderPage: React.FC = () => {
 
           <button
             onClick={toggleAssistant}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-[#8B5A2B] bg-[#F4F1EA] hover:bg-[#E6E1D3] border border-[#E6E1D3] rounded-xl shadow-2xs transition-colors cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold text-[#8B5A2B] bg-[#F4F1EA] hover:bg-[#E6E1D3] border border-[#E6E1D3] rounded-xl shadow-2xs hover:shadow-md hover:scale-105 active:scale-95 transition-all cursor-pointer"
           >
             <Sparkles className="w-3.5 h-3.5 text-[#8B5A2B]" />
             AI Assistant
@@ -140,7 +140,7 @@ export const BundleBuilderPage: React.FC = () => {
 
           <button
             onClick={() => setShowSaveModal(true)}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-[#2C2C1E] bg-white hover:bg-[#F4F1EA] border border-[#E6E1D3] rounded-xl shadow-2xs transition-colors cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-medium text-[#2C2C1E] bg-white hover:bg-[#F4F1EA] border border-[#E6E1D3] rounded-xl shadow-2xs hover:shadow-md hover:scale-105 active:scale-95 transition-all cursor-pointer"
           >
             <Save className="w-3.5 h-3.5 text-[#8B8B7A]" />
             Save Bundle
@@ -148,7 +148,7 @@ export const BundleBuilderPage: React.FC = () => {
 
           <button
             onClick={() => setShowResetConfirm(true)}
-            className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-[#5A5A40] hover:text-[#2C2C1E] hover:bg-[#F4F1EA] rounded-xl transition-colors cursor-pointer"
+            className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-[#5A5A40] hover:text-[#2C2C1E] hover:bg-[#F4F1EA] rounded-xl transition-all cursor-pointer hover:scale-105 active:scale-95"
             title="Reset all product slots"
           >
             <RotateCcw className="w-3.5 h-3.5" />
@@ -159,77 +159,56 @@ export const BundleBuilderPage: React.FC = () => {
 
       {/* Optimizer Feedback Banner if present */}
       {optimizationFeedback && (
-        <div className="p-3.5 rounded-xl bg-white border border-stone-200 shadow-2xs flex items-start justify-between gap-3 text-xs">
+        <div className="p-3.5 rounded-xl bg-white border border-[#E6E1D3] shadow-xs flex items-start justify-between gap-3 text-xs animate-fade-in-up">
           <div className="flex items-start gap-2.5">
-            <Sparkles className="w-4 h-4 text-indigo-700 shrink-0 mt-0.5" />
-            <span className="text-stone-700 leading-relaxed">{optimizationFeedback}</span>
+            <Sparkles className="w-4 h-4 text-[#8B5A2B] shrink-0 mt-0.5" />
+            <span className="text-[#2C2C1E] leading-relaxed">{optimizationFeedback}</span>
           </div>
           <button
             onClick={() => setOptimizationFeedback(null)}
-            className="text-stone-400 hover:text-stone-600 text-xs font-mono"
+            className="text-[#8B8B7A] hover:text-[#2C2C1E] text-xs font-mono cursor-pointer hover:scale-110 transition-transform"
           >
             Dismiss
           </button>
         </div>
       )}
 
-      {/* Step 1 & Step 2 Configuration Strip */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Step 1: Activity Selector */}
-        <div className="p-5 bg-white border border-[#E6E1D3] rounded-[24px] shadow-xs">
-          <span className="text-[11px] font-semibold text-[#8B5A2B] uppercase tracking-wider block mb-1">
-            Step 1: Activity Context
-          </span>
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="font-serif text-base font-bold text-[#2C3A2B]">{fixture.activity.name}</div>
-              <p className="text-xs text-[#5A5A40] mt-0.5 line-clamp-1">
-                {fixture.activity.description}
-              </p>
-            </div>
-            <span className="text-xs font-mono px-2.5 py-1 rounded-lg bg-[#F4F1EA] text-[#2C3A2B] font-semibold border border-[#E6E1D3] shrink-0">
-              {fixture.activity.requiredSlots.length} Slots
+      {/* Budget Configuration */}
+      <div className="p-5 bg-white border border-[#E6E1D3] rounded-[24px] shadow-xs hover:shadow-md transition-shadow">
+        <span className="text-[11px] font-semibold text-[#8B5A2B] uppercase tracking-wider block mb-1">
+          Total Budget (₹)
+        </span>
+
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+          <div className="relative flex-1">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8B8B7A] font-mono text-xs">
+              ₹
             </span>
+            <input
+              type="number"
+              min="0"
+              step="1000"
+              value={budget}
+              onChange={e => setBudget(Number(e.target.value))}
+              className="w-full pl-7 pr-3 py-1.5 text-sm font-mono font-bold text-[#2C3A2B] bg-[#F4F1EA]/70 focus:bg-white border border-[#E6E1D3] rounded-xl focus:outline-hidden focus:border-[#2C3A2B] transition-all"
+            />
           </div>
-        </div>
 
-        {/* Step 2: Budget Input */}
-        <div className="p-5 bg-white border border-[#E6E1D3] rounded-[24px] shadow-xs">
-          <span className="text-[11px] font-semibold text-[#8B5A2B] uppercase tracking-wider block mb-1">
-            Step 2: Total Budget (₹)
-          </span>
-
-          <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-            <div className="relative flex-1">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8B8B7A] font-mono text-xs">
-                ₹
-              </span>
-              <input
-                type="number"
-                min="0"
-                step="1000"
-                value={budget}
-                onChange={e => setBudget(Number(e.target.value))}
-                className="w-full pl-7 pr-3 py-1.5 text-sm font-mono font-bold text-[#2C3A2B] bg-[#F4F1EA]/70 focus:bg-white border border-[#E6E1D3] rounded-xl focus:outline-hidden focus:border-[#2C3A2B]"
-              />
-            </div>
-
-            {/* Presets */}
-            <div className="flex items-center gap-1 overflow-x-auto">
-              {budgetPresets.map(preset => (
-                <button
-                  key={preset}
-                  onClick={() => setBudget(preset)}
-                  className={`px-2.5 py-1 text-[11px] font-mono rounded-lg border transition-colors shrink-0 cursor-pointer ${
-                    budget === preset
-                      ? 'bg-[#2C3A2B] text-white border-[#2C3A2B] font-semibold'
-                      : 'bg-[#F4F1EA] hover:bg-[#E6E1D3] text-[#5A5A40] border-[#E6E1D3]'
-                  }`}
-                >
-                  ₹{(preset / 1000).toFixed(0)}k
-                </button>
-              ))}
-            </div>
+          {/* Presets */}
+          <div className="flex items-center gap-1.5 overflow-x-auto py-1">
+            {budgetPresets.map(preset => (
+              <button
+                key={preset}
+                onClick={() => setBudget(preset)}
+                className={`px-3 py-1.5 text-[11px] font-mono rounded-lg border transition-all shrink-0 cursor-pointer hover:scale-110 active:scale-95 ${
+                  budget === preset
+                    ? 'bg-[#2C3A2B] text-white border-[#2C3A2B] font-semibold shadow-xs'
+                    : 'bg-[#F4F1EA] hover:bg-[#E6E1D3] text-[#5A5A40] border-[#E6E1D3] hover:shadow-xs'
+                }`}
+              >
+                ₹{(preset / 1000).toFixed(0)}k
+              </button>
+            ))}
           </div>
         </div>
       </div>
@@ -242,7 +221,7 @@ export const BundleBuilderPage: React.FC = () => {
           <div className="flex items-center justify-between pb-2 border-b border-[#E6E1D3]/80">
             <div>
               <h2 className="font-serif text-base font-bold text-[#2C3A2B]">
-                Step 3: Required Product Slots
+                Required Product Slots
               </h2>
               <p className="text-xs text-[#5A5A40] mt-0.5">
                 Every bundle must fill all required categories with compatible, in-stock items.
@@ -522,30 +501,7 @@ export const BundleBuilderPage: React.FC = () => {
               </p>
             </div>
 
-            {/* AI Assistant Context Helper */}
-            {(!validation.isValid || validation.compatibilityViolations.length > 0) && (
-              <div className="p-3.5 rounded-2xl bg-[#FDFBF7] border border-[#E6E1D3] text-xs shadow-2xs">
-                <div className="flex items-center justify-between mb-1">
-                  <div className="flex items-center gap-1.5 font-serif font-bold text-[#2C3A2B] text-[11px]">
-                    <Sparkles className="w-3.5 h-3.5 text-[#8B5A2B]" />
-                    <span>Need Help Optimizing?</span>
-                  </div>
-                  <span className="text-[9px] font-mono px-1.5 py-0.2 rounded-md bg-[#8B5A2B]/15 text-[#8B5A2B] font-bold">
-                    Sahay AI
-                  </span>
-                </div>
-                <p className="text-[11px] text-[#5A5A40] mb-2 leading-relaxed">
-                  Let Sahay AI diagnose configuration conflicts or auto-fit products to respect your budget limit.
-                </p>
-                <button
-                  onClick={toggleAssistant}
-                  className="w-full py-2 px-3 rounded-xl text-xs font-semibold bg-[#2C3A2B] hover:bg-[#3A4D39] text-white flex items-center justify-center gap-1.5 shadow-2xs transition-colors cursor-pointer"
-                >
-                  <span>Resolve with Sahay AI</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            )}
+
 
             {/* Export Buttons */}
             <div className="pt-2 flex items-center gap-2">

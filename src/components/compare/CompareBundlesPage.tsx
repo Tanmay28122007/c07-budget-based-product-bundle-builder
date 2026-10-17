@@ -197,7 +197,7 @@ export const CompareBundlesPage: React.FC<CompareBundlesPageProps> = ({ initialM
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in-up">
       {/* Top Header & View Segmented Switch */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-2 border-b border-[#E6E1D3]/70">
         <div>
@@ -205,7 +205,7 @@ export const CompareBundlesPage: React.FC<CompareBundlesPageProps> = ({ initialM
             <h1 className="font-serif text-2xl font-bold tracking-tight text-[#2C3A2B]">
               Compare Builder
             </h1>
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold tracking-wider uppercase bg-[#2C3A2B] text-amber-200">
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold tracking-wider uppercase bg-[#2C3A2B] text-amber-200 shadow-2xs">
               Workspace & Comparison
             </span>
           </div>
@@ -219,7 +219,7 @@ export const CompareBundlesPage: React.FC<CompareBundlesPageProps> = ({ initialM
           <div className="inline-flex items-center p-1 bg-[#F4F1EA] border border-[#E6E1D3] rounded-2xl shadow-inner">
             <button
               onClick={() => setViewMode('workspace')}
-              className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+              className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer hover:scale-102 active:scale-98 ${
                 viewMode === 'workspace'
                   ? 'bg-[#2C3A2B] text-white shadow-xs'
                   : 'text-[#5A5A40] hover:text-[#2C3A2B] hover:bg-white/60'
@@ -236,7 +236,7 @@ export const CompareBundlesPage: React.FC<CompareBundlesPageProps> = ({ initialM
 
             <button
               onClick={() => setViewMode('compare')}
-              className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+              className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer hover:scale-102 active:scale-98 ${
                 viewMode === 'compare'
                   ? 'bg-[#2C3A2B] text-white shadow-xs'
                   : 'text-[#5A5A40] hover:text-[#2C3A2B] hover:bg-white/60'
@@ -256,7 +256,7 @@ export const CompareBundlesPage: React.FC<CompareBundlesPageProps> = ({ initialM
           <button
             onClick={handleSnapshotActive}
             title="Snapshot active setup to saved comparison bundles"
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-[#8B5A2B] bg-white hover:bg-[#F4F1EA] border border-[#E6E1D3] rounded-xl shadow-2xs transition-all cursor-pointer active:scale-95"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-[#8B5A2B] bg-white hover:bg-[#F4F1EA] border border-[#E6E1D3] rounded-xl shadow-2xs hover:shadow-md transition-all cursor-pointer hover:scale-105 active:scale-95"
           >
             <BookmarkPlus className="w-3.5 h-3.5 text-[#8B5A2B]" />
             <span>Snapshot Setup</span>
@@ -336,63 +336,42 @@ export const CompareBundlesPage: React.FC<CompareBundlesPageProps> = ({ initialM
             </div>
           )}
 
-          {/* Step 1 & Step 2 Configuration Strip */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Step 1: Activity Selector */}
-            <div className="p-5 bg-white border border-[#E6E1D3] rounded-[24px] shadow-xs">
-              <span className="text-[11px] font-semibold text-[#8B5A2B] uppercase tracking-wider block mb-1">
-                Step 1: Activity Context
-              </span>
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="font-serif text-base font-bold text-[#2C3A2B]">{fixture.activity.name}</div>
-                  <p className="text-xs text-[#5A5A40] mt-0.5 line-clamp-1">
-                    {fixture.activity.description}
-                  </p>
-                </div>
-                <span className="text-xs font-mono px-2.5 py-1 rounded-lg bg-[#F4F1EA] text-[#2C3A2B] font-semibold border border-[#E6E1D3] shrink-0">
-                  {fixture.activity.requiredSlots.length} Slots
+          {/* Budget Configuration */}
+          <div className="p-5 bg-white border border-[#E6E1D3] rounded-[24px] shadow-xs">
+            <span className="text-[11px] font-semibold text-[#8B5A2B] uppercase tracking-wider block mb-1">
+              Total Budget (₹)
+            </span>
+
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+              <div className="relative flex-1">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8B8B7A] font-mono text-xs">
+                  ₹
                 </span>
+                <input
+                  type="number"
+                  min="0"
+                  step="1000"
+                  value={budget}
+                  onChange={e => setBudget(Number(e.target.value))}
+                  className="w-full pl-7 pr-3 py-1.5 text-sm font-mono font-bold text-[#2C3A2B] bg-[#F4F1EA]/70 focus:bg-white border border-[#E6E1D3] rounded-xl focus:outline-hidden focus:border-[#2C3A2B]"
+                />
               </div>
-            </div>
 
-            {/* Step 2: Budget Input */}
-            <div className="p-5 bg-white border border-[#E6E1D3] rounded-[24px] shadow-xs">
-              <span className="text-[11px] font-semibold text-[#8B5A2B] uppercase tracking-wider block mb-1">
-                Step 2: Total Budget (₹)
-              </span>
-
-              <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-                <div className="relative flex-1">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8B8B7A] font-mono text-xs">
-                    ₹
-                  </span>
-                  <input
-                    type="number"
-                    min="0"
-                    step="1000"
-                    value={budget}
-                    onChange={e => setBudget(Number(e.target.value))}
-                    className="w-full pl-7 pr-3 py-1.5 text-sm font-mono font-bold text-[#2C3A2B] bg-[#F4F1EA]/70 focus:bg-white border border-[#E6E1D3] rounded-xl focus:outline-hidden focus:border-[#2C3A2B]"
-                  />
-                </div>
-
-                {/* Presets */}
-                <div className="flex items-center gap-1 overflow-x-auto">
-                  {budgetPresets.map(preset => (
-                    <button
-                      key={preset}
-                      onClick={() => setBudget(preset)}
-                      className={`px-2.5 py-1 text-[11px] font-mono rounded-lg border transition-colors shrink-0 cursor-pointer ${
-                        budget === preset
-                          ? 'bg-[#2C3A2B] text-white border-[#2C3A2B] font-semibold'
-                          : 'bg-[#F4F1EA] hover:bg-[#E6E1D3] text-[#5A5A40] border-[#E6E1D3]'
-                      }`}
-                    >
-                      ₹{(preset / 1000).toFixed(0)}k
-                    </button>
-                  ))}
-                </div>
+              {/* Presets */}
+              <div className="flex items-center gap-1.5 overflow-x-auto">
+                {budgetPresets.map(preset => (
+                  <button
+                    key={preset}
+                    onClick={() => setBudget(preset)}
+                    className={`px-3 py-1.5 text-[11px] font-mono rounded-lg border transition-colors shrink-0 cursor-pointer ${
+                      budget === preset
+                        ? 'bg-[#2C3A2B] text-white border-[#2C3A2B] font-semibold'
+                        : 'bg-[#F4F1EA] hover:bg-[#E6E1D3] text-[#5A5A40] border-[#E6E1D3]'
+                    }`}
+                  >
+                    ₹{(preset / 1000).toFixed(0)}k
+                  </button>
+                ))}
               </div>
             </div>
           </div>
@@ -405,7 +384,7 @@ export const CompareBundlesPage: React.FC<CompareBundlesPageProps> = ({ initialM
               <div className="flex items-center justify-between pb-2 border-b border-[#E6E1D3]/80">
                 <div>
                   <h2 className="font-serif text-base font-bold text-[#2C3A2B]">
-                    Step 3: Required Product Slots
+                    Required Product Slots
                   </h2>
                   <p className="text-xs text-[#5A5A40] mt-0.5">
                     Fill each required slot with a compatible, in-stock item within your budget.
@@ -685,30 +664,7 @@ export const CompareBundlesPage: React.FC<CompareBundlesPageProps> = ({ initialM
                   </p>
                 </div>
 
-                {/* AI Assistant Context Helper */}
-                {(!validation.isValid || validation.compatibilityViolations.length > 0) && (
-                  <div className="p-3.5 rounded-2xl bg-[#FDFBF7] border border-[#E6E1D3] text-xs shadow-2xs">
-                    <div className="flex items-center justify-between mb-1">
-                      <div className="flex items-center gap-1.5 font-serif font-bold text-[#2C3A2B] text-[11px]">
-                        <Sparkles className="w-3.5 h-3.5 text-[#8B5A2B]" />
-                        <span>Need Help Optimizing?</span>
-                      </div>
-                      <span className="text-[9px] font-mono px-1.5 py-0.2 rounded-md bg-[#8B5A2B]/15 text-[#8B5A2B] font-bold">
-                        Sahay AI
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-[#5A5A40] mb-2 leading-relaxed">
-                      Let Sahay AI diagnose configuration conflicts or auto-fit products to respect your budget limit.
-                    </p>
-                    <button
-                      onClick={toggleAssistant}
-                      className="w-full py-2 px-3 rounded-xl text-xs font-semibold bg-[#2C3A2B] hover:bg-[#3A4D39] text-white flex items-center justify-center gap-1.5 shadow-2xs transition-colors cursor-pointer"
-                    >
-                      <span>Resolve with Sahay AI</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                )}
+
 
                 {/* Export Buttons */}
                 <div className="pt-2 flex items-center gap-2">

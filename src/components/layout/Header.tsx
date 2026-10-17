@@ -166,22 +166,21 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
         <button
           onClick={toggleCart}
           aria-label="View bundle cart"
-          className={`relative flex items-center gap-2 px-3 py-1.5 rounded-xl border transition-all cursor-pointer active:scale-95 ${
-            validation.filledSlotCount > 0
-              ? 'bg-[#2C3A2B] hover:bg-[#1E281D] text-white border-[#2C3A2B] shadow-xs'
-              : 'bg-[#F4F1EA] hover:bg-[#E6E1D3] text-[#5A5A40] border-[#E6E1D3]'
-          }`}
+          className={`relative flex items-center gap-2 px-3 py-1.5 rounded-xl border transition-all duration-200 cursor-pointer hover:scale-105 active:scale-95 ${validation.filledSlotCount > 0
+            ? 'bg-[#2C3A2B] hover:bg-[#1E281D] text-white border-[#2C3A2B] shadow-xs hover:shadow-md'
+            : 'bg-[#F4F1EA] hover:bg-[#E6E1D3] text-[#5A5A40] border-[#E6E1D3] hover:shadow-2xs'
+            }`}
           title={`Bundle Cart: ${validation.filledSlotCount} of ${validation.totalSlotCount} slots filled`}
         >
           <div className="relative flex items-center justify-center">
-            <ShoppingCart className="w-4 h-4" />
+            <ShoppingCart className="w-4 h-4 transition-transform group-hover:scale-110" />
             {validation.filledSlotCount > 0 && (
-              <span className="absolute -top-2 -right-2.5 min-w-4 h-4 px-1 rounded-full bg-amber-400 text-[#2C2C1E] font-bold text-[10px] flex items-center justify-center shadow-xs">
+              <span className="absolute -top-2 -right-2.5 min-w-4 h-4 px-1 rounded-full bg-amber-400 text-[#2C2C1E] font-bold text-[10px] flex items-center justify-center shadow-xs animate-badge-pulse">
                 {validation.filledSlotCount}
               </span>
             )}
           </div>
-          <span className="hidden sm:inline font-semibold text-xs">
+          <span className="hidden sm:inline font-semibold text-xs font-mono">
             {validation.filledSlotCount > 0 ? formatINR(validation.landedPrice.landedPrice) : 'Cart'}
           </span>
         </button>

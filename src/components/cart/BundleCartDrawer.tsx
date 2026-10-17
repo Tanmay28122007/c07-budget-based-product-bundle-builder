@@ -19,6 +19,17 @@ import { useApp } from '../../context/AppContext';
 import { formatINR } from '../../utils/pricing';
 import { exportBundleToCSV, downloadFile } from '../../utils/exportUtils';
 
+function getProductImageUrl(img?: string, id?: string): string {
+  if (!img) return id ? `/assets/${id}.png` : '';
+  if (img.startsWith('../assets/')) {
+    return img.replace('../assets/', '/assets/');
+  }
+  if (img.startsWith('./assets/')) {
+    return img.replace('./assets/', '/assets/');
+  }
+  return img;
+}
+
 export const BundleCartDrawer: React.FC = () => {
   const {
     isCartOpen,
@@ -58,14 +69,20 @@ export const BundleCartDrawer: React.FC = () => {
   const filledItems = Object.entries(currentItems)
     .filter(([_, prod]) => prod !== null)
     .map(([slotId, prod]) => {
-      const slotDef = fixture.activity.requiredSlots.find(s => s.id === slotId);
+      const slotDef = fixture.activity.requiredSlots.find(
+        s => s.id === slotId || s.category.toLowerCase() === slotId.toLowerCase()
+      );
       return {
         slotId,
-        slotLabel: slotDef?.label || slotId,
-        slotCategory: slotDef?.category || '',
+        slotLabel: slotDef?.label || prod!.category || slotId,
+        slotCategory: slotDef?.category || prod!.category || '',
         product: prod!
       };
     });
+
+  const emptyRequiredSlots = fixture.activity.requiredSlots.filter(
+    slot => !currentItems[slot.id] && !filledItems.some(f => f.slotCategory.toLowerCase() === slot.category.toLowerCase())
+  );
 
   return (
     <AnimatePresence>
@@ -102,11 +119,11 @@ export const BundleCartDrawer: React.FC = () => {
                         Your Bundle Cart
                       </h2>
                       <span className="text-xs font-mono font-bold px-2 py-0.5 rounded-full bg-[#2C3A2B] text-white">
-                        {validation.filledSlotCount}
+                        {filledItems.length}
                       </span>
                     </div>
                     <p className="text-[11px] text-[#5A5A40]">
-                      {validation.filledSlotCount} of {validation.totalSlotCount} slots filled · {fixture.activity.name}
+                      {filledItems.length} {filledItems.length === 1 ? 'item' : 'items'} in bundle cart · {fixture.activity.name}
                     </p>
                   </div>
                 </div>
@@ -129,7 +146,7 @@ export const BundleCartDrawer: React.FC = () => {
                       <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-rose-100 text-rose-800 border border-rose-300">
                         Over by {formatINR(Math.abs(validation.landedPrice.remainingBudget))}
                       </span>
-                    ) : validation.landedPrice.remainingBudget === 0 && validation.filledSlotCount > 0 ? (
+                    ) : validation.landedPrice.remainingBudget === 0 && filledItems.length > 0 ? (
                       <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
                         Exact Fit
                       </span>
@@ -160,7 +177,7 @@ export const BundleCartDrawer: React.FC = () => {
 
               {/* Scrollable Content: Items List or Empty State */}
               <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3">
-                {validation.filledSlotCount === 0 ? (
+                {filledItems.length === 0 ? (
                   <div className="py-12 px-4 text-center space-y-4">
                     <div className="w-16 h-16 rounded-full bg-[#F4F1EA] text-[#8B8B7A] flex items-center justify-center mx-auto border border-[#E6E1D3]">
                       <ShoppingBag className="w-8 h-8 stroke-[1.5]" />
@@ -189,7 +206,7 @@ export const BundleCartDrawer: React.FC = () => {
                   <>
                     <div className="flex items-center justify-between pb-1">
                       <span className="text-[11px] font-bold text-[#8B5A2B] uppercase tracking-wider">
-                        Configured Slots ({validation.filledSlotCount}/{validation.totalSlotCount})
+                        Items in Bundle ({filledItems.length})
                       </span>
                       <button
                         onClick={resetBundle}
@@ -201,123 +218,129 @@ export const BundleCartDrawer: React.FC = () => {
                       </button>
                     </div>
 
-                    {/* Loop through all required slots to show filled items + unfilled gaps */}
-                    {fixture.activity.requiredSlots.map(slot => {
-                      const prod = currentItems[slot.id];
+                    {/* Loop through all filled items in currentItems */}
+                    <div className="space-y-3">
+                      {filledItems.map(({ slotId, slotLabel, slotCategory, product: prod }) => {
+                        const hasConflict = validation.compatibilityViolations.some(
+                          v => v.sourceProductId === prod.id || v.targetProductId === prod.id
+                        );
 
-                      if (!prod) {
                         return (
                           <div
+                            key={slotId}
+                            className={`p-3.5 rounded-2xl border bg-white shadow-xs transition-all duration-200 hover:-translate-y-1 hover:shadow-md hover:scale-[1.01] group/cartitem ${
+                              hasConflict
+                                ? 'border-rose-300 ring-1 ring-rose-200'
+                                : 'border-[#E6E1D3] hover:border-[#2C3A2B]/60'
+                            }`}
+                          >
+                            <div className="flex items-start gap-3">
+                              {/* Product Image */}
+                              <div className="w-14 h-14 rounded-xl bg-[#F5F5EC] border border-[#E6E1D3] overflow-hidden flex items-center justify-center shrink-0">
+                                <img
+                                  src={getProductImageUrl(prod.image, prod.id)}
+                                  alt={prod.name}
+                                  onError={e => {
+                                    (e.currentTarget as HTMLImageElement).src = '/assets/P01.png';
+                                  }}
+                                  className="w-full h-full object-contain p-1 mix-blend-multiply group-hover/cartitem:scale-110 transition-transform duration-300"
+                                />
+                              </div>
+
+                              {/* Product Details */}
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center justify-between gap-1">
+                                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#8B5A2B] bg-[#8B5A2B]/10 px-1.5 py-0.5 rounded">
+                                    {slotLabel}
+                                  </span>
+                                  <span className="text-xs font-mono font-bold text-[#2C3A2B]">
+                                    {formatINR(prod.price)}
+                                  </span>
+                                </div>
+
+                                <h4 className="text-xs font-bold text-[#2C3A2B] line-clamp-1 mt-1">
+                                  {prod.name}
+                                </h4>
+
+                                <div className="flex items-center gap-2 mt-1 text-[10px] text-[#5A5A40]">
+                                  <span className="font-mono">{prod.id}</span>
+                                  {(prod.colour || prod.attributes?.colour) && (
+                                    <span className="flex items-center gap-1">
+                                      <span
+                                        className="w-2.5 h-2.5 rounded-full border border-black/20"
+                                        style={{ backgroundColor: (prod.colour || prod.attributes?.colour || '').toLowerCase() }}
+                                      />
+                                      <span>{prod.colour || prod.attributes?.colour}</span>
+                                    </span>
+                                  )}
+                                  {(prod.size || prod.attributes?.size) && (
+                                    <span>· Size: {prod.size || prod.attributes?.size}</span>
+                                  )}
+                                </div>
+
+                                {hasConflict && (
+                                  <div className="mt-2 p-1.5 rounded-lg bg-rose-50 border border-rose-200 text-[10px] text-rose-800 flex items-center gap-1">
+                                    <ShieldAlert className="w-3 h-3 text-rose-600 shrink-0" />
+                                    <span>Compatibility warning</span>
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Remove Button */}
+                              <button
+                                onClick={() => removeProduct(slotId)}
+                                className="p-1.5 text-[#8B8B7A] hover:text-rose-600 hover:bg-rose-100 rounded-lg transition-all cursor-pointer shrink-0 hover:scale-120 active:scale-90"
+                                title="Remove from bundle cart"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* Unfilled Required Slots notice if any */}
+                    {emptyRequiredSlots.length > 0 && (
+                      <div className="mt-4 pt-3 border-t border-[#E6E1D3]/80 space-y-2">
+                        <div className="flex items-center justify-between text-[11px] text-[#5A5A40]">
+                          <span className="font-bold uppercase tracking-wider text-[#7A7A68] text-[10px]">
+                            Missing Required Slots ({emptyRequiredSlots.length})
+                          </span>
+                          <span className="text-[10px] italic text-[#8B8B7A]">Required for complete bundle</span>
+                        </div>
+                        {emptyRequiredSlots.map(slot => (
+                          <div
                             key={slot.id}
-                            className="p-3.5 rounded-2xl border border-dashed border-[#D6CFBF] bg-[#FDFBF7]/80 flex items-center justify-between gap-3 text-xs"
+                            className="p-3 rounded-xl border border-dashed border-[#D6CFBF] bg-[#FDFBF7]/70 flex items-center justify-between gap-2 text-xs"
                           >
                             <div>
                               <div className="flex items-center gap-1.5">
-                                <span className="font-semibold text-[#5A5A40]">{slot.label}</span>
+                                <span className="font-semibold text-[#5A5A40] text-[11px]">{slot.label}</span>
                                 <span className="text-[10px] text-[#8B8B7A] font-mono">({slot.category})</span>
                               </div>
-                              <span className="text-[11px] text-[#8B8B7A] italic mt-0.5 block">
-                                Slot is currently empty
-                              </span>
+                              <span className="text-[10px] text-[#8B8B7A] block mt-0.5">Slot is currently empty</span>
                             </div>
-
                             <button
                               onClick={() => {
                                 setActiveTab('catalogue');
                                 setIsCartOpen(false);
                               }}
-                              className="px-3 py-1.5 rounded-xl text-[11px] font-semibold text-[#2C3A2B] bg-[#F4F1EA] hover:bg-[#E6E1D3] border border-[#E6E1D3] flex items-center gap-1 shrink-0 transition-colors cursor-pointer"
+                              className="px-2.5 py-1 rounded-lg text-[11px] font-semibold text-[#2C3A2B] bg-[#F4F1EA] hover:bg-[#E6E1D3] border border-[#E6E1D3] flex items-center gap-1 transition-colors cursor-pointer shrink-0"
                             >
                               <Plus className="w-3 h-3" />
-                              <span>Add Item</span>
+                              <span>Add</span>
                             </button>
                           </div>
-                        );
-                      }
-
-                      const hasConflict = validation.compatibilityViolations.some(
-                        v => v.sourceProductId === prod.id || v.targetProductId === prod.id
-                      );
-
-                      return (
-                        <div
-                          key={slot.id}
-                          className={`p-3.5 rounded-2xl border bg-white shadow-xs transition-all ${
-                            hasConflict
-                              ? 'border-rose-300 ring-1 ring-rose-200'
-                              : 'border-[#E6E1D3] hover:border-[#2C3A2B]/40'
-                          }`}
-                        >
-                          <div className="flex items-start gap-3">
-                            {/* Product Image */}
-                            <div className="w-14 h-14 rounded-xl bg-[#F5F5EC] border border-[#E6E1D3] overflow-hidden flex items-center justify-center shrink-0">
-                              <img
-                                src={`/assets/${prod.id}.png`}
-                                alt={prod.name}
-                                onError={e => {
-                                  (e.currentTarget as HTMLImageElement).src = prod.image || '/assets/P01.png';
-                                }}
-                                className="w-full h-full object-contain p-1 mix-blend-multiply"
-                              />
-                            </div>
-
-                            {/* Product Details */}
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center justify-between gap-1">
-                                <span className="text-[10px] font-bold uppercase tracking-wider text-[#8B5A2B]">
-                                  {slot.label}
-                                </span>
-                                <span className="text-xs font-mono font-bold text-[#2C3A2B]">
-                                  {formatINR(prod.price)}
-                                </span>
-                              </div>
-
-                              <h4 className="text-xs font-bold text-[#2C3A2B] line-clamp-1 mt-0.5">
-                                {prod.name}
-                              </h4>
-
-                              <div className="flex items-center gap-2 mt-1 text-[10px] text-[#5A5A40]">
-                                <span className="font-mono">{prod.id}</span>
-                                {(prod.colour || prod.attributes?.colour) && (
-                                  <span className="flex items-center gap-1">
-                                    <span
-                                      className="w-2.5 h-2.5 rounded-full border border-black/20"
-                                      style={{ backgroundColor: (prod.colour || prod.attributes?.colour || '').toLowerCase() }}
-                                    />
-                                    <span>{prod.colour || prod.attributes?.colour}</span>
-                                  </span>
-                                )}
-                                {(prod.size || prod.attributes?.size) && (
-                                  <span>· Size: {prod.size || prod.attributes?.size}</span>
-                                )}
-                              </div>
-
-                              {hasConflict && (
-                                <div className="mt-2 p-1.5 rounded-lg bg-rose-50 border border-rose-200 text-[10px] text-rose-800 flex items-center gap-1">
-                                  <ShieldAlert className="w-3 h-3 text-rose-600 shrink-0" />
-                                  <span>Has compatibility warning</span>
-                                </div>
-                              )}
-                            </div>
-
-                            {/* Remove Button */}
-                            <button
-                              onClick={() => removeProduct(slot.id)}
-                              className="p-1.5 text-[#8B8B7A] hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer shrink-0"
-                              title="Remove from bundle cart"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </div>
-                      );
-                    })}
+                        ))}
+                      </div>
+                    )}
                   </>
                 )}
               </div>
 
               {/* Landed Pricing Footer */}
-              {validation.filledSlotCount > 0 && (
+              {filledItems.length > 0 && (
                 <div className="p-4 sm:p-5 bg-white border-t border-[#E6E1D3] space-y-3 shadow-md">
                   {/* Price Stack */}
                   <div className="space-y-1.5 text-xs text-[#5A5A40]">

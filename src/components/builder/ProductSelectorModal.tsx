@@ -27,7 +27,7 @@ export const ProductSelectorModal: React.FC<ProductSelectorModalProps> = ({
   isOpen,
   onClose
 }) => {
-  const { fixture, currentItems, selectProduct, budget, validation } = useApp();
+  const { fixture, currentItems, selectProduct, budget, validation, setIsCartOpen } = useApp();
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState<'price_asc' | 'price_desc' | 'availability'>('price_asc');
   const [showOnlyCompatible, setShowOnlyCompatible] = useState(false);
@@ -347,6 +347,7 @@ export const ProductSelectorModal: React.FC<ProductSelectorModalProps> = ({
                           onClick={() => {
                             selectProduct(slot.id, product);
                             onClose();
+                            setIsCartOpen(true);
                           }}
                           className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs ${
                             isSelected

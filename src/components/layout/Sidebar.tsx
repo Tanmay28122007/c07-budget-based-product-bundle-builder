@@ -7,7 +7,8 @@ import {
   CheckCircle2,
   TrendingUp,
   FileCode2,
-  Settings
+  Settings,
+  ShoppingCart
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 
@@ -26,8 +27,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     savedBundles,
     testResults,
     userRole,
-    logout
+    logout,
+    toggleCart,
+    currentItems
   } = useApp();
+
+  const cartItemsCount = Object.values(currentItems).filter(Boolean).length;
 
   const navItems = userRole === 'admin'
     ? [
@@ -86,7 +91,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           id: 'compare',
           label: 'Compare Builder',
           icon: Columns,
-          badge: savedBundles.length > 0 ? `${savedBundles.length} saved` : (validation.filledSlotCount > 0 ? `${validation.filledSlotCount}/${validation.totalSlotCount}` : null)
+          badge: savedBundles.length > 0 ? `${savedBundles.length} saved` : (cartItemsCount > 0 ? `${cartItemsCount} in cart` : null)
+        },
+        {
+          id: 'cart',
+          label: 'Bundle Cart',
+          icon: ShoppingCart,
+          badge: cartItemsCount > 0 ? `${cartItemsCount}` : null
         }
       ]
     : [
@@ -100,7 +111,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           id: 'compare',
           label: 'Compare Builder',
           icon: Columns,
-          badge: savedBundles.length > 0 ? `${savedBundles.length} saved` : (validation.filledSlotCount > 0 ? `${validation.filledSlotCount}/${validation.totalSlotCount}` : null)
+          badge: savedBundles.length > 0 ? `${savedBundles.length} saved` : (cartItemsCount > 0 ? `${cartItemsCount} in cart` : null)
+        },
+        {
+          id: 'cart',
+          label: 'Bundle Cart',
+          icon: ShoppingCart,
+          badge: cartItemsCount > 0 ? `${cartItemsCount}` : null
         }
       ];
 
@@ -127,11 +144,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
             onClose();
           }}
           title="Return to Homepage"
-          className="w-full h-18 px-5 border-b border-[#E6E1D3] flex items-center justify-between bg-white/70 hover:bg-white transition-colors cursor-pointer text-left group"
+          className="w-full h-18 px-5 border-b border-[#E6E1D3] flex items-center justify-between bg-white/70 hover:bg-white transition-all cursor-pointer text-left group"
         >
           <div className="flex items-center gap-3 min-w-0">
             {/* Brand Emblem Badge */}
-            <div className="w-9 h-9 rounded-xl bg-[#2C3A2B] group-hover:bg-[#3A4D39] text-white flex items-center justify-center text-sm shadow-xs ring-1 ring-[#E6E1D3] shrink-0 transition-all group-hover:scale-105">
+            <div className="w-9 h-9 rounded-xl bg-[#2C3A2B] group-hover:bg-[#3A4D39] text-white flex items-center justify-center text-sm shadow-xs ring-1 ring-[#E6E1D3] shrink-0 transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 group-hover:shadow-md">
               <PackagePlus className="w-5 h-5 text-amber-100" />
             </div>
             <div className="min-w-0">
@@ -155,19 +172,23 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
               <button
                 key={item.id}
                 onClick={() => {
-                  setActiveTab(item.id);
+                  if (item.id === 'cart') {
+                    toggleCart();
+                  } else {
+                    setActiveTab(item.id);
+                  }
                   onClose();
                 }}
-                className={`w-full flex items-center justify-between px-3.5 py-3 rounded-2xl text-sm font-medium transition-all ${
+                className={`w-full flex items-center justify-between px-3.5 py-3 rounded-2xl text-sm font-medium transition-all duration-200 group/nav ${
                   isActive
-                    ? 'bg-[#2C3A2B] text-white font-semibold shadow-sm'
-                    : 'text-[#4A4A35] hover:text-[#2C3A2B] hover:bg-[#F4F1EA]'
+                    ? 'bg-[#2C3A2B] text-white font-semibold shadow-md translate-x-1'
+                    : 'text-[#4A4A35] hover:text-[#2C3A2B] hover:bg-[#F4F1EA] hover:translate-x-2 hover:shadow-xs'
                 }`}
               >
                 <div className="flex items-center gap-3">
                   <Icon
-                    className={`w-5 h-5 transition-colors ${
-                      isActive ? 'text-emerald-300' : 'text-[#7A7A68]'
+                    className={`w-5 h-5 transition-transform duration-200 group-hover/nav:scale-115 ${
+                      isActive ? 'text-emerald-300' : 'text-[#7A7A68] group-hover/nav:text-[#2C3A2B]'
                     }`}
                   />
                   <span className={isActive ? 'font-serif font-bold text-[14.5px]' : 'font-medium'}>{item.label}</span>
@@ -175,7 +196,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
 
                 {item.badge && (
                   <span
-                    className={`text-xs font-mono font-semibold tabular-nums px-2.5 py-0.5 rounded-lg ${
+                    className={`text-xs font-mono font-semibold tabular-nums px-2.5 py-0.5 rounded-lg transition-transform group-hover/nav:scale-105 ${
                       isActive
                         ? 'bg-white/20 text-white font-bold'
                         : 'bg-[#F4F1EA] text-[#8B5A2B] border border-[#E6E1D3]'
@@ -187,7 +208,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
               </button>
             );
           })}
-
         </nav>
       </aside>
     </>

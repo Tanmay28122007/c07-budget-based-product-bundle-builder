@@ -45,20 +45,20 @@ export const RequiredSlotCard: React.FC<RequiredSlotCardProps> = ({
 
   return (
     <div
-      className={`rounded-[22px] border p-4.5 transition-all duration-300 relative overflow-hidden group hover:-translate-y-1 hover:shadow-lg ${
+      className={`rounded-[22px] border p-4.5 transition-all duration-300 relative overflow-hidden group hover:-translate-y-2 hover:scale-[1.012] hover:shadow-xl ${
         !isFilled
           ? 'border-dashed border-[#D6CFBF] bg-[#FDFBF7]/90 hover:border-[#8B5A2B] hover:bg-[#F5F5EC]'
           : hasCompatibilityError
           ? 'border-rose-300 bg-rose-50/30 hover:border-rose-400'
           : !isInStock
           ? 'border-amber-300 bg-amber-50/30 hover:border-amber-400'
-          : 'border-[#E6E1D3] bg-white shadow-xs hover:border-[#A3B18A]'
+          : 'border-[#E6E1D3] bg-white shadow-xs hover:border-[#8B5A2B]/60'
       }`}
     >
       {/* Top Header of Card */}
       <div className="flex items-center justify-between gap-2 pb-3 border-b border-[#E6E1D3]/80">
         <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-lg bg-[#F4F1EA] text-[#2C3A2B] border border-[#E6E1D3] flex items-center justify-center group-hover:bg-[#2C3A2B] group-hover:text-white transition-colors">
+          <div className="w-7 h-7 rounded-lg bg-[#F4F1EA] text-[#2C3A2B] border border-[#E6E1D3] flex items-center justify-center group-hover:bg-[#2C3A2B] group-hover:text-white group-hover:scale-115 group-hover:rotate-6 group-hover:shadow-md transition-all duration-300">
             <Layers className="w-4 h-4" />
           </div>
           <div>
@@ -221,14 +221,14 @@ export const RequiredSlotCard: React.FC<RequiredSlotCardProps> = ({
           <>
             <button
               onClick={onOpenSelector}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-[#2C3A2B] hover:text-white hover:bg-[#2C3A2B] bg-[#F4F1EA] border border-[#E6E1D3] rounded-xl transition-all cursor-pointer group/btn shadow-2xs"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-[#2C3A2B] hover:text-white hover:bg-[#2C3A2B] bg-[#F4F1EA] border border-[#E6E1D3] rounded-xl transition-all cursor-pointer group/btn shadow-2xs hover:shadow-md hover:scale-105 active:scale-95"
             >
               <RefreshCw className="w-3 h-3 text-[#8B5A2B] group-hover/btn:text-white group-hover/btn:rotate-180 transition-all duration-300" />
               Swap Item
             </button>
             <button
               onClick={onRemove}
-              className="p-1.5 text-[#8B8B7A] hover:text-rose-600 rounded-xl hover:bg-rose-50 transition-colors cursor-pointer"
+              className="p-1.5 text-[#8B8B7A] hover:text-rose-600 rounded-xl hover:bg-rose-100 transition-all cursor-pointer hover:scale-120 active:scale-90"
               title="Remove item from slot"
             >
               <Trash2 className="w-4 h-4" />
@@ -237,7 +237,7 @@ export const RequiredSlotCard: React.FC<RequiredSlotCardProps> = ({
         ) : (
           <button
             onClick={onOpenSelector}
-            className="w-full inline-flex items-center justify-center gap-2 px-3.5 py-2 text-xs font-bold text-white bg-[#2C3A2B] hover:bg-[#3A4D39] rounded-xl transition-all uppercase tracking-wider cursor-pointer shadow-xs hover:shadow-md"
+            className="w-full inline-flex items-center justify-center gap-2 px-3.5 py-2.5 text-xs font-bold text-white bg-[#2C3A2B] hover:bg-[#3A4D39] rounded-xl transition-all uppercase tracking-wider cursor-pointer shadow-xs hover:shadow-lg hover:scale-[1.03] active:scale-[0.96]"
           >
             <Plus className="w-4 h-4" />
             Select {slot.label}

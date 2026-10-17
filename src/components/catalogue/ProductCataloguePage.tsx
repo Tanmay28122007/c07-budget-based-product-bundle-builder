@@ -10,8 +10,6 @@ import {
   X,
   ExternalLink,
   Plus,
-  LayoutGrid,
-  List,
   Check,
   PackageSearch,
   RotateCcw,
@@ -55,13 +53,13 @@ export const ProductCataloguePage: React.FC = () => {
     setActiveTab,
     openProductDetails,
     searchQuery,
-    setSearchQuery
+    setSearchQuery,
+    setIsCartOpen
   } = useApp();
 
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedStockStatus, setSelectedStockStatus] = useState<string>('all');
   const [sortField, setSortField] = useState<'price_asc' | 'price_desc' | 'name' | 'id'>('price_asc');
-  const [viewMode, setViewMode] = useState<'list' | 'table'>('list');
   const [imgErrors, setImgErrors] = useState<Record<string, boolean>>({});
 
   // Extract unique categories from fixture products
@@ -192,42 +190,11 @@ export const ProductCataloguePage: React.FC = () => {
               </div>
             )}
           </div>
-
-          {/* View Mode: Amazon Listings (Stacked) vs Table */}
-          <div className="flex items-center gap-1 bg-[#FDFBF7] p-1 rounded-xl border border-[#E6E1D3] shrink-0">
-            <button
-              type="button"
-              onClick={() => setViewMode('list')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                viewMode === 'list'
-                  ? 'bg-white text-[#2C3A2B] shadow-2xs border border-[#E6E1D3]'
-                  : 'text-[#8B8B7A] hover:text-[#2C2C1E]'
-              }`}
-              title="Amazon-style vertical listings"
-            >
-              <List className="w-3.5 h-3.5" />
-              <span>Amazon Listings</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setViewMode('table')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                viewMode === 'table'
-                  ? 'bg-white text-[#2C3A2B] shadow-2xs border border-[#E6E1D3]'
-                  : 'text-[#8B8B7A] hover:text-[#2C2C1E]'
-              }`}
-              title="Table View"
-            >
-              <LayoutGrid className="w-3.5 h-3.5" />
-              <span>Table</span>
-            </button>
-          </div>
         </div>
       </div>
 
-      {/* Catalogue Content: Amazon-Style Vertical Listings or Table */}
-      {viewMode === 'list' ? (
-        <div className="space-y-4">
+      {/* Catalogue Content: Amazon-Style Vertical Listings */}
+      <div className="space-y-4">
           {filteredProducts.length === 0 ? (
             <div className="bg-white border border-[#E6E1D3] rounded-[24px] p-12 text-center space-y-3">
               <div className="w-12 h-12 rounded-2xl bg-[#F4F1EA] text-[#8B8B7A] mx-auto flex items-center justify-center">
@@ -257,10 +224,10 @@ export const ProductCataloguePage: React.FC = () => {
                   <div
                     key={p.id}
                     id={`product-${p.id}`}
-                    className={`bg-white border rounded-[24px] p-5 sm:p-6 shadow-xs hover:shadow-md transition-all duration-200 flex flex-col md:flex-row items-stretch gap-6 relative group ${
+                    className={`bg-white border rounded-[24px] p-5 sm:p-6 shadow-xs hover:shadow-2xl hover:-translate-y-2 hover:scale-[1.008] transition-all duration-300 flex flex-col md:flex-row items-stretch gap-6 relative group ${
                       isInCurrentBundle
                         ? 'border-[#2C3A2B] ring-2 ring-[#2C3A2B]/15 bg-[#FDFBF7]'
-                        : 'border-[#E6E1D3] hover:border-[#8B5A2B]/40'
+                        : 'border-[#E6E1D3] hover:border-[#8B5A2B]/60'
                     }`}
                   >
                     {/* 1. LEFT SECTION: Main Product Image & Thumbnail */}
@@ -268,7 +235,7 @@ export const ProductCataloguePage: React.FC = () => {
                       {/* Main Image Box */}
                       <div
                         onClick={() => openProductDetails(p.id)}
-                        className="w-full aspect-square bg-[#FDFBF7] rounded-2xl border border-[#E6E1D3] p-4 flex items-center justify-center relative overflow-hidden group/img cursor-pointer"
+                        className="w-full aspect-square bg-[#FDFBF7] rounded-2xl border border-[#E6E1D3] p-4 flex items-center justify-center relative overflow-hidden group/img transition-all group-hover:border-[#8B5A2B]/30 cursor-pointer"
                         title="Click to view full product details"
                       >
                         {hasImgError ? (
@@ -522,23 +489,28 @@ export const ProductCataloguePage: React.FC = () => {
                           <button
                             disabled={!p.inStock}
                             onClick={() => {
-                              selectProduct(p.category, p);
+                              const matchingSlot = fixture.activity.requiredSlots.find(
+                                s => s.id === p.category || s.category.toLowerCase() === p.category.toLowerCase()
+                              );
+                              const targetSlotId = matchingSlot ? matchingSlot.id : p.category;
+                              selectProduct(targetSlotId, p);
+                              setIsCartOpen(true);
                             }}
                             className={`w-full py-2.5 px-3 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer ${
                               p.inStock
-                                ? 'bg-[#2C3A2B] hover:bg-[#1E281D] text-white shadow-xs hover:shadow-md active:scale-[0.99]'
+                                ? 'bg-[#2C3A2B] hover:bg-[#1E281D] text-white shadow-xs hover:shadow-xl hover:scale-[1.03] active:scale-[0.96]'
                                 : 'bg-[#F4F1EA] text-[#8B8B7A] cursor-not-allowed border border-[#E6E1D3]'
                             }`}
                             title={p.inStock ? 'Add product to bundle slot' : 'Cannot add out-of-stock item'}
                           >
-                            <Plus className="w-4 h-4" />
+                            <Plus className="w-4 h-4 transition-transform group-hover:rotate-90" />
                             <span>{p.inStock ? 'Add to Slot' : 'Out of Stock'}</span>
                           </button>
                         )}
 
                         <button
                           onClick={() => openProductDetails(p.id)}
-                          className="w-full py-2.5 px-3 text-xs font-semibold rounded-xl border text-[#5A5A40] hover:text-[#2C2C1E] hover:bg-[#F4F1EA] border-[#E6E1D3] transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs hover:shadow-xs group/btn"
+                          className="w-full py-2.5 px-3 text-xs font-semibold rounded-xl border text-[#5A5A40] hover:text-[#2C2C1E] hover:bg-[#F4F1EA] border-[#E6E1D3] transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs hover:shadow-xs hover:scale-102 active:scale-98 group/btn"
                           title="Open product specifications and details on new page"
                         >
                           <Eye className="w-3.5 h-3.5 text-[#8B5A2B]" />
@@ -563,182 +535,6 @@ export const ProductCataloguePage: React.FC = () => {
             </span>
           </div>
         </div>
-      ) : (
-        /* Catalogue Table */
-        <div className="bg-white border border-[#E6E1D3] rounded-[24px] shadow-xs overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse text-xs">
-              <thead>
-                <tr className="bg-[#F5F5EC]/70 border-b border-[#E6E1D3] text-[11px] font-serif font-bold text-[#2C3A2B] uppercase tracking-wider">
-                  <th className="py-3 px-4">Photo</th>
-                  <th className="py-3 px-4">Product ID</th>
-                  <th className="py-3 px-4">Item Name & Brand</th>
-                  <th className="py-3 px-4">Category Slot</th>
-                  <th className="py-3 px-4 text-right">Price (INR)</th>
-                  <th className="py-3 px-4">Inventory</th>
-                  <th className="py-3 px-4">Key Compatibility Attributes</th>
-                  <th className="py-3 px-4 text-right">Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#E6E1D3]/50">
-                {filteredProducts.length === 0 ? (
-                  <tr>
-                    <td colSpan={8} className="py-12 text-center">
-                      <div className="w-10 h-10 rounded-xl bg-[#F4F1EA] text-[#8B8B7A] mx-auto flex items-center justify-center mb-2">
-                        <PackageSearch className="w-5 h-5" />
-                      </div>
-                      <p className="font-semibold text-xs text-[#2C3A2B] mb-1">No products matched the active filters</p>
-                      <button
-                        onClick={handleResetFilters}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-[#2C3A2B] bg-[#F4F1EA] hover:bg-[#E6E1D3] border border-[#E6E1D3] rounded-xl transition-colors cursor-pointer shadow-2xs mt-1"
-                      >
-                        <RotateCcw className="w-3.5 h-3.5 text-[#8B5A2B]" />
-                        Reset All Filters
-                      </button>
-                    </td>
-                  </tr>
-                ) : (
-                  filteredProducts.map(p => {
-                    const bundleSlotKey = Object.entries(currentItems).find(([_, item]) => item?.id === p.id)?.[0];
-                    const isInCurrentBundle = Boolean(bundleSlotKey);
-                    const imgSrc = getProductImageUrl(p.image, p.id);
-                    const hasImgError = imgErrors[p.id];
-
-                    return (
-                      <tr key={p.id} className="hover:bg-[#FDFBF7] transition-colors">
-                        <td className="py-3 px-4">
-                          <div className="w-10 h-10 rounded-lg bg-[#FDFBF7] border border-[#E6E1D3] p-1 flex items-center justify-center overflow-hidden shrink-0">
-                            {hasImgError ? (
-                              <Package className="w-4 h-4 text-[#8B8B7A]" />
-                            ) : (
-                              <img
-                                src={imgSrc}
-                                alt=""
-                                onError={() => setImgErrors(prev => ({ ...prev, [p.id]: true }))}
-                                className="w-full h-full object-contain mix-blend-multiply"
-                              />
-                            )}
-                          </div>
-                        </td>
-                        <td className="py-3.5 px-4 font-mono font-medium text-[#5A5A40]">
-                          {p.id}
-                        </td>
-
-                        <td className="py-3.5 px-4">
-                          <button
-                            onClick={() => openProductDetails(p.id)}
-                            className="font-semibold text-[#2C3A2B] leading-tight hover:text-[#8B5A2B] text-left transition-colors cursor-pointer"
-                          >
-                            {p.name}
-                          </button>
-                          <div className="text-[11px] text-[#5A5A40] font-mono mt-0.5">
-                            {p.brand} {p.model ? `· ${p.model}` : ''}
-                          </div>
-                        </td>
-
-                        <td className="py-3.5 px-4">
-                          <span className="font-mono text-[#2C3A2B] bg-[#F4F1EA] border border-[#E6E1D3] px-2 py-0.5 rounded text-[11px]">
-                            {p.category}
-                          </span>
-                        </td>
-
-                        <td className="py-3.5 px-4 text-right font-mono font-bold tabular-nums text-[#2C3A2B]">
-                          {formatINR(p.price)}
-                        </td>
-
-                        <td className="py-3.5 px-4">
-                          {p.inStock ? (
-                            <div className="flex items-center gap-1.5 text-[#2C3A2B] font-medium">
-                              <span className="w-1.5 h-1.5 rounded-full bg-[#A3B18A]" />
-                              <span>{p.stockQuantity} units</span>
-                            </div>
-                          ) : (
-                            <div className="flex items-center gap-1.5 text-[#C05621] font-medium">
-                              <span className="w-1.5 h-1.5 rounded-full bg-[#C05621]" />
-                              <span>Out of Stock</span>
-                            </div>
-                          )}
-                        </td>
-
-                        <td className="py-3.5 px-4 text-[11px] text-[#5A5A40]">
-                          <div className="space-y-0.5 font-mono">
-                            {p.attributes.size && <span>Size: {p.attributes.size}</span>}
-                            {p.attributes.colour && <span> · Colour: {p.attributes.colour}</span>}
-                            {p.attributes.unitCostInr && <span> · Cost: {formatINR(p.attributes.unitCostInr)}</span>}
-                            {p.attributes.connector && <span> · Port: {p.attributes.connector.toUpperCase()}</span>}
-                            {p.attributes.compatibleWith?.length ? (
-                              <span> · Comp: {p.attributes.compatibleWith.join(', ')}</span>
-                            ) : null}
-                            {p.weightKg > 0 && !p.attributes.size && <span> · Weight: {p.weightKg}kg</span>}
-                            {p.attributes.deskWidthCm && <span> · Width: {p.attributes.deskWidthCm}cm</span>}
-                            {p.attributes.ergonomicGrade && <span> · {p.attributes.ergonomicGrade}</span>}
-                            {p.incompatibleProductIds?.length ? (
-                              <span className="block text-[#C05621] font-sans text-[10px]">
-                                Blocks: {p.incompatibleProductIds.join(', ')}
-                              </span>
-                            ) : null}
-                          </div>
-                        </td>
-
-                        <td className="py-3.5 px-4 text-right">
-                          <div className="flex items-center justify-end gap-1.5">
-                            <button
-                              onClick={() => openProductDetails(p.id)}
-                              className="p-1.5 text-[#5A5A40] hover:text-[#2C3A2B] hover:bg-[#F4F1EA] rounded-lg transition-colors cursor-pointer"
-                              title="Inspect full specs on new page"
-                            >
-                              <Eye className="w-4 h-4" />
-                            </button>
-
-                            {isInCurrentBundle ? (
-                              <div className="flex items-center gap-1.5">
-                                <span className="text-[11px] font-semibold text-[#2C3A2B] px-2 py-0.5 bg-[#A3B18A]/20 border border-[#A3B18A]/40 rounded-lg">
-                                  In Bundle {bundleSlotKey ? `(${bundleSlotKey})` : ''}
-                                </span>
-                                <button
-                                  type="button"
-                                  onClick={() => bundleSlotKey && removeProduct(bundleSlotKey)}
-                                  className="p-1 text-rose-600 hover:text-rose-800 hover:bg-rose-50 border border-rose-200 rounded-lg transition-colors cursor-pointer"
-                                  title="Remove from bundle"
-                                >
-                                  <Trash2 className="w-3.5 h-3.5" />
-                                </button>
-                              </div>
-                            ) : (
-                              <button
-                                disabled={!p.inStock}
-                                onClick={() => {
-                                  selectProduct(p.category, p);
-                                }}
-                                className={`px-3 py-1.5 rounded-lg text-[11px] font-medium transition-colors ${
-                                  p.inStock
-                                    ? 'bg-[#2C3A2B] hover:bg-[#3A4D39] text-white shadow-xs'
-                                    : 'bg-[#F4F1EA] text-[#5A5A40]/50 cursor-not-allowed border border-[#E6E1D3]'
-                                }`}
-                              >
-                                Add to Slot
-                              </button>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
-          </div>
-
-          <div className="p-4 border-t border-[#E6E1D3] bg-[#F5F5EC]/50 flex items-center justify-between text-xs text-[#5A5A40]">
-            <span>
-              Showing {filteredProducts.length} of {fixture.products.length} products
-            </span>
-            <span className="font-mono text-[11px]">
-              Source of Truth: {isCustomFixture ? 'Loaded JSON' : 'Synthetic Data Engine'}
-            </span>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
