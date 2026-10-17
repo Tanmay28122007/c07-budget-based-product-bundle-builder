@@ -800,24 +800,10 @@ Choose your preferred language below or ask me anything to assemble, optimize, o
               </button>
               <button
                 type="button"
-                onClick={() => handleSendMessage('Explain the MBA unit economics, referral margins, and break-even basket threshold.')}
-                className="px-2.5 py-1 rounded-full bg-white border border-[#E6E1D3] text-[#2C3A2B] hover:border-[#8B5A2B] hover:bg-[#F5F5EC] shrink-0 transition-colors shadow-2xs font-medium cursor-pointer"
-              >
-                📊 MBA Economics
-              </button>
-              <button
-                type="button"
                 onClick={() => handleSendMessage('How does the Cartesian Auto-Solve algorithm work under the hood?')}
                 className="px-2.5 py-1 rounded-full bg-white border border-[#E6E1D3] text-[#2C3A2B] hover:border-[#8B5A2B] hover:bg-[#F5F5EC] shrink-0 transition-colors shadow-2xs font-medium cursor-pointer"
               >
                 ⚡ Auto-Solve Logic
-              </button>
-              <button
-                type="button"
-                onClick={() => handleSendMessage('What edge cases and tests are verified in the Automated Test Suite?')}
-                className="px-2.5 py-1 rounded-full bg-white border border-[#E6E1D3] text-[#2C3A2B] hover:border-[#8B5A2B] hover:bg-[#F5F5EC] shrink-0 transition-colors shadow-2xs font-medium cursor-pointer"
-              >
-                🧪 Test Suite
               </button>
               <button
                 type="button"
