@@ -86,9 +86,6 @@ export const BundleCartDrawer: React.FC = () => {
       };
     });
 
-  const emptyRequiredSlots = fixture.activity.requiredSlots.filter(
-    slot => !currentItems[slot.id] && !filledItems.some(f => f.slotCategory.toLowerCase() === slot.category.toLowerCase())
-  );
 
   const availableQuickAddProducts = fixture.products.filter(p => {
     if (!p.inStock) return false;
@@ -316,41 +313,6 @@ export const BundleCartDrawer: React.FC = () => {
                       })}
                     </div>
 
-                    {/* Unfilled Required Slots notice if any */}
-                    {emptyRequiredSlots.length > 0 && (
-                      <div className="mt-4 pt-3 border-t border-[#E6E1D3]/80 space-y-2">
-                        <div className="flex items-center justify-between text-[11px] text-[#5A5A40]">
-                          <span className="font-bold uppercase tracking-wider text-[#7A7A68] text-[10px]">
-                            Missing Required Slots ({emptyRequiredSlots.length})
-                          </span>
-                          <span className="text-[10px] italic text-[#8B8B7A]">Required for complete bundle</span>
-                        </div>
-                        {emptyRequiredSlots.map(slot => (
-                          <div
-                            key={slot.id}
-                            className="p-3 rounded-xl border border-dashed border-[#D6CFBF] bg-[#FDFBF7]/70 flex items-center justify-between gap-2 text-xs"
-                          >
-                            <div>
-                              <div className="flex items-center gap-1.5">
-                                <span className="font-semibold text-[#5A5A40] text-[11px]">{slot.label}</span>
-                                <span className="text-[10px] text-[#8B8B7A] font-mono">({slot.category})</span>
-                              </div>
-                              <span className="text-[10px] text-[#8B8B7A] block mt-0.5">Slot is currently empty</span>
-                            </div>
-                            <button
-                              onClick={() => {
-                                setActiveTab('catalogue');
-                                setIsCartOpen(false);
-                              }}
-                              className="px-2.5 py-1 rounded-lg text-[11px] font-semibold text-[#2C3A2B] bg-[#F4F1EA] hover:bg-[#E6E1D3] border border-[#E6E1D3] flex items-center gap-1 transition-colors cursor-pointer shrink-0"
-                            >
-                              <Plus className="w-3 h-3" />
-                              <span>Add</span>
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    )}
 
                     {/* Quick Add More Items to Cart */}
                     <div className="mt-5 pt-4 border-t border-[#E6E1D3] space-y-3">
