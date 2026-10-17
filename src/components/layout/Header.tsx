@@ -7,7 +7,6 @@ import {
   AlertTriangle,
   Info,
   X,
-  ExternalLink,
   ChevronDown,
   LogOut,
   ShoppingCart,
@@ -270,26 +269,6 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
               >
                 <span>My Profile</span>
                 <User className="w-3.5 h-3.5 text-[#5A5A40]" />
-              </button>
-
-              <button
-                onClick={() => {
-                  setActiveTab('evidence');
-                  setShowProfile(false);
-                }}
-                className="w-full text-left px-3 py-1.5 rounded-xl text-xs text-[#2C2C1E] hover:bg-[#F4F1EA] flex items-center justify-between cursor-pointer"
-              >
-                <span>Project Evidence Log</span>
-                <ExternalLink className="w-3 h-3 text-[#8B8B7A]" />
-              </button>
-              <button
-                onClick={() => {
-                  setActiveTab('settings');
-                  setShowProfile(false);
-                }}
-                className="w-full text-left px-3 py-1.5 rounded-xl text-xs text-[#2C2C1E] hover:bg-[#F4F1EA] cursor-pointer"
-              >
-                Fixture & Rule Configuration
               </button>
             </div>
           )}
