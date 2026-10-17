@@ -523,9 +523,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     try {
       localStorage.removeItem('c07_user_role_v1');
     } catch {}
-    setAdminSignInRequested(true);
+    setAdminSignInRequested(false);
     setActiveTab('dashboard');
-    addNotification('Logged Out', 'Redirected to Admin Sign In page.', 'info');
+    addNotification('Logged Out', 'You have returned to the homepage.', 'info');
   };
 
   const setBudget = (val: number) => {
