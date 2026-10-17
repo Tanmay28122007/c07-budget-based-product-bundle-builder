@@ -334,11 +334,11 @@ export const CompareBundlesPage: React.FC<CompareBundlesPageProps> = ({ initialM
               }`}
             >
               <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-              <span>10 Dynamic Recommendations</span>
+              <span>Bundle Recommendations</span>
               <span className={`text-[10px] font-mono px-1.5 py-0.2 rounded-md ${
                 viewMode === 'recommendations' ? 'bg-amber-400/20 text-amber-900 border border-amber-300/40' : 'bg-[#E6E1D3] text-[#5A5A40]'
               }`}>
-                10
+                20
               </span>
             </button>
           </div>

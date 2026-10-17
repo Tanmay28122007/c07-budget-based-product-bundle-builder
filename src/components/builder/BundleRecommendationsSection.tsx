@@ -195,10 +195,10 @@ export const BundleRecommendationsSection: React.FC<BundleRecommendationsSection
               <span>Dynamic Bundle Recommendation Engine</span>
             </div>
             <h2 className="text-xl sm:text-2xl font-serif font-bold text-[#2C3A2B] tracking-tight">
-              10 Dynamic Product Bundle Recommendations
+              Dynamic Product Bundle Recommendations
             </h2>
             <p className="text-xs sm:text-sm text-[#5A5A40] leading-relaxed max-w-3xl">
-              Specify your required products, quantities, or budget to receive up to 10 distinct, validated,
+              Specify your required products, quantities, or budget to receive up to 20 distinct, validated,
               and compatible bundle options generated dynamically from the official C07 catalogue.
             </p>
           </div>
@@ -207,10 +207,10 @@ export const BundleRecommendationsSection: React.FC<BundleRecommendationsSection
             <button
               onClick={() => handleApplyPreset('reset')}
               className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-[#5A5A40] bg-[#F4F1EA] hover:bg-[#E6E1D3] border border-[#E6E1D3] rounded-xl transition-all cursor-pointer shadow-2xs"
-              title="Reset all filters to view 10 predefined baseline bundles"
+              title="Reset all filters to view 20 predefined baseline bundles"
             >
               <RotateCcw className="w-3.5 h-3.5" />
-              <span>Reset to 10 Baselines</span>
+              <span>Reset to 20 Baselines</span>
             </button>
           </div>
         </div>

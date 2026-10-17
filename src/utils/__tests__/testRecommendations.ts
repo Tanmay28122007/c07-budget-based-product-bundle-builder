@@ -7,7 +7,7 @@ const shippingRule = fixture.shippingRule;
 const taxRule = fixture.taxRule;
 
 console.log('====================================================');
-console.log('TEST 0: Baseline 10 Predefined Bundles (No Requirements)');
+console.log('TEST 0: Baseline 20 Predefined Bundles (No Requirements)');
 console.log('====================================================');
 const baseline = getPredefinedBaselineBundles(products, shippingRule, taxRule);
 console.log(`Generated ${baseline.length} baseline bundles.`);

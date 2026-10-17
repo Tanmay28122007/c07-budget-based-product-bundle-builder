@@ -185,6 +185,124 @@ export function getPredefinedBaselineBundles(
         { product: p12, quantity: 1 }
       ],
       matchExplanation: 'The ultimate 6-category ensemble showcasing the maximum variety of active in-stock fixture products.'
+    },
+    {
+      id: 'base-11',
+      name: 'Hydration & Note-Taking Minimalist',
+      tagline: 'Ultra-compact eco wellness duo pairing reusable green bottle with lined blue notebook',
+      items: [
+        { product: p10, quantity: 1 },
+        { product: p11, quantity: 1 }
+      ],
+      matchExplanation: 'Clean dual-item wellness and desk companion pairing for daily note-taking and hydration.'
+    },
+    {
+      id: 'base-12',
+      name: "Creative Writer's Desk Trio",
+      tagline: 'Balanced desk companion set featuring ceramic tea mug, green bottle, and ideas journal',
+      items: [
+        { product: p05, quantity: 1 },
+        { product: p10, quantity: 1 },
+        { product: p11, quantity: 1 }
+      ],
+      matchExplanation: 'Non-electronic desktop combo providing complete hydration, caffeine, and note-taking.'
+    },
+    {
+      id: 'base-13',
+      name: 'Urban Digital Nomad Pack',
+      tagline: 'Mobile power tech kit combining rugged backpack with precision mouse and multiport expansion hub',
+      items: [
+        { product: p12, quantity: 1 },
+        { product: p07, quantity: 1 },
+        { product: p09, quantity: 1 }
+      ],
+      matchExplanation: 'High-mobility connectivity pack for working on the go from cafes and co-working spaces.'
+    },
+    {
+      id: 'base-14',
+      name: 'Casual Red Gamer Starter Kit',
+      tagline: 'Comfortable red apparel matched with core USB-C gaming peripherals and beverage mug',
+      items: [
+        { product: p03, quantity: 1 },
+        { product: p07, quantity: 1 },
+        { product: p08, quantity: 1 },
+        { product: p05, quantity: 1 }
+      ],
+      matchExplanation: 'Enthusiast starter set pairing dual input peripherals with breathable red cotton apparel and mug.'
+    },
+    {
+      id: 'base-15',
+      name: 'Commuter Tech & Stationery Quad',
+      tagline: 'All-in-one travel setup with weather-resistant backpack, mouse, hydration, and notebook',
+      items: [
+        { product: p12, quantity: 1 },
+        { product: p07, quantity: 1 },
+        { product: p10, quantity: 1 },
+        { product: p11, quantity: 1 }
+      ],
+      matchExplanation: 'Versatile 4-category transit package covering input, storage, hydration, and writing.'
+    },
+    {
+      id: 'base-16',
+      name: 'Modern Blue Apparel & Peripherals Quad',
+      tagline: 'Unified blue-accented workstation pack with cotton tee, dual peripherals, and notebook',
+      items: [
+        { product: p02, quantity: 1 },
+        { product: p07, quantity: 1 },
+        { product: p08, quantity: 1 },
+        { product: p11, quantity: 1 }
+      ],
+      matchExplanation: 'Professional 4-item desktop and apparel combination featuring tactile inputs and stationery.'
+    },
+    {
+      id: 'base-17',
+      name: 'Compact Expansion & Lifestyle Trio',
+      tagline: 'Comfort-fit L-size tee with high-speed multiport hub and morning ceramic mug',
+      items: [
+        { product: p04, quantity: 1 },
+        { product: p09, quantity: 1 },
+        { product: p05, quantity: 1 }
+      ],
+      matchExplanation: 'Affordable 3-piece setup combining connectivity hardware with lifestyle essentials.'
+    },
+    {
+      id: 'base-18',
+      name: 'Road Warrior Full Commute Suite',
+      tagline: 'Complete travel ensemble with backpack, hub, change of apparel, bottle, and journal',
+      items: [
+        { product: p12, quantity: 1 },
+        { product: p09, quantity: 1 },
+        { product: p10, quantity: 1 },
+        { product: p03, quantity: 1 },
+        { product: p11, quantity: 1 }
+      ],
+      matchExplanation: 'Comprehensive 5-piece nomad ensemble with multi-port connectivity and travel utility.'
+    },
+    {
+      id: 'base-19',
+      name: 'Student All-Day Desk Essentials',
+      tagline: 'Pure non-electronic campus kit featuring apparel, dual hydration/drinkware, and notebook',
+      items: [
+        { product: p04, quantity: 1 },
+        { product: p05, quantity: 1 },
+        { product: p10, quantity: 1 },
+        { product: p11, quantity: 1 }
+      ],
+      matchExplanation: 'Sub-₹1,500 4-item everyday student essentials bundle with zero tech complexity.'
+    },
+    {
+      id: 'base-20',
+      name: 'Grand Master Productivity & Travel Suite',
+      tagline: 'The premier full-equipment workstation and commute powerhouse with all tech and carry gear',
+      items: [
+        { product: p12, quantity: 1 },
+        { product: p08, quantity: 1 },
+        { product: p07, quantity: 1 },
+        { product: p09, quantity: 1 },
+        { product: p10, quantity: 1 },
+        { product: p11, quantity: 1 }
+      ],
+      matchExplanation: 'Flagship 6-item heavy productivity bundle covering the entire peripheral suite, transit, and desk accessories.'
     }
   ];
 
@@ -277,7 +395,8 @@ export function generateBundleRecommendations(
   maxBudget?: number | null,
   exactOnly: boolean = false,
   shippingRule: ShippingRule = { baseFee: 100, freeShippingThreshold: 999999, heavyItemSurchargePerItem: 0, heavyThresholdKg: 999 },
-  taxRule: TaxRule = { taxRate: 0, taxName: 'Included' }
+  taxRule: TaxRule = { taxRate: 0, taxName: 'Included' },
+  maxResults: number = 20
 ): RecommendationResult {
   // If no requirements specified, return predefined baseline bundles filtered by budget
   if (!requirements || requirements.length === 0) {
@@ -287,14 +406,14 @@ export function generateBundleRecommendations(
       : baseline;
 
     return {
-      bundles: validBaseline.slice(0, 10),
+      bundles: validBaseline.slice(0, maxResults),
       totalGenerated: validBaseline.length,
       hasUnavailableProduct: false,
       isOverBudgetForAll: validBaseline.length === 0 && baseline.length > 0,
       overBudgetReason: validBaseline.length === 0 
-        ? `None of the 10 baseline bundles fit within your ${formatINR(maxBudget || 0)} budget.` 
+        ? `None of the ${baseline.length} baseline bundles fit within your ${formatINR(maxBudget || 0)} budget.` 
         : undefined,
-      activeRequirementsSummary: '10 Predefined Distinct Baseline Bundles (No specific product requirements applied)'
+      activeRequirementsSummary: `${validBaseline.length} Predefined Distinct Baseline Bundles (No specific product requirements applied)`
     };
   }
 
@@ -481,7 +600,7 @@ export function generateBundleRecommendations(
 
   // Strategy 1: Add single complementary items from available pool
   for (const comp of availableComplementaryProducts) {
-    if (validBundles.length >= 10) break;
+    if (validBundles.length >= maxResults) break;
 
     const candidateItems: BundleItem[] = [
       ...resolvedRequiredItems.map(it => ({ ...it })),
@@ -506,22 +625,30 @@ export function generateBundleRecommendations(
     }
   }
 
-  // Strategy 2: Add complementary pairs (e.g., peripherals, study accessories)
+  // Strategy 2: Add complementary pairs (peripherals, stationery, lifestyle)
   const compPairs: [string, string][] = [
     ['P11', 'P10'], // Blue Notebook + Green Bottle
     ['P07', 'P08'], // Black Mouse + Black Keyboard
     ['P07', 'P09'], // Black Mouse + Grey Hub
     ['P05', 'P11'], // Blue Mug + Blue Notebook
+    ['P05', 'P10'], // Blue Mug + Green Bottle
     ['P12', 'P10'], // Grey Backpack + Green Bottle
     ['P12', 'P11'], // Grey Backpack + Blue Notebook
+    ['P12', 'P07'], // Grey Backpack + Black Mouse
+    ['P12', 'P09'], // Grey Backpack + Grey Hub
     ['P02', 'P07'], // Blue Tshirt M + Black Mouse
+    ['P02', 'P11'], // Blue Tshirt M + Blue Notebook
     ['P03', 'P11'], // Red Tshirt M + Blue Notebook
+    ['P03', 'P05'], // Red Tshirt M + Blue Mug
+    ['P03', 'P07'], // Red Tshirt M + Black Mouse
     ['P04', 'P10'], // Blue Tshirt L + Green Bottle
+    ['P04', 'P09'], // Blue Tshirt L + Grey Hub
+    ['P04', 'P05'], // Blue Tshirt L + Blue Mug
     ['P08', 'P09']  // Black Keyboard + Grey Hub
   ];
 
   for (const [idA, idB] of compPairs) {
-    if (validBundles.length >= 10) break;
+    if (validBundles.length >= maxResults) break;
     if (requiredProductIds.has(idA) || requiredProductIds.has(idB)) continue;
 
     const prodA = allProducts.find(p => p.id === idA);
@@ -552,7 +679,7 @@ export function generateBundleRecommendations(
     }
   }
 
-  // Strategy 3: Multi-item lifestyle / workstation sets if slots still under 10
+  // Strategy 3: Multi-item lifestyle / workstation sets if slots still under maxResults
   const multiConfigs = [
     {
       ids: ['P07', 'P08', 'P09'],
@@ -573,11 +700,26 @@ export function generateBundleRecommendations(
       ids: ['P02', 'P12', 'P10'],
       nameExtra: 'Travel Lifestyle Trio',
       descExtra: 'Apparel, Backpack, and Bottle'
+    },
+    {
+      ids: ['P03', 'P07', 'P08'],
+      nameExtra: 'Creative Gaming Setup',
+      descExtra: 'Red Tee, Mouse, and Keyboard'
+    },
+    {
+      ids: ['P05', 'P10', 'P11'],
+      nameExtra: 'Desk Companion Trio',
+      descExtra: 'Mug, Bottle, and Notebook'
+    },
+    {
+      ids: ['P07', 'P08', 'P10', 'P11'],
+      nameExtra: 'Executive Quad',
+      descExtra: 'Mouse, Keyboard, Bottle, and Notebook'
     }
   ];
 
   for (const mc of multiConfigs) {
-    if (validBundles.length >= 10) break;
+    if (validBundles.length >= maxResults) break;
     if (mc.ids.some(id => requiredProductIds.has(id))) continue;
 
     const candidateItems: BundleItem[] = [
@@ -614,7 +756,7 @@ export function generateBundleRecommendations(
   // Sort valid bundles by landed price ascending for predictable budget ordering
   validBundles.sort((a, b) => a.landedPrice - b.landedPrice);
 
-  const displayedBundles = validBundles.slice(0, 10);
+  const displayedBundles = validBundles.slice(0, maxResults);
 
   return {
     bundles: displayedBundles,
