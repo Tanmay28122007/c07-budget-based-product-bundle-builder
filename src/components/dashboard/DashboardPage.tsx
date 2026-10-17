@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Package,
   Layers,
@@ -15,8 +15,14 @@ import {
   ShieldCheck,
   UserCheck,
   Building2,
-  Lock
+  Lock,
+  Mail,
+  User,
+  Eye,
+  EyeOff,
+  X
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
 import { useApp } from '../../context/AppContext';
 import { formatINR } from '../../utils/pricing';
 import { exportBundleToCSV, exportTestResultsToCSV, downloadFile } from '../../utils/exportUtils';
@@ -38,6 +44,35 @@ export const DashboardPage: React.FC = () => {
     loginAs,
     logout
   } = useApp();
+
+  // Customer Auth Modal State (ID, Password, Sign Up option)
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
+  const [customerId, setCustomerId] = useState('shopper@workspace.com');
+  const [customerPassword, setCustomerPassword] = useState('password123');
+  const [customerName, setCustomerName] = useState('');
+  const [customerConfirmPassword, setCustomerConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [authError, setAuthError] = useState('');
+
+  const handleCustomerAuth = (e: React.FormEvent) => {
+    e.preventDefault();
+    setAuthError('');
+    if (!customerId.trim()) {
+      setAuthError('Please enter your Customer ID or Email.');
+      return;
+    }
+    if (!customerPassword.trim()) {
+      setAuthError('Please enter your password.');
+      return;
+    }
+    if (authMode === 'signup' && customerPassword !== customerConfirmPassword) {
+      setAuthError('Passwords do not match.');
+      return;
+    }
+    setShowAuthModal(false);
+    loginAs('customer');
+  };
 
   // Metrics computation from real loaded datasets
   const availableProductsCount = fixture.products.filter(
@@ -110,7 +145,11 @@ export const DashboardPage: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto mt-10 text-left">
             {/* Card 1: Login as Customer */}
             <div
-              onClick={() => loginAs('customer')}
+              onClick={() => {
+                setAuthMode('login');
+                setAuthError('');
+                setShowAuthModal(true);
+              }}
               className="group relative bg-white border border-[#E6E1D3] rounded-[28px] p-8 sm:p-9 shadow-sm hover:shadow-[0_28px_60px_-12px_rgba(44,58,43,0.3)] transition-all duration-300 overflow-hidden cursor-pointer hover:-translate-y-4 hover:scale-[1.025] hover:border-[#8B5A2B] hover:ring-8 hover:ring-[#8B5A2B]/20 flex flex-col justify-between"
             >
               {/* Top right decorative arc watermark */}
@@ -139,7 +178,9 @@ export const DashboardPage: React.FC = () => {
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  loginAs('customer');
+                  setAuthMode('login');
+                  setAuthError('');
+                  setShowAuthModal(true);
                 }}
                 className="w-full py-3.5 px-5 rounded-2xl bg-[#2C3A2B] text-white text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2.5 shadow-md hover:shadow-2xl group-hover:bg-[#3A4D39] group-hover:scale-[1.02] transition-all cursor-pointer"
               >
@@ -188,6 +229,187 @@ export const DashboardPage: React.FC = () => {
               </button>
             </div>
           </div>
+
+          {/* Customer Authentication Modal (Login / Sign Up) */}
+          <AnimatePresence>
+            {showAuthModal && (
+              <div
+                className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#2C2C1E]/55 backdrop-blur-md"
+                onClick={() => setShowAuthModal(false)}
+              >
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.94, y: 18 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.94, y: 18 }}
+                  transition={{ type: 'spring', damping: 28, stiffness: 350 }}
+                  onClick={e => e.stopPropagation()}
+                  className="bg-[#FDFBF7] border border-[#E6E1D3] rounded-[32px] p-6 sm:p-8 max-w-md w-full shadow-2xl relative overflow-hidden text-left"
+                >
+                  {/* Decorative corner accent */}
+                  <div className="absolute top-0 right-0 w-36 h-36 bg-[#F5F5EC] rounded-bl-[120px] pointer-events-none -z-0" />
+
+                  {/* Close Button */}
+                  <button
+                    onClick={() => setShowAuthModal(false)}
+                    className="absolute top-5 right-5 p-2 rounded-full hover:bg-[#F4F1EA] text-[#8A8A88] hover:text-[#2C2C1E] transition-colors cursor-pointer z-10"
+                    aria-label="Close modal"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+
+                  <div className="relative z-10">
+                    {/* Header Icon & Title */}
+                    <div className="w-12 h-12 rounded-2xl bg-[#2C3A2B] text-white flex items-center justify-center mb-4 shadow-sm">
+                      <UserCheck className="w-6 h-6 text-amber-200" />
+                    </div>
+
+                    <h3 className="font-serif text-2xl font-bold text-[#2C3A2B] tracking-tight">
+                      {authMode === 'login' ? 'Customer Sign In' : 'Create Customer Account'}
+                    </h3>
+                    <p className="text-xs text-[#5A5A40] mt-1 leading-relaxed">
+                      {authMode === 'login'
+                        ? 'Enter your Customer ID & password to access your customized workstation workspace.'
+                        : 'Sign up to assemble, validate, and optimize your target workstation setup.'}
+                    </p>
+
+                    {/* Auth Form */}
+                    <form onSubmit={handleCustomerAuth} className="mt-6 space-y-4">
+                      {authError && (
+                        <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center gap-2">
+                          <AlertTriangle className="w-4 h-4 shrink-0 text-rose-600" />
+                          <span>{authError}</span>
+                        </div>
+                      )}
+
+                      {/* Sign Up: Full Name */}
+                      {authMode === 'signup' && (
+                        <div>
+                          <label className="block text-[11px] font-bold text-[#5A5A40] uppercase tracking-wider mb-1">
+                            Full Name
+                          </label>
+                          <div className="relative">
+                            <User className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8A8A88]" />
+                            <input
+                              type="text"
+                              value={customerName}
+                              onChange={e => setCustomerName(e.target.value)}
+                              placeholder="e.g. Tanmay Anand"
+                              className="w-full pl-10 pr-3.5 py-2.5 bg-white border border-[#E6E1D3] rounded-xl text-xs text-[#2C2C1E] placeholder-[#8A8A88] focus:border-[#2C3A2B] focus:ring-2 focus:ring-[#2C3A2B]/20 outline-none transition-all"
+                            />
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Customer ID / Email */}
+                      <div>
+                        <label className="block text-[11px] font-bold text-[#5A5A40] uppercase tracking-wider mb-1">
+                          Customer ID or Email
+                        </label>
+                        <div className="relative">
+                          <Mail className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8A8A88]" />
+                          <input
+                            type="text"
+                            value={customerId}
+                            onChange={e => setCustomerId(e.target.value)}
+                            placeholder="e.g. shopper@workspace.com or CUST-01"
+                            required
+                            className="w-full pl-10 pr-3.5 py-2.5 bg-white border border-[#E6E1D3] rounded-xl text-xs text-[#2C2C1E] placeholder-[#8A8A88] focus:border-[#2C3A2B] focus:ring-2 focus:ring-[#2C3A2B]/20 outline-none transition-all font-mono"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Password */}
+                      <div>
+                        <label className="block text-[11px] font-bold text-[#5A5A40] uppercase tracking-wider mb-1">
+                          Password
+                        </label>
+                        <div className="relative">
+                          <Lock className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8A8A88]" />
+                          <input
+                            type={showPassword ? 'text' : 'password'}
+                            value={customerPassword}
+                            onChange={e => setCustomerPassword(e.target.value)}
+                            placeholder="Enter password"
+                            required
+                            className="w-full pl-10 pr-10 py-2.5 bg-white border border-[#E6E1D3] rounded-xl text-xs text-[#2C2C1E] placeholder-[#8A8A88] focus:border-[#2C3A2B] focus:ring-2 focus:ring-[#2C3A2B]/20 outline-none transition-all"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowPassword(prev => !prev)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8A8A88] hover:text-[#2C2C1E] transition-colors p-1"
+                          >
+                            {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Sign Up: Confirm Password */}
+                      {authMode === 'signup' && (
+                        <div>
+                          <label className="block text-[11px] font-bold text-[#5A5A40] uppercase tracking-wider mb-1">
+                            Confirm Password
+                          </label>
+                          <div className="relative">
+                            <Lock className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8A8A88]" />
+                            <input
+                              type={showPassword ? 'text' : 'password'}
+                              value={customerConfirmPassword}
+                              onChange={e => setCustomerConfirmPassword(e.target.value)}
+                              placeholder="Confirm your password"
+                              required
+                              className="w-full pl-10 pr-3.5 py-2.5 bg-white border border-[#E6E1D3] rounded-xl text-xs text-[#2C2C1E] placeholder-[#8A8A88] focus:border-[#2C3A2B] focus:ring-2 focus:ring-[#2C3A2B]/20 outline-none transition-all"
+                            />
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Submit Button */}
+                      <button
+                        type="submit"
+                        className="w-full py-3 px-4 rounded-xl bg-[#2C3A2B] hover:bg-[#1B281B] text-white text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-md hover:shadow-xl transition-all cursor-pointer mt-2"
+                      >
+                        <span>{authMode === 'login' ? 'Log In to Customer Portal' : 'Create Account & Sign In'}</span>
+                        <ArrowRight className="w-4 h-4" />
+                      </button>
+                    </form>
+
+                    {/* Bottom Toggle: Switch between Log In and Sign Up */}
+                    <div className="mt-5 pt-4 border-t border-[#E6E1D3] text-center text-xs text-[#5A5A40]">
+                      {authMode === 'login' ? (
+                        <p>
+                          Don't have an account?{' '}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setAuthMode('signup');
+                              setAuthError('');
+                            }}
+                            className="font-bold text-[#8B5A2B] hover:underline cursor-pointer ml-1"
+                          >
+                            Sign Up
+                          </button>
+                        </p>
+                      ) : (
+                        <p>
+                          Already have an account?{' '}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setAuthMode('login');
+                              setAuthError('');
+                            }}
+                            className="font-bold text-[#2C3A2B] hover:underline cursor-pointer ml-1"
+                          >
+                            Log In
+                          </button>
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </motion.div>
+              </div>
+            )}
+          </AnimatePresence>
         </section>
       </div>
     );
