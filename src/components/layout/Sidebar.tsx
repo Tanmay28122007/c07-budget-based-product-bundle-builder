@@ -68,12 +68,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           badge: fixture.products.length.toString()
         },
         {
-          id: 'builder',
-          label: 'Build a Bundle',
-          icon: PackagePlus,
-          badge: validation.filledSlotCount > 0 ? `${validation.filledSlotCount}/${validation.totalSlotCount}` : null
-        },
-        {
           id: 'compare',
           label: 'Compare Bundles',
           icon: Columns,
@@ -82,12 +76,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       ]
     : userRole === 'customer'
     ? [
-        {
-          id: 'builder',
-          label: 'Build a Bundle',
-          icon: PackagePlus,
-          badge: validation.filledSlotCount > 0 ? `${validation.filledSlotCount}/${validation.totalSlotCount}` : null
-        },
         {
           id: 'catalogue',
           label: 'Product Catalogue',
@@ -102,12 +90,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         }
       ]
     : [
-        {
-          id: 'builder',
-          label: 'Build a Bundle',
-          icon: PackagePlus,
-          badge: validation.filledSlotCount > 0 ? `${validation.filledSlotCount}/${validation.totalSlotCount}` : null
-        },
         {
           id: 'catalogue',
           label: 'Product Catalogue',

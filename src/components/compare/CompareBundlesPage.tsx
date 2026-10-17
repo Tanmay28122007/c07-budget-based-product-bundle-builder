@@ -409,7 +409,7 @@ export const CompareBundlesPage: React.FC = () => {
                             onClick={() => loadSavedBundle(b)}
                             className="px-3.5 py-1.5 rounded-xl text-xs font-semibold text-white bg-[#2C3A2B] hover:bg-[#3A4D39] shadow-2xs"
                           >
-                            Load Into Builder
+                            Load Bundle
                           </button>
                           <button
                             onClick={() => deleteSavedBundle(b.id)}

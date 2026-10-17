@@ -512,7 +512,6 @@ export const ProductCataloguePage: React.FC = () => {
                             disabled={!p.inStock}
                             onClick={() => {
                               selectProduct(p.category, p);
-                              setActiveTab('builder');
                             }}
                             className={`w-full py-2.5 px-3 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer ${
                               p.inStock
@@ -692,7 +691,6 @@ export const ProductCataloguePage: React.FC = () => {
                                 disabled={!p.inStock}
                                 onClick={() => {
                                   selectProduct(p.category, p);
-                                  setActiveTab('builder');
                                 }}
                                 className={`px-3 py-1.5 rounded-lg text-[11px] font-medium transition-colors ${
                                   p.inStock
@@ -867,11 +865,10 @@ export const ProductCataloguePage: React.FC = () => {
                       onClick={() => {
                         selectProduct(viewingProduct.category, viewingProduct);
                         setViewingProduct(null);
-                        setActiveTab('builder');
                       }}
                       className="px-4 py-2 text-xs font-semibold text-white bg-[#2C3A2B] hover:bg-[#3A4D39] rounded-xl shadow-xs cursor-pointer"
                     >
-                      Assign to Slot in Builder
+                      Assign to Slot
                     </button>
                   );
                 }

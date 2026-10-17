@@ -279,16 +279,18 @@ const getInitialTab = (): string => {
   try {
     if (typeof window !== 'undefined' && window.location.hash) {
       const hash = window.location.hash.replace('#', '').trim();
+      if (hash === 'builder') return 'catalogue';
       if (VALID_TABS.includes(hash)) return hash;
     }
     if (typeof localStorage !== 'undefined') {
       const savedTab = localStorage.getItem('c07_active_tab_v1');
+      if (savedTab === 'builder') return 'catalogue';
       if (savedTab && VALID_TABS.includes(savedTab)) return savedTab;
     }
   } catch (e) {
     console.warn('Could not read active tab from storage:', e);
   }
-  return 'dashboard';
+  return 'catalogue';
 };
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -560,7 +562,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       localStorage.setItem('c07_user_role_v1', role);
     } catch {}
     if (role === 'customer') {
-      setActiveTab('builder');
+      setActiveTab('catalogue');
       addNotification('Logged in as Customer', 'Welcome! You can now assemble custom product bundles within your budget.', 'success');
     } else {
       setActiveTab('dashboard');
@@ -706,8 +708,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const loadSavedBundle = (bundle: SavedBundle) => {
     setBudget(bundle.budget);
     setCurrentItems({ ...bundle.items });
-    addNotification("Bundle Loaded", `Restored "${bundle.name}" into builder workspace.`, 'info');
-    setActiveTab('builder');
+    addNotification("Bundle Loaded", `Restored "${bundle.name}" into workspace.`, 'info');
+    setActiveTab('catalogue');
   };
 
   const toggleCompareBundle = (id: string) => {
