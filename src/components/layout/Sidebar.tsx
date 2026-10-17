@@ -168,17 +168,17 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       >
         {/* Brand / Emblem Zone */}
         <div className="h-18 px-5 border-b border-[#E6E1D3] flex items-center justify-between bg-white/70">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 min-w-0">
             {/* Brand Emblem Badge */}
             <div className="w-9 h-9 rounded-xl bg-[#2C3A2B] text-white flex items-center justify-center text-sm shadow-xs ring-1 ring-[#E6E1D3] shrink-0">
               <PackagePlus className="w-5 h-5 text-amber-100" />
             </div>
-            <div>
-              <div className="font-serif text-sm font-bold tracking-tight text-[#2C3A2B] leading-tight">
-                Bundle Builder
+            <div className="min-w-0">
+              <div className="font-serif text-xs font-bold tracking-tight text-[#2C3A2B] leading-tight">
+                Budget Based Product Bundle Builder
               </div>
-              <div className="text-[11px] text-[#5A5A40] font-medium">
-                Product Workspace OS
+              <div className="text-[10px] text-[#5A5A40] font-medium">
+                Standard C07 Suite
               </div>
             </div>
           </div>

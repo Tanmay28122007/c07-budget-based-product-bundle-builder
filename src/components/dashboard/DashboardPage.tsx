@@ -100,7 +100,7 @@ export const DashboardPage: React.FC = () => {
 
           {/* Hero Serif Title & Subtitle */}
           <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-[#2C3A2B] mb-3">
-            Product Bundle Builder
+            Budget Based Product Bundle Builder
           </h1>
           <p className="text-[#5A5A40] text-sm sm:text-base max-w-xl mx-auto leading-relaxed">
             Welcome to the Budget-Based Product Bundle Builder. Please select your login to continue.
