@@ -59,7 +59,7 @@ export const AIAssistantDrawer: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [selectedLang, setSelectedLang] = useState<'en' | 'hi' | 'gu'>('en');
-  const [drawerModel, setDrawerModel] = useState<'gemini-3.8-flash' | 'gemini-3.1-flash-lite' | 'gemini-4-argon'>('gemini-3.8-flash');
+  const drawerModel = 'gemini-3.8-flash';
 
   const [messages, setMessages] = useState<ChatMessage[]>(() => [
     {
@@ -88,28 +88,6 @@ Choose your preferred language below or ask me anything to optimize your setup:`
       setTimeout(() => inputRef.current?.focus(), 150);
     }
   }, [isAssistantOpen, messages]);
-
-  const quickPromptsByLang = {
-    en: [
-      { label: 'Build Best Bundle under ₹75k', prompt: 'Build me an optimal, fully compatible workspace bundle under ₹75,000 budget.' },
-      { label: 'Fix Compatibility Errors', prompt: 'Analyze my current bundle for any hardware compatibility conflicts and fix them.' },
-      { label: 'Reduce Landed Cost', prompt: 'My bundle cost needs reduction. Suggest alternatives to stay strictly within budget.' },
-      { label: 'Explain Clamp vs Curved Rule', prompt: 'Why is a screenbar clamp light incompatible with a curved monitor in this system?' },
-      { label: 'Analyze Unit Economics', prompt: 'Give me an MBA analysis of the unit economics, landed margins, and platform referral fee.' }
-    ],
-    hi: [
-      { label: '₹75,000 में सर्वश्रेष्ठ बंडल बनाएं', prompt: '₹75,000 के बजट में मेरे लिए सर्वश्रेष्ठ और 100% संगत वर्कस्पेस बंडल तैयार करें।' },
-      { label: 'हार्डवेयर त्रुटियां ठीक करें', prompt: 'मेरे वर्तमान बंडल की अनुकूलता जांचें और सभी समस्याओं को हल करें।' },
-      { label: 'लागत कम करें', prompt: 'बंडल का खर्च कम करने के लिए बजट-अनुकूल विकल्प सुझाएं।' },
-      { label: 'यूनिट इकोनॉमिक्स विश्लेषण', prompt: 'इस बंडल के मार्जिन, टैक्स और यूनिट इकोनॉमिक्स का विस्तृत विश्लेषण दें।' }
-    ],
-    gu: [
-      { label: '₹75,000 માં શ્રેષ્ઠ બંડલ બનાવો', prompt: '₹75,000 ના બજેટમાં મારા માટે શ્રેષ્ઠ અને 100% સુસંગત વર્કસ્પેસ બંડલ તૈયાર કરો.' },
-      { label: 'હાર્ડવેર ભૂલો સુધારો', prompt: 'મારા વર્તમાન બંડલની સુસંગતતા તપાસો અને બધી સમસ્યાઓ હલ કરો.' },
-      { label: 'ખર્ચ ઓછો કરો', prompt: 'બંડલનો ખર્ચ ઘટાડવા માટે બજેટ-અનુકૂળ વિકલ્પો સૂચવો.' },
-      { label: 'યુનિટ ઇકોનોમિક્સ વિશ્લેષણ', prompt: 'આ બંડલના માર્જિન અને યુનિટ ઇકોનોમિક્સનું વિગતવાર વિશ્લેષણ આપો.' }
-    ]
-  };
 
   const handleLanguageSelect = (langKey: 'en' | 'hi' | 'gu') => {
     setSelectedLang(langKey);
@@ -369,7 +347,6 @@ Choose your preferred language below or ask me anything to optimize your setup:`
 
   const violationCount = validation.compatibilityViolations.length;
   const isOverBudget = validation.landedPrice.isOverBudget;
-  const currentPrompts = quickPromptsByLang[selectedLang] || quickPromptsByLang.en;
 
   return (
     <>
@@ -461,16 +438,6 @@ Choose your preferred language below or ask me anything to optimize your setup:`
                   </button>
                 </div>
 
-                {/* Model Selector */}
-                <select
-                  value={drawerModel}
-                  onChange={e => setDrawerModel(e.target.value as any)}
-                  className="hidden md:block text-[10px] font-mono font-semibold bg-[#F4F1EA] border border-[#E6E1D3] rounded px-1.5 py-1 text-[#2C3A2B] cursor-pointer"
-                >
-                  <option value="gemini-3.8-flash">3.8-flash</option>
-                  <option value="gemini-3.1-flash-lite">3.1-lite</option>
-                  <option value="gemini-4-argon">4-argon</option>
-                </select>
 
                 {/* Full Chat button */}
                 <button
@@ -551,19 +518,6 @@ Choose your preferred language below or ask me anything to optimize your setup:`
               </div>
             </div>
 
-            {/* Quick Prompts Bar */}
-            <div className="px-4 py-2 border-b border-[#E6E1D3] bg-[#FDFBF7] flex items-center gap-1.5 overflow-x-auto no-scrollbar">
-              {currentPrompts.map((qp, i) => (
-                <button
-                  key={i}
-                  disabled={isLoading}
-                  onClick={() => handleSendMessage(qp.prompt)}
-                  className="shrink-0 px-2.5 py-1 text-[11px] font-medium rounded-full bg-white border border-[#E6E1D3] text-[#5A5A40] hover:text-[#2C3A2B] hover:border-[#8B5A2B] hover:bg-[#F4F1EA] transition-colors cursor-pointer disabled:opacity-50"
-                >
-                  {qp.label}
-                </button>
-              ))}
-            </div>
 
             {/* Messages Area */}
             <div className="flex-1 overflow-y-auto w-full p-4 space-y-4" style={{ backgroundColor: '#FDFBF7' }}>

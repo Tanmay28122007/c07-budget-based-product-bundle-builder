@@ -143,9 +143,9 @@ export const GeminiChatbotPage: React.FC = () => {
       text: `Welcome to the **Gemini Multi-Turn Hardware Chatbot**!
 
 I can assist you across several specialized roles:
-1. **Ergonomic Workspace Architect** (*gemini-3.8-flash*): Comprehensive ergonomic bundle assembly & postural design.
-2. **Rapid Compatibility Checker** (*gemini-3.1-flash-lite*): Lightning-fast dimensional and port validation.
-3. **Procurement & Unit Economics Analyst** (*gemini-4-argon*): Quantitative landed cost, shipping thresholds, and margin analysis.
+1. **Ergonomic Workspace Architect**: Comprehensive ergonomic bundle assembly & postural design.
+2. **Rapid Compatibility Checker**: Lightning-fast dimensional and port validation.
+3. **Procurement & Unit Economics Analyst**: Quantitative landed cost, shipping thresholds, and margin analysis.
 
 Your active bundle context is currently **${attachWorkspaceContext ? 'synced' : 'disconnected'}**. What would you like to discuss?`,
       model: 'gemini-3.8-flash',
@@ -381,7 +381,7 @@ Please provide an in-depth ergonomic & procurement evaluation for this product b
       {
         id: `reset-${Date.now()}`,
         role: 'assistant',
-        text: `Chat reset. I am ready as your **${ROLE_DEFINITIONS[activeRole].name}** using **${selectedModel}**. How can I help you?`,
+        text: `Chat reset. I am ready as your **${ROLE_DEFINITIONS[activeRole].name}**. How can I help you?`,
         model: selectedModel,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       }
@@ -539,10 +539,7 @@ Please provide an in-depth ergonomic & procurement evaluation for this product b
                     <span className="truncate">{r.name}</span>
                   </div>
                 </div>
-                <div className="flex items-center justify-between mt-1 text-[10px]">
-                  <span className={`font-mono px-1.5 py-0.2 rounded ${isSelected ? 'bg-[#2C3A2B] text-white font-bold' : 'bg-[#E6E1D3] text-[#5A5A40]'}`}>
-                    {r.defaultModel}
-                  </span>
+                <div className="flex items-center justify-end mt-1 text-[10px]">
                   <span className="text-[#8B8B7A] font-medium">{r.badge}</span>
                 </div>
               </button>
@@ -553,19 +550,6 @@ Please provide an in-depth ergonomic & procurement evaluation for this product b
         {/* Configuration Bar: Model Selector, System Instruction, Context Toggle */}
         <div className="mt-3 pt-3 border-t border-stone-100 flex flex-wrap items-center justify-between gap-3 text-xs">
           <div className="flex flex-wrap items-center gap-3">
-            {/* Model Selector */}
-            <div className="flex items-center gap-1.5">
-              <span className="text-stone-500 font-medium">Model:</span>
-              <select
-                value={selectedModel}
-                onChange={e => setSelectedModel(e.target.value as GeminiModel)}
-                className="px-2.5 py-1 text-xs font-mono font-semibold bg-white border border-stone-200 rounded-lg text-stone-800 focus:outline-hidden focus:ring-1 focus:ring-indigo-800 cursor-pointer"
-              >
-                <option value="gemini-3.8-flash">gemini-3.8-flash (General Tasks)</option>
-                <option value="gemini-3.1-flash-lite">gemini-3.1-flash-lite (Fast Tasks)</option>
-                <option value="gemini-4-argon">gemini-4-argon (Complex Tasks)</option>
-              </select>
-            </div>
 
             {/* System Instruction View/Edit Toggle */}
             <button
@@ -891,22 +875,6 @@ Please provide an in-depth ergonomic & procurement evaluation for this product b
 
       {/* Main Conversation Container */}
       <div className="bg-white border border-[#E6E1D3] rounded-[24px] shadow-sm flex flex-col min-h-[560px]">
-        {/* Role Quick Prompts Strip */}
-        <div className="p-3 bg-[#FDFBF7] border-b border-[#E6E1D3] flex items-center gap-2 overflow-x-auto no-scrollbar">
-          <span className="text-[11px] font-semibold text-[#8B8B7A] uppercase tracking-wider shrink-0 mr-1">
-            Starters:
-          </span>
-          {ROLE_DEFINITIONS[activeRole].starterPrompts.map((prompt, i) => (
-            <button
-              key={i}
-              disabled={isLoading}
-              onClick={() => handleSendMessage(prompt)}
-              className="shrink-0 px-3 py-1 text-xs font-medium rounded-full bg-white border border-[#E6E1D3] text-[#5A5A40] hover:text-[#2C3A2B] hover:border-[#8B5A2B] hover:bg-[#F4F1EA] transition-colors cursor-pointer disabled:opacity-50"
-            >
-              {prompt}
-            </button>
-          ))}
-        </div>
 
         {/* Scrollable Message Thread */}
         <div className="flex-1 p-5 overflow-y-auto space-y-5 max-h-[520px]">
@@ -933,7 +901,7 @@ Please provide an in-depth ergonomic & procurement evaluation for this product b
                   {/* Message Meta Header */}
                   <div className="flex items-center justify-between gap-3 mb-1.5 pb-1 border-b border-current/10">
                     <span className={`font-semibold text-[11px] ${isUser ? 'text-emerald-200' : 'text-[#8B5A2B]'}`}>
-                      {isUser ? 'You' : `Gemini (${msg.model || selectedModel})`}
+                      {isUser ? 'You' : 'Gemini'}
                     </span>
                     <div className="flex items-center gap-2">
                       <span className={`text-[10px] font-mono ${isUser ? 'text-emerald-200' : 'text-[#8B8B7A]'}`}>
@@ -1117,7 +1085,7 @@ Please provide an in-depth ergonomic & procurement evaluation for this product b
                 <span className="w-2 h-2 rounded-full bg-[#8B5A2B] animate-bounce [animation-delay:0.2s]" />
                 <span className="w-2 h-2 rounded-full bg-[#8B5A2B] animate-bounce [animation-delay:0.4s]" />
                 <span className="text-xs font-medium text-[#5A5A40] ml-1">
-                  Gemini ({selectedModel}) is evaluating multi-turn context...
+                  Gemini is evaluating multi-turn context...
                 </span>
               </div>
             </div>
@@ -1147,7 +1115,7 @@ Please provide an in-depth ergonomic & procurement evaluation for this product b
                     handleSendMessage();
                   }
                 }}
-                placeholder={`Ask ${ROLE_DEFINITIONS[activeRole].name} with ${selectedModel}...`}
+                placeholder={`Ask ${ROLE_DEFINITIONS[activeRole].name}...`}
                 disabled={isLoading}
                 className="w-full resize-none p-3 text-xs bg-[#F4F1EA]/70 hover:bg-[#F4F1EA] focus:bg-white border border-[#E6E1D3] rounded-xl focus:outline-hidden focus:border-[#2C3A2B] transition-colors placeholder:text-[#8B8B7A] text-[#2C2C1E]"
               />
@@ -1165,7 +1133,7 @@ Please provide an in-depth ergonomic & procurement evaluation for this product b
 
           <div className="mt-2 flex items-center justify-between text-[11px] text-[#8B8B7A] px-1 font-mono">
             <span>Press Enter to send, Shift+Enter for newline</span>
-            <span>Role: {ROLE_DEFINITIONS[activeRole].name} • Model: {selectedModel}</span>
+            <span>Role: {ROLE_DEFINITIONS[activeRole].name}</span>
           </div>
         </div>
       </div>
