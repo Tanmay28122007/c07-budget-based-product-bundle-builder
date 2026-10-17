@@ -152,11 +152,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
               <PackagePlus className="w-5 h-5 text-amber-100" />
             </div>
             <div className="min-w-0">
-              <div className="font-serif text-xs font-bold tracking-tight text-[#2C3A2B] group-hover:text-[#8B5A2B] transition-colors leading-tight">
+              <div className="font-serif text-sm font-bold tracking-tight text-[#2C3A2B] group-hover:text-[#8B5A2B] transition-colors leading-snug">
                 Budget Based Product Bundle Builder
-              </div>
-              <div className="text-[10px] text-[#5A5A40] font-medium">
-                Standard C07 Suite
               </div>
             </div>
           </div>
