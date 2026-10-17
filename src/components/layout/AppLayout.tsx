@@ -4,6 +4,7 @@ import { Header } from './Header';
 import { AIAssistantDrawer } from '../assistant/AIAssistantDrawer';
 import { BundleCartDrawer } from '../cart/BundleCartDrawer';
 import { SupabaseModal } from '../database/SupabaseModal';
+import { ProfileModal } from '../profile/ProfileModal';
 import { useApp } from '../../context/AppContext';
 import { ShoppingCart } from 'lucide-react';
 import { formatINR } from '../../utils/pricing';
@@ -36,6 +37,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
           isOpen={isSupabaseModalOpen}
           onClose={() => setIsSupabaseModalOpen(false)}
         />
+        <ProfileModal />
       </div>
     );
   }
@@ -95,6 +97,9 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
           isOpen={isSupabaseModalOpen}
           onClose={() => setIsSupabaseModalOpen(false)}
         />
+
+        {/* Quick Profile Edit Modal */}
+        <ProfileModal />
       </div>
     </div>
   );
