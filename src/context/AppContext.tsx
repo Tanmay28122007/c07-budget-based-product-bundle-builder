@@ -12,10 +12,8 @@ import {
   UnitEconomicsParams,
   ShopperExperimentRecord,
   ProjectEvidenceRecord,
-  NegotiatedScope,
-  UserProfile
+  NegotiatedScope
 } from '../types';
-export type { UserProfile };
 import { DEFAULT_SYNTHETIC_FIXTURE, mapC07Fixture } from '../data/defaultFixture';
 import { validateBundle } from '../utils/bundleValidation';
 import { findValidBundle, OptimizationResult } from '../utils/bundleOptimizer';
@@ -72,10 +70,8 @@ interface AppContextType {
   currentItems: Record<string, Product | null>;
   validation: BundleValidationResult;
   selectProduct: (slotId: string, product: Product) => void;
-  addItemToCart: (product: Product) => void;
   removeProduct: (slotId: string) => void;
   resetBundle: () => void;
-  setBundleItems: (items: Record<string, Product | null>, newBudget?: number) => void;
   optimizeBundle: (preference?: 'lowest_cost' | 'best_value') => OptimizationResult;
 
   // Saved & Compared Bundles
@@ -129,38 +125,7 @@ interface AppContextType {
   isSupabaseModalOpen: boolean;
   setIsSupabaseModalOpen: (open: boolean) => void;
   checkSupabaseStatus: () => Promise<void>;
-
-  // User Profile
-  userProfile: UserProfile;
-  updateUserProfile: (updates: Partial<UserProfile>) => void;
-  resetUserProfile: () => void;
-  isProfileModalOpen: boolean;
-  setIsProfileModalOpen: (open: boolean) => void;
-  openProfileModal: () => void;
-  closeProfileModal: () => void;
 }
-
-export const DEFAULT_USER_PROFILE: UserProfile = {
-  name: 'Tanmay Anand',
-  email: 'tanmay.anand@craftbundle.io',
-  phone: '+91 98765 43210',
-  roleTitle: 'Lead Bundle Architect',
-  department: 'Product & Merchandising',
-  bio: 'Specializing in budget-optimized workspace bundles, landed cost analytics, and AI recommendations.',
-  avatarColor: '#2C3A2B',
-  address: '42 Indiranagar 100ft Road',
-  city: 'Bengaluru',
-  state: 'Karnataka',
-  postalCode: '560038',
-  country: 'India',
-  preferredCurrency: 'INR',
-  defaultBudget: 75000,
-  optimizationPreference: 'best_value',
-  emailAlerts: true,
-  aiTips: true,
-  compactView: false,
-  memberSince: 'March 2024'
-};
 
 const INITIAL_SHOPPER_RECORDS: ShopperExperimentRecord[] = [
   {
@@ -327,8 +292,7 @@ const VALID_TABS = [
   'business',
   'evidence',
   'settings',
-  'product-detail',
-  'profile'
+  'product-detail'
 ];
 
 const getInitialTab = (): string => {
@@ -600,42 +564,6 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [isSupabaseConnected, setIsSupabaseConnected] = useState<boolean>(false);
   const [isSupabaseModalOpen, setIsSupabaseModalOpen] = useState<boolean>(false);
 
-  // User Profile State
-  const [userProfile, setUserProfile] = useState<UserProfile>(() => {
-    try {
-      const saved = localStorage.getItem('c07_user_profile_v1');
-      if (saved) {
-        return { ...DEFAULT_USER_PROFILE, ...JSON.parse(saved) };
-      }
-    } catch (e) {
-      console.warn('Could not read user profile from storage:', e);
-    }
-    return DEFAULT_USER_PROFILE;
-  });
-
-  const [isProfileModalOpen, setIsProfileModalOpen] = useState<boolean>(false);
-  const openProfileModal = () => setIsProfileModalOpen(true);
-  const closeProfileModal = () => setIsProfileModalOpen(false);
-
-  const updateUserProfile = (updates: Partial<UserProfile>) => {
-    setUserProfile(prev => {
-      const next = { ...prev, ...updates };
-      try {
-        localStorage.setItem('c07_user_profile_v1', JSON.stringify(next));
-      } catch {}
-      return next;
-    });
-    addNotification('Profile Updated', 'Your profile details and preferences were saved successfully.', 'success');
-  };
-
-  const resetUserProfile = () => {
-    setUserProfile(DEFAULT_USER_PROFILE);
-    try {
-      localStorage.setItem('c07_user_profile_v1', JSON.stringify(DEFAULT_USER_PROFILE));
-    } catch {}
-    addNotification('Profile Reset', 'Profile details restored to defaults.', 'info');
-  };
-
   const checkSupabaseStatus = async () => {
     const config = getSupabaseConfig();
     if (!config.isConfigured) {
@@ -749,45 +677,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     addNotification("Product Selected", `Assigned "${product.name}" to ${slotId.toUpperCase()} slot.`, 'info');
   };
 
-  const addItemToCart = (product: Product) => {
-    // 1. Check if an empty required slot exists for this product's category
-    const matchingEmptyRequiredSlot = fixture.activity.requiredSlots.find(
-      s => (s.id === product.category || s.category.toLowerCase() === product.category.toLowerCase()) && !currentItems[s.id]
-    );
-
-    let targetSlot = matchingEmptyRequiredSlot ? matchingEmptyRequiredSlot.id : null;
-
-    if (!targetSlot) {
-      if (!currentItems[product.category]) {
-        targetSlot = product.category;
-      } else {
-        // Generate an available unique slot identifier for subsequent items
-        let index = 1;
-        while (currentItems[`${product.category}_${index}`]) {
-          index++;
-        }
-        targetSlot = `${product.category}_${index}`;
-      }
-    }
-
-    setCurrentItems(prev => ({
-      ...prev,
-      [targetSlot!]: product
-    }));
-    addNotification("Added to Cart", `Added "${product.name}" (${formatINR(product.price)}) to bundle cart.`, 'success');
-  };
-
   const removeProduct = (slotId: string) => {
     const current = currentItems[slotId];
-    setCurrentItems(prev => {
-      const next = { ...prev };
-      if (fixture.activity.requiredSlots.some(s => s.id === slotId)) {
-        next[slotId] = null;
-      } else {
-        delete next[slotId];
-      }
-      return next;
-    });
+    setCurrentItems(prev => ({ ...prev, [slotId]: null }));
     if (current) {
       addNotification("Product Removed", `Removed "${current.name}" from ${slotId.toUpperCase()} slot.`, 'warning');
     }
@@ -800,13 +692,6 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }
     setCurrentItems(emptyItems);
     addNotification("Bundle Reset", "Cleared all selected products from slots.", 'info');
-  };
-
-  const setBundleItems = (items: Record<string, Product | null>, newBudget?: number) => {
-    if (newBudget && newBudget > 0) {
-      setBudget(newBudget);
-    }
-    setCurrentItems(items);
   };
 
   const applyBundleRecommendation = (itemsMap: Record<string, string>, newBudget?: number) => {
@@ -1126,10 +1011,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         currentItems,
         validation,
         selectProduct,
-        addItemToCart,
         removeProduct,
         resetBundle,
-        setBundleItems,
         optimizeBundle,
 
         savedBundles,
@@ -1174,15 +1057,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         isSupabaseConnected,
         isSupabaseModalOpen,
         setIsSupabaseModalOpen,
-        checkSupabaseStatus,
-
-        userProfile,
-        updateUserProfile,
-        resetUserProfile,
-        isProfileModalOpen,
-        setIsProfileModalOpen,
-        openProfileModal,
-        closeProfileModal
+        checkSupabaseStatus
       }}
     >
       {children}

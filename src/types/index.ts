@@ -215,27 +215,3 @@ export interface NegotiatedScope {
   agreementDate: string;
   acceptanceCriteria: string;
 }
-
-export interface UserProfile {
-  name: string;
-  email: string;
-  phone: string;
-  roleTitle: string;
-  department: string;
-  bio: string;
-  avatarColor: string;
-  avatarUrl?: string;
-  address: string;
-  city: string;
-  state: string;
-  postalCode: string;
-  country: string;
-  preferredCurrency: string;
-  defaultBudget: number;
-  optimizationPreference: 'lowest_cost' | 'best_value';
-  emailAlerts: boolean;
-  aiTips: boolean;
-  compactView: boolean;
-  memberSince?: string;
-}
-

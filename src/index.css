@@ -71,7 +71,7 @@ html {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Smooth baseline transitions for all interactive elements with spring easing */
+/* Smooth baseline transitions for all interactive elements */
 button,
 a,
 input,
@@ -82,66 +82,66 @@ textarea,
   transition: color 0.22s cubic-bezier(0.16, 1, 0.3, 1),
               background-color 0.22s cubic-bezier(0.16, 1, 0.3, 1),
               border-color 0.22s cubic-bezier(0.16, 1, 0.3, 1),
-              box-shadow 0.32s cubic-bezier(0.34, 1.56, 0.64, 1),
-              transform 0.32s cubic-bezier(0.34, 1.56, 0.64, 1),
+              box-shadow 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.28s cubic-bezier(0.16, 1, 0.3, 1),
               filter 0.22s ease,
               opacity 0.2s ease;
   will-change: transform, box-shadow;
 }
 
-/* Universal Button Hover: Energetic 3D Float with Rich Ambient Depth */
+/* Universal Button Hover: Strong, Elevated 3D Float with Warm Radiant Depth */
 button:not(:disabled):hover,
 [role="button"]:not(:disabled):hover {
-  transform: translateY(-4px) scale(1.035);
-  filter: brightness(1.08);
-  box-shadow: 0 18px 36px -6px rgba(44, 58, 43, 0.28),
-              0 8px 16px -3px rgba(139, 90, 43, 0.18);
+  transform: translateY(-3px) scale(1.025);
+  filter: brightness(1.05);
+  box-shadow: 0 14px 28px -6px rgba(44, 58, 43, 0.24),
+              0 6px 12px -3px rgba(44, 58, 43, 0.12);
 }
 
-/* Tactile Active Compression on Press with Spring Bounce */
+/* Tactile Active Compression on Press */
 button:not(:disabled):active,
 [role="button"]:not(:disabled):active {
-  transform: translateY(2px) scale(0.95) !important;
-  filter: brightness(0.95);
-  box-shadow: 0 4px 10px -2px rgba(44, 58, 43, 0.2) !important;
-  transition-duration: 0.06s !important;
+  transform: translateY(1px) scale(0.96) !important;
+  filter: brightness(0.96);
+  box-shadow: 0 4px 10px -2px rgba(44, 58, 43, 0.18) !important;
+  transition-duration: 0.08s !important;
 }
 
 /* Header & Icon Buttons: Energetic Pop and Spring Lift */
 .shrink-0 button:hover,
 header button:hover,
 .icon-btn:hover {
-  transform: scale(1.16) translateY(-3px) !important;
-  filter: brightness(1.08);
-  box-shadow: 0 14px 28px -4px rgba(44, 58, 43, 0.28) !important;
+  transform: scale(1.12) translateY(-2px) !important;
+  filter: brightness(1.06);
+  box-shadow: 0 10px 22px -4px rgba(44, 58, 43, 0.22) !important;
 }
 
 /* Primary Heritage Green Buttons: Bold Elevated Float & Deep Radiant Shadow */
 button.bg-\[\#2C3A2B\]:not(:disabled):hover,
 button.bg-\[\#1E281D\]:not(:disabled):hover,
 button.bg-\[\#3A4D39\]:not(:disabled):hover {
-  transform: translateY(-5px) scale(1.045) !important;
-  box-shadow: 0 24px 48px -8px rgba(44, 58, 43, 0.48),
-              0 10px 22px -4px rgba(44, 58, 43, 0.32) !important;
-  filter: brightness(1.1);
+  transform: translateY(-4px) scale(1.03) !important;
+  box-shadow: 0 20px 40px -8px rgba(44, 58, 43, 0.44),
+              0 8px 18px -4px rgba(44, 58, 43, 0.28) !important;
+  filter: brightness(1.07);
 }
 
 /* Primary Terracotta Orange Buttons: Warm Amber Ambient Bloom */
 button.bg-\[\#8B5A2B\]:not(:disabled):hover,
 button.bg-\[\#B85B28\]:not(:disabled):hover,
 button.bg-\[\#D46A43\]:not(:disabled):hover {
-  transform: translateY(-5px) scale(1.045) !important;
-  box-shadow: 0 24px 48px -8px rgba(139, 90, 43, 0.5),
-              0 10px 22px -4px rgba(139, 90, 43, 0.32) !important;
-  filter: brightness(1.1);
+  transform: translateY(-4px) scale(1.03) !important;
+  box-shadow: 0 20px 40px -8px rgba(139, 90, 43, 0.44),
+              0 8px 18px -4px rgba(139, 90, 43, 0.28) !important;
+  filter: brightness(1.07);
 }
 
 /* Secondary & Outline Buttons: Crisp Light Lift */
 button.bg-\[\#F4F1EA\]:not(:disabled):hover,
 button.bg-white:not(:disabled):hover {
-  transform: translateY(-4px) scale(1.035) !important;
-  box-shadow: 0 16px 32px -6px rgba(44, 58, 43, 0.2),
-              0 6px 14px -3px rgba(139, 90, 43, 0.15) !important;
+  transform: translateY(-3px) scale(1.025) !important;
+  box-shadow: 0 12px 24px -5px rgba(44, 58, 43, 0.16),
+              0 4px 10px -2px rgba(139, 90, 43, 0.1) !important;
   border-color: #8B5A2B !important;
 }
 
@@ -156,50 +156,41 @@ button.bg-white:not(:disabled):hover {
 .rounded-\[22px\].border,
 .rounded-\[28px\].border,
 .rounded-xl.border {
-  transition: transform 0.38s cubic-bezier(0.34, 1.56, 0.64, 1),
-              box-shadow 0.38s cubic-bezier(0.16, 1, 0.3, 1),
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1),
               border-color 0.28s ease,
               background-color 0.25s ease;
   will-change: transform, box-shadow;
 }
 
-/* Elevated Hover on Interactive Cards: High Lift & Deep Organic Drop Shadow */
+/* Elevated Hover on Interactive Cards */
 .cursor-pointer.border:hover,
 .card-hover:hover,
 .group:hover.group-hover-card {
-  transform: translateY(-9px) scale(1.022) !important;
-  box-shadow: 0 32px 64px -12px rgba(44, 58, 43, 0.3),
-              0 14px 28px -6px rgba(139, 90, 43, 0.22) !important;
+  transform: translateY(-6px) scale(1.014) !important;
+  box-shadow: 0 26px 52px -12px rgba(44, 58, 43, 0.24),
+              0 10px 24px -6px rgba(139, 90, 43, 0.16) !important;
   border-color: #8B5A2B !important;
 }
 
-/* Product Catalogue & Bundle Card Hover */
-div[id^="product-"]:hover {
-  transform: translateY(-8px) scale(1.018) !important;
-  box-shadow: 0 28px 56px -10px rgba(44, 58, 43, 0.28),
-              0 12px 24px -5px rgba(139, 90, 43, 0.2) !important;
-  border-color: #8B5A2B !important;
-}
-
-/* Image Zoom & Dynamic Micro-Tilt Inside Cards */
+/* Image Zoom Dynamics Inside Cards */
 .group:hover img,
 .group\/img:hover img,
 .card-hover:hover img {
-  transform: scale(1.14) rotate(1deg) !important;
-  transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
-  filter: drop-shadow(0 8px 16px rgba(44, 58, 43, 0.15));
+  transform: scale(1.09) !important;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
 /* Table rows smooth hover highlight and micro-float */
 tbody tr {
   transition: background-color 0.2s cubic-bezier(0.16, 1, 0.3, 1),
-              transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
-              box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+              transform 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 }
 tbody tr:hover {
-  background-color: #ECE6D8 !important;
-  transform: scale(1.012) translateY(-3px);
-  box-shadow: 0 12px 26px -4px rgba(44, 58, 43, 0.2) !important;
+  background-color: #EDE8DC !important;
+  transform: scale(1.006) translateY(-2px);
+  box-shadow: 0 8px 20px -4px rgba(44, 58, 43, 0.16) !important;
   position: relative;
   z-index: 2;
 }
@@ -207,52 +198,51 @@ tbody tr:hover {
 /* Interactive badge & chip energetic micro-hover */
 span.rounded-full,
 .badge-chip {
-  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
-              box-shadow 0.28s ease,
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.25s ease,
               background-color 0.2s ease;
 }
 span.rounded-full:hover,
 .badge-chip:hover {
-  transform: scale(1.15) translateY(-3px);
-  box-shadow: 0 8px 20px -3px rgba(139, 90, 43, 0.3);
+  transform: scale(1.09) translateY(-1.5px);
+  box-shadow: 0 6px 16px -3px rgba(139, 90, 43, 0.25);
 }
 
 /* Inputs & selects smooth focus bloom with micro-lift */
 input, select, textarea {
   transition: border-color 0.22s ease,
-              box-shadow 0.28s cubic-bezier(0.34, 1.56, 0.64, 1),
-              transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+              box-shadow 0.26s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.22s cubic-bezier(0.16, 1, 0.3, 1),
               background-color 0.2s ease;
 }
 input:hover:not(:disabled),
 select:hover:not(:disabled),
 textarea:hover:not(:disabled) {
-  transform: translateY(-2px);
   border-color: #8B5A2B;
-  box-shadow: 0 0 0 3px rgba(139, 90, 43, 0.18),
-              0 6px 16px -2px rgba(44, 58, 43, 0.12);
+  box-shadow: 0 0 0 3px rgba(139, 90, 43, 0.14),
+              0 4px 12px -2px rgba(44, 58, 43, 0.08);
 }
 
 input:focus,
 select:focus,
 textarea:focus {
   outline: none;
-  transform: translateY(-2px) scale(1.01);
+  transform: translateY(-1px);
   border-color: #2C3A2B !important;
-  box-shadow: 0 0 0 4px rgba(44, 58, 43, 0.25),
-              0 10px 24px -4px rgba(44, 58, 43, 0.18) !important;
+  box-shadow: 0 0 0 4px rgba(44, 58, 43, 0.2),
+              0 8px 20px -4px rgba(44, 58, 43, 0.14) !important;
 }
 
 /* Navigation links energetic slide right with spring */
 nav button {
-  transition: transform 0.32s cubic-bezier(0.34, 1.56, 0.64, 1),
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
               background-color 0.22s ease,
               color 0.22s ease,
               box-shadow 0.3s ease !important;
 }
 nav button:hover {
-  transform: translateX(10px) scale(1.025) !important;
-  box-shadow: 0 12px 26px -4px rgba(44, 58, 43, 0.22) !important;
+  transform: translateX(7px) scale(1.015) !important;
+  box-shadow: 0 8px 20px -4px rgba(44, 58, 43, 0.16) !important;
 }
 
 /* ========================================================================= */
@@ -261,16 +251,16 @@ nav button:hover {
 
 button:not(:disabled):hover svg,
 [role="button"]:not(:disabled):hover svg {
-  transform: scale(1.22);
-  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transform: scale(1.15);
+  transition: transform 0.26s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 /* Sparkles Golden Rotation & Radiant Drop Shadow */
 button:hover svg.lucide-sparkles,
 .group:hover svg.lucide-sparkles {
-  transform: scale(1.36) rotate(32deg) !important;
-  filter: drop-shadow(0 0 10px rgba(245, 158, 11, 0.9));
-  transition: all 0.38s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+  transform: scale(1.28) rotate(22deg) !important;
+  filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.75));
+  transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
 }
 
 /* Refresh / Reset Spin on Hover */
@@ -278,24 +268,24 @@ button:hover svg.lucide-refresh-cw,
 button:hover svg.lucide-refresh-ccw,
 button:hover svg.lucide-rotate-ccw,
 .group:hover svg.lucide-rotate-ccw {
-  transform: rotate(360deg) scale(1.25) !important;
-  transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+  transform: rotate(180deg) scale(1.15) !important;
+  transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
 }
 
 /* Plus Icon 90-degree Rotation Pop */
 button:hover svg.lucide-plus,
 button:hover svg.lucide-plus-circle,
 .group:hover svg.lucide-plus {
-  transform: rotate(90deg) scale(1.3) !important;
+  transform: rotate(90deg) scale(1.22) !important;
   transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
 }
 
 /* Trash Icon Wiggle / Shake */
 @keyframes trash-shake {
   0%, 100% { transform: rotate(0deg) scale(1); }
-  25% { transform: rotate(-18deg) scale(1.25); }
-  50% { transform: rotate(18deg) scale(1.25); }
-  75% { transform: rotate(-10deg) scale(1.2); }
+  25% { transform: rotate(-14deg) scale(1.18); }
+  50% { transform: rotate(14deg) scale(1.18); }
+  75% { transform: rotate(-8deg) scale(1.18); }
 }
 
 button:hover svg.lucide-trash2,
@@ -308,36 +298,28 @@ button:hover svg.lucide-trash {
 button:hover svg.lucide-shopping-bag,
 button:hover svg.lucide-shopping-cart,
 .group:hover svg.lucide-shopping-cart {
-  transform: translateY(-4px) scale(1.32) rotate(-5deg) !important;
-  transition: transform 0.32s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+  transform: translateY(-3px) scale(1.22) !important;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
 }
 
 /* Arrow Slide Animations */
 button:hover svg.lucide-arrow-right,
 .group:hover svg.lucide-arrow-right {
-  transform: translateX(7px) scale(1.22) !important;
+  transform: translateX(5px) scale(1.15) !important;
   transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
 button:hover svg.lucide-arrow-left,
 .group:hover svg.lucide-arrow-left {
-  transform: translateX(-7px) scale(1.22) !important;
+  transform: translateX(-5px) scale(1.15) !important;
   transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
 /* External Link Shift */
 button:hover svg.lucide-external-link,
 a:hover svg.lucide-external-link {
-  transform: translate(4px, -4px) scale(1.22) !important;
+  transform: translate(3px, -3px) scale(1.15) !important;
   transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1) !important;
-}
-
-/* User & Profile Icon Pop */
-button:hover svg.lucide-user,
-button:hover svg.lucide-user-circle2,
-.group:hover svg.lucide-user-circle2 {
-  transform: scale(1.28) rotate(4deg) !important;
-  transition: transform 0.32s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
 }
 
 /* ========================================================================= */
@@ -349,7 +331,7 @@ button:hover svg.lucide-user-circle2,
     transform: translateY(0px) rotate(0deg) scale(1);
   }
   50% {
-    transform: translateY(-30px) rotate(4deg) scale(1.08);
+    transform: translateY(-24px) rotate(3deg) scale(1.06);
   }
 }
 
@@ -358,18 +340,18 @@ button:hover svg.lucide-user-circle2,
     transform: translateY(0px) rotate(0deg) scale(1);
   }
   50% {
-    transform: translateY(28px) rotate(-4deg) scale(0.94);
+    transform: translateY(22px) rotate(-3deg) scale(0.95);
   }
 }
 
 @keyframes pulse-glow {
   0%, 100% {
-    opacity: 0.15;
+    opacity: 0.12;
     transform: scale(1);
   }
   50% {
-    opacity: 0.38;
-    transform: scale(1.15);
+    opacity: 0.3;
+    transform: scale(1.1);
   }
 }
 
@@ -378,7 +360,7 @@ button:hover svg.lucide-user-circle2,
     transform: translateY(0);
   }
   50% {
-    transform: translateY(-8px);
+    transform: translateY(-6px);
   }
 }
 
@@ -394,11 +376,11 @@ button:hover svg.lucide-user-circle2,
 @keyframes badge-pulse {
   0%, 100% {
     transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(44, 58, 43, 0.45);
+    box-shadow: 0 0 0 0 rgba(44, 58, 43, 0.35);
   }
   50% {
-    transform: scale(1.12);
-    box-shadow: 0 0 0 8px rgba(44, 58, 43, 0);
+    transform: scale(1.08);
+    box-shadow: 0 0 0 6px rgba(44, 58, 43, 0);
   }
 }
 
@@ -412,23 +394,23 @@ button:hover svg.lucide-user-circle2,
 }
 
 .animate-float-slow {
-  animation: float-slow 12s ease-in-out infinite;
+  animation: float-slow 14s ease-in-out infinite;
 }
 
 .animate-float-reverse {
-  animation: float-reverse 15s ease-in-out infinite;
+  animation: float-reverse 18s ease-in-out infinite;
 }
 
 .animate-pulse-glow {
-  animation: pulse-glow 7s ease-in-out infinite;
+  animation: pulse-glow 9s ease-in-out infinite;
 }
 
 .animate-fab-float {
-  animation: fab-float 3.5s ease-in-out infinite;
+  animation: fab-float 4s ease-in-out infinite;
 }
 
 .animate-badge-pulse {
-  animation: badge-pulse 1.8s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+  animation: badge-pulse 2.2s cubic-bezier(0.16, 1, 0.3, 1) infinite;
 }
 
 /* Subtle idle breathing on Floating Action Buttons */
@@ -436,7 +418,7 @@ button[aria-label*="AI Assistant"],
 button[aria-label*="Assistant"],
 button[aria-label*="cart"],
 button[aria-label*="Cart"] {
-  animation: fab-float 3.8s ease-in-out infinite;
+  animation: fab-float 4.5s ease-in-out infinite;
 }
 
 button[aria-label*="AI Assistant"]:hover,
@@ -444,8 +426,8 @@ button[aria-label*="Assistant"]:hover,
 button[aria-label*="cart"]:hover,
 button[aria-label*="Cart"]:hover {
   animation-play-state: paused;
-  transform: translateY(-9px) scale(1.14) !important;
-  box-shadow: 0 30px 60px -8px rgba(44, 58, 43, 0.45) !important;
+  transform: translateY(-6px) scale(1.08) !important;
+  box-shadow: 0 24px 48px -8px rgba(44, 58, 43, 0.38) !important;
 }
 
 /* Shimmer reflection sweep on primary CTA buttons */
@@ -460,12 +442,12 @@ button.bg-\[\#8B5A2B\]::after {
   position: absolute;
   top: 0;
   left: 0;
-  width: 50%;
+  width: 45%;
   height: 100%;
   background: linear-gradient(
     90deg,
     transparent,
-    rgba(255, 255, 255, 0.3),
+    rgba(255, 255, 255, 0.22),
     transparent
   );
   transform: translateX(-180%) skewX(-20deg);
@@ -473,14 +455,14 @@ button.bg-\[\#8B5A2B\]::after {
 }
 button.bg-\[\#2C3A2B\]:hover::after,
 button.bg-\[\#8B5A2B\]:hover::after {
-  animation: shimmer-sweep 0.85s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+  animation: shimmer-sweep 1.1s cubic-bezier(0.16, 1, 0.3, 1) infinite;
 }
 
 /* Page & Card Entrance Stagger Keyframe */
 @keyframes fadeInUpSubtle {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(16px);
   }
   to {
     opacity: 1;
@@ -489,7 +471,7 @@ button.bg-\[\#8B5A2B\]:hover::after {
 }
 
 .animate-fade-in-up {
-  animation: fadeInUpSubtle 0.38s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  animation: fadeInUpSubtle 0.42s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 /* Progress bar continuous sheen animation */
@@ -498,8 +480,8 @@ button.bg-\[\#8B5A2B\]:hover::after {
   background-image: linear-gradient(
     90deg,
     rgba(255, 255, 255, 0) 0%,
-    rgba(255, 255, 255, 0.35) 50%,
+    rgba(255, 255, 255, 0.3) 50%,
     rgba(255, 255, 255, 0) 100%
   );
-  animation: progress-sheen 2s infinite linear;
+  animation: progress-sheen 2.5s infinite linear;
 }
