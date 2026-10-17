@@ -12,7 +12,8 @@ import {
   UnitEconomicsParams,
   ShopperExperimentRecord,
   ProjectEvidenceRecord,
-  NegotiatedScope
+  NegotiatedScope,
+  UserProfile
 } from '../types';
 import { DEFAULT_SYNTHETIC_FIXTURE, mapC07Fixture } from '../data/defaultFixture';
 import { validateBundle } from '../utils/bundleValidation';
@@ -125,7 +126,38 @@ interface AppContextType {
   isSupabaseModalOpen: boolean;
   setIsSupabaseModalOpen: (open: boolean) => void;
   checkSupabaseStatus: () => Promise<void>;
+
+  // User Profile
+  userProfile: UserProfile;
+  updateUserProfile: (updates: Partial<UserProfile>) => void;
+  resetUserProfile: () => void;
+  isProfileModalOpen: boolean;
+  setIsProfileModalOpen: (open: boolean) => void;
+  openProfileModal: () => void;
+  closeProfileModal: () => void;
 }
+
+export const DEFAULT_USER_PROFILE: UserProfile = {
+  name: 'Tanmay Anand',
+  email: 'tanmay.anand@craftbundle.io',
+  phone: '+91 98765 43210',
+  roleTitle: 'Lead Bundle Architect',
+  department: 'Product & Merchandising',
+  bio: 'Specializing in budget-optimized workspace bundles, landed cost analytics, and AI recommendations.',
+  avatarColor: '#2C3A2B',
+  address: '42 Indiranagar 100ft Road',
+  city: 'Bengaluru',
+  state: 'Karnataka',
+  postalCode: '560038',
+  country: 'India',
+  preferredCurrency: 'INR',
+  defaultBudget: 75000,
+  optimizationPreference: 'best_value',
+  emailAlerts: true,
+  aiTips: true,
+  compactView: false,
+  memberSince: 'March 2024'
+};
 
 const INITIAL_SHOPPER_RECORDS: ShopperExperimentRecord[] = [
   {
@@ -292,7 +324,8 @@ const VALID_TABS = [
   'business',
   'evidence',
   'settings',
-  'product-detail'
+  'product-detail',
+  'profile'
 ];
 
 const getInitialTab = (): string => {
@@ -563,6 +596,42 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   // Supabase Database State
   const [isSupabaseConnected, setIsSupabaseConnected] = useState<boolean>(false);
   const [isSupabaseModalOpen, setIsSupabaseModalOpen] = useState<boolean>(false);
+
+  // User Profile State
+  const [userProfile, setUserProfile] = useState<UserProfile>(() => {
+    try {
+      const saved = localStorage.getItem('c07_user_profile_v1');
+      if (saved) {
+        return { ...DEFAULT_USER_PROFILE, ...JSON.parse(saved) };
+      }
+    } catch (e) {
+      console.warn('Could not read user profile from storage:', e);
+    }
+    return DEFAULT_USER_PROFILE;
+  });
+
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState<boolean>(false);
+  const openProfileModal = () => setIsProfileModalOpen(true);
+  const closeProfileModal = () => setIsProfileModalOpen(false);
+
+  const updateUserProfile = (updates: Partial<UserProfile>) => {
+    setUserProfile(prev => {
+      const next = { ...prev, ...updates };
+      try {
+        localStorage.setItem('c07_user_profile_v1', JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+    addNotification('Profile Updated', 'Your profile details and preferences were saved successfully.', 'success');
+  };
+
+  const resetUserProfile = () => {
+    setUserProfile(DEFAULT_USER_PROFILE);
+    try {
+      localStorage.setItem('c07_user_profile_v1', JSON.stringify(DEFAULT_USER_PROFILE));
+    } catch {}
+    addNotification('Profile Reset', 'Profile details restored to defaults.', 'info');
+  };
 
   const checkSupabaseStatus = async () => {
     const config = getSupabaseConfig();
@@ -1057,7 +1126,15 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         isSupabaseConnected,
         isSupabaseModalOpen,
         setIsSupabaseModalOpen,
-        checkSupabaseStatus
+        checkSupabaseStatus,
+
+        userProfile,
+        updateUserProfile,
+        resetUserProfile,
+        isProfileModalOpen,
+        setIsProfileModalOpen,
+        openProfileModal,
+        closeProfileModal
       }}
     >
       {children}

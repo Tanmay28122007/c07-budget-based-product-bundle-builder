@@ -10,7 +10,9 @@ import {
   ExternalLink,
   ChevronDown,
   LogOut,
-  ShoppingCart
+  ShoppingCart,
+  UserCircle2,
+  Edit3
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { formatINR } from '../../utils/pricing';
@@ -31,13 +33,21 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
     loginAs,
     logout,
     validation,
-    toggleCart
+    toggleCart,
+    userProfile,
+    openProfileModal
   } = useApp();
 
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
+
+  const getInitials = (nameStr: string) => {
+    const parts = (nameStr || '').trim().split(/\s+/);
+    if (parts.length >= 2) return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
+    return (nameStr.slice(0, 2) || 'US').toUpperCase();
+  };
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
@@ -206,32 +216,75 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
           )}
         </div>
 
-        {/* User Profile Avatar with Initials "TA" */}
+        {/* User Profile Avatar with Dynamic Initials */}
         <div className="relative" ref={profileRef}>
           <button
             onClick={() => setShowProfile(prev => !prev)}
             aria-label="User profile settings"
-            className="flex items-center gap-2 pl-1 pr-1.5 py-1 rounded-xl hover:bg-[#F4F1EA] transition-colors cursor-pointer"
+            className="flex items-center gap-2 pl-1 pr-1.5 py-1 rounded-xl hover:bg-[#F4F1EA] transition-colors cursor-pointer group"
           >
-            <div className="w-7 h-7 rounded-full bg-[#2C3A2B] text-white flex items-center justify-center font-bold text-xs tracking-tight shadow-2xs ring-1 ring-[#E6E1D3]">
-              TA
+            <div
+              className="w-7 h-7 rounded-full text-white flex items-center justify-center font-bold text-xs tracking-tight shadow-2xs ring-1 ring-[#E6E1D3] transition-transform group-hover:scale-105"
+              style={{ backgroundColor: userProfile.avatarColor || '#2C3A2B' }}
+            >
+              {getInitials(userProfile.name)}
             </div>
-            <span className="hidden sm:inline text-xs font-medium text-[#2C2C1E]">
-              {userRole === 'admin' ? 'Admin' : userRole === 'customer' ? 'Customer' : 'Guest'}
-            </span>
+            <div className="hidden sm:flex flex-col text-left leading-none">
+              <span className="text-xs font-semibold text-[#2C2C1E] max-w-[100px] truncate">
+                {userProfile.name || 'User'}
+              </span>
+              <span className="text-[10px] text-[#7A7A68]">
+                {userRole === 'admin' ? 'Admin' : userRole === 'customer' ? 'Customer' : 'Guest'}
+              </span>
+            </div>
             <ChevronDown className="w-3 h-3 text-[#8B8B7A]" />
           </button>
 
           {showProfile && (
-            <div className="absolute right-0 mt-2 w-60 bg-white border border-[#E6E1D3] rounded-2xl shadow-xl z-50 p-2">
-              <div className="px-3 py-2 border-b border-[#E6E1D3] mb-1">
-                <div className="text-xs font-serif font-bold text-[#2C3A2B]">Tanmay Anand</div>
-                <div className="text-[11px] text-[#5A5A40] flex items-center justify-between mt-0.5">
+            <div className="absolute right-0 mt-2 w-64 bg-white border border-[#E6E1D3] rounded-2xl shadow-xl z-50 p-2">
+              {/* Profile Card Header */}
+              <div className="px-3 py-2 border-b border-[#E6E1D3] mb-1.5 bg-[#FAF8F5] rounded-xl">
+                <div className="flex items-center gap-2.5">
+                  <div
+                    className="w-8 h-8 rounded-lg text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs"
+                    style={{ backgroundColor: userProfile.avatarColor || '#2C3A2B' }}
+                  >
+                    {getInitials(userProfile.name)}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="text-xs font-serif font-bold text-[#2C3A2B] truncate">{userProfile.name}</div>
+                    <div className="text-[10px] text-[#7A7A68] truncate">{userProfile.email}</div>
+                  </div>
+                </div>
+
+                <div className="text-[11px] text-[#5A5A40] flex items-center justify-between mt-2 pt-1.5 border-t border-[#E6E1D3]/60">
                   <span>Current Session:</span>
                   <span className="font-bold uppercase text-[10px] text-[#8B5A2B]">
                     {userRole ? userRole : 'Not Logged In'}
                   </span>
                 </div>
+              </div>
+
+              {/* My Profile Option */}
+              <div className="p-1 border-b border-[#E6E1D3] mb-1 space-y-1">
+                <button
+                  onClick={() => {
+                    setActiveTab('profile');
+                    setShowProfile(false);
+                  }}
+                  className="w-full text-left px-2.5 py-2 rounded-xl text-xs font-semibold text-[#2C3A2B] hover:bg-[#F4F1EA] flex items-center justify-between cursor-pointer transition-colors group bg-[#FAF8F5]/80 border border-[#E6E1D3]"
+                >
+                  <div className="flex items-center gap-2">
+                    <UserCircle2 className="w-4 h-4 text-[#8B5A2B] group-hover:scale-110 transition-transform" />
+                    <div>
+                      <div className="text-xs font-bold text-[#2C3A2B]">My Profile</div>
+                      <div className="text-[10px] text-[#7A7A68]">Edit name, address & details</div>
+                    </div>
+                  </div>
+                  <span className="text-[10px] font-mono text-[#8B5A2B] bg-[#8B5A2B]/10 px-2 py-0.5 rounded-md font-bold">
+                    Edit
+                  </span>
+                </button>
               </div>
 
               {/* Role Actions */}
