@@ -271,7 +271,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
                     className="w-full text-left px-3 py-1.5 rounded-xl text-xs font-medium text-[#8B5A2B] hover:bg-[#F4F1EA] flex items-center justify-between cursor-pointer"
                   >
                     <span>Login as Admin</span>
-                    <span className="text-[10px] font-mono text-[#8B8B7A]">Sarpanch</span>
+                    <span className="text-[10px] font-mono text-[#8B8B7A]">Manager</span>
                   </button>
                 )}
                 {userRole && (
