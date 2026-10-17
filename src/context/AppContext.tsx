@@ -283,6 +283,7 @@ function parseProductHash(hash: string): string | null {
 }
 
 const VALID_TABS = [
+  'landing',
   'dashboard',
   'builder',
   'chat',
@@ -311,7 +312,7 @@ const getInitialTab = (): string => {
   } catch (e) {
     console.warn('Could not read active tab from storage:', e);
   }
-  return 'catalogue';
+  return 'landing';
 };
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -421,7 +422,14 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   // Authentication & Role State
   const [userRole, setUserRole] = useState<UserRole>(() => {
     try {
-      const saved = localStorage.getItem('c07_user_role_v1');
+      if (typeof window !== 'undefined') {
+        const hash = window.location.hash.replace('#', '').trim();
+        // If visiting root with no specific hash or explicit landing, start at starting screen
+        if (!hash || hash === 'landing' || hash === 'login' || hash === 'start') {
+          return null;
+        }
+      }
+      const saved = sessionStorage.getItem('c07_user_role_v1');
       if (saved === 'customer' || saved === 'admin') return saved;
     } catch (e) {
       console.warn('Could not read user role from storage:', e);
@@ -436,20 +444,35 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       const saved = localStorage.getItem('c07_fixture_v2');
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (parsed?.products?.length && parsed?.activity) return parsed;
+        if (parsed?.products?.length && parsed?.activity) {
+          if (parsed.products.length < C07_DEFAULT_FIXTURE.products.length) {
+            return C07_DEFAULT_FIXTURE;
+          }
+          return parsed;
+        }
       }
     } catch (e) {
       console.warn('Could not parse saved fixture from storage:', e);
     }
-    return DEFAULT_SYNTHETIC_FIXTURE;
+    return C07_DEFAULT_FIXTURE;
   });
+
+  // Guard against stale cached fixtures with fewer products than C07_DEFAULT_FIXTURE
+  useEffect(() => {
+    if (fixture.products.length < C07_DEFAULT_FIXTURE.products.length) {
+      setFixture(C07_DEFAULT_FIXTURE);
+      try {
+        localStorage.removeItem('c07_fixture_v2');
+      } catch {}
+    }
+  }, [fixture.products.length]);
 
   const isCustomFixture = !fixture.isSynthetic;
 
   // Bundle State
   const [budget, setBudgetState] = useState<number>(() => {
     const saved = localStorage.getItem('c07_budget_v2');
-    return saved ? Number(saved) : (fixture.activity.defaultBudget || 2200);
+    return saved ? Number(saved) : 5000;
   });
 
   const [currentItems, setCurrentItems] = useState<Record<string, Product | null>>(() => {
@@ -464,11 +487,15 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     } catch (e) {
       console.warn('Could not load saved current items:', e);
     }
-    // Initialize with empty slots
+    // Initialize with default benchmark items if available (P07 Mouse & P08 Keyboard)
     const initial: Record<string, Product | null> = {};
     for (const slot of fixture.activity.requiredSlots) {
       initial[slot.id] = null;
     }
+    const p07 = fixture.products.find(p => p.id === 'P07');
+    const p08 = fixture.products.find(p => p.id === 'P08');
+    if (p07 && initial['Mouse'] !== undefined) initial['Mouse'] = p07;
+    if (p08 && initial['Keyboard'] !== undefined) initial['Keyboard'] = p08;
     return initial;
   });
 
@@ -643,6 +670,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     setUserRole(role);
     setAdminSignInRequested(false);
     try {
+      sessionStorage.setItem('c07_user_role_v1', role);
       localStorage.setItem('c07_user_role_v1', role);
     } catch {}
     if (role === 'customer') {
@@ -657,11 +685,15 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const logout = () => {
     setUserRole(null);
     try {
+      sessionStorage.removeItem('c07_user_role_v1');
       localStorage.removeItem('c07_user_role_v1');
     } catch {}
     setAdminSignInRequested(false);
-    setActiveTab('dashboard');
-    addNotification('Logged Out', 'You have returned to the homepage.', 'info');
+    setActiveTab('landing');
+    if (typeof window !== 'undefined') {
+      window.history.replaceState(null, '', '#landing');
+    }
+    addNotification('Logged Out', 'You have returned to the role selection starting screen.', 'info');
   };
 
   const setBudget = (val: number) => {

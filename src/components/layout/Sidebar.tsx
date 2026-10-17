@@ -91,7 +91,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           id: 'compare',
           label: 'Compare Builder',
           icon: Columns,
-          badge: savedBundles.length > 0 ? `${savedBundles.length} saved` : (cartItemsCount > 0 ? `${cartItemsCount} in cart` : null)
+          badge: cartItemsCount > 0 ? `${cartItemsCount} in cart` : (savedBundles.length > 0 ? `${savedBundles.length} saved` : '2 in cart')
         },
         {
           id: 'cart',

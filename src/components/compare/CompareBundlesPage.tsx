@@ -251,16 +251,6 @@ export const CompareBundlesPage: React.FC<CompareBundlesPageProps> = ({ initialM
               </span>
             </button>
           </div>
-
-          {/* Quick Snapshot Action */}
-          <button
-            onClick={handleSnapshotActive}
-            title="Snapshot active setup to saved comparison bundles"
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-[#8B5A2B] bg-white hover:bg-[#F4F1EA] border border-[#E6E1D3] rounded-xl shadow-2xs hover:shadow-md transition-all cursor-pointer hover:scale-105 active:scale-95"
-          >
-            <BookmarkPlus className="w-3.5 h-3.5 text-[#8B5A2B]" />
-            <span>Snapshot Setup</span>
-          </button>
         </div>
       </div>
 
@@ -269,7 +259,7 @@ export const CompareBundlesPage: React.FC<CompareBundlesPageProps> = ({ initialM
       {/* ========================================================================= */}
       {viewMode === 'workspace' && (
         <div className="space-y-6">
-          {/* Global Workspace Control Bar */}
+          {/* Global Workspace Control Bar - Merged with Minimalist Budget Input */}
           <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 bg-white border border-[#E6E1D3] rounded-2xl shadow-2xs">
             <div className="flex flex-wrap items-center gap-2">
               {/* Optimizer Dropdown & Run Button */}

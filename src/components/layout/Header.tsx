@@ -7,13 +7,10 @@ import {
   AlertTriangle,
   Info,
   X,
-  ExternalLink,
-  ChevronDown,
   LogOut,
   ShoppingCart
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
-import { formatINR } from '../../utils/pricing';
 
 interface HeaderProps {
   onToggleSidebar: () => void;
@@ -28,7 +25,6 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
     clearNotifications,
     setActiveTab,
     userRole,
-    loginAs,
     logout,
     validation,
     toggleCart
@@ -57,39 +53,62 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
 
   return (
     <header className="sticky top-0 z-30 h-16 bg-[#FDFBF7]/90 backdrop-blur-md border-b border-[#E6E1D3] px-4 lg:px-6 flex items-center justify-between gap-4">
-      {/* Left Area: Mobile Menu */}
-      <div className="flex items-center gap-3">
+      {/* Left Area: Mobile Menu, Search Bar & Budget Bar Side-by-Side */}
+      <div className="flex items-center gap-3 flex-1 max-w-xl sm:max-w-2xl lg:max-w-3xl">
         <button
           onClick={onToggleSidebar}
           aria-label="Toggle navigation menu"
-          className="p-1.5 -ml-1 text-[#5A5A40] hover:text-[#2C2C1E] hover:bg-[#F4F1EA] rounded-xl lg:hidden transition-colors cursor-pointer"
+          className="p-1.5 -ml-1 text-[#5A5A40] hover:text-[#2C2C1E] hover:bg-[#F4F1EA] rounded-xl lg:hidden transition-colors cursor-pointer shrink-0"
         >
           <Menu className="w-5 h-5" />
         </button>
-      </div>
-
-      {/* Center / Right Controls */}
-      <div className="flex items-center gap-3">
 
         {/* Global Search Bar */}
-        <div className="relative w-36 sm:w-48 lg:w-64">
-          <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-[#8B8B7A]" />
+        <div className="relative flex-1 min-w-[180px]">
+          <Search className="w-3.5 h-3.5 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8B8B7A]" />
           <input
             type="text"
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             placeholder="Search items, specs, IDs..."
-            className="w-full pl-8 pr-3 py-1.5 text-xs bg-[#F4F1EA]/70 hover:bg-[#F4F1EA] focus:bg-white border border-[#E6E1D3] rounded-xl focus:outline-hidden focus:border-[#2C3A2B] transition-colors text-[#2C2C1E] placeholder-[#8B8B7A]"
+            className="w-full pl-9 pr-8 py-2 text-xs bg-[#F4F1EA]/70 hover:bg-[#F4F1EA] focus:bg-white border border-[#E6E1D3] rounded-xl focus:outline-hidden focus:border-[#2C3A2B] transition-all text-[#2C2C1E] placeholder-[#8B8B7A] shadow-2xs"
           />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery('')}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#8B8B7A] hover:text-[#2C2C1E]"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#8B8B7A] hover:text-[#2C2C1E] cursor-pointer p-0.5"
             >
               <X className="w-3 h-3" />
             </button>
           )}
         </div>
+
+        {/* Budget Input Bar - Placed next to the product search bar */}
+        <div className="flex items-center gap-1.5 shrink-0">
+          <span className="text-[11px] font-bold text-[#8B5A2B] uppercase tracking-wider hidden sm:inline-flex items-center gap-1">
+            <Wallet className="w-3.5 h-3.5 text-[#8B5A2B]" />
+            <span>Budget:</span>
+          </span>
+          <div className="relative w-28 sm:w-36">
+            <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[#8B5A2B] font-mono text-xs font-bold pointer-events-none">
+              ₹
+            </span>
+            <input
+              type="number"
+              min="0"
+              step="500"
+              value={budget || ''}
+              onChange={e => setBudget(Math.max(0, Number(e.target.value) || 0))}
+              placeholder="Budget"
+              title="Set Target Budget (₹)"
+              className="w-full pl-6 pr-2.5 py-2 text-xs font-mono font-bold text-[#2C2C1E] bg-[#F4F1EA]/70 hover:bg-[#F4F1EA] focus:bg-white border border-[#E6E1D3] rounded-xl focus:outline-hidden focus:border-[#2C3A2B] transition-all placeholder-[#8B8B7A] shadow-2xs"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Right Controls: Notifications & Profile Avatar */}
+      <div className="flex items-center gap-3">
 
         {/* Notifications Popover */}
         <div className="relative" ref={notifRef}>
@@ -275,39 +294,17 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
 
               <button
                 onClick={() => {
-                  setActiveTab('evidence');
+                  setActiveTab('profile');
                   setShowProfile(false);
                 }}
-                className="w-full text-left px-3 py-1.5 rounded-xl text-xs text-[#2C2C1E] hover:bg-[#F4F1EA] flex items-center justify-between cursor-pointer"
+                className="w-full text-left px-3 py-1.5 rounded-xl text-xs font-semibold text-[#2C3A2B] hover:bg-[#F4F1EA] flex items-center justify-between cursor-pointer"
               >
-                <span>Project Evidence Log</span>
-                <ExternalLink className="w-3 h-3 text-[#8B8B7A]" />
-              </button>
-              <button
-                onClick={() => {
-                  setActiveTab('settings');
-                  setShowProfile(false);
-                }}
-                className="w-full text-left px-3 py-1.5 rounded-xl text-xs text-[#2C2C1E] hover:bg-[#F4F1EA] cursor-pointer"
-              >
-                Fixture & Rule Configuration
+                <span>My Profile</span>
+                <User className="w-3.5 h-3.5 text-[#5A5A40]" />
               </button>
             </div>
           )}
         </div>
-
-        {/* Top-Right Corner Logout Button */}
-        {userRole && (
-          <button
-            onClick={() => logout()}
-            aria-label="Logout"
-            title="Log out and return to homepage"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#F4F1EA] hover:bg-rose-50 text-[#5A5A40] hover:text-rose-700 border border-[#E6E1D3] hover:border-rose-200 text-xs font-semibold shadow-2xs transition-all cursor-pointer group shrink-0"
-          >
-            <LogOut className="w-3.5 h-3.5 text-[#8B8B7A] group-hover:text-rose-600 transition-colors" />
-            <span className="hidden sm:inline">Logout</span>
-          </button>
-        )}
       </div>
     </header>
   );

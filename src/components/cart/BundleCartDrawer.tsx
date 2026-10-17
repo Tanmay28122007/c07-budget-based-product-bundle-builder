@@ -80,9 +80,6 @@ export const BundleCartDrawer: React.FC = () => {
       };
     });
 
-  const emptyRequiredSlots = fixture.activity.requiredSlots.filter(
-    slot => !currentItems[slot.id] && !filledItems.some(f => f.slotCategory.toLowerCase() === slot.category.toLowerCase())
-  );
 
   return (
     <AnimatePresence>
