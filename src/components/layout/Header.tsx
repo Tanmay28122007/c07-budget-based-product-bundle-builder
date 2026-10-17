@@ -25,7 +25,6 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
     clearNotifications,
     setActiveTab,
     userRole,
-    loginAs,
     logout,
     budget,
     setBudget
@@ -207,32 +206,16 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
                 </div>
               </div>
 
-              {/* Role Actions */}
-              <div className="p-1 space-y-1">
-                {userRole !== 'customer' && (
-                  <button
-                    onClick={() => {
-                      loginAs('customer');
-                      setShowProfile(false);
-                    }}
-                    className="w-full text-left px-3 py-1.5 rounded-xl text-xs font-medium text-[#2C3A2B] hover:bg-[#F4F1EA] flex items-center justify-between cursor-pointer"
-                  >
-                    <span>Login as Customer</span>
-                    <span className="text-[10px] font-mono text-[#8B8B7A]">Shopper</span>
-                  </button>
-                )}
-                {userRole && (
-                  <button
-                    onClick={() => {
-                      logout();
-                      setShowProfile(false);
-                    }}
-                    className="w-full text-left px-3 py-1.5 rounded-xl text-xs font-medium text-rose-700 hover:bg-rose-50 flex items-center justify-between cursor-pointer"
-                  >
-                    <span>Log Out to Front Page</span>
-                  </button>
-                )}
-              </div>
+              <button
+                onClick={() => {
+                  setActiveTab('profile');
+                  setShowProfile(false);
+                }}
+                className="w-full text-left px-3 py-1.5 rounded-xl text-xs font-semibold text-[#2C3A2B] hover:bg-[#F4F1EA] flex items-center justify-between cursor-pointer"
+              >
+                <span>My Profile</span>
+                <User className="w-3.5 h-3.5 text-[#5A5A40]" />
+              </button>
             </div>
           )}
         </div>
