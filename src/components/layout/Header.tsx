@@ -8,7 +8,8 @@ import {
   Info,
   X,
   LogOut,
-  Wallet
+  Wallet,
+  User
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 
