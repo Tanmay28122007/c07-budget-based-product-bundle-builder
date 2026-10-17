@@ -39,14 +39,14 @@ export const RequiredSlotCard: React.FC<RequiredSlotCardProps> = ({
 
   return (
     <div
-      className={`rounded-2xl border p-4 transition-all duration-300 relative overflow-hidden group hover:-translate-y-1 hover:shadow-lg ${
+      className={`rounded-2xl border p-4 transition-all duration-300 relative overflow-hidden group hover:-translate-y-2.5 hover:scale-[1.015] hover:shadow-[0_16px_36px_-8px_rgba(44,58,43,0.18)] ${
         !isFilled
           ? 'border-dashed border-[#E6E1D3] bg-[#FDFBF7]/80 hover:border-[#8B5A2B] hover:bg-[#F5F5EC]'
           : hasCompatibilityError
-          ? 'border-rose-300 bg-rose-50/20 hover:border-rose-400 hover:shadow-rose-100'
+          ? 'border-rose-300 bg-rose-50/20 hover:border-rose-500 hover:shadow-rose-100'
           : !isInStock
-          ? 'border-amber-300 bg-amber-50/20 hover:border-amber-400 hover:shadow-amber-100'
-          : 'border-[#E6E1D3] bg-white shadow-xs hover:border-[#8B5A2B]/50'
+          ? 'border-amber-300 bg-amber-50/20 hover:border-amber-500 hover:shadow-amber-100'
+          : 'border-[#E6E1D3] bg-white shadow-xs hover:border-[#8B5A2B]'
       }`}
     >
       {/* Top Header of Card */}

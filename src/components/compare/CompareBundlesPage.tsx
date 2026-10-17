@@ -151,10 +151,10 @@ export const CompareBundlesPage: React.FC = () => {
                 <div
                   key={bundle.id}
                   onClick={() => toggleSelectBundle(bundle.id)}
-                  className={`p-3.5 rounded-2xl border text-xs cursor-pointer transition-all flex flex-col justify-between ${
+                  className={`p-4 rounded-2xl border text-xs cursor-pointer transition-all duration-300 flex flex-col justify-between hover:-translate-y-2 hover:scale-[1.015] hover:shadow-[0_16px_36px_-8px_rgba(44,58,43,0.18)] ${
                     isChecked
-                      ? 'border-[#2C3A2B] bg-[#F5F5EC] shadow-2xs'
-                      : 'border-[#E6E1D3] bg-[#FDFBF7] hover:bg-[#F4F1EA]'
+                      ? 'border-[#2C3A2B] bg-[#F5F5EC] shadow-md ring-2 ring-[#2C3A2B]/20'
+                      : 'border-[#E6E1D3] bg-[#FDFBF7] hover:border-[#8B5A2B] hover:bg-white'
                   }`}
                 >
                   <div>

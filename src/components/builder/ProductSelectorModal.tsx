@@ -175,11 +175,11 @@ export const ProductSelectorModal: React.FC<ProductSelectorModalProps> = ({
                 return (
                   <div
                     key={product.id}
-                    className={`p-4 rounded-2xl border transition-all ${
+                    className={`p-4 rounded-2xl border transition-all duration-200 ${
                       isSelected
-                        ? 'border-[#2C3A2B] bg-[#A3B18A]/10 shadow-xs'
+                        ? 'border-[#2C3A2B] bg-[#A3B18A]/10 shadow-sm ring-2 ring-[#2C3A2B]/20'
                         : isEligible
-                        ? 'border-[#E6E1D3] hover:border-[#8B5A2B] bg-white'
+                        ? 'border-[#E6E1D3] hover:border-[#8B5A2B] hover:-translate-y-1.5 hover:shadow-lg bg-white'
                         : 'border-[#E6E1D3] bg-[#F4F1EA]/60 opacity-80'
                     }`}
                   >

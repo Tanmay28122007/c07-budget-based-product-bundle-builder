@@ -111,22 +111,22 @@ export const DashboardPage: React.FC = () => {
             {/* Card 1: Login as Customer */}
             <div
               onClick={() => loginAs('customer')}
-              className="group relative bg-white border border-[#E6E1D3] rounded-[24px] p-8 shadow-xs hover:shadow-2xl transition-all duration-300 overflow-hidden cursor-pointer hover:-translate-y-2 hover:border-[#8B5A2B] hover:ring-4 hover:ring-[#8B5A2B]/10 flex flex-col justify-between"
+              className="group relative bg-white border border-[#E6E1D3] rounded-[28px] p-8 sm:p-9 shadow-sm hover:shadow-[0_28px_60px_-12px_rgba(44,58,43,0.3)] transition-all duration-300 overflow-hidden cursor-pointer hover:-translate-y-4 hover:scale-[1.025] hover:border-[#8B5A2B] hover:ring-8 hover:ring-[#8B5A2B]/20 flex flex-col justify-between"
             >
               {/* Top right decorative arc watermark */}
-              <div className="absolute top-0 right-0 w-28 h-28 bg-[#F5F5EC]/80 rounded-bl-[100px] pointer-events-none transition-transform duration-500 group-hover:scale-125 group-hover:bg-[#EDE8DC]" />
+              <div className="absolute top-0 right-0 w-32 h-32 bg-[#F5F5EC]/90 rounded-bl-[120px] pointer-events-none transition-transform duration-500 group-hover:scale-140 group-hover:bg-[#EBE5D6]" />
 
               <div>
                 {/* Icon Box */}
-                <div className="w-12 h-12 rounded-xl bg-[#F4F1EA] text-[#2C3A2B] flex items-center justify-center mb-6 border border-[#E6E1D3] shadow-2xs group-hover:bg-[#2C3A2B] group-hover:text-white group-hover:scale-110 group-hover:-rotate-3 transition-all duration-300">
-                  <UserCheck className="w-6 h-6" />
+                <div className="w-14 h-14 rounded-2xl bg-[#F4F1EA] text-[#2C3A2B] flex items-center justify-center mb-6 border border-[#E6E1D3] shadow-xs group-hover:bg-[#2C3A2B] group-hover:text-white group-hover:scale-125 group-hover:-rotate-6 group-hover:shadow-xl transition-all duration-300">
+                  <UserCheck className="w-7 h-7" />
                 </div>
 
                 <div className="flex items-center gap-2 mb-2">
-                  <h2 className="font-serif text-2xl font-bold text-[#2C3A2B] group-hover:text-[#8B5A2B] transition-colors">
+                  <h2 className="font-serif text-2xl sm:text-3xl font-bold text-[#2C3A2B] group-hover:text-[#8B5A2B] transition-colors">
                     Customer
                   </h2>
-                  <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-[#F4F1EA] text-[#8B5A2B] border border-[#E6E1D3] group-hover:bg-[#8B5A2B] group-hover:text-white transition-colors">
+                  <span className="text-[10px] uppercase font-bold tracking-wider px-2.5 py-0.5 rounded-full bg-[#F4F1EA] text-[#8B5A2B] border border-[#E6E1D3] group-hover:bg-[#8B5A2B] group-hover:text-white transition-all group-hover:scale-110">
                     Shopper
                   </span>
                 </div>
@@ -141,32 +141,32 @@ export const DashboardPage: React.FC = () => {
                   e.stopPropagation();
                   loginAs('customer');
                 }}
-                className="w-full py-3 px-4 rounded-xl bg-[#2C3A2B] text-white text-xs font-semibold uppercase tracking-wider flex items-center justify-center gap-2 shadow-xs hover:shadow-lg group-hover:bg-[#3A4D39] transition-all cursor-pointer"
+                className="w-full py-3.5 px-5 rounded-2xl bg-[#2C3A2B] text-white text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2.5 shadow-md hover:shadow-2xl group-hover:bg-[#3A4D39] group-hover:scale-[1.02] transition-all cursor-pointer"
               >
                 <span>LOGIN AS CUSTOMER</span>
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1.5 transition-transform" />
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-2.5 transition-transform duration-300" />
               </button>
             </div>
 
             {/* Card 2: Login as Admin */}
             <div
               onClick={() => loginAs('admin')}
-              className="group relative bg-white border border-[#E6E1D3] rounded-[24px] p-8 shadow-xs hover:shadow-2xl transition-all duration-300 overflow-hidden cursor-pointer hover:-translate-y-2 hover:border-[#8B5A2B] hover:ring-4 hover:ring-[#8B5A2B]/10 flex flex-col justify-between"
+              className="group relative bg-white border border-[#E6E1D3] rounded-[28px] p-8 sm:p-9 shadow-sm hover:shadow-[0_28px_60px_-12px_rgba(139,90,43,0.3)] transition-all duration-300 overflow-hidden cursor-pointer hover:-translate-y-4 hover:scale-[1.025] hover:border-[#8B5A2B] hover:ring-8 hover:ring-[#8B5A2B]/20 flex flex-col justify-between"
             >
               {/* Top right decorative arc watermark */}
-              <div className="absolute top-0 right-0 w-28 h-28 bg-[#F5F5EC]/80 rounded-bl-[100px] pointer-events-none transition-transform duration-500 group-hover:scale-125 group-hover:bg-[#EDE8DC]" />
+              <div className="absolute top-0 right-0 w-32 h-32 bg-[#F5F5EC]/90 rounded-bl-[120px] pointer-events-none transition-transform duration-500 group-hover:scale-140 group-hover:bg-[#EBE5D6]" />
 
               <div>
                 {/* Icon Box */}
-                <div className="w-12 h-12 rounded-xl bg-[#F4F1EA] text-[#2C3A2B] flex items-center justify-center mb-6 border border-[#E6E1D3] shadow-2xs group-hover:bg-[#8B5A2B] group-hover:text-white group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
-                  <ShieldCheck className="w-6 h-6" />
+                <div className="w-14 h-14 rounded-2xl bg-[#F4F1EA] text-[#2C3A2B] flex items-center justify-center mb-6 border border-[#E6E1D3] shadow-xs group-hover:bg-[#8B5A2B] group-hover:text-white group-hover:scale-125 group-hover:rotate-6 group-hover:shadow-xl transition-all duration-300">
+                  <ShieldCheck className="w-7 h-7" />
                 </div>
 
                 <div className="flex items-center gap-2 mb-2">
-                  <h2 className="font-serif text-2xl font-bold text-[#2C3A2B] group-hover:text-[#8B5A2B] transition-colors">
+                  <h2 className="font-serif text-2xl sm:text-3xl font-bold text-[#2C3A2B] group-hover:text-[#8B5A2B] transition-colors">
                     Admin
                   </h2>
-                  <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-[#F4F1EA] text-[#2C3A2B] border border-[#E6E1D3] group-hover:bg-[#2C3A2B] group-hover:text-white transition-colors">
+                  <span className="text-[10px] uppercase font-bold tracking-wider px-2.5 py-0.5 rounded-full bg-[#F4F1EA] text-[#2C3A2B] border border-[#E6E1D3] group-hover:bg-[#2C3A2B] group-hover:text-white transition-all group-hover:scale-110">
                     Manager
                   </span>
                 </div>
@@ -181,10 +181,10 @@ export const DashboardPage: React.FC = () => {
                   e.stopPropagation();
                   loginAs('admin');
                 }}
-                className="w-full py-3 px-4 rounded-xl bg-[#8B5A2B] text-white text-xs font-semibold uppercase tracking-wider flex items-center justify-center gap-2 shadow-xs hover:shadow-lg group-hover:bg-[#724822] transition-all cursor-pointer"
+                className="w-full py-3.5 px-5 rounded-2xl bg-[#8B5A2B] text-white text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2.5 shadow-md hover:shadow-2xl group-hover:bg-[#724822] group-hover:scale-[1.02] transition-all cursor-pointer"
               >
                 <span>LOGIN AS ADMIN</span>
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1.5 transition-transform" />
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-2.5 transition-transform duration-300" />
               </button>
             </div>
           </div>
