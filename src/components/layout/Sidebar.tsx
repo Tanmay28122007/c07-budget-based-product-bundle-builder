@@ -69,9 +69,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         },
         {
           id: 'compare',
-          label: 'Compare Bundles',
+          label: 'Compare Builder',
           icon: Columns,
-          badge: savedBundles.length > 0 ? savedBundles.length.toString() : null
+          badge: savedBundles.length > 0 ? `${savedBundles.length} saved` : (validation.filledSlotCount > 0 ? `${validation.filledSlotCount}/${validation.totalSlotCount}` : null)
         }
       ]
     : userRole === 'customer'
@@ -84,9 +84,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         },
         {
           id: 'compare',
-          label: 'Compare Bundles',
+          label: 'Compare Builder',
           icon: Columns,
-          badge: savedBundles.length > 0 ? savedBundles.length.toString() : null
+          badge: savedBundles.length > 0 ? `${savedBundles.length} saved` : (validation.filledSlotCount > 0 ? `${validation.filledSlotCount}/${validation.totalSlotCount}` : null)
         }
       ]
     : [
@@ -98,9 +98,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         },
         {
           id: 'compare',
-          label: 'Compare Bundles',
+          label: 'Compare Builder',
           icon: Columns,
-          badge: savedBundles.length > 0 ? savedBundles.length.toString() : null
+          badge: savedBundles.length > 0 ? `${savedBundles.length} saved` : (validation.filledSlotCount > 0 ? `${validation.filledSlotCount}/${validation.totalSlotCount}` : null)
         }
       ];
 

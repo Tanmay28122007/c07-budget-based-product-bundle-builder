@@ -598,10 +598,10 @@ export const DashboardPage: React.FC = () => {
               Auto-Find Valid Setup
             </button>
             <button
-              onClick={() => setActiveTab('builder')}
+              onClick={() => setActiveTab('compare')}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-[#2C3A2B] hover:bg-[#3A4D39] rounded-xl shadow-xs transition-colors cursor-pointer"
             >
-              Open Builder
+              Open Compare Builder
               <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>
@@ -769,10 +769,10 @@ export const DashboardPage: React.FC = () => {
               <div className="pt-3 flex flex-wrap items-center justify-between gap-3 border-t border-[#E6E1D3]">
                 <div className="flex items-center gap-2">
                   <button
-                    onClick={() => setActiveTab('builder')}
+                    onClick={() => setActiveTab('compare')}
                     className="px-4 py-2 text-xs font-semibold text-white bg-[#2C3A2B] hover:bg-[#3A4D39] rounded-xl shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer"
                   >
-                    Continue Building
+                    Open Compare Builder
                     <ArrowRight className="w-3.5 h-3.5" />
                   </button>
                   <button
@@ -806,10 +806,10 @@ export const DashboardPage: React.FC = () => {
                   </p>
                 </div>
                 <button
-                  onClick={() => setActiveTab('builder')}
+                  onClick={() => setActiveTab('compare')}
                   className="text-xs font-bold text-[#8B5A2B] hover:underline"
                 >
-                  Manage in Builder
+                  Manage in Compare Builder
                 </button>
               </div>
 
@@ -860,7 +860,7 @@ export const DashboardPage: React.FC = () => {
 
                       <div className="mt-2.5 pt-2 border-t border-[#E6E1D3] flex items-center justify-end">
                         <button
-                          onClick={() => setActiveTab('builder')}
+                          onClick={() => setActiveTab('compare')}
                           className="text-[11px] font-bold text-[#8B5A2B] hover:text-[#743815] uppercase tracking-wider"
                         >
                           {isAssigned ? 'Replace →' : 'Select →'}
@@ -935,10 +935,10 @@ export const DashboardPage: React.FC = () => {
 
               <div className="space-y-2">
                 <button
-                  onClick={() => setActiveTab('builder')}
+                  onClick={() => setActiveTab('compare')}
                   className="w-full text-left px-3.5 py-2.5 rounded-xl text-xs font-medium text-[#2C2C1E] hover:bg-[#F4F1EA] border border-[#E6E1D3] flex items-center justify-between transition-colors"
                 >
-                  <span className="font-medium">Open Bundle Builder</span>
+                  <span className="font-medium">Open Compare Builder</span>
                   <ArrowRight className="w-3.5 h-3.5 text-[#8B5A2B]" />
                 </button>
 

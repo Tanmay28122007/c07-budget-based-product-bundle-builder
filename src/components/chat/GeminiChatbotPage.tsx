@@ -362,10 +362,10 @@ Please provide an in-depth ergonomic & procurement evaluation for this product b
 
     if (action.type === 'apply_bundle' && action.items) {
       applyBundleRecommendation(action.items, action.budget);
-      setActiveTab('builder');
+      setActiveTab('compare');
     } else if (action.type === 'swap_product' && action.slotId && action.productId) {
       swapProductById(action.slotId, action.productId);
-      setActiveTab('builder');
+      setActiveTab('compare');
     } else if (action.type === 'set_budget' && action.budget) {
       setBudget(action.budget);
     } else if (action.type === 'navigate' && action.tab) {

@@ -254,10 +254,10 @@ Choose your preferred language below or ask me anything to assemble, optimize, o
 
     if (action.type === 'apply_bundle' && action.items) {
       applyBundleRecommendation(action.items, action.budget);
-      setActiveTab('builder');
+      setActiveTab('compare');
     } else if (action.type === 'swap_product' && action.slotId && action.productId) {
       swapProductById(action.slotId, action.productId);
-      setActiveTab('builder');
+      setActiveTab('compare');
     } else if (action.type === 'set_budget' && action.budget) {
       setBudget(action.budget);
     } else if (action.type === 'navigate' && action.tab) {

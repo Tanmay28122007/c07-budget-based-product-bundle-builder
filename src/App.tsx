@@ -33,7 +33,7 @@ const AppContent: React.FC = () => {
           className="w-full"
         >
           {activeTab === 'dashboard' && <DashboardPage />}
-          {activeTab === 'builder' && <BundleBuilderPage />}
+          {activeTab === 'builder' && <CompareBundlesPage initialMode="workspace" />}
           {activeTab === 'chat' && <GeminiChatbotPage />}
           {activeTab === 'catalogue' && <ProductCataloguePage />}
           {activeTab === 'compare' && <CompareBundlesPage />}
