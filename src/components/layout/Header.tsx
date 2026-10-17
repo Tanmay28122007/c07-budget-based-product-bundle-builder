@@ -27,7 +27,10 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
     markNotificationsRead,
     clearNotifications,
     setActiveTab,
-    toggleAssistant
+    toggleAssistant,
+    userRole,
+    loginAs,
+    logout
   } = useApp();
 
   const [showNotifications, setShowNotifications] = useState(false);
@@ -38,7 +41,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
   const unreadCount = notifications.filter(n => !n.read).length;
 
   const tabLabels: Record<string, string> = {
-    dashboard: 'Dashboard',
+    dashboard: userRole === 'admin' ? 'Admin Overview' : 'Front Page',
     builder: 'Build a Bundle',
     chat: 'Gemini Chatbot',
     catalogue: 'Product Catalogue',
@@ -196,32 +199,100 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
           )}
         </div>
 
+        {/* Active Role Pill in Header */}
+        <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-[#E6E1D3] bg-[#F4F1EA] text-xs shadow-2xs">
+          <span className="text-[#8B8B7A] text-[10px] font-bold uppercase tracking-wider">Role:</span>
+          {userRole === 'admin' ? (
+            <span className="font-bold text-[#8B5A2B] flex items-center gap-1">
+              <span>Admin</span>
+            </span>
+          ) : userRole === 'customer' ? (
+            <span className="font-bold text-[#2C3A2B] flex items-center gap-1">
+              <span>Customer</span>
+            </span>
+          ) : (
+            <button
+              onClick={() => setActiveTab('dashboard')}
+              className="text-[#2C3A2B] font-bold hover:underline cursor-pointer"
+            >
+              Front Page (Login)
+            </button>
+          )}
+        </div>
+
         {/* User Profile Avatar with Initials "TA" */}
         <div className="relative" ref={profileRef}>
           <button
             onClick={() => setShowProfile(prev => !prev)}
             aria-label="User profile settings"
-            className="flex items-center gap-2 pl-1 pr-1.5 py-1 rounded-xl hover:bg-[#F4F1EA] transition-colors"
+            className="flex items-center gap-2 pl-1 pr-1.5 py-1 rounded-xl hover:bg-[#F4F1EA] transition-colors cursor-pointer"
           >
             <div className="w-7 h-7 rounded-full bg-[#2C3A2B] text-white flex items-center justify-center font-bold text-xs tracking-tight shadow-2xs ring-1 ring-[#E6E1D3]">
               TA
             </div>
-            <span className="hidden sm:inline text-xs font-medium text-[#2C2C1E]">Tanmay A.</span>
+            <span className="hidden sm:inline text-xs font-medium text-[#2C2C1E]">
+              {userRole === 'admin' ? 'Admin' : userRole === 'customer' ? 'Customer' : 'Guest'}
+            </span>
             <ChevronDown className="w-3 h-3 text-[#8B8B7A]" />
           </button>
 
           {showProfile && (
-            <div className="absolute right-0 mt-2 w-56 bg-white border border-[#E6E1D3] rounded-2xl shadow-xl z-50 p-2">
+            <div className="absolute right-0 mt-2 w-60 bg-white border border-[#E6E1D3] rounded-2xl shadow-xl z-50 p-2">
               <div className="px-3 py-2 border-b border-[#E6E1D3] mb-1">
                 <div className="text-xs font-serif font-bold text-[#2C3A2B]">Tanmay Anand</div>
-                <div className="text-[11px] text-[#5A5A40] font-mono">Product & Engineering Lead</div>
+                <div className="text-[11px] text-[#5A5A40] flex items-center justify-between mt-0.5">
+                  <span>Current Session:</span>
+                  <span className="font-bold uppercase text-[10px] text-[#8B5A2B]">
+                    {userRole ? userRole : 'Not Logged In'}
+                  </span>
+                </div>
               </div>
+
+              {/* Role Actions */}
+              <div className="p-1 border-b border-[#E6E1D3] mb-1 space-y-1">
+                {userRole !== 'customer' && (
+                  <button
+                    onClick={() => {
+                      loginAs('customer');
+                      setShowProfile(false);
+                    }}
+                    className="w-full text-left px-3 py-1.5 rounded-xl text-xs font-medium text-[#2C3A2B] hover:bg-[#F4F1EA] flex items-center justify-between cursor-pointer"
+                  >
+                    <span>Login as Customer</span>
+                    <span className="text-[10px] font-mono text-[#8B8B7A]">Shopper</span>
+                  </button>
+                )}
+                {userRole !== 'admin' && (
+                  <button
+                    onClick={() => {
+                      loginAs('admin');
+                      setShowProfile(false);
+                    }}
+                    className="w-full text-left px-3 py-1.5 rounded-xl text-xs font-medium text-[#8B5A2B] hover:bg-[#F4F1EA] flex items-center justify-between cursor-pointer"
+                  >
+                    <span>Login as Admin</span>
+                    <span className="text-[10px] font-mono text-[#8B8B7A]">Sarpanch</span>
+                  </button>
+                )}
+                {userRole && (
+                  <button
+                    onClick={() => {
+                      logout();
+                      setShowProfile(false);
+                    }}
+                    className="w-full text-left px-3 py-1.5 rounded-xl text-xs font-medium text-rose-700 hover:bg-rose-50 flex items-center justify-between cursor-pointer"
+                  >
+                    <span>Log Out to Front Page</span>
+                  </button>
+                )}
+              </div>
+
               <button
                 onClick={() => {
                   setActiveTab('evidence');
                   setShowProfile(false);
                 }}
-                className="w-full text-left px-3 py-1.5 rounded-xl text-xs text-[#2C2C1E] hover:bg-[#F4F1EA] flex items-center justify-between"
+                className="w-full text-left px-3 py-1.5 rounded-xl text-xs text-[#2C2C1E] hover:bg-[#F4F1EA] flex items-center justify-between cursor-pointer"
               >
                 <span>Project Evidence Log</span>
                 <ExternalLink className="w-3 h-3 text-[#8B8B7A]" />
@@ -231,7 +302,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
                   setActiveTab('settings');
                   setShowProfile(false);
                 }}
-                className="w-full text-left px-3 py-1.5 rounded-xl text-xs text-[#2C2C1E] hover:bg-[#F4F1EA]"
+                className="w-full text-left px-3 py-1.5 rounded-xl text-xs text-[#2C2C1E] hover:bg-[#F4F1EA] cursor-pointer"
               >
                 Fixture & Rule Configuration
               </button>

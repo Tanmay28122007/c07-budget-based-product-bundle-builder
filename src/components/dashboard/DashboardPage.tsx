@@ -33,7 +33,10 @@ export const DashboardPage: React.FC = () => {
     runTestSuite,
     resetBundle,
     optimizeBundle,
-    loadSavedBundle
+    loadSavedBundle,
+    userRole,
+    loginAs,
+    logout
   } = useApp();
 
   // Metrics computation from real loaded datasets
@@ -82,92 +85,163 @@ export const DashboardPage: React.FC = () => {
     downloadFile(csv, `test_results_${Date.now()}.csv`, 'text/csv');
   };
 
+  // If NOT logged in as Admin, the front page contains ONLY the two login choices: Customer or Admin
+  if (userRole !== 'admin') {
+    return (
+      <div className="py-6 sm:py-12 flex flex-col items-center justify-center min-h-[72vh]">
+        {/* ========================================================================= */}
+        {/* FRONT PAGE: ONLY TWO LOGINS (CUSTOMER OR ADMIN)                           */}
+        {/* ========================================================================= */}
+        <section className="text-center w-full max-w-4xl mx-auto px-4 relative">
+          {/* Top Flag Emblem Circle with ambient glowing rings */}
+          <div className="relative inline-block mb-6">
+            <div className="absolute -inset-3 bg-[#A3B18A]/25 rounded-full blur-md animate-pulse" />
+            <div className="absolute -top-4 -left-4 w-3 h-3 bg-[#A3B18A]/30 rounded-full blur-2xs" />
+            <div className="absolute -bottom-2 -right-4 w-4 h-4 bg-[#8B5A2B]/20 rounded-full blur-2xs" />
+            <div className="absolute top-1/2 -left-6 w-2.5 h-2.5 bg-[#A3B18A]/40 rounded-full blur-2xs" />
+
+            <div className="relative w-16 h-16 rounded-full bg-[#2C3A2B] text-white flex items-center justify-center text-2xl shadow-md ring-4 ring-[#E6E1D3]/80">
+              <span className="scale-125 select-none">🇮🇳</span>
+            </div>
+          </div>
+
+          {/* Hero Serif Title & Subtitle */}
+          <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-[#2C3A2B] mb-3">
+            Vocal-Local Village OS
+          </h1>
+          <p className="text-[#5A5A40] text-sm sm:text-base max-w-xl mx-auto leading-relaxed">
+            Welcome to the Digital Gram Panchayat & Commerce OS. Please select your login to continue.
+          </p>
+
+          {/* Two Login Cards: Customer or Admin */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto mt-10 text-left">
+            {/* Card 1: Login as Customer */}
+            <div
+              onClick={() => loginAs('customer')}
+              className="group relative bg-white border border-[#E6E1D3] rounded-[24px] p-8 shadow-xs hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer hover:-translate-y-1 hover:border-[#8B5A2B]/40 flex flex-col justify-between"
+            >
+              {/* Top right decorative arc watermark */}
+              <div className="absolute top-0 right-0 w-28 h-28 bg-[#F5F5EC]/80 rounded-bl-[100px] pointer-events-none transition-transform group-hover:scale-110" />
+
+              <div>
+                {/* Icon Box */}
+                <div className="w-12 h-12 rounded-xl bg-[#F4F1EA] text-[#2C3A2B] flex items-center justify-center mb-6 border border-[#E6E1D3] shadow-2xs group-hover:bg-[#2C3A2B] group-hover:text-white transition-colors">
+                  <UserCheck className="w-6 h-6" />
+                </div>
+
+                <div className="flex items-center gap-2 mb-2">
+                  <h2 className="font-serif text-2xl font-bold text-[#2C3A2B] group-hover:text-[#8B5A2B] transition-colors">
+                    Customer
+                  </h2>
+                  <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-[#F4F1EA] text-[#8B5A2B] border border-[#E6E1D3]">
+                    Citizen
+                  </span>
+                </div>
+
+                <p className="text-[#5A5A40] text-sm leading-relaxed mb-6">
+                  Access live bundles, check hardware compatibility, and optimize budget for your workstation.
+                </p>
+              </div>
+
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  loginAs('customer');
+                }}
+                className="w-full py-3 px-4 rounded-xl bg-[#2C3A2B] text-white text-xs font-semibold uppercase tracking-wider flex items-center justify-center gap-2 shadow-xs group-hover:bg-[#3A4D39] transition-all cursor-pointer"
+              >
+                <span>LOGIN AS CUSTOMER</span>
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </button>
+            </div>
+
+            {/* Card 2: Login as Admin */}
+            <div
+              onClick={() => loginAs('admin')}
+              className="group relative bg-white border border-[#E6E1D3] rounded-[24px] p-8 shadow-xs hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer hover:-translate-y-1 hover:border-[#8B5A2B]/40 flex flex-col justify-between"
+            >
+              {/* Top right decorative arc watermark */}
+              <div className="absolute top-0 right-0 w-28 h-28 bg-[#F5F5EC]/80 rounded-bl-[100px] pointer-events-none transition-transform group-hover:scale-110" />
+
+              <div>
+                {/* Icon Box */}
+                <div className="w-12 h-12 rounded-xl bg-[#F4F1EA] text-[#2C3A2B] flex items-center justify-center mb-6 border border-[#E6E1D3] shadow-2xs group-hover:bg-[#2C3A2B] group-hover:text-white transition-colors">
+                  <ShieldCheck className="w-6 h-6" />
+                </div>
+
+                <div className="flex items-center gap-2 mb-2">
+                  <h2 className="font-serif text-2xl font-bold text-[#2C3A2B] group-hover:text-[#8B5A2B] transition-colors">
+                    Admin
+                  </h2>
+                  <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-[#F4F1EA] text-[#2C3A2B] border border-[#E6E1D3]">
+                    Sarpanch
+                  </span>
+                </div>
+
+                <p className="text-[#5A5A40] text-sm leading-relaxed mb-6">
+                  Admin login to manage village records, review automated test suites, and audit landed economics.
+                </p>
+              </div>
+
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  loginAs('admin');
+                }}
+                className="w-full py-3 px-4 rounded-xl bg-[#8B5A2B] text-white text-xs font-semibold uppercase tracking-wider flex items-center justify-center gap-2 shadow-xs group-hover:bg-[#724822] transition-all cursor-pointer"
+              >
+                <span>LOGIN AS ADMIN</span>
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </button>
+            </div>
+          </div>
+        </section>
+      </div>
+    );
+  }
+
+  // Admin view
   return (
-    <div className="space-y-10 py-2">
-      {/* ========================================================================= */}
-      {/* THEME HERO SECTION (Matches Reference Screen Exactly)                    */}
-      {/* ========================================================================= */}
-      <section className="text-center pt-2 pb-4 relative">
-        {/* Top Flag Emblem Circle with ambient glowing rings */}
-        <div className="relative inline-block mb-6">
-          <div className="absolute -inset-3 bg-[#A3B18A]/25 rounded-full blur-md animate-pulse" />
-          <div className="absolute -top-4 -left-4 w-3 h-3 bg-[#A3B18A]/30 rounded-full blur-2xs" />
-          <div className="absolute -bottom-2 -right-4 w-4 h-4 bg-[#8B5A2B]/20 rounded-full blur-2xs" />
-          <div className="absolute top-1/2 -left-6 w-2.5 h-2.5 bg-[#A3B18A]/40 rounded-full blur-2xs" />
-
-          <div className="relative w-16 h-16 rounded-full bg-[#2C3A2B] text-white flex items-center justify-center text-2xl shadow-md ring-4 ring-[#E6E1D3]/80">
-            <span className="scale-125 select-none">🇮🇳</span>
+    <div className="space-y-8 py-2">
+      {/* Admin Session Header Bar */}
+      <div className="p-4 rounded-2xl bg-white border border-[#E6E1D3] shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-[#2C3A2B] text-white flex items-center justify-center shadow-xs">
+            <ShieldCheck className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <h2 className="font-serif font-bold text-lg text-[#2C3A2B]">Admin Workspace Control</h2>
+              <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
+                Sarpanch Active
+              </span>
+            </div>
+            <p className="text-xs text-[#5A5A40]">
+              Full administrative access to test execution, MBA unit economics, and landed tariff rules.
+            </p>
           </div>
         </div>
 
-        {/* Hero Serif Title & Subtitle */}
-        <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-[#2C3A2B] mb-3">
-          Vocal-Local Village OS
-        </h1>
-        <p className="text-[#5A5A40] text-sm sm:text-base max-w-xl mx-auto leading-relaxed">
-          Welcome to the Digital Gram Panchayat & Commerce OS. Please select your role to continue.
-        </p>
-
-        {/* Signature Two Role Cards (Citizen & Sarpanch) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto mt-8 text-left">
-          {/* Card 1: Citizen */}
-          <div
-            onClick={() => setActiveTab('builder')}
-            className="group relative bg-white border border-[#E6E1D3] rounded-[24px] p-8 shadow-xs hover:shadow-lg transition-all duration-300 overflow-hidden cursor-pointer hover:-translate-y-0.5"
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => loginAs('customer')}
+            className="px-3 py-1.5 rounded-xl border border-[#E6E1D3] text-xs font-medium text-[#2C2C1E] hover:bg-[#F4F1EA] transition-colors cursor-pointer"
           >
-            {/* Top right decorative arc watermark */}
-            <div className="absolute top-0 right-0 w-28 h-28 bg-[#F5F5EC]/70 rounded-bl-[100px] pointer-events-none transition-transform group-hover:scale-105" />
-
-            {/* Icon Box */}
-            <div className="w-12 h-12 rounded-xl bg-[#F4F1EA] text-[#2C3A2B] flex items-center justify-center mb-6 border border-[#E6E1D3] shadow-2xs group-hover:bg-[#2C3A2B] group-hover:text-white transition-colors">
-              <UserCheck className="w-6 h-6" />
-            </div>
-
-            <h2 className="font-serif text-2xl font-bold text-[#2C3A2B] mb-2 group-hover:text-[#8B5A2B] transition-colors">
-              Citizen
-            </h2>
-            <p className="text-[#5A5A40] text-sm leading-relaxed mb-6">
-              Access live bundles, check hardware compatibility, and optimize budget for your workstation.
-            </p>
-
-            <div className="text-xs font-bold text-[#8B5A2B] uppercase tracking-wider flex items-center gap-1.5 group-hover:gap-2.5 transition-all">
-              <span>ENTER PORTAL</span>
-              <ArrowRight className="w-4 h-4" />
-            </div>
-          </div>
-
-          {/* Card 2: Sarpanch */}
-          <div
-            onClick={() => setActiveTab('business')}
-            className="group relative bg-white border border-[#E6E1D3] rounded-[24px] p-8 shadow-xs hover:shadow-lg transition-all duration-300 overflow-hidden cursor-pointer hover:-translate-y-0.5"
+            Switch to Customer
+          </button>
+          <button
+            onClick={logout}
+            className="px-3 py-1.5 rounded-xl bg-[#F4F1EA] hover:bg-[#E6E1D3] text-xs font-semibold text-[#8B5A2B] transition-colors cursor-pointer"
           >
-            {/* Top right decorative arc watermark */}
-            <div className="absolute top-0 right-0 w-28 h-28 bg-[#F5F5EC]/70 rounded-bl-[100px] pointer-events-none transition-transform group-hover:scale-105" />
-
-            {/* Icon Box */}
-            <div className="w-12 h-12 rounded-xl bg-[#F4F1EA] text-[#2C3A2B] flex items-center justify-center mb-6 border border-[#E6E1D3] shadow-2xs group-hover:bg-[#2C3A2B] group-hover:text-white transition-colors">
-              <ShieldCheck className="w-6 h-6" />
-            </div>
-
-            <h2 className="font-serif text-2xl font-bold text-[#2C3A2B] mb-2 group-hover:text-[#8B5A2B] transition-colors">
-              Sarpanch
-            </h2>
-            <p className="text-[#5A5A40] text-sm leading-relaxed mb-6">
-              Admin login to manage village records, review automated test suites, and audit landed economics.
-            </p>
-
-            <div className="text-xs font-bold text-[#8B5A2B] uppercase tracking-wider flex items-center gap-1.5 group-hover:gap-2.5 transition-all">
-              <span>SECURE LOGIN</span>
-              <ArrowRight className="w-4 h-4" />
-            </div>
-          </div>
+            Log Out
+          </button>
         </div>
-      </section>
+      </div>
 
       {/* ========================================================================= */}
-      {/* WORKSPACE OPERATIONS & DASHBOARD OVERVIEW                                 */}
+      {/* WORKSPACE OPERATIONS & DASHBOARD OVERVIEW (Admin Only)                    */}
       {/* ========================================================================= */}
-      <div className="space-y-6 pt-4 border-t border-[#E6E1D3]">
+      <div className="space-y-6 pt-2">
         {/* Title bar */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>

@@ -20,6 +20,8 @@ import { findValidBundle, OptimizationResult } from '../utils/bundleOptimizer';
 import { runAllTests, runReferenceRequestTest, EDGE_CASE_TESTS } from '../utils/testRunner';
 import { formatINR } from '../utils/pricing';
 
+export type UserRole = 'customer' | 'admin' | null;
+
 export interface AppNotification {
   id: string;
   title: string;
@@ -30,6 +32,11 @@ export interface AppNotification {
 }
 
 interface AppContextType {
+  // Authentication & Role
+  userRole: UserRole;
+  loginAs: (role: 'customer' | 'admin') => void;
+  logout: () => void;
+
   // Navigation & View
   activeTab: string;
   setActiveTab: (tab: string) => void;
@@ -247,6 +254,17 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [activeTab, setActiveTab] = useState<string>('dashboard');
   const [searchQuery, setSearchQuery] = useState<string>('');
 
+  // Authentication & Role State
+  const [userRole, setUserRole] = useState<UserRole>(() => {
+    try {
+      const saved = localStorage.getItem('c07_user_role_v1');
+      if (saved === 'customer' || saved === 'admin') return saved;
+    } catch (e) {
+      console.warn('Could not read user role from storage:', e);
+    }
+    return null;
+  });
+
   // Fixture State
   const [fixture, setFixture] = useState<FixtureData>(() => {
     try {
@@ -413,6 +431,29 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   const clearNotifications = () => {
     setNotifications([]);
+  };
+
+  const loginAs = (role: 'customer' | 'admin') => {
+    setUserRole(role);
+    try {
+      localStorage.setItem('c07_user_role_v1', role);
+    } catch {}
+    if (role === 'customer') {
+      setActiveTab('builder');
+      addNotification('Logged in as Customer', 'Welcome! You can now assemble custom product bundles within your budget.', 'success');
+    } else {
+      setActiveTab('dashboard');
+      addNotification('Logged in as Administrator', 'Welcome! Full access to business insights, test suites, and configurations.', 'info');
+    }
+  };
+
+  const logout = () => {
+    setUserRole(null);
+    try {
+      localStorage.removeItem('c07_user_role_v1');
+    } catch {}
+    setActiveTab('dashboard');
+    addNotification('Logged Out', 'You have returned to the role login page.', 'info');
   };
 
   const setBudget = (val: number) => {
@@ -706,6 +747,10 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   return (
     <AppContext.Provider
       value={{
+        userRole,
+        loginAs,
+        logout,
+
         activeTab,
         setActiveTab,
         searchQuery,

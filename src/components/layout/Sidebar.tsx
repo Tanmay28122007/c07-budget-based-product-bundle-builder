@@ -27,65 +27,128 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     validation,
     savedBundles,
     testResults,
-    toggleAssistant
+    toggleAssistant,
+    userRole,
+    loginAs,
+    logout
   } = useApp();
 
-  const navItems = [
-    {
-      id: 'dashboard',
-      label: 'Dashboard',
-      icon: LayoutDashboard,
-      badge: null
-    },
-    {
-      id: 'builder',
-      label: 'Build a Bundle',
-      icon: PackagePlus,
-      badge: validation.filledSlotCount > 0 ? `${validation.filledSlotCount}/${validation.totalSlotCount}` : null
-    },
-    {
-      id: 'chat',
-      label: 'Gemini Assistant',
-      icon: Bot,
-      badge: 'AI'
-    },
-    {
-      id: 'catalogue',
-      label: 'Product Catalogue',
-      icon: Layers,
-      badge: fixture.products.length.toString()
-    },
-    {
-      id: 'compare',
-      label: 'Compare Bundles',
-      icon: Columns,
-      badge: savedBundles.length > 0 ? savedBundles.length.toString() : null
-    },
-    {
-      id: 'tests',
-      label: 'Test Results',
-      icon: CheckCircle2,
-      badge: testResults.length > 0 ? `${testResults.filter(t => t.passed).length}/${testResults.length}` : '20'
-    },
-    {
-      id: 'business',
-      label: 'Business Insights',
-      icon: TrendingUp,
-      badge: 'Unit Econ'
-    },
-    {
-      id: 'evidence',
-      label: 'Project Evidence',
-      icon: FileCode2,
-      badge: null
-    },
-    {
-      id: 'settings',
-      label: 'Fixture & Rules',
-      icon: Settings,
-      badge: isCustomFixture ? 'Custom' : 'Demo'
-    }
-  ];
+  const navItems = userRole === 'admin'
+    ? [
+        {
+          id: 'dashboard',
+          label: 'Admin Overview',
+          icon: LayoutDashboard,
+          badge: null
+        },
+        {
+          id: 'business',
+          label: 'Business Insights',
+          icon: TrendingUp,
+          badge: 'Unit Econ'
+        },
+        {
+          id: 'tests',
+          label: 'Test Results',
+          icon: CheckCircle2,
+          badge: testResults.length > 0 ? `${testResults.filter(t => t.passed).length}/${testResults.length}` : '20'
+        },
+        {
+          id: 'evidence',
+          label: 'Project Evidence',
+          icon: FileCode2,
+          badge: null
+        },
+        {
+          id: 'settings',
+          label: 'Fixture & Rules',
+          icon: Settings,
+          badge: isCustomFixture ? 'Custom' : 'Demo'
+        },
+        {
+          id: 'catalogue',
+          label: 'Product Catalogue',
+          icon: Layers,
+          badge: fixture.products.length.toString()
+        },
+        {
+          id: 'builder',
+          label: 'Build a Bundle',
+          icon: PackagePlus,
+          badge: validation.filledSlotCount > 0 ? `${validation.filledSlotCount}/${validation.totalSlotCount}` : null
+        },
+        {
+          id: 'compare',
+          label: 'Compare Bundles',
+          icon: Columns,
+          badge: savedBundles.length > 0 ? savedBundles.length.toString() : null
+        },
+        {
+          id: 'chat',
+          label: 'Gemini Assistant',
+          icon: Bot,
+          badge: 'AI'
+        }
+      ]
+    : userRole === 'customer'
+    ? [
+        {
+          id: 'builder',
+          label: 'Build a Bundle',
+          icon: PackagePlus,
+          badge: validation.filledSlotCount > 0 ? `${validation.filledSlotCount}/${validation.totalSlotCount}` : null
+        },
+        {
+          id: 'catalogue',
+          label: 'Product Catalogue',
+          icon: Layers,
+          badge: fixture.products.length.toString()
+        },
+        {
+          id: 'compare',
+          label: 'Compare Bundles',
+          icon: Columns,
+          badge: savedBundles.length > 0 ? savedBundles.length.toString() : null
+        },
+        {
+          id: 'chat',
+          label: 'Gemini Assistant',
+          icon: Bot,
+          badge: 'AI'
+        },
+        {
+          id: 'dashboard',
+          label: 'Front Page (Switch)',
+          icon: LayoutDashboard,
+          badge: null
+        }
+      ]
+    : [
+        {
+          id: 'dashboard',
+          label: 'Front Page (Login)',
+          icon: LayoutDashboard,
+          badge: 'Start'
+        },
+        {
+          id: 'builder',
+          label: 'Customer Portal',
+          icon: PackagePlus,
+          badge: null
+        },
+        {
+          id: 'catalogue',
+          label: 'Product Catalogue',
+          icon: Layers,
+          badge: fixture.products.length.toString()
+        },
+        {
+          id: 'chat',
+          label: 'Gemini Assistant',
+          icon: Bot,
+          badge: 'AI'
+        }
+      ];
 
   return (
     <>
@@ -121,8 +184,73 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           </div>
         </div>
 
+        {/* Active Role Indicator Card */}
+        <div className="mx-3 mt-3 p-2.5 rounded-xl bg-white border border-[#E6E1D3] shadow-2xs">
+          <div className="flex items-center justify-between text-[10px] font-semibold">
+            <span className="text-[#8B8B7A] uppercase tracking-wider">Active Role</span>
+            <span className={`px-2 py-0.5 rounded-full font-bold uppercase text-[9px] ${
+              userRole === 'admin'
+                ? 'bg-[#8B5A2B]/15 text-[#8B5A2B] border border-[#8B5A2B]/20'
+                : userRole === 'customer'
+                ? 'bg-[#2C3A2B]/15 text-[#2C3A2B] border border-[#2C3A2B]/20'
+                : 'bg-stone-100 text-stone-600 border border-stone-200'
+            }`}>
+              {userRole === 'admin' ? 'Admin' : userRole === 'customer' ? 'Customer' : 'Front Page'}
+            </span>
+          </div>
+
+          <div className="mt-1.5 flex items-center justify-between text-[11px]">
+            {userRole === 'customer' && (
+              <button
+                onClick={() => {
+                  loginAs('admin');
+                  onClose();
+                }}
+                className="text-[10px] text-[#8B5A2B] font-medium hover:underline flex items-center gap-1 cursor-pointer"
+              >
+                <span>Switch to Admin</span>
+                <span>→</span>
+              </button>
+            )}
+            {userRole === 'admin' && (
+              <button
+                onClick={() => {
+                  loginAs('customer');
+                  onClose();
+                }}
+                className="text-[10px] text-[#2C3A2B] font-medium hover:underline flex items-center gap-1 cursor-pointer"
+              >
+                <span>Switch to Customer</span>
+                <span>→</span>
+              </button>
+            )}
+            {userRole && (
+              <button
+                onClick={() => {
+                  logout();
+                  onClose();
+                }}
+                className="text-[10px] text-rose-700 font-medium hover:underline ml-auto cursor-pointer"
+              >
+                Log Out
+              </button>
+            )}
+            {!userRole && (
+              <button
+                onClick={() => {
+                  setActiveTab('dashboard');
+                  onClose();
+                }}
+                className="text-[10px] text-[#2C3A2B] font-semibold hover:underline w-full text-center cursor-pointer"
+              >
+                Login as Customer or Admin →
+              </button>
+            )}
+          </div>
+        </div>
+
         {/* Navigation Section */}
-        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+        <nav className="flex-1 px-3 py-3 space-y-1 overflow-y-auto">
           <div className="px-3 pb-2 text-[10px] font-semibold text-[#8B8B7A] uppercase tracking-wider">
             Workspace
           </div>
