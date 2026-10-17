@@ -127,33 +127,57 @@ export const DashboardPage: React.FC = () => {
         {/* ========================================================================= */}
         {/* FRONT PAGE: ONLY TWO LOGINS (CUSTOMER OR ADMIN)                           */}
         {/* ========================================================================= */}
-        <section className="text-center w-full max-w-4xl mx-auto px-4 relative">
-          {/* Brand Logo Box */}
-          <div className="w-16 h-16 rounded-2xl bg-[#2C3A2B] text-white flex items-center justify-center mx-auto mb-6 shadow-md border border-[#E6E1D3]">
+        <motion.section
+          initial={{ opacity: 0, y: 22 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          className="text-center w-full max-w-4xl mx-auto px-4 relative"
+        >
+          {/* Brand Logo Box with gentle floating motion */}
+          <motion.div
+            initial={{ scale: 0.8, rotate: -8 }}
+            animate={{ scale: 1, rotate: 0 }}
+            transition={{ type: 'spring', stiffness: 280, damping: 20 }}
+            className="w-16 h-16 rounded-2xl bg-[#2C3A2B] text-white flex items-center justify-center mx-auto mb-6 shadow-lg border border-[#E6E1D3] animate-fab-float"
+          >
             <Package className="w-8 h-8 text-amber-100" />
-          </div>
+          </motion.div>
 
           {/* Hero Serif Title & Subtitle */}
-          <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-[#2C3A2B] mb-3">
+          <motion.h1
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+            className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-[#2C3A2B] mb-3"
+          >
             Budget Based Product Bundle Builder
-          </h1>
-          <p className="text-[#5A5A40] text-sm sm:text-base max-w-xl mx-auto leading-relaxed">
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.18, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+            className="text-[#5A5A40] text-sm sm:text-base max-w-xl mx-auto leading-relaxed"
+          >
             Welcome to the Budget-Based Product Bundle Builder. Please select your login to continue.
-          </p>
+          </motion.p>
 
           {/* Two Login Cards: Customer or Admin */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto mt-10 text-left">
             {/* Card 1: Login as Customer */}
-            <div
+            <motion.div
+              initial={{ opacity: 0, y: 28, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ delay: 0.24, duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
+              whileHover={{ y: -8, scale: 1.02 }}
               onClick={() => {
                 setAuthMode('login');
                 setAuthError('');
                 setShowAuthModal(true);
               }}
-              className="group relative bg-white border border-[#E6E1D3] rounded-[28px] p-8 sm:p-9 shadow-sm hover:shadow-[0_28px_60px_-12px_rgba(44,58,43,0.3)] transition-all duration-300 overflow-hidden cursor-pointer hover:-translate-y-4 hover:scale-[1.025] hover:border-[#8B5A2B] hover:ring-8 hover:ring-[#8B5A2B]/20 flex flex-col justify-between"
+              className="group relative bg-white border border-[#E6E1D3] rounded-[28px] p-8 sm:p-9 shadow-sm hover:shadow-[0_32px_64px_-12px_rgba(44,58,43,0.32)] transition-all duration-300 overflow-hidden cursor-pointer hover:border-[#8B5A2B] hover:ring-8 hover:ring-[#8B5A2B]/20 flex flex-col justify-between"
             >
               {/* Top right decorative arc watermark */}
-              <div className="absolute top-0 right-0 w-32 h-32 bg-[#F5F5EC]/90 rounded-bl-[120px] pointer-events-none transition-transform duration-500 group-hover:scale-140 group-hover:bg-[#EBE5D6]" />
+              <div className="absolute top-0 right-0 w-32 h-32 bg-[#F5F5EC]/90 rounded-bl-[120px] pointer-events-none transition-transform duration-500 group-hover:scale-150 group-hover:bg-[#EBE5D6]" />
 
               <div>
                 {/* Icon Box */}
@@ -187,15 +211,19 @@ export const DashboardPage: React.FC = () => {
                 <span>LOGIN AS CUSTOMER</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-2.5 transition-transform duration-300" />
               </button>
-            </div>
+            </motion.div>
 
             {/* Card 2: Login as Admin */}
-            <div
+            <motion.div
+              initial={{ opacity: 0, y: 28, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ delay: 0.32, duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
+              whileHover={{ y: -8, scale: 1.02 }}
               onClick={() => loginAs('admin')}
-              className="group relative bg-white border border-[#E6E1D3] rounded-[28px] p-8 sm:p-9 shadow-sm hover:shadow-[0_28px_60px_-12px_rgba(139,90,43,0.3)] transition-all duration-300 overflow-hidden cursor-pointer hover:-translate-y-4 hover:scale-[1.025] hover:border-[#8B5A2B] hover:ring-8 hover:ring-[#8B5A2B]/20 flex flex-col justify-between"
+              className="group relative bg-white border border-[#E6E1D3] rounded-[28px] p-8 sm:p-9 shadow-sm hover:shadow-[0_32px_64px_-12px_rgba(139,90,43,0.32)] transition-all duration-300 overflow-hidden cursor-pointer hover:border-[#8B5A2B] hover:ring-8 hover:ring-[#8B5A2B]/20 flex flex-col justify-between"
             >
               {/* Top right decorative arc watermark */}
-              <div className="absolute top-0 right-0 w-32 h-32 bg-[#F5F5EC]/90 rounded-bl-[120px] pointer-events-none transition-transform duration-500 group-hover:scale-140 group-hover:bg-[#EBE5D6]" />
+              <div className="absolute top-0 right-0 w-32 h-32 bg-[#F5F5EC]/90 rounded-bl-[120px] pointer-events-none transition-transform duration-500 group-hover:scale-150 group-hover:bg-[#EBE5D6]" />
 
               <div>
                 {/* Icon Box */}
@@ -227,7 +255,7 @@ export const DashboardPage: React.FC = () => {
                 <span>LOGIN AS ADMIN</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-2.5 transition-transform duration-300" />
               </button>
-            </div>
+            </motion.div>
           </div>
 
           {/* Customer Authentication Modal (Login / Sign Up) */}
@@ -410,7 +438,7 @@ export const DashboardPage: React.FC = () => {
               </div>
             )}
           </AnimatePresence>
-        </section>
+        </motion.section>
       </div>
     );
   }

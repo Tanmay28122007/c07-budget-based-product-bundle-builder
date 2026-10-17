@@ -213,4 +213,138 @@ button[aria-label*="Assistant"]:hover {
   box-shadow: 0 20px 42px -6px rgba(44, 58, 43, 0.48) !important;
 }
 
+/* ========================================================================= */
+/* DYNAMIC LIVING ANIMATION SUITE                                            */
+/* ========================================================================= */
 
+@keyframes float-slow {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg) scale(1);
+  }
+  50% {
+    transform: translateY(-24px) rotate(3deg) scale(1.06);
+  }
+}
+
+@keyframes float-reverse {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg) scale(1);
+  }
+  50% {
+    transform: translateY(22px) rotate(-3deg) scale(0.95);
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 0.12;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.26;
+    transform: scale(1.08);
+  }
+}
+
+@keyframes fab-float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes shimmer-sweep {
+  0% {
+    transform: translateX(-150%) skewX(-20deg);
+  }
+  100% {
+    transform: translateX(250%) skewX(-20deg);
+  }
+}
+
+.animate-float-slow {
+  animation: float-slow 14s ease-in-out infinite;
+}
+
+.animate-float-reverse {
+  animation: float-reverse 18s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 9s ease-in-out infinite;
+}
+
+/* Subtle idle breathing on Floating Action Button */
+button[aria-label*="AI Assistant"],
+button[aria-label*="Assistant"] {
+  animation: fab-float 4s ease-in-out infinite;
+}
+button[aria-label*="AI Assistant"]:hover,
+button[aria-label*="Assistant"]:hover {
+  animation-play-state: paused;
+}
+
+/* Shimmer reflection sweep on primary CTA buttons */
+button.bg-\[\#2C3A2B\],
+button.bg-\[\#8B5A2B\] {
+  position: relative;
+  overflow: hidden;
+}
+button.bg-\[\#2C3A2B\]::after,
+button.bg-\[\#8B5A2B\]::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 40%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.16),
+    transparent
+  );
+  transform: translateX(-180%) skewX(-20deg);
+  pointer-events: none;
+}
+button.bg-\[\#2C3A2B\]:hover::after,
+button.bg-\[\#8B5A2B\]:hover::after {
+  animation: shimmer-sweep 1.2s ease-in-out infinite;
+}
+
+/* Page & Card Entrance Stagger Keyframe */
+@keyframes fadeInUpSubtle {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUpSubtle 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Subtle icon rotation helper */
+.group:hover .group-hover-spin {
+  transform: rotate(180deg);
+}
+
+/* Subtle badge pulse */
+@keyframes badge-pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.animate-badge-pulse {
+  animation: badge-pulse 2.5s ease-in-out infinite;
+}

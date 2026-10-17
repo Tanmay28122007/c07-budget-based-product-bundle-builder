@@ -52,7 +52,7 @@ export const RequiredSlotCard: React.FC<RequiredSlotCardProps> = ({
       {/* Top Header of Card */}
       <div className="flex items-center justify-between gap-2 pb-2.5 border-b border-[#E6E1D3]/80">
         <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-lg bg-[#F4F1EA] text-[#2C3A2B] border border-[#E6E1D3] flex items-center justify-center">
+          <div className="w-6 h-6 rounded-lg bg-[#F4F1EA] text-[#2C3A2B] border border-[#E6E1D3] flex items-center justify-center group-hover:rotate-6 group-hover:scale-110 group-hover:bg-[#2C3A2B] group-hover:text-white transition-all duration-300">
             <Layers className="w-3.5 h-3.5" />
           </div>
           <div>
@@ -133,14 +133,14 @@ export const RequiredSlotCard: React.FC<RequiredSlotCardProps> = ({
           <>
             <button
               onClick={onOpenSelector}
-              className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium text-[#2C2C1E] hover:text-[#2C3A2B] hover:bg-[#F4F1EA] rounded-lg transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-medium text-[#2C2C1E] hover:text-[#2C3A2B] hover:bg-[#F4F1EA] rounded-lg transition-colors cursor-pointer group/btn"
             >
-              <RefreshCw className="w-3 h-3 text-[#8B5A2B]" />
+              <RefreshCw className="w-3 h-3 text-[#8B5A2B] group-hover/btn:rotate-180 transition-transform duration-500" />
               Replace Item
             </button>
             <button
               onClick={onRemove}
-              className="p-1 text-[#8B8B7A] hover:text-rose-600 rounded-lg hover:bg-rose-50 transition-colors cursor-pointer"
+              className="p-1 text-[#8B8B7A] hover:text-rose-600 rounded-lg hover:bg-rose-50 transition-colors cursor-pointer hover:scale-115"
               title="Remove item from slot"
             >
               <Trash2 className="w-3.5 h-3.5" />
@@ -149,9 +149,9 @@ export const RequiredSlotCard: React.FC<RequiredSlotCardProps> = ({
         ) : (
           <button
             onClick={onOpenSelector}
-            className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-bold text-[#8B5A2B] bg-[#F4F1EA] hover:bg-[#E6E1D3] border border-[#E6E1D3] rounded-xl transition-all uppercase tracking-wider cursor-pointer"
+            className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-bold text-[#8B5A2B] bg-[#F4F1EA] hover:bg-[#E6E1D3] border border-[#E6E1D3] rounded-xl transition-all uppercase tracking-wider cursor-pointer group/btn hover:scale-[1.01]"
           >
-            <Plus className="w-3.5 h-3.5" />
+            <Plus className="w-3.5 h-3.5 group-hover/btn:rotate-90 transition-transform duration-300" />
             Select Product
           </button>
         )}

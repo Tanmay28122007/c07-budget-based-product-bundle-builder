@@ -338,14 +338,14 @@ export const BundleBuilderPage: React.FC = () => {
                 <span className="font-mono font-bold text-[#2C3A2B]">{formatINR(budget)}</span>
               </div>
 
-              <div className="w-full h-2.5 bg-[#F4F1EA] rounded-full overflow-hidden border border-[#E6E1D3]">
+              <div className="w-full h-2.5 bg-[#F4F1EA] rounded-full overflow-hidden border border-[#E6E1D3] relative shadow-inner">
                 <div
-                  className={`h-full transition-all duration-300 rounded-full ${
+                  className={`h-full transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] rounded-full relative overflow-hidden ${
                     validation.landedPrice.isOverBudget
-                      ? 'bg-rose-500'
+                      ? 'bg-rose-500 shadow-[0_0_12px_rgba(244,63,94,0.4)]'
                       : validation.landedPrice.budgetUtilisationPercent > 90
-                      ? 'bg-amber-500'
-                      : 'bg-[#2C3A2B]'
+                      ? 'bg-amber-500 shadow-[0_0_12px_rgba(245,158,11,0.4)]'
+                      : 'bg-gradient-to-r from-[#2C3A2B] to-[#496148] shadow-[0_0_12px_rgba(44,58,43,0.3)]'
                   }`}
                   style={{
                     width: `${Math.min(validation.landedPrice.budgetUtilisationPercent, 100)}%`
