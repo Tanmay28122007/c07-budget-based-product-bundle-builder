@@ -51,39 +51,39 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
 
   return (
     <header className="sticky top-0 z-30 h-16 bg-[#FDFBF7]/90 backdrop-blur-md border-b border-[#E6E1D3] px-4 lg:px-6 flex items-center justify-between gap-4">
-      {/* Left Area: Mobile Menu */}
-      <div className="flex items-center gap-3">
+      {/* Left Area: Mobile Menu & Expanded Search Bar */}
+      <div className="flex items-center gap-3 flex-1 max-w-md sm:max-w-lg lg:max-w-xl">
         <button
           onClick={onToggleSidebar}
           aria-label="Toggle navigation menu"
-          className="p-1.5 -ml-1 text-[#5A5A40] hover:text-[#2C2C1E] hover:bg-[#F4F1EA] rounded-xl lg:hidden transition-colors cursor-pointer"
+          className="p-1.5 -ml-1 text-[#5A5A40] hover:text-[#2C2C1E] hover:bg-[#F4F1EA] rounded-xl lg:hidden transition-colors cursor-pointer shrink-0"
         >
           <Menu className="w-5 h-5" />
         </button>
-      </div>
 
-      {/* Center / Right Controls */}
-      <div className="flex items-center gap-3">
-
-        {/* Global Search Bar */}
-        <div className="relative w-36 sm:w-48 lg:w-64">
-          <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-[#8B8B7A]" />
+        {/* Global Search Bar - Positioned on the left side and extended */}
+        <div className="relative w-full">
+          <Search className="w-3.5 h-3.5 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8B8B7A]" />
           <input
             type="text"
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             placeholder="Search items, specs, IDs..."
-            className="w-full pl-8 pr-3 py-1.5 text-xs bg-[#F4F1EA]/70 hover:bg-[#F4F1EA] focus:bg-white border border-[#E6E1D3] rounded-xl focus:outline-hidden focus:border-[#2C3A2B] transition-colors text-[#2C2C1E] placeholder-[#8B8B7A]"
+            className="w-full pl-9 pr-8 py-2 text-xs bg-[#F4F1EA]/70 hover:bg-[#F4F1EA] focus:bg-white border border-[#E6E1D3] rounded-xl focus:outline-hidden focus:border-[#2C3A2B] transition-all text-[#2C2C1E] placeholder-[#8B8B7A] shadow-2xs"
           />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery('')}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#8B8B7A] hover:text-[#2C2C1E]"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#8B8B7A] hover:text-[#2C2C1E] cursor-pointer p-0.5"
             >
               <X className="w-3 h-3" />
             </button>
           )}
         </div>
+      </div>
+
+      {/* Right Controls: Notifications & Profile Avatar */}
+      <div className="flex items-center gap-3">
 
         {/* Notifications Popover */}
         <div className="relative" ref={notifRef}>
