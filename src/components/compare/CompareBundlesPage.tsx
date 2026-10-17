@@ -179,6 +179,20 @@ export const CompareBundlesPage: React.FC<CompareBundlesPageProps> = ({ initialM
     return saved;
   }, [savedBundles, selectedBundleIds, includeActiveInComparison, validation.filledSlotCount, activeWorkspaceBundle]);
 
+  // Dynamic slot keys present across compared bundles (replaces hardcoded mouse/keyboard slots)
+  const comparisonSlotKeys = useMemo(() => {
+    const keys = new Set<string>();
+    bundlesToCompare.forEach(b => {
+      Object.keys(b.items).forEach(k => {
+        if (b.items[k]) keys.add(k);
+      });
+    });
+    if (keys.size === 0) {
+      fixture.activity.requiredSlots.forEach(s => keys.add(s.id));
+    }
+    return Array.from(keys);
+  }, [bundlesToCompare, fixture.activity.requiredSlots]);
+
   // Find minimum landed price among compared bundles to highlight the best deal
   const validCompared = bundlesToCompare.filter(b => b.validation.isValid);
   const minLandedPrice = validCompared.length > 0
@@ -1220,14 +1234,14 @@ export const CompareBundlesPage: React.FC<CompareBundlesPageProps> = ({ initialM
                         ))}
                       </tr>
 
-                      {/* Required Slots Breakdown */}
-                      {fixture.activity.requiredSlots.map(slot => (
-                        <tr key={slot.id}>
-                          <td className="py-3 px-4 text-[#5A5A40] font-medium">
-                            {slot.label} ({slot.category})
+                      {/* Dynamic Product Breakdown for Compared Bundles */}
+                      {comparisonSlotKeys.map(slotKey => (
+                        <tr key={slotKey}>
+                          <td className="py-3 px-4 text-[#5A5A40] font-medium capitalize">
+                            {slotKey.replace(/_/g, ' ')}
                           </td>
                           {bundlesToCompare.map(b => {
-                            const item = b.items[slot.id];
+                            const item = b.items[slotKey];
                             return (
                               <td key={b.id} className="py-3 px-4">
                                 {item ? (
@@ -1240,7 +1254,7 @@ export const CompareBundlesPage: React.FC<CompareBundlesPageProps> = ({ initialM
                                     </span>
                                   </div>
                                 ) : (
-                                  <span className="text-[#5A5A40]/60 italic">Empty Slot</span>
+                                  <span className="text-[#5A5A40]/60 italic">—</span>
                                 )}
                               </td>
                             );
