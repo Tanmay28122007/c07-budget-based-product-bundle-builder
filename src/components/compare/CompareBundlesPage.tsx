@@ -23,7 +23,10 @@ import {
   Eye,
   SlidersHorizontal,
   BookmarkPlus,
-  CreditCard
+  CreditCard,
+  RefreshCw,
+  Plus,
+  Package
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { formatINR } from '../../utils/pricing';
@@ -68,7 +71,8 @@ export const CompareBundlesPage: React.FC<CompareBundlesPageProps> = ({ initialM
     setActiveTab,
     toggleAssistant,
     addNotification,
-    initiateCheckout
+    initiateCheckout,
+    addItemToCart
   } = useApp();
 
   // Mode state: 'recommendations' for curated bundles & add-ons, 'workspace' for custom builder, 'compare' for side-by-side comparison
@@ -181,44 +185,32 @@ export const CompareBundlesPage: React.FC<CompareBundlesPageProps> = ({ initialM
     ? Math.min(...validCompared.map(b => b.validation.landedPrice.landedPrice))
     : 0;
 
-  // Additional items in currentItems not in fixture.activity.requiredSlots
-  const extraBundleItems = useMemo(() => {
-    return Object.entries(currentItems).filter(
-      ([slotId, prod]) => prod !== null && !fixture.activity.requiredSlots.some(s => s.id === slotId)
-    );
-  }, [currentItems, fixture.activity.requiredSlots]);
+  // Selected bundle recommendation state
+  const [selectedBundle, setSelectedBundle] = useState<BundleRecommendation | null>(null);
+  const [selectedWorkspaceAddonCategory, setSelectedWorkspaceAddonCategory] = useState<string>('all');
 
-  // Handle selecting a recommended bundle from 10 Dynamic Recommendations
+  // Active products configured in current bundle
+  const activeBundleProducts = useMemo(() => {
+    return Object.entries(currentItems)
+      .filter(([_, prod]) => prod !== null) as [string, Product][];
+  }, [currentItems]);
+
+  // Handle selecting a recommended bundle from curated recommendations
   const handleSelectRecommendedBundle = (bundle: BundleRecommendation) => {
+    setSelectedBundle(bundle);
     const newItems: Record<string, Product | null> = {};
 
-    // Initialize required benchmark slots as null
-    for (const slot of fixture.activity.requiredSlots) {
-      newItems[slot.id] = null;
-    }
-
-    // Populate products from bundle
-    for (const bundleItem of bundle.items) {
+    // Populate products of this specific bundle
+    bundle.items.forEach(bundleItem => {
       const prod = bundleItem.product;
       const qty = bundleItem.quantity;
-
       for (let i = 0; i < qty; i++) {
-        // Find if any unfilled benchmark slot matches category
-        const matchingBenchmarkSlot = fixture.activity.requiredSlots.find(
-          s => s.category.toLowerCase() === prod.category.toLowerCase() && newItems[s.id] === null
-        );
-
-        if (matchingBenchmarkSlot) {
-          newItems[matchingBenchmarkSlot.id] = prod;
-        } else {
-          // Dynamic category slot key
-          const key = qty > 1
-            ? `${prod.category} (${i + 1})`
-            : (newItems[prod.category] ? `${prod.category}_${i + 1}` : prod.category);
-          newItems[key] = prod;
-        }
+        const slotKey = qty > 1
+          ? `${prod.category} (${i + 1})`
+          : (newItems[prod.category] ? `${prod.category}_${i + 1}` : prod.category);
+        newItems[slotKey] = prod;
       }
-    }
+    });
 
     const targetBudget = bundle.budget && bundle.budget > 0
       ? bundle.budget
@@ -228,13 +220,49 @@ export const CompareBundlesPage: React.FC<CompareBundlesPageProps> = ({ initialM
 
     saveCurrentBundle(
       bundle.name,
-      `Selected from 10 Dynamic Recommendations. Landed: ${formatINR(bundle.landedPrice)}. ${bundle.matchExplanation}`
+      `Selected from Dynamic Recommendations. Landed: ${formatINR(bundle.landedPrice)}. ${bundle.matchExplanation}`
     );
 
     setViewMode('workspace');
     addNotification(
       'Bundle Loaded into Builder',
       `Loaded "${bundle.name}" (${bundle.totalItemCount} items, landed ${formatINR(bundle.landedPrice)}) into workspace.`,
+      'success'
+    );
+  };
+
+  // Remaining money to spend in active workspace
+  const remainingHeadroom = Math.max(0, budget - validation.landedPrice.landedPrice);
+  const activeProductIds = useMemo(() => {
+    return new Set(activeBundleProducts.map(([_, p]) => p.id));
+  }, [activeBundleProducts]);
+
+  const affordableAddons = useMemo(() => {
+    if (remainingHeadroom <= 0) return [];
+    return fixture.products
+      .filter(p => {
+        const inStock = p.inStock && (p.stockQuantity ?? 1) > 0;
+        const notInBundle = !activeProductIds.has(p.id);
+        const fitsInBudget = p.price <= remainingHeadroom;
+        return inStock && notInBundle && fitsInBudget;
+      })
+      .sort((a, b) => b.price - a.price);
+  }, [fixture.products, remainingHeadroom, activeProductIds]);
+
+  const addonCategories = useMemo(() => {
+    return ['all', ...Array.from(new Set(affordableAddons.map(p => p.category)))];
+  }, [affordableAddons]);
+
+  const displayedWorkspaceAddons = useMemo(() => {
+    if (selectedWorkspaceAddonCategory === 'all') return affordableAddons.slice(0, 8);
+    return affordableAddons.filter(p => p.category === selectedWorkspaceAddonCategory).slice(0, 8);
+  }, [affordableAddons, selectedWorkspaceAddonCategory]);
+
+  const handleAddAddonToWorkspace = (prod: Product) => {
+    addItemToCart(prod);
+    addNotification(
+      'Add-On Added',
+      `Added "${prod.name}" (${formatINR(prod.price)}) to bundle. Remaining budget: ${formatINR(Math.max(0, remainingHeadroom - prod.price))}.`,
       'success'
     );
   };
@@ -361,56 +389,26 @@ export const CompareBundlesPage: React.FC<CompareBundlesPageProps> = ({ initialM
             </div>
           )}
 
-          {/* Main Layout: Required Product Slots (Left) + Sticky Budget Summary (Right) */}
+          {/* Main Layout: Configured Bundle Products (Left) + Sticky Budget Summary (Right) */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-            {/* Left 2 Columns: Slots Grid & Context Alerts */}
-            <div className="lg:col-span-2 space-y-4">
+            {/* Left 2 Columns: Bundle Products & Add-On Recommendations */}
+            <div className="lg:col-span-2 space-y-6">
               {/* Slot Header Bar */}
               <div className="flex items-center justify-between pb-2 border-b border-[#E6E1D3]/80">
                 <div>
                   <h2 className="font-serif text-base font-bold text-[#2C3A2B]">
-                    Required Product Slots
+                    {selectedBundle ? selectedBundle.name : 'Configured Bundle Products'}
                   </h2>
                   <p className="text-xs text-[#5A5A40] mt-0.5">
-                    Fill each required slot with a compatible, in-stock item within your budget.
+                    {selectedBundle?.matchExplanation || 'Products currently included in your active bundle. Swap or remove items, or add smart accessories below.'}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className={`text-xs font-mono font-semibold px-2.5 py-1 rounded-lg border ${
-                    validation.isComplete
-                      ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
-                      : validation.filledSlotCount > 0
-                      ? 'bg-amber-50 text-amber-800 border-amber-200'
-                      : 'bg-[#F4F1EA] text-[#5A5A40] border-[#E6E1D3]'
-                  }`}>
-                    {validation.filledSlotCount} of {validation.totalSlotCount} slots filled
+                  <span className="text-xs font-mono font-semibold px-2.5 py-1 rounded-lg border bg-[#F4F1EA] text-[#2C3A2B] border-[#E6E1D3]">
+                    {activeBundleProducts.length} {activeBundleProducts.length === 1 ? 'item' : 'items'} in bundle
                   </span>
                 </div>
               </div>
-
-              {/* Empty State Banner (when no slots filled yet) */}
-              {validation.filledSlotCount === 0 && (
-                <div className="p-5 rounded-[22px] bg-[#FDFBF7] border border-dashed border-[#D6CFBF] shadow-2xs flex flex-col sm:flex-row items-center justify-between gap-4">
-                  <div className="flex items-start gap-3.5">
-                    <div className="w-10 h-10 rounded-2xl bg-[#2C3A2B] text-amber-200 flex items-center justify-center shrink-0 shadow-xs">
-                      <PackagePlus className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <h3 className="font-serif text-sm font-bold text-[#2C3A2B]">Your Bundle is Currently Empty</h3>
-                      <p className="text-xs text-[#5A5A40] mt-0.5 leading-relaxed">
-                        Select items for each required slot below, or let the intelligent optimizer find the best compatible configuration within your {formatINR(budget)} budget.
-                      </p>
-                    </div>
-                  </div>
-                  <button
-                    onClick={handleRunOptimizer}
-                    className="shrink-0 inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-[#2C3A2B] hover:bg-[#3A4D39] rounded-xl transition-all shadow-xs hover:shadow-md cursor-pointer"
-                  >
-                    <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-                    Auto-Fill Optimal Bundle
-                  </button>
-                </div>
-              )}
 
               {/* Over-Budget Alert Banner */}
               {validation.landedPrice.isOverBudget && (
@@ -451,71 +449,240 @@ export const CompareBundlesPage: React.FC<CompareBundlesPageProps> = ({ initialM
                 </div>
               )}
 
-              {/* Slots Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {fixture.activity.requiredSlots.map(slot => (
-                  <RequiredSlotCard
-                    key={slot.id}
-                    slot={slot}
-                    product={currentItems[slot.id]}
-                    onOpenSelector={() => setActiveSlotForSelection(slot)}
-                    onRemove={() => removeProduct(slot.id)}
-                    compatibilityViolations={validation.compatibilityViolations}
-                    availableCount={fixture.products.filter(p => p.category === slot.category).length}
-                  />
-                ))}
-              </div>
+              {/* Main Bundle Products Grid (The actual products of the bundle) */}
+              {activeBundleProducts.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {activeBundleProducts.map(([slotKey, prod]) => (
+                    <div
+                      key={slotKey}
+                      className="p-4.5 bg-white border border-[#E6E1D3] rounded-[22px] shadow-2xs hover:shadow-md transition-all flex flex-col justify-between gap-3 group"
+                    >
+                      <div className="flex items-start justify-between gap-2 pb-2.5 border-b border-[#E6E1D3]/70">
+                        <div className="flex items-center gap-2">
+                          <span className="px-2.5 py-0.5 rounded-md text-[10px] font-mono font-bold uppercase tracking-wider bg-[#2C3A2B] text-amber-200">
+                            {prod.category}
+                          </span>
+                          <span className="text-xs text-[#5A5A40] font-mono truncate max-w-[130px]">
+                            {slotKey}
+                          </span>
+                        </div>
+                        <span className="text-[10px] font-semibold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200 flex items-center gap-1">
+                          <Check className="w-3 h-3 text-emerald-700" /> In Bundle
+                        </span>
+                      </div>
 
-              {/* Additional Selected Bundle Products (from recommendations or custom selection) */}
-              {extraBundleItems.length > 0 && (
-                <div className="space-y-3 pt-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold text-[#8B5A2B] uppercase tracking-wider flex items-center gap-1.5">
-                      <Layers className="w-3.5 h-3.5 text-[#8B5A2B]" /> Additional Selected Products ({extraBundleItems.length})
+                      <div className="flex items-center gap-3.5 my-1">
+                        <img
+                          src={getProductImageUrl(prod.image, prod.id)}
+                          alt={prod.name}
+                          className="w-16 h-16 rounded-xl object-contain bg-[#FDFBF7] border border-[#E6E1D3] p-1.5 shrink-0 group-hover:scale-105 transition-transform"
+                        />
+                        <div className="min-w-0 flex-1">
+                          <h4 className="font-serif font-bold text-sm text-[#2C3A2B] truncate">{prod.name}</h4>
+                          <div className="text-xs text-[#5A5A40] mt-0.5 line-clamp-1">{prod.description || `${prod.category} item`}</div>
+                          <div className="text-sm font-mono font-bold text-[#2C3A2B] mt-1">
+                            {formatINR(prod.price)}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between gap-2 pt-2 border-t border-[#E6E1D3]/70 text-xs">
+                        <button
+                          type="button"
+                          onClick={() => setActiveSlotForSelection({
+                            id: slotKey,
+                            label: prod.name,
+                            category: prod.category,
+                            description: prod.description || `${prod.category} item`,
+                            priority: 'required'
+                          })}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-semibold text-xs text-[#2C3A2B] bg-[#F4F1EA] hover:bg-[#E6E1D3] border border-[#E6E1D3] transition-colors cursor-pointer"
+                          title="Swap with another product in this category"
+                        >
+                          <RefreshCw className="w-3.5 h-3.5" />
+                          <span>Swap</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => removeProduct(slotKey)}
+                          className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold text-rose-700 hover:bg-rose-50 border border-transparent hover:border-rose-200 transition-colors cursor-pointer"
+                          title="Remove from bundle"
+                        >
+                          <Trash2 className="w-3.5 h-3.5 text-rose-600" />
+                          <span>Remove</span>
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+
+                  {/* + Add Product Card */}
+                  <div
+                    onClick={() => setActiveTab('catalogue')}
+                    className="p-5 border-2 border-dashed border-[#D6CFBF] hover:border-[#2C3A2B] rounded-[22px] bg-[#FDFBF7]/80 hover:bg-[#F5F5EC] flex flex-col items-center justify-center text-center gap-2 cursor-pointer transition-all group min-h-[160px]"
+                  >
+                    <div className="w-10 h-10 rounded-xl bg-white border border-[#E6E1D3] flex items-center justify-center text-[#2C3A2B] group-hover:bg-[#2C3A2B] group-hover:text-amber-200 transition-all shadow-xs">
+                      <Plus className="w-5 h-5" />
+                    </div>
+                    <span className="font-serif font-bold text-xs text-[#2C3A2B]">
+                      + Add Product from Catalogue
                     </span>
-                    <span className="text-[11px] text-[#5A5A40]">
-                      Included in landed price calculations
+                    <span className="text-[10px] text-[#5A5A40]">
+                      Expand your bundle with additional products
                     </span>
                   </div>
+                </div>
+              ) : (
+                /* Empty state when no items in bundle */
+                <div className="p-8 text-center bg-white border border-[#E6E1D3] rounded-[24px] shadow-xs space-y-4">
+                  <div className="w-14 h-14 mx-auto rounded-full bg-[#F4F1EA] flex items-center justify-center text-[#5A5A40]">
+                    <Package className="w-7 h-7" />
+                  </div>
+                  <div>
+                    <h3 className="font-serif text-base font-bold text-[#2C3A2B]">Your Bundle is Currently Empty</h3>
+                    <p className="text-xs text-[#5A5A40] mt-1 max-w-md mx-auto">
+                      Select a curated bundle from the recommendations or add products from the catalogue.
+                    </p>
+                  </div>
+                  <div className="flex items-center justify-center gap-3 pt-2">
+                    <button
+                      type="button"
+                      onClick={() => setViewMode('recommendations')}
+                      className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-[#2C3A2B] hover:bg-[#1E281D] transition-colors cursor-pointer shadow-xs"
+                    >
+                      Browse Bundles
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab('catalogue')}
+                      className="px-4 py-2 rounded-xl text-xs font-semibold text-[#2C3A2B] bg-[#F4F1EA] hover:bg-[#E6E1D3] border border-[#E6E1D3] transition-colors cursor-pointer"
+                    >
+                      Browse Product Catalogue
+                    </button>
+                  </div>
+                </div>
+              )}
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {extraBundleItems.map(([slotKey, prod]) => {
-                      const p = prod!;
-                      return (
-                        <div
-                          key={slotKey}
-                          className="p-4 bg-white border border-[#E6E1D3] rounded-[22px] shadow-2xs hover:shadow-xs transition-all flex items-center justify-between gap-3"
+              {/* Dynamic Add-Ons Recommendations based on remaining budget */}
+              <div className="pt-4 border-t border-[#E6E1D3]/80 space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-100 text-emerald-900 border border-emerald-300">
+                        <Sparkles className="w-3 h-3 text-emerald-700" />
+                        <span>Recommended Add-Ons</span>
+                      </span>
+                      <span className="text-xs font-mono font-bold text-[#2C3A2B]">
+                        {remainingHeadroom > 0 ? `${formatINR(remainingHeadroom)} remaining budget` : 'Budget fully utilized'}
+                      </span>
+                    </div>
+                    <h3 className="font-serif text-lg font-bold text-[#2C3A2B] mt-1">
+                      Recommended Products for Remaining Spend
+                    </h3>
+                    <p className="text-xs text-[#5A5A40]">
+                      Add-on items matching your unspent budget to maximize workstation value.
+                    </p>
+                  </div>
+
+                  {remainingHeadroom > 0 && addonCategories.length > 2 && (
+                    <div className="flex flex-wrap items-center gap-1">
+                      {addonCategories.map(cat => (
+                        <button
+                          key={cat}
+                          type="button"
+                          onClick={() => setSelectedWorkspaceAddonCategory(cat)}
+                          className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-colors cursor-pointer ${
+                            selectedWorkspaceAddonCategory === cat
+                              ? 'bg-[#2C3A2B] text-white shadow-2xs'
+                              : 'bg-white text-[#5A5A40] border border-[#E6E1D3] hover:bg-[#F4F1EA]'
+                          }`}
                         >
-                          <div className="flex items-center gap-3 min-w-0">
+                          {cat === 'all' ? `All (${affordableAddons.length})` : cat}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {remainingHeadroom > 0 ? (
+                  affordableAddons.length > 0 ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                      {displayedWorkspaceAddons.map(prod => (
+                        <div
+                          key={`addon-${prod.id}`}
+                          className="p-3 bg-white border border-[#E6E1D3] rounded-2xl shadow-2xs hover:shadow-xs transition-all flex flex-col justify-between gap-2.5 group"
+                        >
+                          <div className="flex items-center gap-3">
                             <img
-                              src={getProductImageUrl(p.image, p.id)}
-                              alt={p.name}
-                              className="w-12 h-12 rounded-xl object-contain bg-[#FDFBF7] border border-[#E6E1D3] p-1 shrink-0"
+                              src={getProductImageUrl(prod.image, prod.id)}
+                              alt={prod.name}
+                              className="w-12 h-12 rounded-xl object-contain bg-[#FDFBF7] border border-[#E6E1D3] p-1 shrink-0 group-hover:scale-105 transition-transform"
                             />
-                            <div className="min-w-0">
-                              <span className="px-2 py-0.2 rounded-md text-[9px] font-bold uppercase tracking-wider bg-[#F4F1EA] text-[#8B5A2B] border border-[#E6E1D3]">
-                                {slotKey}
+                            <div className="min-w-0 flex-1">
+                              <span className="text-[9px] font-mono font-bold uppercase tracking-wider text-[#8B5A2B]">
+                                {prod.category}
                               </span>
-                              <h4 className="font-serif font-bold text-xs text-[#2C3A2B] truncate mt-0.5">{p.name}</h4>
+                              <h5 className="font-serif font-bold text-xs text-[#2C3A2B] truncate">{prod.name}</h5>
                               <div className="text-xs font-mono font-bold text-[#2C3A2B]">
-                                {formatINR(p.price)}
+                                {formatINR(prod.price)}
                               </div>
                             </div>
                           </div>
 
-                          <button
-                            onClick={() => removeProduct(slotKey)}
-                            className="p-1.5 rounded-lg text-stone-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer shrink-0"
-                            title="Remove item"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
+                          <div className="flex items-center justify-between gap-2 pt-2 border-t border-[#E6E1D3]/60 text-[10px]">
+                            <span className="text-[#8B8B7A] font-mono">
+                              +{formatINR(remainingHeadroom - prod.price)} left
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => handleAddAddonToWorkspace(prod)}
+                              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg font-bold text-white bg-[#2C3A2B] hover:bg-[#1E281D] transition-colors cursor-pointer shadow-2xs"
+                            >
+                              <Plus className="w-3 h-3 text-amber-300" />
+                              <span>Add to Bundle</span>
+                            </button>
+                          </div>
                         </div>
-                      );
-                    })}
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="p-4 rounded-2xl bg-[#FDFBF7] border border-[#E6E1D3] text-center text-xs text-[#5A5A40]">
+                      No individual catalogue products fit within your remaining ₹{formatINR(remainingHeadroom)} spend.
+                      Increase your budget at the top to unlock more add-on options!
+                    </div>
+                  )
+                ) : (
+                  <div className="p-4 rounded-2xl bg-emerald-50/60 border border-emerald-200 text-xs text-emerald-900 flex flex-col sm:flex-row items-center justify-between gap-3">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-700 shrink-0" />
+                      <span>
+                        Budget fully utilized ({formatINR(budget)})! All allocated funds are invested in this bundle.
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setBudget(budget + 1000);
+                          addNotification('Budget Increased', 'Added ₹1,000 to unlock add-on accessories.', 'success');
+                        }}
+                        className="px-2.5 py-1 rounded-lg text-xs font-bold text-[#2C3A2B] bg-white border border-[#E6E1D3] hover:bg-[#F4F1EA] transition-colors cursor-pointer"
+                      >
+                        + ₹1,000 Budget
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setBudget(budget + 5000);
+                          addNotification('Budget Increased', 'Added ₹5,000 to unlock premium add-ons.', 'success');
+                        }}
+                        className="px-2.5 py-1 rounded-lg text-xs font-bold text-white bg-[#2C3A2B] hover:bg-[#1E281D] transition-colors cursor-pointer"
+                      >
+                        + ₹5,000 Budget
+                      </button>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
 
             {/* Right 1 Column: Sticky Landed Pricing & Validation Summary Panel */}

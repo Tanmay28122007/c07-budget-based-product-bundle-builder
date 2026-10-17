@@ -718,9 +718,27 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   // Reactive bundle validation
   const validation = useMemo(() => {
+    const activeProducts = Object.values(currentItems).filter((p): p is Product => Boolean(p));
+    const hasBenchmarkSlotsOnly = Object.keys(currentItems).length > 0 && Object.keys(currentItems).every(k => 
+      fixture.activity.requiredSlots.some(s => s.id === k)
+    );
+
+    let effectiveSlots = fixture.activity.requiredSlots;
+    if (!hasBenchmarkSlotsOnly && activeProducts.length > 0) {
+      effectiveSlots = Object.entries(currentItems)
+        .filter(([_, p]) => Boolean(p))
+        .map(([slotKey, prod]) => ({
+          id: slotKey,
+          label: prod!.name,
+          category: prod!.category,
+          description: prod!.description || `${prod!.category} slot`,
+          priority: 'required' as const
+        }));
+    }
+
     return validateBundle(
       currentItems,
-      fixture.activity.requiredSlots,
+      effectiveSlots,
       budget,
       fixture.shippingRule,
       fixture.taxRule
