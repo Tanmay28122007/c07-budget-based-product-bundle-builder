@@ -12,13 +12,17 @@ import {
   UnitEconomicsParams,
   ShopperExperimentRecord,
   ProjectEvidenceRecord,
-  NegotiatedScope
+  NegotiatedScope,
+  UserProfile,
+  CheckoutBundleItem,
+  CheckoutBundleData
 } from '../types';
+export type { UserProfile, CheckoutBundleItem, CheckoutBundleData };
 import { DEFAULT_SYNTHETIC_FIXTURE, mapC07Fixture } from '../data/defaultFixture';
 import { validateBundle } from '../utils/bundleValidation';
 import { findValidBundle, OptimizationResult } from '../utils/bundleOptimizer';
 import { runAllTests, runReferenceRequestTest, EDGE_CASE_TESTS } from '../utils/testRunner';
-import { formatINR } from '../utils/pricing';
+import { formatINR, calculateLandedPrice } from '../utils/pricing';
 import {
   fetchSavedBundlesFromDb,
   upsertSavedBundleToDb,
@@ -70,8 +74,10 @@ interface AppContextType {
   currentItems: Record<string, Product | null>;
   validation: BundleValidationResult;
   selectProduct: (slotId: string, product: Product) => void;
+  addItemToCart: (product: Product) => void;
   removeProduct: (slotId: string) => void;
   resetBundle: () => void;
+  setBundleItems: (items: Record<string, Product | null>, newBudget?: number) => void;
   optimizeBundle: (preference?: 'lowest_cost' | 'best_value') => OptimizationResult;
 
   // Saved & Compared Bundles
@@ -125,7 +131,46 @@ interface AppContextType {
   isSupabaseModalOpen: boolean;
   setIsSupabaseModalOpen: (open: boolean) => void;
   checkSupabaseStatus: () => Promise<void>;
+
+  // User Profile
+  userProfile: UserProfile;
+  updateUserProfile: (updates: Partial<UserProfile>) => void;
+  resetUserProfile: () => void;
+  isProfileModalOpen: boolean;
+  setIsProfileModalOpen: (open: boolean) => void;
+  openProfileModal: () => void;
+  closeProfileModal: () => void;
+
+  // Checkout & Payment Simulation
+  checkoutData: CheckoutBundleData | null;
+  setCheckoutData: (data: CheckoutBundleData | null) => void;
+  initiateCheckout: (customBundle?: {
+    items: { product: Product; quantity: number }[];
+    bundleName?: string;
+  }) => void;
 }
+
+export const DEFAULT_USER_PROFILE: UserProfile = {
+  name: 'Tanmay Anand',
+  email: 'tanmay.anand@craftbundle.io',
+  phone: '+91 98765 43210',
+  roleTitle: 'Lead Bundle Architect',
+  department: 'Product & Merchandising',
+  bio: 'Specializing in budget-optimized workspace bundles, landed cost analytics, and AI recommendations.',
+  avatarColor: '#2C3A2B',
+  address: '42 Indiranagar 100ft Road',
+  city: 'Bengaluru',
+  state: 'Karnataka',
+  postalCode: '560038',
+  country: 'India',
+  preferredCurrency: 'INR',
+  defaultBudget: 75000,
+  optimizationPreference: 'best_value',
+  emailAlerts: true,
+  aiTips: true,
+  compactView: false,
+  memberSince: 'March 2024'
+};
 
 const INITIAL_SHOPPER_RECORDS: ShopperExperimentRecord[] = [
   {
@@ -292,7 +337,9 @@ const VALID_TABS = [
   'business',
   'evidence',
   'settings',
-  'product-detail'
+  'product-detail',
+  'profile',
+  'checkout'
 ];
 
 const getInitialTab = (): string => {
@@ -436,13 +483,23 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       const saved = localStorage.getItem('c07_fixture_v2');
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (parsed?.products?.length && parsed?.activity) return parsed;
+        if (parsed?.products?.length >= DEFAULT_SYNTHETIC_FIXTURE.products.length && parsed?.activity) return parsed;
       }
     } catch (e) {
       console.warn('Could not parse saved fixture from storage:', e);
     }
     return DEFAULT_SYNTHETIC_FIXTURE;
   });
+
+  // Guard against stale cached fixtures with fewer than 25 products
+  useEffect(() => {
+    if (fixture.products.length < DEFAULT_SYNTHETIC_FIXTURE.products.length) {
+      setFixture(DEFAULT_SYNTHETIC_FIXTURE);
+      try {
+        localStorage.removeItem('c07_fixture_v2');
+      } catch {}
+    }
+  }, [fixture.products.length]);
 
   const isCustomFixture = !fixture.isSynthetic;
 
@@ -564,6 +621,42 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [isSupabaseConnected, setIsSupabaseConnected] = useState<boolean>(false);
   const [isSupabaseModalOpen, setIsSupabaseModalOpen] = useState<boolean>(false);
 
+  // User Profile State
+  const [userProfile, setUserProfile] = useState<UserProfile>(() => {
+    try {
+      const saved = localStorage.getItem('c07_user_profile_v1');
+      if (saved) {
+        return { ...DEFAULT_USER_PROFILE, ...JSON.parse(saved) };
+      }
+    } catch (e) {
+      console.warn('Could not read user profile from storage:', e);
+    }
+    return DEFAULT_USER_PROFILE;
+  });
+
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState<boolean>(false);
+  const openProfileModal = () => setIsProfileModalOpen(true);
+  const closeProfileModal = () => setIsProfileModalOpen(false);
+
+  const updateUserProfile = (updates: Partial<UserProfile>) => {
+    setUserProfile(prev => {
+      const next = { ...prev, ...updates };
+      try {
+        localStorage.setItem('c07_user_profile_v1', JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+    addNotification('Profile Updated', 'Your profile details and preferences were saved successfully.', 'success');
+  };
+
+  const resetUserProfile = () => {
+    setUserProfile(DEFAULT_USER_PROFILE);
+    try {
+      localStorage.setItem('c07_user_profile_v1', JSON.stringify(DEFAULT_USER_PROFILE));
+    } catch {}
+    addNotification('Profile Reset', 'Profile details restored to defaults.', 'info');
+  };
+
   const checkSupabaseStatus = async () => {
     const config = getSupabaseConfig();
     if (!config.isConfigured) {
@@ -677,9 +770,45 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     addNotification("Product Selected", `Assigned "${product.name}" to ${slotId.toUpperCase()} slot.`, 'info');
   };
 
+  const addItemToCart = (product: Product) => {
+    // 1. Check if an empty required slot exists for this product's category
+    const matchingEmptyRequiredSlot = fixture.activity.requiredSlots.find(
+      s => (s.id === product.category || s.category.toLowerCase() === product.category.toLowerCase()) && !currentItems[s.id]
+    );
+
+    let targetSlot = matchingEmptyRequiredSlot ? matchingEmptyRequiredSlot.id : null;
+
+    if (!targetSlot) {
+      if (!currentItems[product.category]) {
+        targetSlot = product.category;
+      } else {
+        // Generate an available unique slot identifier for subsequent items
+        let index = 1;
+        while (currentItems[`${product.category}_${index}`]) {
+          index++;
+        }
+        targetSlot = `${product.category}_${index}`;
+      }
+    }
+
+    setCurrentItems(prev => ({
+      ...prev,
+      [targetSlot!]: product
+    }));
+    addNotification("Added to Cart", `Added "${product.name}" (${formatINR(product.price)}) to bundle cart.`, 'success');
+  };
+
   const removeProduct = (slotId: string) => {
     const current = currentItems[slotId];
-    setCurrentItems(prev => ({ ...prev, [slotId]: null }));
+    setCurrentItems(prev => {
+      const next = { ...prev };
+      if (fixture.activity.requiredSlots.some(s => s.id === slotId)) {
+        next[slotId] = null;
+      } else {
+        delete next[slotId];
+      }
+      return next;
+    });
     if (current) {
       addNotification("Product Removed", `Removed "${current.name}" from ${slotId.toUpperCase()} slot.`, 'warning');
     }
@@ -692,6 +821,13 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }
     setCurrentItems(emptyItems);
     addNotification("Bundle Reset", "Cleared all selected products from slots.", 'info');
+  };
+
+  const setBundleItems = (items: Record<string, Product | null>, newBudget?: number) => {
+    if (newBudget && newBudget > 0) {
+      setBudget(newBudget);
+    }
+    setCurrentItems(items);
   };
 
   const applyBundleRecommendation = (itemsMap: Record<string, string>, newBudget?: number) => {
@@ -981,9 +1117,94 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     setUnitEconomics(prev => ({ ...prev, ...updates }));
   };
 
+  // Checkout & Payment Simulation State
+  const [checkoutData, setCheckoutData] = useState<CheckoutBundleData | null>(() => {
+    try {
+      if (typeof localStorage !== 'undefined') {
+        const saved = localStorage.getItem('c07_checkout_data_v1');
+        if (saved) return JSON.parse(saved);
+      }
+    } catch {}
+    return null;
+  });
+
+  const initiateCheckout = (customBundle?: {
+    items: { product: Product; quantity: number }[];
+    bundleName?: string;
+  }) => {
+    let orderData: CheckoutBundleData;
+
+    if (customBundle && customBundle.items.length > 0) {
+      const validItems = customBundle.items.filter(it => it.quantity > 0);
+      const expandedProducts: Product[] = [];
+      validItems.forEach(it => {
+        for (let i = 0; i < it.quantity; i++) {
+          expandedProducts.push(it.product);
+        }
+      });
+      const breakdown = calculateLandedPrice(expandedProducts, budget, fixture.shippingRule, fixture.taxRule);
+
+      orderData = {
+        items: validItems,
+        subtotal: breakdown.productSubtotal,
+        shippingFee: breakdown.shippingFee,
+        shippingDiscount: breakdown.shippingDiscount,
+        netShipping: breakdown.netShipping,
+        taxAmount: breakdown.taxAmount,
+        total: breakdown.landedPrice,
+        bundleName: customBundle.bundleName || 'Selected Bundle',
+        source: 'recommendation'
+      };
+    } else {
+      const map = new Map<string, { product: Product; quantity: number }>();
+      Object.values(currentItems).forEach(p => {
+        if (!p) return;
+        const existing = map.get(p.id);
+        if (existing) {
+          existing.quantity += 1;
+        } else {
+          map.set(p.id, { product: p, quantity: 1 });
+        }
+      });
+      const items = Array.from(map.values());
+      const breakdown = validation.landedPrice;
+
+      orderData = {
+        items,
+        subtotal: breakdown.productSubtotal,
+        shippingFee: breakdown.shippingFee,
+        shippingDiscount: breakdown.shippingDiscount,
+        netShipping: breakdown.netShipping,
+        taxAmount: breakdown.taxAmount,
+        total: breakdown.landedPrice,
+        bundleName: fixture.activity.name || 'Workspace Bundle',
+        source: 'workspace'
+      };
+    }
+
+    try {
+      localStorage.setItem('c07_checkout_data_v1', JSON.stringify(orderData));
+    } catch {}
+
+    setCheckoutData(orderData);
+    setActiveTab('checkout');
+  };
+
+  useEffect(() => {
+    if (checkoutData) {
+      try {
+        localStorage.setItem('c07_checkout_data_v1', JSON.stringify(checkoutData));
+      } catch {}
+    }
+  }, [checkoutData]);
+
   return (
     <AppContext.Provider
       value={{
+        checkoutData,
+        setCheckoutData,
+        initiateCheckout,
+
         userRole,
         loginAs,
         logout,
@@ -1011,8 +1232,10 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         currentItems,
         validation,
         selectProduct,
+        addItemToCart,
         removeProduct,
         resetBundle,
+        setBundleItems,
         optimizeBundle,
 
         savedBundles,
@@ -1057,7 +1280,15 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         isSupabaseConnected,
         isSupabaseModalOpen,
         setIsSupabaseModalOpen,
-        checkSupabaseStatus
+        checkSupabaseStatus,
+
+        userProfile,
+        updateUserProfile,
+        resetUserProfile,
+        isProfileModalOpen,
+        setIsProfileModalOpen,
+        openProfileModal,
+        closeProfileModal
       }}
     >
       {children}
