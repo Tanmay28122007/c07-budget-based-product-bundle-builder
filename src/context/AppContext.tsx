@@ -30,6 +30,7 @@ import {
 } from '../services/supabaseClient';
 
 export type UserRole = 'customer' | 'admin' | null;
+export type { UserProfile };
 
 export interface AppNotification {
   id: string;
@@ -72,6 +73,7 @@ interface AppContextType {
   currentItems: Record<string, Product | null>;
   validation: BundleValidationResult;
   selectProduct: (slotId: string, product: Product) => void;
+  addItemToCart: (product: Product) => void;
   removeProduct: (slotId: string) => void;
   resetBundle: () => void;
   setBundleItems: (items: Record<string, Product | null>, newBudget?: number) => void;
@@ -748,9 +750,45 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     addNotification("Product Selected", `Assigned "${product.name}" to ${slotId.toUpperCase()} slot.`, 'info');
   };
 
+  const addItemToCart = (product: Product) => {
+    // 1. Check if an empty required slot exists for this product's category
+    const matchingEmptyRequiredSlot = fixture.activity.requiredSlots.find(
+      s => (s.id === product.category || s.category.toLowerCase() === product.category.toLowerCase()) && !currentItems[s.id]
+    );
+
+    let targetSlot = matchingEmptyRequiredSlot ? matchingEmptyRequiredSlot.id : null;
+
+    if (!targetSlot) {
+      if (!currentItems[product.category]) {
+        targetSlot = product.category;
+      } else {
+        // Generate an available unique slot identifier for subsequent items
+        let index = 1;
+        while (currentItems[`${product.category}_${index}`]) {
+          index++;
+        }
+        targetSlot = `${product.category}_${index}`;
+      }
+    }
+
+    setCurrentItems(prev => ({
+      ...prev,
+      [targetSlot!]: product
+    }));
+    addNotification("Added to Cart", `Added "${product.name}" (${formatINR(product.price)}) to bundle cart.`, 'success');
+  };
+
   const removeProduct = (slotId: string) => {
     const current = currentItems[slotId];
-    setCurrentItems(prev => ({ ...prev, [slotId]: null }));
+    setCurrentItems(prev => {
+      const next = { ...prev };
+      if (fixture.activity.requiredSlots.some(s => s.id === slotId)) {
+        next[slotId] = null;
+      } else {
+        delete next[slotId];
+      }
+      return next;
+    });
     if (current) {
       addNotification("Product Removed", `Removed "${current.name}" from ${slotId.toUpperCase()} slot.`, 'warning');
     }
@@ -1089,6 +1127,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         currentItems,
         validation,
         selectProduct,
+        addItemToCart,
         removeProduct,
         resetBundle,
         setBundleItems,

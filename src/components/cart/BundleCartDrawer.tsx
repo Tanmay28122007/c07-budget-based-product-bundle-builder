@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   ShoppingCart,
   ShoppingBag,
@@ -38,10 +38,13 @@ export const BundleCartDrawer: React.FC = () => {
     budget,
     currentItems,
     validation,
+    addItemToCart,
     removeProduct,
     resetBundle,
     setActiveTab
   } = useApp();
+
+  const [quickAddCategory, setQuickAddCategory] = useState<string>('all');
 
   // Close on Escape key
   useEffect(() => {
@@ -83,6 +86,16 @@ export const BundleCartDrawer: React.FC = () => {
   const emptyRequiredSlots = fixture.activity.requiredSlots.filter(
     slot => !currentItems[slot.id] && !filledItems.some(f => f.slotCategory.toLowerCase() === slot.category.toLowerCase())
   );
+
+  const availableQuickAddProducts = fixture.products.filter(p => {
+    if (!p.inStock) return false;
+    if (quickAddCategory !== 'all' && p.category.toLowerCase() !== quickAddCategory.toLowerCase()) {
+      return false;
+    }
+    return true;
+  });
+
+  const uniqueCategories = ['all', ...Array.from(new Set(fixture.products.map(p => p.category)))];
 
   return (
     <AnimatePresence>
@@ -335,6 +348,89 @@ export const BundleCartDrawer: React.FC = () => {
                         ))}
                       </div>
                     )}
+
+                    {/* Quick Add More Items to Cart */}
+                    <div className="mt-5 pt-4 border-t border-[#E6E1D3] space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1.5">
+                          <Sparkles className="w-3.5 h-3.5 text-[#8B5A2B]" />
+                          <span className="text-[11px] font-bold text-[#8B5A2B] uppercase tracking-wider">
+                            Quick Add More Items to Cart
+                          </span>
+                        </div>
+                        <span className="text-[10px] text-[#8B8B7A] font-mono">
+                          {availableQuickAddProducts.length} in stock
+                        </span>
+                      </div>
+
+                      {/* Category Filter Pills */}
+                      <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+                        {uniqueCategories.map(cat => (
+                          <button
+                            key={cat}
+                            type="button"
+                            onClick={() => setQuickAddCategory(cat)}
+                            className={`px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase transition-all shrink-0 cursor-pointer ${
+                              quickAddCategory === cat
+                                ? 'bg-[#2C3A2B] text-white shadow-2xs'
+                                : 'bg-white hover:bg-[#F4F1EA] text-[#5A5A40] border border-[#E6E1D3]'
+                            }`}
+                          >
+                            {cat}
+                          </button>
+                        ))}
+                      </div>
+
+                      {/* Quick Add Grid */}
+                      <div className="grid grid-cols-1 gap-2 max-h-56 overflow-y-auto pr-1">
+                        {availableQuickAddProducts.map(prod => {
+                          const prodImg = getProductImageUrl(prod.image, prod.id);
+                          const isAlreadyInCart = Object.values(currentItems).some(item => item?.id === prod.id);
+
+                          return (
+                            <div
+                              key={prod.id}
+                              className="p-2.5 rounded-xl border border-[#E6E1D3] bg-white hover:border-[#2C3A2B]/40 hover:shadow-xs transition-all flex items-center justify-between gap-2 group/add"
+                            >
+                              <div className="flex items-center gap-2.5 min-w-0">
+                                <div className="w-10 h-10 rounded-lg bg-[#F5F5EC] border border-[#E6E1D3] p-1 shrink-0 overflow-hidden flex items-center justify-center">
+                                  <img
+                                    src={prodImg}
+                                    alt={prod.name}
+                                    className="w-full h-full object-contain mix-blend-multiply group-hover/add:scale-105 transition-transform"
+                                  />
+                                </div>
+                                <div className="min-w-0">
+                                  <h5 className="text-xs font-bold text-[#2C3A2B] truncate block">
+                                    {prod.name}
+                                  </h5>
+                                  <div className="flex items-center gap-1.5 text-[10px] font-mono text-[#8B8B7A]">
+                                    <span className="text-[#8B5A2B] font-semibold">{prod.category}</span>
+                                    <span>·</span>
+                                    <span className="font-bold text-[#2C3A2B]">{formatINR(prod.price)}</span>
+                                    {isAlreadyInCart && (
+                                      <span className="text-emerald-700 font-bold bg-emerald-50 px-1 rounded">
+                                        (In Cart)
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+
+                              <button
+                                type="button"
+                                onClick={() => addItemToCart(prod)}
+                                className="py-1 px-3 rounded-lg bg-[#2C3A2B] hover:bg-[#1E281D] text-white shadow-2xs hover:scale-105 active:scale-95 transition-all cursor-pointer shrink-0 flex items-center gap-1 text-[11px] font-bold"
+                                title={`Add ${prod.name} to cart`}
+                              >
+                                <Plus className="w-3.5 h-3.5" />
+                                <span>Add</span>
+                              </button>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
                   </>
                 )}
               </div>

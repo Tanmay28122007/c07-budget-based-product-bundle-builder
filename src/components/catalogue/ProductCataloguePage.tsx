@@ -49,6 +49,7 @@ export const ProductCataloguePage: React.FC = () => {
     isCustomFixture,
     currentItems,
     selectProduct,
+    addItemToCart,
     removeProduct,
     setActiveTab,
     openProductDetails,
@@ -309,9 +310,17 @@ export const ProductCataloguePage: React.FC = () => {
                       <div className="space-y-2.5">
                         {/* Category Pill & Product ID */}
                         <div className="flex flex-wrap items-center gap-2">
-                          <span className="font-mono text-[11px] uppercase font-bold tracking-wider px-2.5 py-0.5 rounded-full bg-[#F4F1EA] text-[#8B5A2B] border border-[#E6E1D3]">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedCategory(p.category);
+                            }}
+                            className="font-mono text-[11px] uppercase font-bold tracking-wider px-2.5 py-0.5 rounded-full bg-[#F4F1EA] hover:bg-[#E8EEDD] text-[#8B5A2B] hover:text-[#2C3A2B] border border-[#E6E1D3] transition-colors cursor-pointer"
+                            title={`Filter catalogue to show only ${p.category}s`}
+                          >
                             {p.category.replace(/_/g, ' ')}
-                          </span>
+                          </button>
                           <span className="font-mono text-xs font-semibold text-[#8B8B7A] px-2 py-0.5 rounded-md bg-[#FDFBF7] border border-[#E6E1D3]">
                             ID: {p.id}
                           </span>
@@ -489,11 +498,7 @@ export const ProductCataloguePage: React.FC = () => {
                           <button
                             disabled={!p.inStock}
                             onClick={() => {
-                              const matchingSlot = fixture.activity.requiredSlots.find(
-                                s => s.id === p.category || s.category.toLowerCase() === p.category.toLowerCase()
-                              );
-                              const targetSlotId = matchingSlot ? matchingSlot.id : p.category;
-                              selectProduct(targetSlotId, p);
+                              addItemToCart(p);
                               setIsCartOpen(true);
                             }}
                             className={`w-full py-2.5 px-3 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer ${
@@ -501,10 +506,10 @@ export const ProductCataloguePage: React.FC = () => {
                                 ? 'bg-[#2C3A2B] hover:bg-[#1E281D] text-white shadow-xs hover:shadow-xl hover:scale-[1.03] active:scale-[0.96]'
                                 : 'bg-[#F4F1EA] text-[#8B8B7A] cursor-not-allowed border border-[#E6E1D3]'
                             }`}
-                            title={p.inStock ? 'Add product to bundle slot' : 'Cannot add out-of-stock item'}
+                            title={p.inStock ? 'Add product to bundle cart' : 'Cannot add out-of-stock item'}
                           >
                             <Plus className="w-4 h-4 transition-transform group-hover:rotate-90" />
-                            <span>{p.inStock ? 'Add to Slot' : 'Out of Stock'}</span>
+                            <span>{p.inStock ? 'Add to Cart' : 'Out of Stock'}</span>
                           </button>
                         )}
 
