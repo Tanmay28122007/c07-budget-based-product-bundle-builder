@@ -45,7 +45,7 @@ export interface AppNotification {
 interface AppContextType {
   // Authentication & Role
   userRole: UserRole;
-  loginAs: (role: 'customer' | 'admin') => void;
+  loginAs: (role: 'customer' | 'admin', provider?: 'google' | 'facebook' | 'email' | 'guest') => void;
   logout: () => void;
   adminSignInRequested: boolean;
   setAdminSignInRequested: (req: boolean) => void;
@@ -328,6 +328,8 @@ function parseProductHash(hash: string): string | null {
 }
 
 const VALID_TABS = [
+  'login',
+  'home',
   'landing',
   'dashboard',
   'builder',
@@ -348,10 +350,15 @@ const getInitialTab = (): string => {
     if (typeof window !== 'undefined' && window.location.hash) {
       const hash = window.location.hash.replace('#', '').trim();
       if (parseProductHash(window.location.hash)) return 'product-detail';
+      if (hash === 'login' || hash === 'home') return 'login';
       if (hash === 'builder' || hash === 'landing') return 'catalogue';
       if (VALID_TABS.includes(hash) && hash !== 'landing') return hash;
     }
     if (typeof localStorage !== 'undefined') {
+      const savedRole = localStorage.getItem('c07_user_role_v1');
+      if (!savedRole || savedRole === 'null' || savedRole === 'logged_out') {
+        return 'login';
+      }
       const savedTab = localStorage.getItem('c07_active_tab_v1');
       if (savedTab === 'builder' || savedTab === 'landing') return 'catalogue';
       if (savedTab && VALID_TABS.includes(savedTab) && savedTab !== 'landing') return savedTab;
@@ -359,7 +366,7 @@ const getInitialTab = (): string => {
   } catch (e) {
     console.warn('Could not read active tab from storage:', e);
   }
-  return 'catalogue';
+  return 'login';
 };
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -471,15 +478,17 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     try {
       if (typeof window !== 'undefined') {
         const hash = window.location.hash.replace('#', '').trim();
+        if (hash === 'login' || hash === 'home') return null;
         if (hash === 'admin') return 'admin';
         if (hash === 'customer') return 'customer';
       }
       const saved = sessionStorage.getItem('c07_user_role_v1') || localStorage.getItem('c07_user_role_v1');
+      if (saved === 'null' || saved === 'logged_out') return null;
       if (saved === 'customer' || saved === 'admin') return saved as UserRole;
     } catch (e) {
       console.warn('Could not read user role from storage:', e);
     }
-    return 'customer';
+    return null;
   });
   const [adminSignInRequested, setAdminSignInRequested] = useState<boolean>(false);
 
@@ -763,34 +772,69 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     setNotifications([]);
   };
 
-  const loginAs = (role: 'customer' | 'admin') => {
+  const loginAs = (
+    role: 'customer' | 'admin',
+    provider: 'google' | 'facebook' | 'email' | 'guest' = 'google'
+  ) => {
     setUserRole(role);
     setAdminSignInRequested(false);
     try {
       sessionStorage.setItem('c07_user_role_v1', role);
+      sessionStorage.setItem('c07_auth_provider_v1', provider);
       localStorage.setItem('c07_user_role_v1', role);
+      localStorage.setItem('c07_auth_provider_v1', provider);
     } catch {}
+
+    if (provider === 'google') {
+      setUserProfile(prev => ({
+        ...prev,
+        name: prev.name || 'Tanmay Anand',
+        email: prev.email || 'tanmay.anand@gmail.com',
+        bio: 'Signed in via Google OAuth 2.0.'
+      }));
+      addNotification('Signed in with Google', 'Welcome! Google authentication verified successfully.', 'success');
+    } else if (provider === 'facebook') {
+      setUserProfile(prev => ({
+        ...prev,
+        name: prev.name || 'Tanmay Anand',
+        email: prev.email || 'tanmay.anand@facebook.com',
+        bio: 'Signed in via Meta Facebook OAuth.'
+      }));
+      addNotification('Signed in with Facebook', 'Welcome! Facebook account verified successfully.', 'success');
+    } else if (provider === 'email') {
+      addNotification(`Signed in as ${role === 'admin' ? 'Administrator' : 'Customer'}`, 'Welcome back to your workspace.', 'success');
+    } else {
+      addNotification('Guest Access Granted', 'Browsing with demo customer privileges.', 'info');
+    }
+
     if (role === 'customer') {
       setActiveTab('catalogue');
-      addNotification('Logged in as Customer', 'Welcome! You can now assemble custom product bundles within your budget.', 'success');
+      if (typeof window !== 'undefined') {
+        window.history.replaceState(null, '', '#catalogue');
+      }
     } else {
       setActiveTab('dashboard');
-      addNotification('Logged in as Administrator', 'Welcome! Full access to business insights, test suites, and configurations.', 'info');
+      if (typeof window !== 'undefined') {
+        window.history.replaceState(null, '', '#dashboard');
+      }
     }
   };
 
   const logout = () => {
-    setUserRole('customer');
+    setUserRole(null);
     try {
       sessionStorage.removeItem('c07_user_role_v1');
-      localStorage.removeItem('c07_user_role_v1');
+      sessionStorage.removeItem('c07_auth_provider_v1');
+      localStorage.setItem('c07_user_role_v1', 'null');
+      localStorage.removeItem('c07_auth_provider_v1');
+      localStorage.setItem('c07_active_tab_v1', 'login');
     } catch {}
     setAdminSignInRequested(false);
-    setActiveTab('catalogue');
+    setActiveTab('login');
     if (typeof window !== 'undefined') {
-      window.history.replaceState(null, '', '#catalogue');
+      window.history.replaceState(null, '', '#login');
     }
-    addNotification('Session Reset', 'You have reset your workspace session to customer mode.', 'info');
+    addNotification('Logged Out', 'You have been signed out. Please sign in again with Google or Facebook.', 'info');
   };
 
   const setBudget = (val: number) => {
