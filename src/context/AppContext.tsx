@@ -348,18 +348,18 @@ const getInitialTab = (): string => {
     if (typeof window !== 'undefined' && window.location.hash) {
       const hash = window.location.hash.replace('#', '').trim();
       if (parseProductHash(window.location.hash)) return 'product-detail';
-      if (hash === 'builder') return 'catalogue';
-      if (VALID_TABS.includes(hash)) return hash;
+      if (hash === 'builder' || hash === 'landing') return 'catalogue';
+      if (VALID_TABS.includes(hash) && hash !== 'landing') return hash;
     }
     if (typeof localStorage !== 'undefined') {
       const savedTab = localStorage.getItem('c07_active_tab_v1');
-      if (savedTab === 'builder') return 'catalogue';
-      if (savedTab && VALID_TABS.includes(savedTab)) return savedTab;
+      if (savedTab === 'builder' || savedTab === 'landing') return 'catalogue';
+      if (savedTab && VALID_TABS.includes(savedTab) && savedTab !== 'landing') return savedTab;
     }
   } catch (e) {
     console.warn('Could not read active tab from storage:', e);
   }
-  return 'landing';
+  return 'catalogue';
 };
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -471,17 +471,15 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     try {
       if (typeof window !== 'undefined') {
         const hash = window.location.hash.replace('#', '').trim();
-        // If visiting root with no specific hash or explicit landing, start at starting screen
-        if (!hash || hash === 'landing' || hash === 'login' || hash === 'start') {
-          return null;
-        }
+        if (hash === 'admin') return 'admin';
+        if (hash === 'customer') return 'customer';
       }
-      const saved = sessionStorage.getItem('c07_user_role_v1');
-      if (saved === 'customer' || saved === 'admin') return saved;
+      const saved = sessionStorage.getItem('c07_user_role_v1') || localStorage.getItem('c07_user_role_v1');
+      if (saved === 'customer' || saved === 'admin') return saved as UserRole;
     } catch (e) {
       console.warn('Could not read user role from storage:', e);
     }
-    return null;
+    return 'customer';
   });
   const [adminSignInRequested, setAdminSignInRequested] = useState<boolean>(false);
 
@@ -766,17 +764,17 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   const logout = () => {
-    setUserRole(null);
+    setUserRole('customer');
     try {
       sessionStorage.removeItem('c07_user_role_v1');
       localStorage.removeItem('c07_user_role_v1');
     } catch {}
     setAdminSignInRequested(false);
-    setActiveTab('landing');
+    setActiveTab('catalogue');
     if (typeof window !== 'undefined') {
-      window.history.replaceState(null, '', '#landing');
+      window.history.replaceState(null, '', '#catalogue');
     }
-    addNotification('Logged Out', 'You have returned to the role selection starting screen.', 'info');
+    addNotification('Session Reset', 'You have reset your workspace session to customer mode.', 'info');
   };
 
   const setBudget = (val: number) => {
