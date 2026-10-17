@@ -349,6 +349,29 @@ export const ProductDetailPage: React.FC = () => {
             </div>
           </div>
 
+          {/* Product Description */}
+          {product.description && (
+            <div className="p-4 bg-white rounded-2xl border border-[#E6E1D3]">
+              <span className="text-[10px] font-mono uppercase tracking-wider text-[#8B8B7A] block font-semibold mb-1">
+                Description
+              </span>
+              <p className="text-xs text-[#4A4A35] leading-relaxed">
+                {product.description}
+              </p>
+            </div>
+          )}
+
+          {/* Compatibility Note if any */}
+          {product.notes && (
+            <div className="p-3.5 rounded-2xl bg-[#FEF9C3] border border-[#F4E1A1] text-xs text-[#713F12] flex items-start gap-2">
+              <Info className="w-4 h-4 text-[#854D0E] shrink-0 mt-0.5" />
+              <div>
+                <span className="font-bold">Compatibility Note: </span>
+                <span>{product.notes}</span>
+              </div>
+            </div>
+          )}
+
           {/* Quick Specifications Highlights */}
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
             {product.attributes.colour && (
@@ -477,104 +500,7 @@ export const ProductDetailPage: React.FC = () => {
         </div>
       </div>
 
-      {/* 3. Comprehensive Specifications & Compatibility Rules Card */}
-      <div className="bg-white rounded-3xl border border-[#E6E1D3] p-6 sm:p-8 shadow-xs space-y-6">
-        <div>
-          <h2 className="font-serif text-2xl font-bold text-[#2C3A2B]">
-            Full Technical Specifications & Verification
-          </h2>
-          <p className="text-xs text-[#5A5A40] mt-1">
-            Engineered to fulfill all operational benchmarks and slot compatibility matrix requirements.
-          </p>
-        </div>
-
-        {/* Compatibility Advisory if any */}
-        {product.notes && (
-          <div className="p-4 rounded-2xl bg-[#FEF9C3] border border-[#F4E1A1] text-xs text-[#713F12] flex items-start gap-3">
-            <Info className="w-5 h-5 text-[#854D0E] shrink-0 mt-0.5" />
-            <div>
-              <span className="font-bold block">Compatibility Note:</span>
-              <p className="mt-0.5 leading-relaxed">{product.notes}</p>
-            </div>
-          </div>
-        )}
-
-        {/* Incompatible Products Warning if any */}
-        {product.incompatibleProductIds && product.incompatibleProductIds.length > 0 && (
-          <div className="p-4 rounded-2xl bg-[#FFF5F5] border border-[#FED7D7] text-xs text-[#9B2C2C] flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 text-[#C53030] shrink-0 mt-0.5" />
-            <div>
-              <span className="font-bold block">Incompatibility Constraint:</span>
-              <p className="mt-0.5 leading-relaxed">
-                This item cannot be bundled simultaneously with product IDs: <strong className="font-mono">{product.incompatibleProductIds.join(', ')}</strong>. The bundle optimizer automatically enforces this rule.
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/* Detailed Table Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-mono">
-          <div className="space-y-2">
-            <div className="flex justify-between p-3 rounded-xl bg-[#FDFBF7] border border-[#E6E1D3]">
-              <span className="text-[#8B8B7A] font-sans font-medium">Product ID</span>
-              <span className="font-bold text-[#2C3A2B]">{product.id}</span>
-            </div>
-            <div className="flex justify-between p-3 rounded-xl bg-[#FDFBF7] border border-[#E6E1D3]">
-              <span className="text-[#8B8B7A] font-sans font-medium">Category Slot</span>
-              <span className="font-bold text-[#2C3A2B]">{product.category}</span>
-            </div>
-            <div className="flex justify-between p-3 rounded-xl bg-[#FDFBF7] border border-[#E6E1D3]">
-              <span className="text-[#8B8B7A] font-sans font-medium">Brand & Manufacturer</span>
-              <span className="font-bold text-[#2C3A2B]">{product.brand}</span>
-            </div>
-            <div className="flex justify-between p-3 rounded-xl bg-[#FDFBF7] border border-[#E6E1D3]">
-              <span className="text-[#8B8B7A] font-sans font-medium">Model Designation</span>
-              <span className="font-bold text-[#2C3A2B]">{product.model}</span>
-            </div>
-            <div className="flex justify-between p-3 rounded-xl bg-[#FDFBF7] border border-[#E6E1D3]">
-              <span className="text-[#8B8B7A] font-sans font-medium">Colour Code</span>
-              <span className="font-bold text-[#2C3A2B]">{product.attributes.colour || 'Standard'}</span>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <div className="flex justify-between p-3 rounded-xl bg-[#FDFBF7] border border-[#E6E1D3]">
-              <span className="text-[#8B8B7A] font-sans font-medium">Size Configuration</span>
-              <span className="font-bold text-[#2C3A2B]">{product.attributes.size || 'Standard'}</span>
-            </div>
-            <div className="flex justify-between p-3 rounded-xl bg-[#FDFBF7] border border-[#E6E1D3]">
-              <span className="text-[#8B8B7A] font-sans font-medium">Connector / Port</span>
-              <span className="font-bold text-[#2C3A2B]">{product.attributes.connector ? product.attributes.connector.toUpperCase() : 'N/A'}</span>
-            </div>
-            <div className="flex justify-between p-3 rounded-xl bg-[#FDFBF7] border border-[#E6E1D3]">
-              <span className="text-[#8B8B7A] font-sans font-medium">Unit Cost (Wholesale)</span>
-              <span className="font-bold text-[#2C3A2B]">{product.attributes.unitCostInr ? formatINR(product.attributes.unitCostInr) : 'N/A'}</span>
-            </div>
-            <div className="flex justify-between p-3 rounded-xl bg-[#FDFBF7] border border-[#E6E1D3]">
-              <span className="text-[#8B8B7A] font-sans font-medium">Weight</span>
-              <span className="font-bold text-[#2C3A2B]">{product.weightKg ? `${product.weightKg} kg` : 'Standard'}</span>
-            </div>
-            <div className="flex justify-between p-3 rounded-xl bg-[#FDFBF7] border border-[#E6E1D3]">
-              <span className="text-[#8B8B7A] font-sans font-medium">Direct Compatibility</span>
-              <span className="font-bold text-[#2C3A2B]">
-                {product.attributes.compatibleWith?.length ? product.attributes.compatibleWith.join(', ') : 'Universal'}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* Description Text */}
-        <div className="pt-2">
-          <span className="text-[10px] font-mono uppercase tracking-wider text-[#8B8B7A] block font-semibold mb-2">
-            Detailed Overview & Design Purpose
-          </span>
-          <p className="text-sm text-[#4A4A35] leading-relaxed bg-[#FDFBF7] p-5 rounded-2xl border border-[#E6E1D3]">
-            {product.description || `${product.name} is an enterprise-grade component designed to ensure seamless ergonomics, durability, and compatibility across modern office and workstation setups.`}
-          </p>
-        </div>
-      </div>
-
-      {/* 4. Related Products in Catalogue */}
+      {/* Related Products in Catalogue */}
       {relatedProducts.length > 0 && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
