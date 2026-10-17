@@ -112,6 +112,11 @@ interface AppContextType {
   applyBundleRecommendation: (itemsMap: Record<string, string>, newBudget?: number) => void;
   swapProductById: (slotId: string, productId: string) => void;
 
+  // Bundle Cart Drawer State & Actions
+  isCartOpen: boolean;
+  setIsCartOpen: (open: boolean) => void;
+  toggleCart: () => void;
+
   // Supabase Cloud Database
   isSupabaseConnected: boolean;
   isSupabaseModalOpen: boolean;
@@ -475,6 +480,10 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   // AI Assistant State
   const [isAssistantOpen, setIsAssistantOpen] = useState<boolean>(false);
   const toggleAssistant = () => setIsAssistantOpen(prev => !prev);
+
+  // Cart Drawer State
+  const [isCartOpen, setIsCartOpen] = useState<boolean>(false);
+  const toggleCart = () => setIsCartOpen(prev => !prev);
 
   // Supabase Database State
   const [isSupabaseConnected, setIsSupabaseConnected] = useState<boolean>(false);
@@ -962,6 +971,10 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         toggleAssistant,
         applyBundleRecommendation,
         swapProductById,
+
+        isCartOpen,
+        setIsCartOpen,
+        toggleCart,
 
         isSupabaseConnected,
         isSupabaseModalOpen,

@@ -9,9 +9,11 @@ import {
   X,
   ExternalLink,
   ChevronDown,
-  LogOut
+  LogOut,
+  ShoppingCart
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
+import { formatINR } from '../../utils/pricing';
 
 interface HeaderProps {
   onToggleSidebar: () => void;
@@ -28,7 +30,9 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
     setActiveTab,
     userRole,
     loginAs,
-    logout
+    logout,
+    validation,
+    toggleCart
   } = useApp();
 
   const [showNotifications, setShowNotifications] = useState(false);
@@ -163,6 +167,30 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
             </div>
           )}
         </div>
+
+        {/* Bundle Cart Option in Corner */}
+        <button
+          onClick={toggleCart}
+          aria-label="View bundle cart"
+          className={`relative flex items-center gap-2 px-3 py-1.5 rounded-xl border transition-all cursor-pointer active:scale-95 ${
+            validation.filledSlotCount > 0
+              ? 'bg-[#2C3A2B] hover:bg-[#1E281D] text-white border-[#2C3A2B] shadow-xs'
+              : 'bg-[#F4F1EA] hover:bg-[#E6E1D3] text-[#5A5A40] border-[#E6E1D3]'
+          }`}
+          title={`Bundle Cart: ${validation.filledSlotCount} of ${validation.totalSlotCount} slots filled`}
+        >
+          <div className="relative flex items-center justify-center">
+            <ShoppingCart className="w-4 h-4" />
+            {validation.filledSlotCount > 0 && (
+              <span className="absolute -top-2 -right-2.5 min-w-4 h-4 px-1 rounded-full bg-amber-400 text-[#2C2C1E] font-bold text-[10px] flex items-center justify-center shadow-xs">
+                {validation.filledSlotCount}
+              </span>
+            )}
+          </div>
+          <span className="hidden sm:inline font-semibold text-xs">
+            {validation.filledSlotCount > 0 ? formatINR(validation.landedPrice.landedPrice) : 'Cart'}
+          </span>
+        </button>
 
         {/* Active Role Pill in Header */}
         <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-[#E6E1D3] bg-[#F4F1EA] text-xs shadow-2xs">

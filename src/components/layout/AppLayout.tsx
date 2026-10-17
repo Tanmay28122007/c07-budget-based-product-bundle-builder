@@ -2,8 +2,11 @@ import React, { useState } from 'react';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
 import { AIAssistantDrawer } from '../assistant/AIAssistantDrawer';
+import { BundleCartDrawer } from '../cart/BundleCartDrawer';
 import { SupabaseModal } from '../database/SupabaseModal';
 import { useApp } from '../../context/AppContext';
+import { ShoppingCart } from 'lucide-react';
+import { formatINR } from '../../utils/pricing';
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -11,7 +14,7 @@ interface AppLayoutProps {
 
 export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { userRole, isSupabaseModalOpen, setIsSupabaseModalOpen } = useApp();
+  const { userRole, isSupabaseModalOpen, setIsSupabaseModalOpen, toggleCart, validation } = useApp();
 
   const isFrontPage = !userRole;
 
@@ -54,6 +57,34 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
           </main>
         </div>
 
+        {/* Floating Cart Button in the Corner */}
+        <button
+          onClick={toggleCart}
+          aria-label="Open bundle cart"
+          className="fixed bottom-22 right-6 z-40 px-3.5 py-2.5 rounded-full shadow-xl bg-white border border-[#E6E1D3] hover:border-[#2C3A2B] text-[#2C3A2B] hover:shadow-2xl transition-all duration-300 hover:scale-105 active:scale-95 flex items-center gap-2 cursor-pointer group"
+          style={{
+            boxShadow: '0 8px 24px rgba(44, 58, 43, 0.15)'
+          }}
+        >
+          <div className="relative flex items-center justify-center">
+            <ShoppingCart className="w-4 h-4 text-[#2C3A2B] group-hover:scale-110 transition-transform" />
+            {validation.filledSlotCount > 0 && (
+              <span className="absolute -top-2 -right-2.5 min-w-4 h-4 px-1 rounded-full bg-[#2C3A2B] text-white font-bold text-[10px] flex items-center justify-center shadow-xs">
+                {validation.filledSlotCount}
+              </span>
+            )}
+          </div>
+          <div className="hidden sm:flex flex-col text-left">
+            <span className="text-[9px] font-bold uppercase tracking-wider text-[#8B5A2B] leading-none">Bundle Cart</span>
+            <span className="text-xs font-mono font-bold text-[#2C3A2B] leading-tight mt-0.5">
+              {validation.filledSlotCount > 0 ? formatINR(validation.landedPrice.landedPrice) : 'Empty'}
+            </span>
+          </div>
+        </button>
+
+        {/* Global Slide-Over Bundle Cart Drawer */}
+        <BundleCartDrawer />
+
         {/* Global AI Assistant Drawer & Floating Button */}
         <AIAssistantDrawer />
 
@@ -66,4 +97,5 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
     </div>
   );
 };
+
 
