@@ -1,6 +1,7 @@
 import { Product, RequiredSlot, ShippingRule, TaxRule, BundleValidationResult } from '../types';
 import { validateBundle } from './bundleValidation';
 import { formatINR } from './pricing';
+import { getPredefinedBaselineBundles } from './bundleRecommendations';
 
 export interface OptimizationResult {
   success: boolean;
@@ -24,6 +25,67 @@ export function findValidBundle(
   taxRule: TaxRule,
   preference: 'lowest_cost' | 'best_value' = 'lowest_cost'
 ): OptimizationResult {
+  // If there are no hardcoded required slots, find the best compatible combination of items
+  if (requiredSlots.length === 0) {
+    const predefined = getPredefinedBaselineBundles(allProducts, shippingRule, taxRule, budget);
+    const validPredefined = predefined.filter(b => b.isWithinBudget && b.items.every(it => it.product.inStock));
+
+    if (validPredefined.length > 0) {
+      const chosen = preference === 'lowest_cost'
+        ? [...validPredefined].sort((a, b) => a.landedPrice - b.landedPrice)[0]
+        : [...validPredefined].sort((a, b) => b.landedPrice - a.landedPrice)[0];
+
+      const bundleItems: Record<string, Product> = {};
+      for (const item of chosen.items) {
+        for (let i = 0; i < item.quantity; i++) {
+          const key = item.quantity > 1 ? `${item.product.category} (${i + 1})` : item.product.category;
+          bundleItems[key] = item.product;
+        }
+      }
+      const val = validateBundle(bundleItems, requiredSlots, budget, shippingRule, taxRule);
+      return {
+        success: true,
+        bundleItems,
+        validation: val,
+        combinationsEvaluated: predefined.length,
+        feasibleCount: validPredefined.length
+      };
+    }
+
+    // Fallback: build bundle from affordable in-stock catalogue items
+    const inStock = allProducts.filter(p => p.inStock && (p.stockQuantity === undefined || p.stockQuantity > 0));
+    const sorted = [...inStock].sort((a, b) => preference === 'lowest_cost' ? a.price - b.price : b.price - a.price);
+    const selected: Record<string, Product> = {};
+
+    for (const p of sorted) {
+      const candidate = { ...selected, [p.category]: p };
+      const testVal = validateBundle(candidate, requiredSlots, budget, shippingRule, taxRule);
+      if (testVal.isValid && testVal.isWithinBudget) {
+        selected[p.category] = p;
+      }
+    }
+
+    if (Object.keys(selected).length > 0) {
+      const val = validateBundle(selected, requiredSlots, budget, shippingRule, taxRule);
+      return {
+        success: true,
+        bundleItems: selected,
+        validation: val,
+        combinationsEvaluated: sorted.length,
+        feasibleCount: 1
+      };
+    }
+
+    return {
+      success: false,
+      bundleItems: null,
+      validation: null,
+      reason: `No configuration satisfies constraints within the current budget of ${formatINR(budget)}.`,
+      limitingFactor: 'budget_constraints',
+      combinationsEvaluated: 0,
+      feasibleCount: 0
+    };
+  }
   // 1. Group candidate products by slot category and filter in-stock
   const slotCandidates: Record<string, Product[]> = {};
 
