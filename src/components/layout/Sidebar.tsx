@@ -25,9 +25,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     validation,
     savedBundles,
     testResults,
-    userRole,
-    loginAs,
-    logout
+    userRole
   } = useApp();
 
   const navItems = userRole === 'admin'
@@ -163,71 +161,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
             </div>
           </div>
         </button>
-
-        {/* Active Role Indicator Card */}
-        <div className="mx-3 mt-3 p-2.5 rounded-xl bg-white border border-[#E6E1D3] shadow-2xs">
-          <div className="flex items-center justify-between text-[10px] font-semibold">
-            <span className="text-[#8B8B7A] uppercase tracking-wider">Active Role</span>
-            <span className={`px-2 py-0.5 rounded-full font-bold uppercase text-[9px] ${
-              userRole === 'admin'
-                ? 'bg-[#8B5A2B]/15 text-[#8B5A2B] border border-[#8B5A2B]/20'
-                : userRole === 'customer'
-                ? 'bg-[#2C3A2B]/15 text-[#2C3A2B] border border-[#2C3A2B]/20'
-                : 'bg-stone-100 text-stone-600 border border-stone-200'
-            }`}>
-              {userRole === 'admin' ? 'Admin' : userRole === 'customer' ? 'Customer' : 'Front Page'}
-            </span>
-          </div>
-
-          <div className="mt-1.5 flex items-center justify-between text-[11px]">
-            {userRole === 'customer' && (
-              <button
-                onClick={() => {
-                  loginAs('admin');
-                  onClose();
-                }}
-                className="text-[10px] text-[#8B5A2B] font-medium hover:underline flex items-center gap-1 cursor-pointer"
-              >
-                <span>Switch to Admin</span>
-                <span>→</span>
-              </button>
-            )}
-            {userRole === 'admin' && (
-              <button
-                onClick={() => {
-                  loginAs('customer');
-                  onClose();
-                }}
-                className="text-[10px] text-[#2C3A2B] font-medium hover:underline flex items-center gap-1 cursor-pointer"
-              >
-                <span>Switch to Customer</span>
-                <span>→</span>
-              </button>
-            )}
-            {userRole && (
-              <button
-                onClick={() => {
-                  logout();
-                  onClose();
-                }}
-                className="text-[10px] text-rose-700 font-medium hover:underline ml-auto cursor-pointer"
-              >
-                Log Out
-              </button>
-            )}
-            {!userRole && (
-              <button
-                onClick={() => {
-                  setActiveTab('dashboard');
-                  onClose();
-                }}
-                className="text-[10px] text-[#2C3A2B] font-semibold hover:underline w-full text-center cursor-pointer"
-              >
-                Login as Customer or Admin →
-              </button>
-            )}
-          </div>
-        </div>
 
         {/* Navigation Section */}
         <nav className="flex-1 px-3 py-3 space-y-1 overflow-y-auto">
