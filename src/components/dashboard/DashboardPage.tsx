@@ -93,16 +93,9 @@ export const DashboardPage: React.FC = () => {
         {/* FRONT PAGE: ONLY TWO LOGINS (CUSTOMER OR ADMIN)                           */}
         {/* ========================================================================= */}
         <section className="text-center w-full max-w-4xl mx-auto px-4 relative">
-          {/* Top Flag Emblem Circle with ambient glowing rings */}
-          <div className="relative inline-block mb-6">
-            <div className="absolute -inset-3 bg-[#A3B18A]/25 rounded-full blur-md animate-pulse" />
-            <div className="absolute -top-4 -left-4 w-3 h-3 bg-[#A3B18A]/30 rounded-full blur-2xs" />
-            <div className="absolute -bottom-2 -right-4 w-4 h-4 bg-[#8B5A2B]/20 rounded-full blur-2xs" />
-            <div className="absolute top-1/2 -left-6 w-2.5 h-2.5 bg-[#A3B18A]/40 rounded-full blur-2xs" />
-
-            <div className="relative w-16 h-16 rounded-full bg-[#2C3A2B] text-white flex items-center justify-center text-2xl shadow-md ring-4 ring-[#E6E1D3]/80">
-              <span className="scale-125 select-none">🇮🇳</span>
-            </div>
+          {/* Brand Logo Box */}
+          <div className="w-16 h-16 rounded-2xl bg-[#2C3A2B] text-white flex items-center justify-center mx-auto mb-6 shadow-md border border-[#E6E1D3]">
+            <Package className="w-8 h-8 text-amber-100" />
           </div>
 
           {/* Hero Serif Title & Subtitle */}

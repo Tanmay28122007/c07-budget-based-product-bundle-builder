@@ -12,14 +12,6 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
 
   return (
     <div className="min-h-screen bg-[#FDFBF7] text-[#2C2C1E] flex flex-col selection:bg-[#8B5A2B]/20 selection:text-[#2C2C1E]">
-      {/* Top Academic Prototype Disclaimer Banner */}
-      <div className="bg-[#FEF9C3] border-b border-[#F4E1A1] text-[#713F12] text-[10px] sm:text-[11px] font-bold py-1.5 px-4 tracking-wider flex items-center justify-center gap-2 shrink-0 z-40 select-none shadow-2xs">
-        <span className="text-amber-600">⚠️</span>
-        <span className="uppercase text-center">
-          DISCLAIMER: THIS APPLICATION IS AN EDUCATIONAL PROTOTYPE DEVELOPED FOR ACADEMIC PURPOSES. IT IS NOT AN OFFICIAL GOVERNMENT PORTAL.
-        </span>
-      </div>
-
       <div className="flex-1 flex relative">
         {/* Soft Organic Ambient Background Circles */}
         <div className="fixed top-24 left-1/4 w-96 h-96 rounded-full bg-[#A3B18A]/12 blur-3xl pointer-events-none -z-10" />

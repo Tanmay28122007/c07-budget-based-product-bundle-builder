@@ -169,9 +169,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         {/* Brand / Emblem Zone */}
         <div className="h-18 px-5 border-b border-[#E6E1D3] flex items-center justify-between bg-white/70">
           <div className="flex items-center gap-3">
-            {/* Indian Flag Emblem Badge */}
-            <div className="w-9 h-9 rounded-full bg-[#2C3A2B] text-white flex items-center justify-center text-sm shadow-xs ring-2 ring-[#E6E1D3] shrink-0">
-              <span className="scale-110">🇮🇳</span>
+            {/* Brand Emblem Badge */}
+            <div className="w-9 h-9 rounded-xl bg-[#2C3A2B] text-white flex items-center justify-center text-sm shadow-xs ring-1 ring-[#E6E1D3] shrink-0">
+              <PackagePlus className="w-5 h-5 text-amber-100" />
             </div>
             <div>
               <div className="font-serif text-sm font-bold tracking-tight text-[#2C3A2B] leading-tight">
