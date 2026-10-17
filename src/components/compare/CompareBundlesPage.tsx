@@ -270,77 +270,19 @@ export const CompareBundlesPage: React.FC<CompareBundlesPageProps> = ({ initialM
 
   return (
     <div className="space-y-6 animate-fade-in-up">
-      {/* Top Header & View Segmented Switch */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-2 border-b border-[#E6E1D3]/70">
-        <div>
-          <div className="flex items-center gap-2.5">
-            <h1 className="font-serif text-2xl font-bold tracking-tight text-[#2C3A2B]">
-              Bundles
-            </h1>
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold tracking-wider uppercase bg-[#2C3A2B] text-amber-200 shadow-2xs">
-              Curated & Custom Builder
-            </span>
-          </div>
-          <p className="text-xs text-[#5A5A40] mt-0.5">
-            Discover curated workstation bundles tailored to your budget, add smart accessories with remaining funds, or create a custom setup.
-          </p>
+      {/* Top Header */}
+      <div className="pb-2 border-b border-[#E6E1D3]/70">
+        <div className="flex items-center gap-2.5">
+          <h1 className="font-serif text-2xl font-bold tracking-tight text-[#2C3A2B]">
+            Bundles
+          </h1>
+          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold tracking-wider uppercase bg-[#2C3A2B] text-amber-200 shadow-2xs">
+            Curated & Custom Builder
+          </span>
         </div>
-
-        {/* View Switcher: Curated Bundles vs Workspace vs Compare */}
-        <div className="flex flex-wrap items-center gap-2.5">
-          <div className="inline-flex items-center p-1 bg-[#F4F1EA] border border-[#E6E1D3] rounded-2xl shadow-inner">
-            <button
-              onClick={() => setViewMode('recommendations')}
-              className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer hover:scale-102 active:scale-98 ${
-                viewMode === 'recommendations'
-                  ? 'bg-[#2C3A2B] text-white shadow-xs'
-                  : 'text-[#5A5A40] hover:text-[#2C3A2B] hover:bg-white/60'
-              }`}
-            >
-              <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-              <span>Curated Bundles</span>
-              <span className={`text-[10px] font-mono px-1.5 py-0.2 rounded-md ${
-                viewMode === 'recommendations' ? 'bg-amber-400/20 text-amber-300 border border-amber-300/40' : 'bg-[#E6E1D3] text-[#5A5A40]'
-              }`}>
-                25
-              </span>
-            </button>
-
-            <button
-              onClick={() => setViewMode('workspace')}
-              className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer hover:scale-102 active:scale-98 ${
-                viewMode === 'workspace'
-                  ? 'bg-[#2C3A2B] text-white shadow-xs'
-                  : 'text-[#5A5A40] hover:text-[#2C3A2B] hover:bg-white/60'
-              }`}
-            >
-              <LayoutGrid className="w-3.5 h-3.5" />
-              <span>Bundle Workspace</span>
-              <span className={`text-[10px] font-mono px-1.5 py-0.2 rounded-md ${
-                viewMode === 'workspace' ? 'bg-white/20 text-white' : 'bg-[#E6E1D3] text-[#5A5A40]'
-              }`}>
-                {validation.filledSlotCount}/{validation.totalSlotCount}
-              </span>
-            </button>
-
-            <button
-              onClick={() => setViewMode('compare')}
-              className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer hover:scale-102 active:scale-98 ${
-                viewMode === 'compare'
-                  ? 'bg-[#2C3A2B] text-white shadow-xs'
-                  : 'text-[#5A5A40] hover:text-[#2C3A2B] hover:bg-white/60'
-              }`}
-            >
-              <Columns className="w-3.5 h-3.5" />
-              <span>Compare Bundles</span>
-              <span className={`text-[10px] font-mono px-1.5 py-0.2 rounded-md ${
-                viewMode === 'compare' ? 'bg-white/20 text-white' : 'bg-[#E6E1D3] text-[#5A5A40]'
-              }`}>
-                {savedBundles.length}
-              </span>
-            </button>
-          </div>
-        </div>
+        <p className="text-xs text-[#5A5A40] mt-0.5">
+          Discover curated workstation bundles tailored to your budget, add smart accessories with remaining funds, or create a custom setup.
+        </p>
       </div>
 
       {/* ========================================================================= */}

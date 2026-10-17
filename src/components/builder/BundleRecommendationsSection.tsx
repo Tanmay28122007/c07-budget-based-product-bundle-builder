@@ -328,35 +328,10 @@ export const BundleRecommendationsSection: React.FC<BundleRecommendationsSection
           </div>
         </div>
 
-        {/* Search Bar & Budget Filter Controls */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 pt-2">
-          {/* Search Input (5 Cols) */}
-          <div className="lg:col-span-5 relative">
-            <label className="text-[10px] font-mono uppercase tracking-wider text-[#8B8B7A] font-bold block mb-1.5">
-              Search Bundles & Items
-            </label>
-            <div className="relative">
-              <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8B8B7A]" />
-              <input
-                type="text"
-                value={bundleSearch}
-                onChange={(e) => setBundleSearch(e.target.value)}
-                placeholder="Search items, keywords, roles (e.g., Chair, Monitor, Lamp, Developer)..."
-                className="w-full pl-9 pr-8 py-2.5 rounded-xl text-xs bg-[#FDFBF7] border border-[#E6E1D3] text-[#2C3A2B] placeholder:text-[#8B8B7A] focus:outline-none focus:border-[#2C3A2B] shadow-2xs"
-              />
-              {bundleSearch && (
-                <button
-                  onClick={() => setBundleSearch('')}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#8B8B7A] hover:text-[#2C3A2B]"
-                >
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              )}
-            </div>
-          </div>
-
-          {/* Insert Specific Required Item (4 Cols) */}
-          <div className="lg:col-span-4">
+        {/* Filter Controls: Must-Have Product & Target Budget */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+          {/* Insert Specific Required Item */}
+          <div>
             <label className="text-[10px] font-mono uppercase tracking-wider text-[#8B8B7A] font-bold block mb-1.5">
               Insert Must-Have Product
             </label>
@@ -376,15 +351,15 @@ export const BundleRecommendationsSection: React.FC<BundleRecommendationsSection
               <button
                 type="submit"
                 disabled={!selectedProductIdInput}
-                className="px-3.5 py-2.5 rounded-xl text-xs font-bold text-white bg-[#2C3A2B] hover:bg-[#1E281D] disabled:bg-[#E6E1D3] disabled:text-[#8B8B7A] disabled:cursor-not-allowed transition-colors shadow-2xs shrink-0 cursor-pointer"
+                className="px-4 py-2.5 rounded-xl text-xs font-bold text-white bg-[#2C3A2B] hover:bg-[#1E281D] disabled:bg-[#E6E1D3] disabled:text-[#8B8B7A] disabled:cursor-not-allowed transition-colors shadow-2xs shrink-0 cursor-pointer"
               >
                 Insert
               </button>
             </form>
           </div>
 
-          {/* Target Budget Filter & Quick Chips (3 Cols) */}
-          <div className="lg:col-span-3">
+          {/* Target Budget Filter */}
+          <div>
             <div className="flex items-center justify-between mb-1.5">
               <label className="text-[10px] font-mono uppercase tracking-wider text-[#8B8B7A] font-bold">
                 Target Budget
@@ -394,7 +369,7 @@ export const BundleRecommendationsSection: React.FC<BundleRecommendationsSection
               </span>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 pt-1.5">
               <input
                 type="range"
                 min="10000"
@@ -404,24 +379,6 @@ export const BundleRecommendationsSection: React.FC<BundleRecommendationsSection
                 onChange={(e) => setBudget(Number(e.target.value))}
                 className="w-full accent-[#2C3A2B] cursor-pointer"
               />
-            </div>
-
-            {/* Quick Budget Chips */}
-            <div className="flex items-center gap-1.5 mt-2">
-              {[35000, 65000, 100000, 150000].map(amt => (
-                <button
-                  key={amt}
-                  type="button"
-                  onClick={() => setBudget(amt)}
-                  className={`px-2 py-0.5 rounded-md text-[10px] font-mono font-semibold transition-all cursor-pointer ${
-                    appBudget === amt
-                      ? 'bg-[#2C3A2B] text-white'
-                      : 'bg-[#F4F1EA] text-[#5A5A40] hover:bg-[#E6E1D3]'
-                  }`}
-                >
-                  ₹{amt >= 100000 ? `${amt / 100000}L` : `${amt / 1000}k`}
-                </button>
-              ))}
             </div>
           </div>
         </div>
@@ -454,35 +411,15 @@ export const BundleRecommendationsSection: React.FC<BundleRecommendationsSection
         )}
       </div>
 
-      {/* ========================================================================= */}
-      {/* 2. "CREATE BUNDLE" BUTTON (Directly Below Search & Filter)                 */}
-      {/* ========================================================================= */}
-      <div className="p-4 sm:p-5 bg-gradient-to-r from-[#2C3A2B] via-[#354834] to-[#2C3A2B] rounded-[24px] shadow-md text-white flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold tracking-wider uppercase bg-amber-400 text-[#1E281D]">
-              Custom Builder
-            </span>
-            <span className="text-xs text-amber-200/90 font-medium">
-              Want something specific?
-            </span>
-          </div>
-          <h3 className="font-serif text-lg sm:text-xl font-bold">
-            Create Your Own Custom Bundle
-          </h3>
-          <p className="text-xs text-stone-300 max-w-xl">
-            Open the full catalogue of all 60 products to handpick chairs, desks, monitors, lamps, and docking stations tailored to your exact budget.
-          </p>
-        </div>
-
+      {/* 2. "CREATE BUNDLE" BUTTON (Clean button without green panel) */}
+      <div className="flex items-center justify-between gap-4">
         <button
           type="button"
           onClick={() => setIsCreateBundleModalOpen(true)}
-          className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-xs font-bold uppercase tracking-wider text-[#2C3A2B] bg-amber-300 hover:bg-amber-200 transition-all cursor-pointer shadow-md hover:scale-102 active:scale-98 shrink-0"
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider text-white bg-[#2C3A2B] hover:bg-[#1E281D] transition-all cursor-pointer shadow-xs hover:shadow-md hover:scale-102 active:scale-98"
         >
-          <PackagePlus className="w-4 h-4 text-[#2C3A2B]" />
+          <PackagePlus className="w-4 h-4 text-amber-300" />
           <span>+ Create Bundle</span>
-          <ArrowRight className="w-3.5 h-3.5 text-[#2C3A2B]" />
         </button>
       </div>
 
