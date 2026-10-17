@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
 import { AIAssistantDrawer } from '../assistant/AIAssistantDrawer';
+import { SupabaseModal } from '../database/SupabaseModal';
 import { useApp } from '../../context/AppContext';
 
 interface AppLayoutProps {
@@ -10,7 +11,7 @@ interface AppLayoutProps {
 
 export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { userRole } = useApp();
+  const { userRole, isSupabaseModalOpen, setIsSupabaseModalOpen } = useApp();
 
   const isFrontPage = !userRole;
 
@@ -25,6 +26,11 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
         <main className="w-full max-w-5xl mx-auto p-4 sm:p-6 lg:p-8">
           {children}
         </main>
+
+        <SupabaseModal
+          isOpen={isSupabaseModalOpen}
+          onClose={() => setIsSupabaseModalOpen(false)}
+        />
       </div>
     );
   }
@@ -50,6 +56,12 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
 
         {/* Global AI Assistant Drawer & Floating Button */}
         <AIAssistantDrawer />
+
+        {/* Supabase Database Connection Modal */}
+        <SupabaseModal
+          isOpen={isSupabaseModalOpen}
+          onClose={() => setIsSupabaseModalOpen(false)}
+        />
       </div>
     </div>
   );

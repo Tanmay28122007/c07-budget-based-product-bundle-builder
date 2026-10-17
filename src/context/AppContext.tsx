@@ -19,6 +19,13 @@ import { validateBundle } from '../utils/bundleValidation';
 import { findValidBundle, OptimizationResult } from '../utils/bundleOptimizer';
 import { runAllTests, runReferenceRequestTest, EDGE_CASE_TESTS } from '../utils/testRunner';
 import { formatINR } from '../utils/pricing';
+import {
+  fetchSavedBundlesFromDb,
+  upsertSavedBundleToDb,
+  deleteSavedBundleFromDb,
+  testSupabaseConnection,
+  getSupabaseConfig
+} from '../services/supabaseClient';
 
 export type UserRole = 'customer' | 'admin' | null;
 
@@ -104,6 +111,12 @@ interface AppContextType {
   toggleAssistant: () => void;
   applyBundleRecommendation: (itemsMap: Record<string, string>, newBudget?: number) => void;
   swapProductById: (slotId: string, productId: string) => void;
+
+  // Supabase Cloud Database
+  isSupabaseConnected: boolean;
+  isSupabaseModalOpen: boolean;
+  setIsSupabaseModalOpen: (open: boolean) => void;
+  checkSupabaseStatus: () => Promise<void>;
 }
 
 const INITIAL_SHOPPER_RECORDS: ShopperExperimentRecord[] = [
@@ -461,6 +474,38 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [isAssistantOpen, setIsAssistantOpen] = useState<boolean>(false);
   const toggleAssistant = () => setIsAssistantOpen(prev => !prev);
 
+  // Supabase Database State
+  const [isSupabaseConnected, setIsSupabaseConnected] = useState<boolean>(false);
+  const [isSupabaseModalOpen, setIsSupabaseModalOpen] = useState<boolean>(false);
+
+  const checkSupabaseStatus = async () => {
+    const config = getSupabaseConfig();
+    if (!config.isConfigured) {
+      setIsSupabaseConnected(false);
+      return;
+    }
+    const res = await testSupabaseConnection();
+    setIsSupabaseConnected(res.ok);
+    if (res.ok) {
+      try {
+        const dbBundles = await fetchSavedBundlesFromDb();
+        if (dbBundles && dbBundles.length > 0) {
+          setSavedBundles(prev => {
+            const existingIds = new Set(prev.map(b => b.id));
+            const newBundles = dbBundles.filter(b => !existingIds.has(b.id));
+            return [...prev, ...newBundles];
+          });
+        }
+      } catch (err) {
+        console.warn('Supabase auto-hydration notice:', err);
+      }
+    }
+  };
+
+  useEffect(() => {
+    checkSupabaseStatus();
+  }, []);
+
   // Persist important data
   useEffect(() => {
     try {
@@ -630,13 +675,31 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     };
 
     setSavedBundles(prev => [newBundle, ...prev]);
-    addNotification("Bundle Saved", `Saved "${newBundle.name}" to local comparisons library.`, 'success');
+
+    if (isSupabaseConnected) {
+      upsertSavedBundleToDb(newBundle).catch(err => {
+        console.warn('Supabase bundle sync warning:', err);
+      });
+    }
+
+    addNotification(
+      "Bundle Saved",
+      `Saved "${newBundle.name}" to comparisons library${isSupabaseConnected ? ' & Supabase cloud' : ''}.`,
+      'success'
+    );
     return newBundle;
   };
 
   const deleteSavedBundle = (id: string) => {
     setSavedBundles(prev => prev.filter(b => b.id !== id));
     setComparedBundleIds(prev => prev.filter(bId => bId !== id));
+
+    if (isSupabaseConnected) {
+      deleteSavedBundleFromDb(id).catch(err => {
+        console.warn('Supabase delete warning:', err);
+      });
+    }
+
     addNotification("Bundle Deleted", "Removed saved bundle record.", 'info');
   };
 
@@ -896,7 +959,12 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         setIsAssistantOpen,
         toggleAssistant,
         applyBundleRecommendation,
-        swapProductById
+        swapProductById,
+
+        isSupabaseConnected,
+        isSupabaseModalOpen,
+        setIsSupabaseModalOpen,
+        checkSupabaseStatus
       }}
     >
       {children}

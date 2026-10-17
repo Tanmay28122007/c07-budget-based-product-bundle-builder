@@ -9,7 +9,8 @@ import {
   X,
   ExternalLink,
   ChevronDown,
-  LogOut
+  LogOut,
+  Database
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 
@@ -28,7 +29,9 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
     setActiveTab,
     userRole,
     loginAs,
-    logout
+    logout,
+    isSupabaseConnected,
+    setIsSupabaseModalOpen
   } = useApp();
 
   const [showNotifications, setShowNotifications] = useState(false);
@@ -92,6 +95,27 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
             </button>
           )}
         </div>
+
+        {/* Supabase Cloud Connection Status Button */}
+        <button
+          onClick={() => setIsSupabaseModalOpen(true)}
+          title={isSupabaseConnected ? 'Supabase Connected - Click to view details / sync' : 'Connect to Supabase Database'}
+          className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border text-xs transition-colors cursor-pointer ${
+            isSupabaseConnected
+              ? 'border-emerald-200 bg-emerald-50/80 hover:bg-emerald-100/80 text-emerald-900'
+              : 'border-[#E6E1D3] bg-[#F4F1EA] hover:bg-[#EAE5D9] text-[#5A5A40]'
+          }`}
+        >
+          <Database className={`w-3.5 h-3.5 ${isSupabaseConnected ? 'text-emerald-700' : 'text-[#8B5A2B]'}`} />
+          <span className="hidden md:inline font-semibold">
+            {isSupabaseConnected ? 'Supabase' : 'Connect DB'}
+          </span>
+          <span
+            className={`w-2 h-2 rounded-full ${
+              isSupabaseConnected ? 'bg-emerald-500 shadow-xs' : 'bg-amber-400'
+            }`}
+          />
+        </button>
 
         {/* Notifications Popover */}
         <div className="relative" ref={notifRef}>
