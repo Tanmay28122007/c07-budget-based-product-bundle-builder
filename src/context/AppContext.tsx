@@ -15,6 +15,7 @@ import {
   NegotiatedScope,
   UserProfile
 } from '../types';
+export type { UserProfile };
 import { DEFAULT_SYNTHETIC_FIXTURE, mapC07Fixture } from '../data/defaultFixture';
 import { validateBundle } from '../utils/bundleValidation';
 import { findValidBundle, OptimizationResult } from '../utils/bundleOptimizer';

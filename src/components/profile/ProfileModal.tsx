@@ -41,7 +41,7 @@ export const ProfileModal: React.FC = () => {
   if (!isProfileModalOpen) return null;
 
   const handleChange = (field: keyof UserProfile, val: any) => {
-    setFormData(prev => ({ ...prev, [field]: val }));
+    setFormData((prev: UserProfile) => ({ ...prev, [field]: val }));
   };
 
   const handleSave = (e: React.FormEvent) => {

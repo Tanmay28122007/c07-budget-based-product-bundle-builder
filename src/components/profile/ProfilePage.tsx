@@ -45,7 +45,7 @@ export const ProfilePage: React.FC = () => {
   }, [userProfile]);
 
   const handleChange = (field: keyof UserProfile, value: any) => {
-    setFormData(prev => ({
+    setFormData((prev: UserProfile) => ({
       ...prev,
       [field]: value
     }));
