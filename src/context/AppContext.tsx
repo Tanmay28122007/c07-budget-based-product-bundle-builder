@@ -36,6 +36,8 @@ interface AppContextType {
   userRole: UserRole;
   loginAs: (role: 'customer' | 'admin') => void;
   logout: () => void;
+  adminSignInRequested: boolean;
+  setAdminSignInRequested: (req: boolean) => void;
 
   // Navigation & View
   activeTab: string;
@@ -264,6 +266,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }
     return null;
   });
+  const [adminSignInRequested, setAdminSignInRequested] = useState<boolean>(false);
 
   // Fixture State
   const [fixture, setFixture] = useState<FixtureData>(() => {
@@ -435,6 +438,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   const loginAs = (role: 'customer' | 'admin') => {
     setUserRole(role);
+    setAdminSignInRequested(false);
     try {
       localStorage.setItem('c07_user_role_v1', role);
     } catch {}
@@ -452,8 +456,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     try {
       localStorage.removeItem('c07_user_role_v1');
     } catch {}
+    setAdminSignInRequested(true);
     setActiveTab('dashboard');
-    addNotification('Logged Out', 'You have returned to the role login page.', 'info');
+    addNotification('Logged Out', 'Redirected to Admin Sign In page.', 'info');
   };
 
   const setBudget = (val: number) => {
@@ -750,6 +755,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         userRole,
         loginAs,
         logout,
+        adminSignInRequested,
+        setAdminSignInRequested,
 
         activeTab,
         setActiveTab,

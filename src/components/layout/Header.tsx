@@ -9,7 +9,8 @@ import {
   X,
   ExternalLink,
   ChevronDown,
-  Sparkles
+  Sparkles,
+  LogOut
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 
@@ -309,6 +310,19 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
             </div>
           )}
         </div>
+
+        {/* Top-Right Corner Logout Button */}
+        {userRole && (
+          <button
+            onClick={() => logout()}
+            aria-label="Logout to Admin page"
+            title="Log out and redirect to Admin page"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#F4F1EA] hover:bg-rose-50 text-[#5A5A40] hover:text-rose-700 border border-[#E6E1D3] hover:border-rose-200 text-xs font-semibold shadow-2xs transition-all cursor-pointer group shrink-0"
+          >
+            <LogOut className="w-3.5 h-3.5 text-[#8B8B7A] group-hover:text-rose-600 transition-colors" />
+            <span className="hidden sm:inline">Logout</span>
+          </button>
+        )}
       </div>
     </header>
   );

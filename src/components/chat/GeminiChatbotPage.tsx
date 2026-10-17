@@ -23,7 +23,8 @@ import {
   AlertTriangle,
   CheckCircle2,
   PackagePlus,
-  Search
+  Search,
+  Compass
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { Product } from '../../types';
@@ -39,7 +40,8 @@ interface Message {
   model?: string;
   timestamp: string;
   action?: {
-    type: 'apply_bundle' | 'swap_product' | 'set_budget';
+    type: 'apply_bundle' | 'swap_product' | 'set_budget' | 'navigate';
+    tab?: string;
     title?: string;
     budget?: number;
     items?: Record<string, string>;
@@ -49,6 +51,18 @@ interface Message {
   } | null;
   actionApplied?: boolean;
 }
+
+const TAB_NAMES: Record<string, string> = {
+  dashboard: 'Executive Dashboard',
+  builder: 'Bundle Builder',
+  chat: 'Gemini AI Assistant',
+  catalogue: 'Product Catalogue',
+  compare: 'Compare Bundles',
+  business: 'Business Insights & Strategy',
+  tests: 'Automated Test Suite',
+  evidence: 'Project Evidence & Scope Audit',
+  settings: 'Settings & Configuration'
+};
 
 const ROLE_DEFINITIONS: Record<ChatbotRole, {
   name: string;
@@ -67,10 +81,11 @@ const ROLE_DEFINITIONS: Record<ChatbotRole, {
     description: 'Expert in human factors, spinal posture, monitor heights, eye-strain mitigation, screenbar mounting, and complete bundle ergonomics.',
     systemInstruction: 'You are an Ergonomic Workspace Architect. Guide users in building healthy, productive, high-efficiency desk setups. Explain ergonomic angles, lumbar support grades, monitor positioning, and glare prevention with clear anatomical rationale.',
     starterPrompts: [
+      'Give me an overview of the whole website and its 9 integrated modules.',
       'Assemble an ergonomic setup for 8+ hour remote software engineering under ₹80,000.',
+      'How does the Cartesian Auto-Solve algorithm work in the Bundle Builder?',
       'How does monitor curvature affect screenbar clamp mounting and eye focal distance?',
-      'Recommend an optimal chair with 3D armrests and lumbar support within our catalogue.',
-      'Check if my current monitor and desk pairing creates any tipping or overhang risk.'
+      'Recommend an optimal chair with 3D armrests and lumbar support within our catalogue.'
     ]
   },
   rapid_checker: {
@@ -82,6 +97,7 @@ const ROLE_DEFINITIONS: Record<ChatbotRole, {
     systemInstruction: 'You are a Rapid Hardware Spec Checker. Deliver lightning-fast, high-density, no-fluff answers verifying hardware compatibility, port types, clamp dimensions, power wattage, and stock status. Be concise and direct.',
     starterPrompts: [
       'Quick check: Are all items in my current bundle in stock and compatible?',
+      'What edge-case scenarios and reference requests are tested in the Test Suite?',
       'Can a screenbar clamp mount on the 34-inch curved ultrawide monitor?',
       'Verify dock power delivery against 85W laptop power consumption.',
       'Which desks in the catalogue have a surface width of 120cm or wider?'
@@ -95,9 +111,10 @@ const ROLE_DEFINITIONS: Record<ChatbotRole, {
     description: 'Deep financial reasoning covering landed price modeling, shipping surcharge thresholds, platform referral fees, and B2B volume pricing.',
     systemInstruction: 'You are a Senior IT Procurement & Unit Economics Strategist. Analyze landed margins, shipping fee breakpoints, tax implications, platform commission referral models, and basket economics with rigorous quantitative detail.',
     starterPrompts: [
+      'Take me to the Business Insights page and explain the MBA unit economics model.',
       'Analyze the landed price breakdown and determine if we qualify for free shipping threshold.',
+      'What is the break-even basket threshold and retailer monthly contribution?',
       'Evaluate the unit economics and platform gross margin for a ₹75,000 WFH bundle.',
-      'How can we restructure items to maximize budget utilization without crossing the budget ceiling?',
       'Perform a sensitivity analysis of shipping surcharges on heavy items (desks vs chairs).'
     ]
   },
@@ -109,6 +126,7 @@ const ROLE_DEFINITIONS: Record<ChatbotRole, {
     description: 'Define your own specialized chatbot persona, custom system instructions, and task parameters.',
     systemInstruction: 'You are a specialized hardware consultant for budget-conscious corporate IT equipment.',
     starterPrompts: [
+      'Give me a complete audit of this project scope and architecture.',
       'Evaluate this setup for a junior developer onboarding package.',
       'Provide a side-by-side comparison between mechanical standing desks and fixed desks.',
       'Suggest a minimalist aesthetic bundle with clean cable management.'
@@ -125,6 +143,7 @@ export const GeminiChatbotPage: React.FC = () => {
     validation,
     applyBundleRecommendation,
     swapProductById,
+    activeTab,
     setActiveTab
   } = useApp();
 
@@ -267,6 +286,7 @@ Please provide an in-depth ergonomic & procurement evaluation for this product b
         }));
 
         contextPayload = {
+          activeTab,
           activityName: fixture.activity.name,
           budget,
           requiredSlots: fixture.activity.requiredSlots,
@@ -348,6 +368,8 @@ Please provide an in-depth ergonomic & procurement evaluation for this product b
       setActiveTab('builder');
     } else if (action.type === 'set_budget' && action.budget) {
       setBudget(action.budget);
+    } else if (action.type === 'navigate' && action.tab) {
+      setActiveTab(action.tab as any);
     }
 
     setMessages(prev =>
@@ -1057,6 +1079,46 @@ Please provide an in-depth ergonomic & procurement evaluation for this product b
                               <>
                                 <DollarSign className="w-3.5 h-3.5" />
                                 Set Budget to {formatINR(msg.action.budget || 0)}
+                              </>
+                            )}
+                          </button>
+                        </div>
+                      )}
+
+                      {msg.action.type === 'navigate' && (
+                        <div className="p-3.5 bg-white border border-[#E6E1D3] rounded-2xl shadow-xs">
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="font-semibold text-[#2C3A2B] text-xs flex items-center gap-1.5">
+                              <Compass className="w-4 h-4 text-[#8B5A2B]" />
+                              Navigate to {msg.action.tab ? (TAB_NAMES[msg.action.tab] || msg.action.tab) : 'Workspace'}
+                            </span>
+                            <span className="font-mono text-[10px] px-2 py-0.5 rounded-full bg-[#F5F5EC] text-[#5A5A40] border border-[#E6E1D3]">
+                              /{msg.action.tab}
+                            </span>
+                          </div>
+                          {msg.action.reason && (
+                            <p className="text-xs text-[#5A5A40] mb-2 leading-relaxed">
+                              {msg.action.reason}
+                            </p>
+                          )}
+                          <button
+                            onClick={() => handleApplyAction(msg.id, msg.action)}
+                            disabled={msg.actionApplied}
+                            className={`w-full py-2 px-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-all ${
+                              msg.actionApplied
+                                ? 'bg-[#A3B18A]/25 text-[#2C3A2B] border border-[#A3B18A]/40 cursor-default'
+                                : 'bg-[#2C3A2B] hover:bg-[#3A4D39] text-white shadow-xs cursor-pointer'
+                            }`}
+                          >
+                            {msg.actionApplied ? (
+                              <>
+                                <Check className="w-3.5 h-3.5" />
+                                Navigated
+                              </>
+                            ) : (
+                              <>
+                                <ArrowRight className="w-3.5 h-3.5" />
+                                Open {msg.action.tab ? (TAB_NAMES[msg.action.tab] || msg.action.tab) : 'Page'}
                               </>
                             )}
                           </button>

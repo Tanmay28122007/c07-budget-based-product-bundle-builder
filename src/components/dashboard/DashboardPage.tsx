@@ -42,7 +42,9 @@ export const DashboardPage: React.FC = () => {
     loadSavedBundle,
     userRole,
     loginAs,
-    logout
+    logout,
+    adminSignInRequested,
+    setAdminSignInRequested
   } = useApp();
 
   // Customer Auth Modal State (ID, Password, Sign Up option)
@@ -93,6 +95,7 @@ export const DashboardPage: React.FC = () => {
       return;
     }
     setShowAdminSignIn(false);
+    setAdminSignInRequested(false);
     loginAs('admin');
   };
 
@@ -145,7 +148,7 @@ export const DashboardPage: React.FC = () => {
   // If NOT logged in as Admin, check if Admin Sign In is requested
   if (userRole !== 'admin') {
     // Dedicated Admin Sign In Page: Shows sign in page and nothing else
-    if (showAdminSignIn) {
+    if (showAdminSignIn || adminSignInRequested) {
       return (
         <div className="py-6 sm:py-12 flex flex-col items-center justify-center min-h-[72vh]">
           <motion.div
@@ -162,6 +165,7 @@ export const DashboardPage: React.FC = () => {
             <button
               onClick={() => {
                 setShowAdminSignIn(false);
+                setAdminSignInRequested(false);
                 setAdminAuthError('');
               }}
               className="absolute top-5 right-5 p-2 rounded-full hover:bg-[#F4F1EA] text-[#8A8A88] hover:text-[#2C2C1E] transition-colors cursor-pointer z-10"
@@ -254,6 +258,7 @@ export const DashboardPage: React.FC = () => {
                   type="button"
                   onClick={() => {
                     setShowAdminSignIn(false);
+                    setAdminSignInRequested(false);
                     setAdminAuthError('');
                   }}
                   className="w-full py-2 text-xs font-semibold text-[#8B8B7A] hover:text-[#2C2C1E] transition-colors cursor-pointer text-center"
