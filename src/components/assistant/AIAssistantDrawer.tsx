@@ -41,6 +41,18 @@ export interface ChatMessage {
   actionApplied?: boolean;
 }
 
+const TAB_NAMES: Record<string, string> = {
+  dashboard: 'Executive Dashboard',
+  builder: 'Bundle Builder',
+  chat: 'Gemini AI Assistant',
+  catalogue: 'Product Catalogue',
+  compare: 'Compare Bundles',
+  business: 'Business Insights & Strategy',
+  tests: 'Automated Test Suite',
+  evidence: 'Project Evidence & Scope Audit',
+  settings: 'Settings & Configuration'
+};
+
 export const AIAssistantDrawer: React.FC = () => {
   const {
     isAssistantOpen,
@@ -696,6 +708,45 @@ Choose your preferred language below or ask me anything to optimize your setup:`
                               </button>
                             </div>
                           )}
+                          {msg.action.type === 'navigate' && (
+                            <div className="p-3 bg-[#FDFBF7] border border-[#E6E1D3] rounded-xl shadow-xs">
+                              <div className="flex items-center justify-between mb-1">
+                                <div className="flex items-center gap-1.5 font-bold text-[#2C3A2B] text-[11px]">
+                                  <Compass className="w-3.5 h-3.5 text-[#8B5A2B]" />
+                                  <span>Navigate to {msg.action.tab ? (TAB_NAMES[msg.action.tab] || msg.action.tab) : 'Workspace'}</span>
+                                </div>
+                                <span className="font-mono text-[9px] px-1.5 py-0.5 rounded-md bg-[#F4F1EA] text-[#5A5A40] border border-[#E6E1D3]">
+                                  /{msg.action.tab}
+                                </span>
+                              </div>
+                              {msg.action.reason && (
+                                <p className="text-[11px] text-[#5A5A40] mb-2 leading-relaxed">
+                                  {msg.action.reason}
+                                </p>
+                              )}
+                              <button
+                                onClick={() => handleApplyAction(msg.id, msg.action)}
+                                disabled={msg.actionApplied}
+                                className={`w-full py-2 px-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-all ${
+                                  msg.actionApplied
+                                    ? 'bg-[#A3B18A]/30 text-[#2C3A2B] border border-[#A3B18A] cursor-default'
+                                    : 'bg-[#2C3A2B] hover:bg-[#1B281B] text-white shadow-xs cursor-pointer'
+                                }`}
+                              >
+                                {msg.actionApplied ? (
+                                  <>
+                                    <Check className="w-3.5 h-3.5" />
+                                    Navigated
+                                  </>
+                                ) : (
+                                  <>
+                                    <ArrowRight className="w-3.5 h-3.5" />
+                                    Open {msg.action.tab ? (TAB_NAMES[msg.action.tab] || msg.action.tab) : 'Page'}
+                                  </>
+                                )}
+                              </button>
+                            </div>
+                          )}
                         </div>
                       )}
 
@@ -720,12 +771,58 @@ Choose your preferred language below or ask me anything to optimize your setup:`
                         ? 'Gemini विश्लेषण कर रहा है...'
                         : selectedLang === 'gu'
                         ? 'Gemini વિશ્લેષણ કરી રહ્યું છે...'
-                        : 'Gemini is analyzing catalogue constraints...'}
+                        : 'Gemini is analyzing whole website context...'}
                     </span>
                   </div>
                 </div>
               )}
               <div ref={messagesEndRef} />
+            </div>
+
+            {/* Whole Website Starter Prompt Chips */}
+            <div className="px-3 py-2 bg-[#FAF8F5] border-t border-[#E6E1D3]/80 flex items-center gap-1.5 overflow-x-auto text-[11px]">
+              <button
+                type="button"
+                onClick={() => handleSendMessage('Give me a complete overview of the whole website and its 9 pages.')}
+                className="px-2.5 py-1 rounded-full bg-white border border-[#E6E1D3] text-[#2C3A2B] hover:border-[#8B5A2B] hover:bg-[#F5F5EC] shrink-0 transition-colors shadow-2xs font-medium cursor-pointer"
+              >
+                🌐 Whole Website Overview
+              </button>
+              <button
+                type="button"
+                onClick={() => handleSendMessage('Explain the MBA unit economics, referral margins, and break-even basket threshold.')}
+                className="px-2.5 py-1 rounded-full bg-white border border-[#E6E1D3] text-[#2C3A2B] hover:border-[#8B5A2B] hover:bg-[#F5F5EC] shrink-0 transition-colors shadow-2xs font-medium cursor-pointer"
+              >
+                📊 MBA Economics
+              </button>
+              <button
+                type="button"
+                onClick={() => handleSendMessage('How does the Cartesian Auto-Solve algorithm work under the hood?')}
+                className="px-2.5 py-1 rounded-full bg-white border border-[#E6E1D3] text-[#2C3A2B] hover:border-[#8B5A2B] hover:bg-[#F5F5EC] shrink-0 transition-colors shadow-2xs font-medium cursor-pointer"
+              >
+                ⚡ Auto-Solve Logic
+              </button>
+              <button
+                type="button"
+                onClick={() => handleSendMessage('What edge cases and tests are verified in the Automated Test Suite?')}
+                className="px-2.5 py-1 rounded-full bg-white border border-[#E6E1D3] text-[#2C3A2B] hover:border-[#8B5A2B] hover:bg-[#F5F5EC] shrink-0 transition-colors shadow-2xs font-medium cursor-pointer"
+              >
+                🧪 Test Suite
+              </button>
+              <button
+                type="button"
+                onClick={() => handleSendMessage('Check my current bundle for any hardware compatibility conflicts and fix them.')}
+                className="px-2.5 py-1 rounded-full bg-white border border-[#E6E1D3] text-[#2C3A2B] hover:border-[#8B5A2B] hover:bg-[#F5F5EC] shrink-0 transition-colors shadow-2xs font-medium cursor-pointer"
+              >
+                🔧 Fix Conflicts
+              </button>
+              <button
+                type="button"
+                onClick={() => handleSendMessage('Compare the Starter Pack, Developer Pro, and Executive Ultra presets.')}
+                className="px-2.5 py-1 rounded-full bg-white border border-[#E6E1D3] text-[#2C3A2B] hover:border-[#8B5A2B] hover:bg-[#F5F5EC] shrink-0 transition-colors shadow-2xs font-medium cursor-pointer"
+              >
+                ⚖️ Compare Presets
+              </button>
             </div>
 
             {/* Input Area */}
