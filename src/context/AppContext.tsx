@@ -250,10 +250,77 @@ const INITIAL_UNIT_ECONOMICS: UnitEconomicsParams = {
   monthlyBasketsForecast: 80
 };
 
+const VALID_TABS = [
+  'dashboard',
+  'builder',
+  'chat',
+  'catalogue',
+  'compare',
+  'tests',
+  'business',
+  'evidence',
+  'settings'
+];
+
+const getInitialTab = (): string => {
+  try {
+    if (typeof window !== 'undefined' && window.location.hash) {
+      const hash = window.location.hash.replace('#', '').trim();
+      if (VALID_TABS.includes(hash)) return hash;
+    }
+    if (typeof localStorage !== 'undefined') {
+      const savedTab = localStorage.getItem('c07_active_tab_v1');
+      if (savedTab && VALID_TABS.includes(savedTab)) return savedTab;
+    }
+  } catch (e) {
+    console.warn('Could not read active tab from storage:', e);
+  }
+  return 'dashboard';
+};
+
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [activeTab, setActiveTab] = useState<string>('dashboard');
+  const [activeTab, setActiveTabState] = useState<string>(getInitialTab);
+
+  const setActiveTab = (tab: string) => {
+    if (!VALID_TABS.includes(tab)) return;
+    setActiveTabState(tab);
+    try {
+      localStorage.setItem('c07_active_tab_v1', tab);
+      if (typeof window !== 'undefined' && window.location.hash.replace('#', '') !== tab) {
+        window.history.replaceState(null, '', `#${tab}`);
+      }
+    } catch {}
+  };
+
+  // Keep activeTab in sync with browser back/forward and URL hash navigation
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.replace('#', '').trim();
+      if (VALID_TABS.includes(hash) && hash !== activeTab) {
+        setActiveTabState(hash);
+        try {
+          localStorage.setItem('c07_active_tab_v1', hash);
+        } catch {}
+      }
+    };
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, [activeTab]);
+
+  // Keep URL hash and localStorage in sync on initial mount and activeTab updates
+  useEffect(() => {
+    if (activeTab && VALID_TABS.includes(activeTab)) {
+      try {
+        if (window.location.hash.replace('#', '') !== activeTab) {
+          window.history.replaceState(null, '', `#${activeTab}`);
+        }
+        localStorage.setItem('c07_active_tab_v1', activeTab);
+      } catch {}
+    }
+  }, [activeTab]);
+
   const [searchQuery, setSearchQuery] = useState<string>('');
 
   // Authentication & Role State
