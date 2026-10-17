@@ -482,50 +482,8 @@ Choose your preferred language below or ask me anything to assemble, optimize, o
                 </div>
               </div>
 
-              {/* Controls & Language Switcher */}
+              {/* Controls */}
               <div className="flex items-center gap-1 shrink-0">
-                {/* Language Switch Pills */}
-                <div className="flex items-center gap-0.5 bg-[#F4F1EA] p-0.5 rounded-full border border-[#E6E1D3]">
-                  <button
-                    type="button"
-                    onClick={() => handleLanguageSelect('en')}
-                    className={`px-2 py-0.5 text-[10px] font-bold rounded-full transition-all cursor-pointer ${
-                      selectedLang === 'en' ? 'bg-[#2C3A2B] text-white shadow-xs' : 'text-[#5A5A40] hover:bg-white'
-                    }`}
-                  >
-                    EN
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleLanguageSelect('hi')}
-                    className={`px-2 py-0.5 text-[10px] font-bold rounded-full transition-all cursor-pointer ${
-                      selectedLang === 'hi' ? 'bg-[#2C3A2B] text-white shadow-xs' : 'text-[#5A5A40] hover:bg-white'
-                    }`}
-                  >
-                    हिंदी
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleLanguageSelect('gu')}
-                    className={`px-2 py-0.5 text-[10px] font-bold rounded-full transition-all cursor-pointer ${
-                      selectedLang === 'gu' ? 'bg-[#2C3A2B] text-white shadow-xs' : 'text-[#5A5A40] hover:bg-white'
-                    }`}
-                  >
-                    ગુજ
-                  </button>
-                </div>
-
-                {/* Full Chat button */}
-                <button
-                  onClick={() => {
-                    setActiveTab('chat');
-                    setIsAssistantOpen(false);
-                  }}
-                  title="Open dedicated full-page Gemini Chatbot"
-                  className="p-1.5 hover:bg-[#F4F1EA] text-[#8B5A2B] rounded-lg transition-colors cursor-pointer"
-                >
-                  <Bot className="w-4 h-4" />
-                </button>
 
                 {/* Clear chat */}
                 <button
