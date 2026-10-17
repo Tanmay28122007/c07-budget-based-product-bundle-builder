@@ -20,7 +20,6 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
   const {
-    activeTab,
     fixture,
     searchQuery,
     setSearchQuery,
@@ -41,18 +40,6 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
-  const tabLabels: Record<string, string> = {
-    dashboard: userRole === 'admin' ? 'Admin Overview' : 'Front Page',
-    builder: 'Build a Bundle',
-    chat: 'Gemini Chatbot',
-    catalogue: 'Product Catalogue',
-    compare: 'Compare Bundles',
-    tests: 'Test Results',
-    business: 'Business Insights',
-    evidence: 'Project Evidence',
-    settings: 'Fixture & Rules'
-  };
-
   // Close dropdowns on outside click
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -69,29 +56,15 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
 
   return (
     <header className="sticky top-0 z-30 h-16 bg-[#FDFBF7]/90 backdrop-blur-md border-b border-[#E6E1D3] px-4 lg:px-6 flex items-center justify-between gap-4">
-      {/* Left Area: Mobile Menu + Breadcrumbs */}
+      {/* Left Area: Mobile Menu */}
       <div className="flex items-center gap-3">
         <button
           onClick={onToggleSidebar}
           aria-label="Toggle navigation menu"
-          className="p-1.5 -ml-1 text-[#5A5A40] hover:text-[#2C2C1E] hover:bg-[#F4F1EA] rounded-xl lg:hidden transition-colors"
+          className="p-1.5 -ml-1 text-[#5A5A40] hover:text-[#2C2C1E] hover:bg-[#F4F1EA] rounded-xl lg:hidden transition-colors cursor-pointer"
         >
           <Menu className="w-5 h-5" />
         </button>
-
-        <div className="flex items-center gap-2 text-xs text-[#5A5A40]">
-          <button
-            onClick={() => setActiveTab('dashboard')}
-            className="font-semibold text-[#2C3A2B] hover:text-[#8B5A2B] transition-colors cursor-pointer text-left"
-            title="Return to Homepage"
-          >
-            Budget Based Product Bundle Builder
-          </button>
-          <span className="text-[#E6E1D3]">/</span>
-          <span>{fixture.activity.name}</span>
-          <span className="text-[#E6E1D3]">/</span>
-          <span className="font-serif font-bold text-[#2C3A2B]">{tabLabels[activeTab] || 'Workspace'}</span>
-        </div>
       </div>
 
       {/* Center / Right Controls */}
