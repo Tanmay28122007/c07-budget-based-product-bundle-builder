@@ -8,7 +8,6 @@ import {
   TrendingUp,
   FileCode2,
   Settings,
-  Sparkles,
   Bot
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
@@ -27,7 +26,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     validation,
     savedBundles,
     testResults,
-    toggleAssistant,
     userRole,
     loginAs,
     logout
@@ -295,26 +293,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
             );
           })}
 
-          <div className="pt-3 pb-1">
-            <div className="px-3 pb-2 text-[10px] font-semibold text-[#8B8B7A] uppercase tracking-wider">
-              AI Tools
-            </div>
-            <button
-              onClick={() => {
-                toggleAssistant();
-                onClose();
-              }}
-              className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold bg-[#8B5A2B] hover:bg-[#743815] text-white shadow-xs transition-all cursor-pointer group"
-            >
-              <div className="flex items-center gap-2.5">
-                <Sparkles className="w-4 h-4 text-amber-200 group-hover:rotate-12 transition-transform" />
-                <span>AI Assistant</span>
-              </div>
-              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-md bg-white/20 text-white font-medium">
-                Gemini
-              </span>
-            </button>
-          </div>
         </nav>
 
         {/* Fixture & Mode Status Footer */}
