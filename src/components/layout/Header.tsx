@@ -28,7 +28,6 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
     clearNotifications,
     setActiveTab,
     userRole,
-    loginAs,
     logout,
     validation,
     toggleCart,
@@ -219,45 +218,6 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
                     {userRole ? userRole : 'Not Logged In'}
                   </span>
                 </div>
-              </div>
-
-              {/* Role Actions */}
-              <div className="p-1 space-y-1 border-b border-[#E6E1D3] mb-1">
-                {userRole !== 'customer' && (
-                  <button
-                    onClick={() => {
-                      loginAs('customer');
-                      setShowProfile(false);
-                    }}
-                    className="w-full text-left px-3 py-1.5 rounded-xl text-xs font-medium text-[#2C3A2B] hover:bg-[#F4F1EA] flex items-center justify-between cursor-pointer"
-                  >
-                    <span>Login as Customer</span>
-                    <span className="text-[10px] font-mono text-[#8B8B7A]">Shopper</span>
-                  </button>
-                )}
-                {userRole !== 'admin' && (
-                  <button
-                    onClick={() => {
-                      loginAs('admin');
-                      setShowProfile(false);
-                    }}
-                    className="w-full text-left px-3 py-1.5 rounded-xl text-xs font-medium text-[#8B5A2B] hover:bg-[#F4F1EA] flex items-center justify-between cursor-pointer"
-                  >
-                    <span>Login as Admin</span>
-                    <span className="text-[10px] font-mono text-[#8B8B7A]">Manager</span>
-                  </button>
-                )}
-                {userRole && (
-                  <button
-                    onClick={() => {
-                      logout();
-                      setShowProfile(false);
-                    }}
-                    className="w-full text-left px-3 py-1.5 rounded-xl text-xs font-medium text-rose-700 hover:bg-rose-50 flex items-center justify-between cursor-pointer"
-                  >
-                    <span>Log Out to Front Page</span>
-                  </button>
-                )}
               </div>
 
               <button
