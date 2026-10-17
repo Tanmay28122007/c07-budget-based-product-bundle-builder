@@ -24,7 +24,14 @@ import {
   CheckCircle2,
   PackagePlus,
   Search,
-  Compass
+  Compass,
+  ShoppingCart,
+  CreditCard,
+  ShoppingBag,
+  ExternalLink,
+  Truck,
+  CheckCircle,
+  X
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { Product } from '../../types';
@@ -33,6 +40,17 @@ import { formatINR } from '../../utils/pricing';
 export type ChatbotRole = 'workspace_architect' | 'rapid_checker' | 'procurement_strategist' | 'custom';
 export type GeminiModel = 'gemini-3.8-flash' | 'gemini-3.1-flash-lite' | 'gemini-4-argon';
 
+function getProductImageUrl(img?: string, id?: string): string {
+  if (!img) return id ? `/assets/${id}.png` : '';
+  if (img.startsWith('../assets/')) {
+    return img.replace('../assets/', '/assets/');
+  }
+  if (img.startsWith('./assets/')) {
+    return img.replace('./assets/', '/assets/');
+  }
+  return img;
+}
+
 interface Message {
   id: string;
   role: 'user' | 'assistant';
@@ -40,24 +58,30 @@ interface Message {
   model?: string;
   timestamp: string;
   action?: {
-    type: 'apply_bundle' | 'swap_product' | 'set_budget' | 'navigate';
+    type: 'apply_bundle' | 'swap_product' | 'set_budget' | 'navigate' | 'order_items' | 'add_to_cart' | 'checkout';
     tab?: string;
     title?: string;
     budget?: number;
-    items?: Record<string, string>;
+    items?: Record<string, string> | { id: string; name?: string; price?: number; quantity?: number }[];
     slotId?: string;
     productId?: string;
+    subtotal?: number;
+    netShipping?: number;
+    taxAmount?: number;
+    total?: number;
     reason?: string;
   } | null;
   actionApplied?: boolean;
 }
 
 const TAB_NAMES: Record<string, string> = {
-  dashboard: 'Executive Dashboard',
-  builder: 'Bundle Builder',
-  chat: 'Gemini AI Assistant',
   catalogue: 'Product Catalogue',
-  compare: 'Compare Bundles',
+  compare: 'Compare Builder',
+  cart: 'Bundle Cart Drawer',
+  checkout: 'Secure Checkout',
+  profile: 'Customer Profile',
+  chat: 'Gemini AI Assistant',
+  dashboard: 'Executive Dashboard',
   business: 'Business Insights & Strategy',
   tests: 'Automated Test Suite',
   evidence: 'Project Evidence & Scope Audit',
@@ -74,18 +98,18 @@ const ROLE_DEFINITIONS: Record<ChatbotRole, {
   starterPrompts: string[];
 }> = {
   workspace_architect: {
-    name: 'Ergonomic Workspace Architect',
-    badge: 'General Tasks',
+    name: 'Sahay Shopping & Setup Consultant',
+    badge: 'Direct Orders & Assembly',
     defaultModel: 'gemini-3.8-flash',
     icon: Bot,
-    description: 'Expert in human factors, spinal posture, monitor heights, eye-strain mitigation, screenbar mounting, and complete bundle ergonomics.',
-    systemInstruction: 'You are an Ergonomic Workspace Architect. Guide users in building healthy, productive, high-efficiency desk setups. Explain ergonomic angles, lumbar support grades, monitor positioning, and glare prevention with clear anatomical rationale.',
+    description: 'Expert in ordering products, bundle assembly, human ergonomics, and complete setup recommendations across all 40 products.',
+    systemInstruction: 'You are Sahay AI (सहाय AI), the master intelligent Shopping Consultant and Ordering Agent for the Budget-Based Product Bundle Builder. You can directly place orders, manage carts, compute landed costs, and recommend hardware across all 40 products (P01 to P40).',
     starterPrompts: [
-      'Give me an overview of the whole website and its 9 integrated modules.',
-      'Assemble an ergonomic setup for 8+ hour remote software engineering under ₹80,000.',
-      'How does the Cartesian Auto-Solve algorithm work in the Bundle Builder?',
-      'How does monitor curvature affect screenbar clamp mounting and eye focal distance?',
-      'Recommend an optimal chair with 3D armrests and lumbar support within our catalogue.'
+      '⚡ Order P26 Ergonomic Vertical Mouse',
+      '🎮 Order P27 RGB Mechanical Gaming Keyboard & P34 100W GaN Fast Charger',
+      '👕 Order 2 Blue Tshirts (Size L) and 1 Insulated Travel Mug',
+      '💳 Proceed to Checkout with my active bundle cart',
+      'Give me an overview of the whole website and all 40 products.'
     ]
   },
   rapid_checker: {
@@ -97,10 +121,9 @@ const ROLE_DEFINITIONS: Record<ChatbotRole, {
     systemInstruction: 'You are a Rapid Hardware Spec Checker. Deliver lightning-fast, high-density, no-fluff answers verifying hardware compatibility, port types, clamp dimensions, power wattage, and stock status. Be concise and direct.',
     starterPrompts: [
       'Quick check: Are all items in my current bundle in stock and compatible?',
-      'What edge-case scenarios and reference requests are tested in the Test Suite?',
-      'Can a screenbar clamp mount on the 34-inch curved ultrawide monitor?',
-      'Verify dock power delivery against 85W laptop power consumption.',
-      'Which desks in the catalogue have a surface width of 120cm or wider?'
+      'Which mice and keyboards have USB-C connectors in the catalogue?',
+      'Quick order: Buy 1x USB-C Multiport Hub (P09)',
+      'Check stock availability for all products in the catalogue.'
     ]
   },
   procurement_strategist: {
@@ -114,8 +137,7 @@ const ROLE_DEFINITIONS: Record<ChatbotRole, {
       'Take me to the Business Insights page and explain the MBA unit economics model.',
       'Analyze the landed price breakdown and determine if we qualify for free shipping threshold.',
       'What is the break-even basket threshold and retailer monthly contribution?',
-      'Evaluate the unit economics and platform gross margin for a ₹75,000 WFH bundle.',
-      'Perform a sensitivity analysis of shipping surcharges on heavy items (desks vs chairs).'
+      'Evaluate the unit economics for a ₹5,000 apparel and accessory order.'
     ]
   },
   custom: {
@@ -124,12 +146,11 @@ const ROLE_DEFINITIONS: Record<ChatbotRole, {
     defaultModel: 'gemini-3.8-flash',
     icon: Settings2,
     description: 'Define your own specialized chatbot persona, custom system instructions, and task parameters.',
-    systemInstruction: 'You are a specialized hardware consultant for budget-conscious corporate IT equipment.',
+    systemInstruction: 'You are a specialized hardware consultant and ordering assistant for budget-conscious corporate IT equipment.',
     starterPrompts: [
       'Give me a complete audit of this project scope and architecture.',
-      'Evaluate this setup for a junior developer onboarding package.',
-      'Provide a side-by-side comparison between mechanical standing desks and fixed desks.',
-      'Suggest a minimalist aesthetic bundle with clean cable management.'
+      'Order the developer onboarding bundle under ₹6,000.',
+      'Order 1x 4K Ultra HD Streaming Webcam (P37) and 1x Studio Microphone (P36).'
     ]
   }
 };
@@ -143,6 +164,12 @@ export const GeminiChatbotPage: React.FC = () => {
     validation,
     applyBundleRecommendation,
     swapProductById,
+    addItemToCart,
+    initiateCheckout,
+    isCartOpen,
+    setIsCartOpen,
+    addNotification,
+    userProfile,
     activeTab,
     setActiveTab
   } = useApp();
@@ -155,18 +182,31 @@ export const GeminiChatbotPage: React.FC = () => {
   const [showSystemInstruction, setShowSystemInstruction] = useState(false);
   const [attachWorkspaceContext, setAttachWorkspaceContext] = useState(true);
 
+  // Instant order confirmation modal
+  const [orderSuccessModal, setOrderSuccessModal] = useState<{
+    orderId: string;
+    items: { id: string; name: string; price: number; quantity: number }[];
+    subtotal: number;
+    shipping: number;
+    tax: number;
+    total: number;
+  } | null>(null);
+
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 'welcome-chat',
       role: 'assistant',
-      text: `Welcome to the **Gemini Multi-Turn Hardware Chatbot**!
+      text: `👋 Welcome to **Sahay AI (सहाय AI)**, your intelligent shopping assistant!
 
-I can assist you across several specialized roles:
-1. **Ergonomic Workspace Architect**: Comprehensive ergonomic bundle assembly & postural design.
-2. **Rapid Compatibility Checker**: Lightning-fast dimensional and port validation.
-3. **Procurement & Unit Economics Analyst**: Quantitative landed cost, shipping thresholds, and margin analysis.
+I am fully trained on our **entire website**, all **40 products (P01 to P40)**, stock levels, and landed pricing calculations.
 
-Your active bundle context is currently **${attachWorkspaceContext ? 'synced' : 'disconnected'}**. What would you like to discuss?`,
+✨ **You can order anything directly through me!** Just ask:
+• *"Order P26 Ergonomic Vertical Mouse"*
+• *"Buy RGB Mechanical Gaming Keyboard and 100W GaN Fast Charger"*
+• *"Order 2 Blue Tshirts (Size L) and 1 Insulated Travel Mug"*
+• *"Checkout my active bundle cart"*
+
+Your active bundle context is **${attachWorkspaceContext ? 'synced' : 'disconnected'}**. What would you like to buy or configure today?`,
       model: 'gemini-3.8-flash',
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }
@@ -179,7 +219,6 @@ Your active bundle context is currently **${attachWorkspaceContext ? 'synced' : 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
-  // When active role changes, update default model & instruction if user hasn't heavily customized
   const handleRoleChange = (role: ChatbotRole) => {
     setActiveRole(role);
     setSelectedModel(ROLE_DEFINITIONS[role].defaultModel);
@@ -187,15 +226,23 @@ Your active bundle context is currently **${attachWorkspaceContext ? 'synced' : 
   };
 
   // Interactive Guidance Toolkit State
-  const [activeToolkitTab, setActiveToolkitTab] = useState<'assembly' | 'troubleshoot' | 'catalogue' | null>('assembly');
+  const [activeToolkitTab, setActiveToolkitTab] = useState<'order' | 'assembly' | 'troubleshoot' | 'catalogue' | null>('order');
   const [targetBudgetInput, setTargetBudgetInput] = useState<number>(budget || 75000);
   const [bundlePriority, setBundlePriority] = useState<'cost_effective' | 'ergonomic_tier1'>('ergonomic_tier1');
   const [selectedCatalogueCategory, setSelectedCatalogueCategory] = useState<string>('all');
-  const [selectedProductId, setSelectedProductId] = useState<string>('');
+  const [selectedProductId, setSelectedProductId] = useState<string>('P26');
+  const [orderQuantity, setOrderQuantity] = useState<number>(1);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isLoading]);
+
+  const handleTriggerQuickOrder = () => {
+    const prod = fixture.products.find(p => p.id === selectedProductId) || fixture.products[0];
+    if (!prod) return;
+    const prompt = `Please order ${orderQuantity}x "${prod.name}" (ID: ${prod.id}, Price: ${formatINR(prod.price)}). Calculate the landed cost and prepare the 1-click order card.`;
+    handleSendMessage(prompt);
+  };
 
   const handleTriggerAssemblyGuide = () => {
     const priorityDesc = bundlePriority === 'cost_effective'
@@ -203,7 +250,7 @@ Your active bundle context is currently **${attachWorkspaceContext ? 'synced' : 
       : 'highest ergonomic grade (Tier-1 lumbar support, 3D adjustable armrests, eye-level monitor height, non-glare asymmetric lighting)';
     const prompt = `Please assemble an optimal, 100% compatible product bundle for the "${fixture.activity.name}" activity with a target landed budget of ${formatINR(targetBudgetInput)}.
 Goal: ${priorityDesc}.
-Verify that all proposed products are in-stock, confirm that monitor clamp geometry and desk surface width clearance are satisfied, compute landed pricing with shipping & 18% GST, and provide the 1-click apply action.`;
+Verify that all proposed products are in-stock, confirm compatibility, compute landed pricing with shipping & 18% GST, and provide the 1-click apply action.`;
     handleSendMessage(prompt);
   };
 
@@ -213,10 +260,10 @@ Verify that all proposed products are in-stock, confirm that monitor clamp geome
 Conflict Type: ${violation.ruleId}
 Rule Details: ${violation.message}
 Conflicting Hardware: "${violation.sourceProductName}" (${violation.sourceProductId}) and "${violation.targetProductName || 'setup'}" (${violation.targetProductId || ''}).
-Please explain why this physical/electrical conflict exists and propose an in-stock replacement from our catalogue with a 1-click swap action.`;
+Please explain why this conflict exists and propose an in-stock replacement from our catalogue with a 1-click swap action.`;
       handleSendMessage(prompt);
     } else {
-      const prompt = `Please perform a complete compatibility troubleshooting inspection on my current bundle (${validation.filledSlotCount} of ${validation.totalSlotCount} slots filled). Check monitor clamp safety, desk width vs monitor curvature, dock power delivery wattage vs consumption, and chair armrest clearance.`;
+      const prompt = `Please perform a complete compatibility troubleshooting inspection on my current bundle (${validation.filledSlotCount} of ${validation.totalSlotCount} slots filled). Check physical clearance, port compatibility, and stock availability.`;
       handleSendMessage(prompt);
     }
   };
@@ -233,7 +280,7 @@ Is this product physically, dimensionally, and electrically compatible with my c
 Product: "${prod.name}" (ID: ${prod.id}, Category: ${prod.category}, Price: ${formatINR(prod.price)}).
 Description: ${prod.description}.
 Specs: ${JSON.stringify(prod.attributes || {})}.
-Please provide an in-depth ergonomic & procurement evaluation for this product based on our current catalogue context, including its key advantages, target user persona, and landed budget impact.`;
+Please provide an in-depth evaluation for this product based on our current catalogue context, including its key advantages, target user persona, and landed budget impact.`;
       handleSendMessage(prompt);
     }
   };
@@ -254,7 +301,6 @@ Please provide an in-depth ergonomic & procurement evaluation for this product b
     setIsLoading(true);
 
     try {
-      // Build context only if enabled
       let contextPayload = null;
       if (attachWorkspaceContext) {
         const currentItemsSummary: Record<string, any> = {};
@@ -307,7 +353,6 @@ Please provide an in-depth ergonomic & procurement evaluation for this product b
         };
       }
 
-      // Multi-turn history maintaining previous conversation turns
       const historyPayload = messages.slice(-15).map(m => ({
         role: m.role,
         text: m.text
@@ -347,7 +392,7 @@ Please provide an in-depth ergonomic & procurement evaluation for this product b
       const errMsg: Message = {
         id: `err-${Date.now()}`,
         role: 'assistant',
-        text: `Sorry, an error occurred while processing your request with ${selectedModel}: ${err.message}.`,
+        text: `Sorry, an error occurred while processing your request: ${err.message}.`,
         model: selectedModel,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
@@ -360,7 +405,70 @@ Please provide an in-depth ergonomic & procurement evaluation for this product b
   const handleApplyAction = (msgId: string, action: Message['action']) => {
     if (!action) return;
 
-    if (action.type === 'apply_bundle' && action.items) {
+    if (action.type === 'order_items') {
+      const itemsList = Array.isArray(action.items) ? action.items : [];
+      const checkoutItems: { product: Product; quantity: number }[] = [];
+
+      itemsList.forEach((it: any) => {
+        const prod = fixture.products.find(p => p.id === it.id) || {
+          id: it.id,
+          name: it.name || it.id,
+          price: it.price || 0,
+          category: 'Peripherals',
+          inStock: true,
+          stockQuantity: 10,
+          brand: 'C07 Essentials',
+          model: it.id,
+          description: it.name || it.id,
+          weightKg: 0.5,
+          unitCostInr: Math.round((it.price || 0) * 0.6),
+          attributes: {},
+          incompatibleProductIds: []
+        } as Product;
+
+        checkoutItems.push({ product: prod, quantity: it.quantity || 1 });
+        addItemToCart(prod);
+      });
+
+      const newOrderId = `C07-ORD-${Math.floor(100000 + Math.random() * 900000)}`;
+
+      setOrderSuccessModal({
+        orderId: newOrderId,
+        items: itemsList.map((it: any) => ({
+          id: it.id,
+          name: it.name || it.id,
+          price: it.price || 0,
+          quantity: it.quantity || 1
+        })),
+        subtotal: action.subtotal || 0,
+        shipping: action.netShipping ?? 499,
+        tax: action.taxAmount || 0,
+        total: action.total || 0
+      });
+
+      initiateCheckout({
+        items: checkoutItems,
+        bundleName: action.title || 'Chatbot Direct Order'
+      });
+
+      addNotification("Order Booked!", `Order #${newOrderId} confirmed via Sahay AI.`, 'success');
+    } else if (action.type === 'add_to_cart') {
+      const itemsList = Array.isArray(action.items) ? action.items : [];
+      if (itemsList.length > 0) {
+        itemsList.forEach((it: any) => {
+          const prod = fixture.products.find(p => p.id === it.id);
+          if (prod) addItemToCart(prod);
+        });
+      } else if (action.productId) {
+        const prod = fixture.products.find(p => p.id === action.productId);
+        if (prod) addItemToCart(prod);
+      }
+      setIsCartOpen(true);
+      addNotification("Added to Cart", action.title || 'Product added to bundle cart.', 'success');
+    } else if (action.type === 'checkout') {
+      initiateCheckout();
+      setActiveTab('checkout');
+    } else if (action.type === 'apply_bundle' && action.items && !Array.isArray(action.items)) {
       applyBundleRecommendation(action.items, action.budget);
       setActiveTab('compare');
     } else if (action.type === 'swap_product' && action.slotId && action.productId) {
@@ -369,7 +477,11 @@ Please provide an in-depth ergonomic & procurement evaluation for this product b
     } else if (action.type === 'set_budget' && action.budget) {
       setBudget(action.budget);
     } else if (action.type === 'navigate' && action.tab) {
-      setActiveTab(action.tab as any);
+      if (action.tab === 'cart') {
+        setIsCartOpen(true);
+      } else {
+        setActiveTab(action.tab as any);
+      }
     }
 
     setMessages(prev =>
@@ -393,7 +505,7 @@ Please provide an in-depth ergonomic & procurement evaluation for this product b
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `gemini_chat_transcript_${Date.now()}.md`;
+    a.download = `sahay_chat_transcript_${Date.now()}.md`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -403,45 +515,44 @@ Please provide an in-depth ergonomic & procurement evaluation for this product b
       {
         id: `reset-${Date.now()}`,
         role: 'assistant',
-        text: `Chat reset. I am ready as your **${ROLE_DEFINITIONS[activeRole].name}**. How can I help you?`,
+        text: `Chat reset. I am ready as your **${ROLE_DEFINITIONS[activeRole].name}**. Tell me what you'd like to order or inspect!`,
         model: selectedModel,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       }
     ]);
   };
 
-  // Basic formatted markdown renderer
   const renderFormatted = (text: string) => {
     const lines = text.split('\n');
     return lines.map((line, idx) => {
       if (line.startsWith('### ')) {
-        return <h4 key={idx} className="font-bold text-stone-900 text-sm mt-3 mb-1">{line.replace('### ', '')}</h4>;
+        return <h4 key={idx} className="font-bold text-[#2C3A2B] text-sm mt-3 mb-1">{line.replace('### ', '')}</h4>;
       }
       if (line.startsWith('## ')) {
-        return <h3 key={idx} className="font-bold text-stone-900 text-base mt-4 mb-1">{line.replace('## ', '')}</h3>;
+        return <h3 key={idx} className="font-bold text-[#2C3A2B] text-base mt-4 mb-1">{line.replace('## ', '')}</h3>;
       }
       if (line.startsWith('- ') || line.startsWith('* ')) {
         return (
-          <li key={idx} className="ml-4 list-disc text-stone-700 my-0.5 leading-relaxed">
+          <li key={idx} className="ml-4 list-disc text-[#4A4A35] my-0.5 leading-relaxed">
             {renderInlineMarkdown(line.substring(2))}
           </li>
         );
       }
       if (/^\d+\.\s/.test(line)) {
         return (
-          <li key={idx} className="ml-4 list-decimal text-stone-700 my-0.5 leading-relaxed">
+          <li key={idx} className="ml-4 list-decimal text-[#4A4A35] my-0.5 leading-relaxed">
             {renderInlineMarkdown(line.replace(/^\d+\.\s/, ''))}
           </li>
         );
       }
       if (line.startsWith('---')) {
-        return <hr key={idx} className="my-2 border-stone-200" />;
+        return <hr key={idx} className="my-2 border-[#E6E1D3]" />;
       }
       if (!line.trim()) {
         return <div key={idx} className="h-1.5" />;
       }
       return (
-        <p key={idx} className="text-stone-700 my-1 leading-relaxed">
+        <p key={idx} className="text-[#3A3A2C] my-1 leading-relaxed">
           {renderInlineMarkdown(line)}
         </p>
       );
@@ -470,7 +581,7 @@ Please provide an in-depth ergonomic & procurement evaluation for this product b
           parts.push(<span key={keyIdx++}>{remaining.substring(0, boldIdx)}</span>);
         }
         parts.push(
-          <strong key={keyIdx++} className="font-semibold text-stone-900">
+          <strong key={keyIdx++} className="font-semibold text-[#2C3A2B]">
             {boldMatch![1]}
           </strong>
         );
@@ -497,29 +608,45 @@ Please provide an in-depth ergonomic & procurement evaluation for this product b
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-start gap-3.5">
             <div className="w-10 h-10 rounded-xl bg-[#2C3A2B] text-white flex items-center justify-center shadow-xs shrink-0 mt-0.5">
-              <Bot className="w-5 h-5 text-emerald-300" />
+              <Bot className="w-5 h-5 text-[#E6C687]" />
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="font-serif text-xl font-bold text-[#2C3A2B] tracking-tight">
-                  Gemini Chatbot
+                  Sahay AI (सहाय AI) — Shopping & Setup Agent
                 </h1>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-semibold bg-[#F4F1EA] text-[#8B5A2B] border border-[#E6E1D3]">
-                  Multi-Turn
-                </span>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-semibold bg-[#A3B18A]/20 text-[#2C3A2B] border border-[#A3B18A]/40 flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse" />
-                  Live Engine
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                  <Sparkles className="w-2.5 h-2.5" />
+                  Order Anything via Chat
                 </span>
               </div>
-              <p className="text-xs text-[#5A5A40] mt-0.5">
-                Multi-turn conversational intelligence tailored for workspace configuration, rapid hardware checking, and procurement analytics.
+              <p className="text-xs text-[#5A5A40] mt-1 leading-relaxed">
+                Trained on the complete platform & all 40 products. Place orders, calculate landed prices, and configure bundles through multi-turn conversation.
               </p>
             </div>
           </div>
 
           {/* Action Toolbar */}
           <div className="flex items-center gap-2">
+            <button
+              onClick={() => {
+                initiateCheckout();
+                setActiveTab('checkout');
+              }}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-[#2C3A2B] hover:bg-[#1E281D] rounded-xl shadow-xs transition-colors cursor-pointer"
+              title="Open secure checkout page"
+            >
+              <CreditCard className="w-3.5 h-3.5 text-[#E6C687]" />
+              <span>Checkout</span>
+            </button>
+            <button
+              onClick={() => setIsCartOpen(true)}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-[#2C2C1E] bg-white hover:bg-[#F4F1EA] border border-[#E6E1D3] rounded-xl shadow-2xs transition-colors cursor-pointer"
+              title="Open Bundle Cart drawer"
+            >
+              <ShoppingCart className="w-3.5 h-3.5 text-[#5A5A40]" />
+              <span>Cart ({validation.filledSlotCount})</span>
+            </button>
             <button
               onClick={handleExportMarkdown}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-[#2C2C1E] bg-white hover:bg-[#F4F1EA] border border-[#E6E1D3] rounded-xl shadow-2xs transition-colors cursor-pointer"
@@ -561,8 +688,11 @@ Please provide an in-depth ergonomic & procurement evaluation for this product b
                     <span className="truncate">{r.name}</span>
                   </div>
                 </div>
-                <div className="flex items-center justify-end mt-1 text-[10px]">
+                <div className="flex items-center justify-between mt-1 text-[10px]">
                   <span className="text-[#8B8B7A] font-medium">{r.badge}</span>
+                  <span className="font-mono text-[9px] px-1.5 py-0.2 rounded bg-white text-[#5A5A40] border border-[#E6E1D3]">
+                    {r.defaultModel}
+                  </span>
                 </div>
               </button>
             );
@@ -572,8 +702,6 @@ Please provide an in-depth ergonomic & procurement evaluation for this product b
         {/* Configuration Bar: Model Selector, System Instruction, Context Toggle */}
         <div className="mt-3 pt-3 border-t border-stone-100 flex flex-wrap items-center justify-between gap-3 text-xs">
           <div className="flex flex-wrap items-center gap-3">
-
-            {/* System Instruction View/Edit Toggle */}
             <button
               onClick={() => setShowSystemInstruction(prev => !prev)}
               className="flex items-center gap-1 px-2.5 py-1 rounded-lg border border-stone-200 hover:bg-stone-50 text-stone-700 font-medium cursor-pointer"
@@ -599,7 +727,7 @@ Please provide an in-depth ergonomic & procurement evaluation for this product b
             </label>
             {attachWorkspaceContext && (
               <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#A3B18A]/25 text-[#2C3A2B] border border-[#A3B18A]/40">
-                ₹{budget.toLocaleString('en-IN')} Budget ({validation.filledSlotCount}/{validation.totalSlotCount} Slots)
+                ₹{budget.toLocaleString('en-IN')} Budget ({validation.filledSlotCount} items in cart)
               </span>
             )}
           </div>
@@ -618,44 +746,49 @@ Please provide an in-depth ergonomic & procurement evaluation for this product b
                 className="text-[11px] text-indigo-700 hover:underline flex items-center gap-1 font-normal cursor-pointer"
               >
                 <RefreshCw className="w-3 h-3" />
-                Reset to Role Default
+                Reset Default
               </button>
             </div>
             <textarea
               rows={3}
               value={customInstruction}
               onChange={e => setCustomInstruction(e.target.value)}
-              className="w-full text-xs font-mono p-2.5 bg-white border border-stone-200 rounded-lg focus:outline-hidden focus:ring-1 focus:ring-indigo-800 text-stone-800"
-              placeholder="Enter system instruction to direct the chatbot role and persona..."
+              className="w-full text-xs font-mono p-2 bg-white border border-stone-200 rounded-lg focus:outline-hidden focus:ring-1 focus:ring-indigo-600"
             />
-            <p className="text-[11px] text-stone-500">
-              This prompt is delivered to Gemini alongside catalogue specs, landed pricing rules, and real-time compatibility matrix data.
-            </p>
           </div>
         )}
       </div>
 
-      {/* Interactive Guidance Hub: Assembly, Troubleshooting & Catalogue Explorer */}
-      <div className="bg-white border border-stone-200/90 rounded-2xl p-4 shadow-2xs space-y-3">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-stone-100">
+      {/* Interactive Guidance Toolkit Strip */}
+      <div className="bg-[#FDFBF7] border border-[#E6E1D3] rounded-[24px] p-4 shadow-2xs space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#E6E1D3] pb-2 text-xs">
           <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-indigo-700" />
-            <h2 className="text-xs font-bold text-stone-900 tracking-tight uppercase">
-              Interactive Gemini Guidance Hub
-            </h2>
+            <Sparkles className="w-4 h-4 text-[#8B5A2B]" />
+            <span className="font-semibold text-[#2C3A2B]">Quick Action & Ordering Toolkit:</span>
           </div>
 
-          {/* Hub Tab Switcher */}
-          <div className="flex items-center gap-1 bg-stone-100/80 p-0.5 rounded-lg text-xs">
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={() => setActiveToolkitTab(activeToolkitTab === 'order' ? null : 'order')}
+              className={`px-2.5 py-1 rounded-md font-medium flex items-center gap-1.5 transition-all cursor-pointer ${
+                activeToolkitTab === 'order'
+                  ? 'bg-[#2C3A2B] text-white font-semibold shadow-2xs'
+                  : 'text-[#5A5A40] hover:text-[#2C2C1E]'
+              }`}
+            >
+              <ShoppingBag className="w-3.5 h-3.5 text-[#E6C687]" />
+              <span>⚡ Order Any Item</span>
+            </button>
+
             <button
               onClick={() => setActiveToolkitTab(activeToolkitTab === 'assembly' ? null : 'assembly')}
               className={`px-2.5 py-1 rounded-md font-medium flex items-center gap-1.5 transition-all cursor-pointer ${
                 activeToolkitTab === 'assembly'
-                  ? 'bg-white text-indigo-950 font-semibold shadow-2xs'
-                  : 'text-stone-600 hover:text-stone-900'
+                  ? 'bg-white text-[#2C3A2B] font-semibold shadow-2xs'
+                  : 'text-[#5A5A40] hover:text-[#2C2C1E]'
               }`}
             >
-              <PackagePlus className="w-3.5 h-3.5 text-indigo-700" />
+              <Package className="w-3.5 h-3.5 text-[#8B5A2B]" />
               <span>Bundle Assembly</span>
             </button>
 
@@ -663,11 +796,11 @@ Please provide an in-depth ergonomic & procurement evaluation for this product b
               onClick={() => setActiveToolkitTab(activeToolkitTab === 'troubleshoot' ? null : 'troubleshoot')}
               className={`px-2.5 py-1 rounded-md font-medium flex items-center gap-1.5 transition-all cursor-pointer ${
                 activeToolkitTab === 'troubleshoot'
-                  ? 'bg-white text-indigo-950 font-semibold shadow-2xs'
-                  : 'text-stone-600 hover:text-stone-900'
+                  ? 'bg-white text-[#2C3A2B] font-semibold shadow-2xs'
+                  : 'text-[#5A5A40] hover:text-[#2C2C1E]'
               }`}
             >
-              <AlertTriangle className={`w-3.5 h-3.5 ${validation.compatibilityViolations.length > 0 ? 'text-amber-600' : 'text-stone-500'}`} />
+              <AlertTriangle className={`w-3.5 h-3.5 ${validation.compatibilityViolations.length > 0 ? 'text-amber-600' : 'text-[#8B8B7A]'}`} />
               <span>Compatibility</span>
               {validation.compatibilityViolations.length > 0 && (
                 <span className="px-1.5 py-0.2 rounded-full text-[9px] bg-rose-500 text-white font-bold">
@@ -680,28 +813,91 @@ Please provide an in-depth ergonomic & procurement evaluation for this product b
               onClick={() => setActiveToolkitTab(activeToolkitTab === 'catalogue' ? null : 'catalogue')}
               className={`px-2.5 py-1 rounded-md font-medium flex items-center gap-1.5 transition-all cursor-pointer ${
                 activeToolkitTab === 'catalogue'
-                  ? 'bg-white text-indigo-950 font-semibold shadow-2xs'
-                  : 'text-stone-600 hover:text-stone-900'
+                  ? 'bg-white text-[#2C3A2B] font-semibold shadow-2xs'
+                  : 'text-[#5A5A40] hover:text-[#2C2C1E]'
               }`}
             >
-              <Layers className="w-3.5 h-3.5 text-indigo-700" />
-              <span>Catalogue Recommendations</span>
+              <Layers className="w-3.5 h-3.5 text-[#8B5A2B]" />
+              <span>Catalogue</span>
             </button>
           </div>
         </div>
+
+        {/* Tab 0: Direct Quick Order */}
+        {activeToolkitTab === 'order' && (
+          <div className="pt-1 grid grid-cols-1 sm:grid-cols-12 gap-3 items-center">
+            <div className="sm:col-span-6 space-y-1">
+              <label className="text-[11px] font-semibold text-[#2C3A2B] block">
+                Select Any Product from Catalogue (40 Items)
+              </label>
+              <select
+                value={selectedProductId}
+                onChange={e => setSelectedProductId(e.target.value)}
+                className="w-full px-2.5 py-1.5 text-xs font-medium border border-[#E6E1D3] rounded-lg focus:outline-hidden focus:ring-1 focus:ring-[#2C3A2B] bg-white text-[#2C3A2B] cursor-pointer"
+              >
+                {fixture.products.map(p => (
+                  <option key={p.id} value={p.id} disabled={!p.inStock}>
+                    [{p.id}] {p.name} — {formatINR(p.price)} ({p.category}) {!p.inStock ? '[OUT OF STOCK]' : `(${p.stockQuantity ?? 10} in stock)`}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="sm:col-span-2 space-y-1">
+              <label className="text-[11px] font-semibold text-[#2C3A2B] block">
+                Quantity
+              </label>
+              <input
+                type="number"
+                min="1"
+                max="10"
+                value={orderQuantity}
+                onChange={e => setOrderQuantity(Math.max(1, parseInt(e.target.value, 10) || 1))}
+                className="w-full px-2.5 py-1.5 text-xs font-mono font-semibold border border-[#E6E1D3] rounded-lg bg-white text-[#2C3A2B] text-center"
+              />
+            </div>
+
+            <div className="sm:col-span-4 flex items-center gap-2 pt-4 sm:pt-0">
+              <button
+                disabled={isLoading}
+                onClick={handleTriggerQuickOrder}
+                className="flex-1 py-2 px-3 rounded-xl bg-[#2C3A2B] hover:bg-[#1E281D] text-white text-xs font-semibold flex items-center justify-center gap-1.5 shadow-xs cursor-pointer transition-colors disabled:opacity-50"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-[#E6C687]" />
+                <span>Order via AI</span>
+              </button>
+              <button
+                onClick={() => {
+                  const prod = fixture.products.find(p => p.id === selectedProductId);
+                  if (prod) {
+                    for (let i = 0; i < orderQuantity; i++) {
+                      addItemToCart(prod);
+                    }
+                    setIsCartOpen(true);
+                  }
+                }}
+                className="py-2 px-3 rounded-xl bg-white hover:bg-[#F4F1EA] text-[#2C3A2B] border border-[#E6E1D3] text-xs font-semibold flex items-center justify-center gap-1 shadow-2xs cursor-pointer transition-colors"
+                title="Add directly to cart"
+              >
+                <ShoppingCart className="w-3.5 h-3.5 text-[#5A5A40]" />
+                <span>Cart</span>
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Tab 1: Bundle Assembly Guidance */}
         {activeToolkitTab === 'assembly' && (
           <div className="pt-1 grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
             <div className="space-y-1.5">
-              <label className="text-[11px] font-semibold text-stone-600 block">
+              <label className="text-[11px] font-semibold text-[#2C3A2B] block">
                 Target Landed Budget
               </label>
               <div className="flex items-center gap-1.5">
                 <input
                   type="number"
                   step="1000"
-                  min="20000"
+                  min="2000"
                   max="300000"
                   value={targetBudgetInput}
                   onChange={e => setTargetBudgetInput(Number(e.target.value) || 0)}
@@ -709,7 +905,7 @@ Please provide an in-depth ergonomic & procurement evaluation for this product b
                 />
               </div>
               <div className="flex items-center gap-1 overflow-x-auto no-scrollbar pt-0.5">
-                {[45000, 65000, 80000, 100000].map(amt => (
+                {[5000, 10000, 25000, 50000].map(amt => (
                   <button
                     key={amt}
                     onClick={() => setTargetBudgetInput(amt)}
@@ -730,14 +926,9 @@ Please provide an in-depth ergonomic & procurement evaluation for this product b
                 onChange={e => setBundlePriority(e.target.value as any)}
                 className="w-full px-2.5 py-1.5 text-xs font-medium border border-[#E6E1D3] rounded-lg focus:outline-hidden focus:ring-1 focus:ring-[#2C3A2B] bg-white text-[#2C3A2B] cursor-pointer"
               >
-                <option value="ergonomic_tier1">Ergonomic Tier-1 & Spine Alignment</option>
+                <option value="ergonomic_tier1">High-Efficiency Ergonomic Setup</option>
                 <option value="cost_effective">Cost-Effective Maximum Savings</option>
               </select>
-              <p className="text-[10px] text-[#5A5A40] line-clamp-1">
-                {bundlePriority === 'ergonomic_tier1'
-                  ? '3D armrests, lumbar support, dual QHD monitor support'
-                  : 'Meets activity slot requirements at the lowest landed cost'}
-              </p>
             </div>
 
             <div className="flex flex-col justify-end h-full">
@@ -747,7 +938,7 @@ Please provide an in-depth ergonomic & procurement evaluation for this product b
                 className="w-full py-2.5 px-3 rounded-xl bg-[#2C3A2B] hover:bg-[#3A4D39] text-white text-xs font-semibold flex items-center justify-center gap-2 shadow-xs cursor-pointer transition-colors disabled:opacity-50"
               >
                 <Sparkles className="w-3.5 h-3.5 text-[#F5F5EC]" />
-                <span>Ask Gemini to Assemble Bundle</span>
+                <span>Ask Gemini to Assemble</span>
               </button>
             </div>
           </div>
@@ -757,16 +948,16 @@ Please provide an in-depth ergonomic & procurement evaluation for this product b
         {activeToolkitTab === 'troubleshoot' && (
           <div className="pt-1 space-y-2">
             <div className="flex items-center justify-between text-xs">
-              <span className="font-semibold text-stone-800">
+              <span className="font-semibold text-[#2C3A2B]">
                 Workspace Compatibility Diagnostics:
               </span>
               <button
                 disabled={isLoading}
                 onClick={() => handleTriggerTroubleshoot()}
-                className="text-[11px] text-indigo-700 hover:underline flex items-center gap-1 font-semibold cursor-pointer"
+                className="text-[11px] text-[#8B5A2B] hover:underline flex items-center gap-1 font-semibold cursor-pointer"
               >
                 <RefreshCw className="w-3 h-3" />
-                Run Comprehensive Gemini Audit
+                Run Comprehensive Audit
               </button>
             </div>
 
@@ -775,16 +966,9 @@ Please provide an in-depth ergonomic & procurement evaluation for this product b
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
                   <span className="text-emerald-950 font-medium">
-                    All currently selected items satisfy physical dimensions, mounting clearance, and power rules.
+                    All currently selected items satisfy physical dimensions and port rules.
                   </span>
                 </div>
-                <button
-                  disabled={isLoading}
-                  onClick={() => handleSendMessage("Are there any subtle hardware bottlenecks or future-proofing risks in my currently selected products?")}
-                  className="px-2.5 py-1 bg-white hover:bg-emerald-100/50 text-emerald-900 font-semibold text-[11px] rounded-lg border border-emerald-200 shadow-2xs transition-colors shrink-0 cursor-pointer"
-                >
-                  Ask Gemini to Check Edge Cases
-                </button>
               </div>
             ) : (
               <div className="space-y-2">
@@ -799,19 +983,15 @@ Please provide an in-depth ergonomic & procurement evaluation for this product b
                         <div className="font-semibold text-rose-950 font-mono text-[11px]">
                           [{v.ruleId.toUpperCase()}]
                         </div>
-                        <p className="text-rose-900 text-[11px] mt-0.5 leading-relaxed">
-                          {v.message}
-                        </p>
+                        <p className="text-rose-900 mt-0.5">{v.message}</p>
                       </div>
                     </div>
-
                     <button
                       disabled={isLoading}
                       onClick={() => handleTriggerTroubleshoot(v)}
-                      className="px-3 py-1.5 rounded-lg bg-rose-700 hover:bg-rose-800 text-white font-semibold text-[11px] flex items-center gap-1.5 shadow-2xs transition-colors shrink-0 cursor-pointer self-end sm:self-center"
+                      className="px-3 py-1.5 bg-white hover:bg-rose-100/50 text-rose-900 font-semibold text-xs rounded-lg border border-rose-200 shadow-2xs transition-colors shrink-0 cursor-pointer"
                     >
-                      <Sparkles className="w-3 h-3 text-rose-200" />
-                      <span>Troubleshoot Conflict with Gemini</span>
+                      Resolve with Gemini
                     </button>
                   </div>
                 ))}
@@ -820,76 +1000,47 @@ Please provide an in-depth ergonomic & procurement evaluation for this product b
           </div>
         )}
 
-        {/* Tab 3: Catalogue Product Recommendations */}
+        {/* Tab 3: Catalogue Item Evaluation */}
         {activeToolkitTab === 'catalogue' && (
-          <div className="pt-1 space-y-3">
-            <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
-              {/* Category Pills */}
-              <div className="flex items-center gap-1 overflow-x-auto no-scrollbar">
-                {['all', 'desk', 'chair', 'monitor', 'laptop_stand_or_dock', 'lighting'].map(cat => (
-                  <button
-                    key={cat}
-                    onClick={() => {
-                      setSelectedCatalogueCategory(cat);
-                      setSelectedProductId('');
-                    }}
-                    className={`px-3 py-1 rounded-xl text-[11px] font-medium transition-all cursor-pointer ${
-                      selectedCatalogueCategory === cat
-                        ? 'bg-[#2C3A2B] text-white font-semibold shadow-xs'
-                        : 'bg-[#F5F5EC] text-[#5A5A40] hover:bg-[#F4F1EA] border border-[#E6E1D3]'
-                    }`}
-                  >
-                    {cat === 'all' ? 'All Categories' : cat.replace(/_/g, ' ')}
-                  </button>
+          <div className="pt-1 grid grid-cols-1 md:grid-cols-2 gap-3 items-center">
+            <div className="space-y-1">
+              <label className="text-[11px] font-semibold text-[#2C3A2B] block">
+                Choose Item to Inspect
+              </label>
+              <select
+                value={selectedProductId}
+                onChange={e => setSelectedProductId(e.target.value)}
+                className="w-full px-2.5 py-1.5 text-xs font-medium border border-[#E6E1D3] rounded-lg focus:outline-hidden focus:ring-1 focus:ring-[#2C3A2B] bg-white text-[#2C3A2B] cursor-pointer"
+              >
+                {fixture.products.map(p => (
+                  <option key={p.id} value={p.id}>
+                    [{p.id}] {p.name} — {formatINR(p.price)}
+                  </option>
                 ))}
-              </div>
-
-              <span className="text-[11px] font-mono text-stone-400">
-                {fixture.products.filter(p => selectedCatalogueCategory === 'all' || p.category === selectedCatalogueCategory).length} items in catalogue
-              </span>
+              </select>
             </div>
 
-            {/* Product Selector Dropdown & Action Buttons */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-center">
-              <div className="md:col-span-2">
-                <select
-                  value={selectedProductId}
-                  onChange={e => setSelectedProductId(e.target.value)}
-                  className="w-full p-2 text-xs border border-stone-200 rounded-lg bg-white focus:outline-hidden focus:ring-1 focus:ring-indigo-800 cursor-pointer"
-                >
-                  <option value="">-- Choose a product from catalogue to evaluate --</option>
-                  {fixture.products
-                    .filter(p => selectedCatalogueCategory === 'all' || p.category === selectedCatalogueCategory)
-                    .map(p => (
-                      <option key={p.id} value={p.id}>
-                        [{p.id}] {p.name} - {formatINR(p.price)} ({p.category}) {p.inStock ? '✓ In Stock' : '✗ Out of Stock'}
-                      </option>
-                    ))}
-                </select>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <button
-                  disabled={!selectedProductId || isLoading}
-                  onClick={() => {
-                    const prod = fixture.products.find(p => p.id === selectedProductId);
-                    if (prod) handleTriggerProductRecommendation(prod, 'evaluate');
-                  }}
-                  className="flex-1 py-2 px-2.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-950 font-semibold text-xs rounded-lg border border-indigo-200 shadow-2xs transition-colors disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed"
-                >
-                  Evaluate Item
-                </button>
-                <button
-                  disabled={!selectedProductId || isLoading}
-                  onClick={() => {
-                    const prod = fixture.products.find(p => p.id === selectedProductId);
-                    if (prod) handleTriggerProductRecommendation(prod, 'compat');
-                  }}
-                  className="flex-1 py-2 px-2.5 bg-stone-100 hover:bg-stone-200 text-stone-800 font-semibold text-xs rounded-lg border border-stone-200 shadow-2xs transition-colors disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed"
-                >
-                  Verify Fit
-                </button>
-              </div>
+            <div className="flex items-center gap-2 pt-4 md:pt-0">
+              <button
+                disabled={!selectedProductId || isLoading}
+                onClick={() => {
+                  const prod = fixture.products.find(p => p.id === selectedProductId);
+                  if (prod) handleTriggerProductRecommendation(prod, 'evaluate');
+                }}
+                className="flex-1 py-2 px-2.5 bg-white hover:bg-[#F4F1EA] text-[#2C3A2B] font-semibold text-xs rounded-lg border border-[#E6E1D3] shadow-2xs transition-colors cursor-pointer"
+              >
+                Evaluate Item
+              </button>
+              <button
+                disabled={!selectedProductId || isLoading}
+                onClick={() => {
+                  const prod = fixture.products.find(p => p.id === selectedProductId);
+                  if (prod) handleTriggerProductRecommendation(prod, 'compat');
+                }}
+                className="flex-1 py-2 px-2.5 bg-white hover:bg-[#F4F1EA] text-[#2C3A2B] font-semibold text-xs rounded-lg border border-[#E6E1D3] shadow-2xs transition-colors cursor-pointer"
+              >
+                Verify Fit
+              </button>
             </div>
           </div>
         )}
@@ -909,7 +1060,7 @@ Please provide an in-depth ergonomic & procurement evaluation for this product b
               >
                 {!isUser && (
                   <div className="w-8 h-8 rounded-xl bg-[#2C3A2B] text-white shrink-0 flex items-center justify-center shadow-xs">
-                    <Bot className="w-4 h-4 text-emerald-300" />
+                    <Bot className="w-4 h-4 text-[#E6C687]" />
                   </div>
                 )}
 
@@ -923,7 +1074,7 @@ Please provide an in-depth ergonomic & procurement evaluation for this product b
                   {/* Message Meta Header */}
                   <div className="flex items-center justify-between gap-3 mb-1.5 pb-1 border-b border-current/10">
                     <span className={`font-semibold text-[11px] ${isUser ? 'text-emerald-200' : 'text-[#8B5A2B]'}`}>
-                      {isUser ? 'You' : 'Gemini'}
+                      {isUser ? 'You' : 'Sahay AI (सहाय AI)'}
                     </span>
                     <div className="flex items-center gap-2">
                       <span className={`text-[10px] font-mono ${isUser ? 'text-emerald-200' : 'text-[#8B8B7A]'}`}>
@@ -932,7 +1083,7 @@ Please provide an in-depth ergonomic & procurement evaluation for this product b
                       {!isUser && (
                         <button
                           onClick={() => handleCopyMessage(msg.id, msg.text)}
-                          className="text-stone-400 hover:text-stone-600 transition-colors p-0.5"
+                          className="text-stone-400 hover:text-stone-600 transition-colors p-0.5 cursor-pointer"
                           title="Copy message"
                         >
                           {copiedId === msg.id ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
@@ -942,7 +1093,7 @@ Please provide an in-depth ergonomic & procurement evaluation for this product b
                   </div>
 
                   {/* Body Content */}
-                  <div className={isUser ? 'text-white' : 'text-stone-800'}>
+                  <div className={isUser ? 'text-white' : 'text-[#2C2C1E]'}>
                     {isUser ? (
                       <p className="leading-relaxed whitespace-pre-wrap">{msg.text}</p>
                     ) : (
@@ -952,7 +1103,174 @@ Please provide an in-depth ergonomic & procurement evaluation for this product b
 
                   {/* Interactive Action Card if returned by Gemini */}
                   {!isUser && msg.action && (
-                    <div className="mt-3 pt-3 border-t border-stone-200/80">
+                    <div className="mt-3 pt-3 border-t border-[#E6E1D3]">
+
+                      {/* 1. DIRECT ORDER ACTION CARD */}
+                      {msg.action.type === 'order_items' && (
+                        <div className="p-4 bg-white border-2 border-emerald-600/30 rounded-2xl shadow-sm space-y-3">
+                          <div className="flex items-center justify-between pb-2 border-b border-[#E6E1D3]">
+                            <div className="flex items-center gap-2 font-bold text-sm text-[#2C3A2B]">
+                              <ShoppingBag className="w-4 h-4 text-emerald-700" />
+                              <span>{msg.action.title || 'Direct Order Prepared'}</span>
+                            </div>
+                            <span className="font-mono text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
+                              Landed Total: {formatINR(msg.action.total || 0)}
+                            </span>
+                          </div>
+
+                          {/* Line Items List */}
+                          {Array.isArray(msg.action.items) && msg.action.items.length > 0 && (
+                            <div className="space-y-1.5">
+                              {msg.action.items.map((it: any, i: number) => {
+                                const prod = fixture.products.find(p => p.id === it.id);
+                                return (
+                                  <div
+                                    key={i}
+                                    className="flex items-center justify-between p-2 rounded-xl bg-[#FDFBF7] border border-[#E6E1D3]"
+                                  >
+                                    <div className="flex items-center gap-2.5">
+                                      <div className="w-8 h-8 rounded-lg bg-white border border-[#E6E1D3] overflow-hidden flex items-center justify-center shrink-0">
+                                        <img
+                                          src={getProductImageUrl(prod?.image, it.id)}
+                                          alt={it.name || it.id}
+                                          className="w-full h-full object-contain"
+                                          onError={e => {
+                                            (e.currentTarget as HTMLElement).style.display = 'none';
+                                          }}
+                                        />
+                                      </div>
+                                      <div>
+                                        <div className="font-semibold text-xs text-[#2C3A2B]">{it.name || it.id}</div>
+                                        <div className="text-[10px] text-[#5A5A40]">
+                                          Qty: {it.quantity || 1} · Unit: {formatINR(it.price || prod?.price || 0)}
+                                        </div>
+                                      </div>
+                                    </div>
+                                    <div className="font-mono font-bold text-xs text-[#2C3A2B]">
+                                      {formatINR((it.price || prod?.price || 0) * (it.quantity || 1))}
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          )}
+
+                          {/* Landed Pricing Mini Breakdown */}
+                          <div className="p-2.5 rounded-xl bg-[#F7F4EC] text-[11px] space-y-1">
+                            <div className="flex justify-between text-[#5A5A40]">
+                              <span>Subtotal</span>
+                              <span className="font-mono font-medium">{formatINR(msg.action.subtotal || 0)}</span>
+                            </div>
+                            <div className="flex justify-between text-[#5A5A40]">
+                              <span>Net Shipping & Logistics</span>
+                              <span className="font-mono font-medium">
+                                {(msg.action.netShipping ?? 499) === 0 ? 'FREE' : formatINR(msg.action.netShipping ?? 499)}
+                              </span>
+                            </div>
+                            <div className="flex justify-between text-[#5A5A40]">
+                              <span>GST Tax (18%)</span>
+                              <span className="font-mono font-medium">{formatINR(msg.action.taxAmount || 0)}</span>
+                            </div>
+                            <div className="pt-1 border-t border-[#E6E1D3] flex justify-between font-bold text-xs text-[#2C3A2B]">
+                              <span>Final Landed Price</span>
+                              <span className="font-mono text-sm text-[#2C3A2B]">{formatINR(msg.action.total || 0)}</span>
+                            </div>
+                          </div>
+
+                          {/* Action Buttons */}
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                            <button
+                              onClick={() => handleApplyAction(msg.id, msg.action)}
+                              disabled={msg.actionApplied}
+                              className={`py-2.5 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm transition-all cursor-pointer ${
+                                msg.actionApplied
+                                  ? 'bg-emerald-100 text-emerald-800 border border-emerald-300 cursor-default'
+                                  : 'bg-[#263325] hover:bg-[#1B261A] text-white active:scale-[0.99]'
+                              }`}
+                            >
+                              {msg.actionApplied ? (
+                                <>
+                                  <Check className="w-4 h-4 text-emerald-700" />
+                                  <span>Order Booked & Confirmed</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Zap className="w-4 h-4 text-[#E6C687]" />
+                                  <span>⚡ Place Order Now ({formatINR(msg.action.total || 0)})</span>
+                                </>
+                              )}
+                            </button>
+
+                            <button
+                              onClick={() => {
+                                handleApplyAction(msg.id, {
+                                  type: 'add_to_cart',
+                                  items: msg.action?.items as any,
+                                  title: msg.action?.title
+                                });
+                              }}
+                              className="py-2.5 px-3 rounded-xl text-xs font-semibold bg-white hover:bg-[#F4F1EA] text-[#2C3A2B] border border-[#E6E1D3] flex items-center justify-center gap-1.5 shadow-2xs transition-colors cursor-pointer"
+                            >
+                              <ShoppingCart className="w-4 h-4 text-[#5A5A40]" />
+                              <span>Add to Cart & Open</span>
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* 2. ADD TO CART ACTION CARD */}
+                      {msg.action.type === 'add_to_cart' && (
+                        <div className="p-3.5 bg-white border border-[#E6E1D3] rounded-2xl shadow-xs space-y-2.5">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-1.5 font-semibold text-xs text-[#2C3A2B]">
+                              <ShoppingCart className="w-4 h-4 text-[#8B5A2B]" />
+                              <span>{msg.action.title || 'Add Items to Cart'}</span>
+                            </div>
+                          </div>
+                          {msg.action.reason && (
+                            <p className="text-xs text-[#5A5A40] leading-relaxed">{msg.action.reason}</p>
+                          )}
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => handleApplyAction(msg.id, msg.action)}
+                              className="flex-1 py-2 px-3 rounded-xl text-xs font-semibold bg-[#2C3A2B] hover:bg-[#1E281D] text-white flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
+                            >
+                              <ShoppingCart className="w-3.5 h-3.5 text-[#E6C687]" />
+                              <span>Add to Bundle Cart</span>
+                            </button>
+                            <button
+                              onClick={() => setIsCartOpen(true)}
+                              className="py-2 px-3 rounded-xl text-xs font-semibold bg-[#F4F1EA] hover:bg-[#EAE5D9] text-[#2C3A2B] border border-[#E6E1D3] flex items-center justify-center gap-1 cursor-pointer"
+                            >
+                              <span>Open Cart Drawer</span>
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* 3. CHECKOUT ACTION CARD */}
+                      {msg.action.type === 'checkout' && (
+                        <div className="p-3.5 bg-white border border-[#E6E1D3] rounded-2xl shadow-xs space-y-2.5">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-1.5 font-semibold text-xs text-[#2C3A2B]">
+                              <CreditCard className="w-4 h-4 text-[#8B5A2B]" />
+                              <span>{msg.action.title || 'Proceed to Secure Checkout'}</span>
+                            </div>
+                          </div>
+                          <p className="text-xs text-[#5A5A40]">
+                            Verify your delivery address, select payment method (UPI, Card, COD), and confirm order.
+                          </p>
+                          <button
+                            onClick={() => handleApplyAction(msg.id, msg.action)}
+                            className="w-full py-2.5 px-3 rounded-xl text-xs font-bold bg-[#263325] hover:bg-[#1B261A] text-white flex items-center justify-center gap-2 shadow-sm cursor-pointer"
+                          >
+                            <CreditCard className="w-4 h-4 text-[#E6C687]" />
+                            <span>Open Checkout Page →</span>
+                          </button>
+                        </div>
+                      )}
+
+                      {/* 4. APPLY FULL BUNDLE CARD */}
                       {msg.action.type === 'apply_bundle' && (
                         <div className="p-3.5 bg-white border border-[#E6E1D3] rounded-2xl shadow-xs">
                           <div className="flex items-center justify-between mb-2">
@@ -967,7 +1285,7 @@ Please provide an in-depth ergonomic & procurement evaluation for this product b
                             )}
                           </div>
 
-                          {msg.action.items && (
+                          {msg.action.items && !Array.isArray(msg.action.items) && (
                             <div className="space-y-1.5 mb-3">
                               {Object.entries(msg.action.items).map(([slotId, prodId]) => {
                                 const prod = fixture.products.find(p => p.id === prodId);
@@ -1001,18 +1319,19 @@ Please provide an in-depth ergonomic & procurement evaluation for this product b
                             {msg.actionApplied ? (
                               <>
                                 <Check className="w-3.5 h-3.5" />
-                                Bundle Applied to Builder Workspace
+                                Bundle Applied to Compare Builder
                               </>
                             ) : (
                               <>
                                 <ArrowRight className="w-3.5 h-3.5" />
-                                Apply Configuration to Bundle Builder
+                                Load Configuration into Compare Builder
                               </>
                             )}
                           </button>
                         </div>
                       )}
 
+                      {/* 5. SWAP PRODUCT CARD */}
                       {msg.action.type === 'swap_product' && (
                         <div className="p-3 bg-white border border-[#F4E1A1] rounded-2xl shadow-xs">
                           <div className="flex items-center gap-1.5 font-semibold text-[#2C3A2B] text-xs mb-1">
@@ -1046,6 +1365,7 @@ Please provide an in-depth ergonomic & procurement evaluation for this product b
                         </div>
                       )}
 
+                      {/* 6. SET BUDGET CARD */}
                       {msg.action.type === 'set_budget' && (
                         <div className="p-3 bg-white border border-[#E6E1D3] rounded-2xl shadow-xs">
                           <div className="flex items-center justify-between mb-1">
@@ -1085,6 +1405,7 @@ Please provide an in-depth ergonomic & procurement evaluation for this product b
                         </div>
                       )}
 
+                      {/* 7. NAVIGATION CARD */}
                       {msg.action.type === 'navigate' && (
                         <div className="p-3.5 bg-white border border-[#E6E1D3] rounded-2xl shadow-xs">
                           <div className="flex items-center justify-between mb-1">
@@ -1103,34 +1424,21 @@ Please provide an in-depth ergonomic & procurement evaluation for this product b
                           )}
                           <button
                             onClick={() => handleApplyAction(msg.id, msg.action)}
-                            disabled={msg.actionApplied}
-                            className={`w-full py-2 px-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-all ${
-                              msg.actionApplied
-                                ? 'bg-[#A3B18A]/25 text-[#2C3A2B] border border-[#A3B18A]/40 cursor-default'
-                                : 'bg-[#2C3A2B] hover:bg-[#3A4D39] text-white shadow-xs cursor-pointer'
-                            }`}
+                            className="w-full py-2 px-3 rounded-xl text-xs font-semibold bg-[#2C3A2B] hover:bg-[#1E281D] text-white flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
                           >
-                            {msg.actionApplied ? (
-                              <>
-                                <Check className="w-3.5 h-3.5" />
-                                Navigated
-                              </>
-                            ) : (
-                              <>
-                                <ArrowRight className="w-3.5 h-3.5" />
-                                Open {msg.action.tab ? (TAB_NAMES[msg.action.tab] || msg.action.tab) : 'Page'}
-                              </>
-                            )}
+                            <ArrowRight className="w-3.5 h-3.5" />
+                            Open {msg.action.tab ? (TAB_NAMES[msg.action.tab] || msg.action.tab) : 'Page'}
                           </button>
                         </div>
                       )}
+
                     </div>
                   )}
                 </div>
 
                 {isUser && (
                   <div className="w-8 h-8 rounded-xl bg-[#2C3A2B] text-white shrink-0 flex items-center justify-center text-xs font-bold shadow-xs">
-                    U
+                    TA
                   </div>
                 )}
               </div>
@@ -1140,17 +1448,35 @@ Please provide an in-depth ergonomic & procurement evaluation for this product b
           {isLoading && (
             <div className="flex gap-3 text-xs justify-start">
               <div className="w-8 h-8 rounded-xl bg-[#2C3A2B] text-white shrink-0 flex items-center justify-center shadow-xs">
-                <Bot className="w-4 h-4 text-[#F5F5EC] animate-pulse" />
+                <Bot className="w-4 h-4 text-[#E6C687] animate-pulse" />
               </div>
               <div className="bg-white border border-[#E6E1D3] rounded-2xl rounded-tl-xs px-4 py-3 shadow-2xs flex items-center gap-1.5 text-[#5A5A40]">
                 <span className="w-2 h-2 rounded-full bg-[#8B5A2B] animate-bounce" />
                 <span className="w-2 h-2 rounded-full bg-[#8B5A2B] animate-bounce [animation-delay:0.2s]" />
                 <span className="w-2 h-2 rounded-full bg-[#8B5A2B] animate-bounce [animation-delay:0.4s]" />
+                <span className="text-[11px] font-medium text-[#5A5A40] ml-1">Sahay AI is processing your request...</span>
               </div>
             </div>
           )}
 
           <div ref={messagesEndRef} />
+        </div>
+
+        {/* Quick Order Starter Chips */}
+        <div className="px-4 py-2 border-t border-[#E6E1D3] bg-[#FDFBF7] flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+          <span className="text-[10px] font-bold text-[#8B8B7A] uppercase tracking-wider shrink-0 flex items-center gap-1">
+            <Sparkles className="w-2.5 h-2.5 text-[#8B5A2B]" /> Quick Order:
+          </span>
+          {ROLE_DEFINITIONS[activeRole].starterPrompts.map((prompt, i) => (
+            <button
+              key={i}
+              onClick={() => handleSendMessage(prompt)}
+              disabled={isLoading}
+              className="text-[11px] px-2.5 py-1 rounded-full bg-white hover:bg-[#F4F1EA] text-[#2C3A2B] border border-[#E6E1D3] shadow-2xs shrink-0 transition-colors cursor-pointer disabled:opacity-50"
+            >
+              {prompt}
+            </button>
+          ))}
         </div>
 
         {/* Input Bar */}
@@ -1174,7 +1500,7 @@ Please provide an in-depth ergonomic & procurement evaluation for this product b
                     handleSendMessage();
                   }
                 }}
-                placeholder={`Ask ${ROLE_DEFINITIONS[activeRole].name}...`}
+                placeholder={`Ask Sahay AI to order any product, add to cart, or assemble setup... (e.g. "Order P26" or "Buy mechanical keyboard")`}
                 disabled={isLoading}
                 className="w-full resize-none p-3 text-xs bg-[#F4F1EA]/70 hover:bg-[#F4F1EA] focus:bg-white border border-[#E6E1D3] rounded-xl focus:outline-hidden focus:border-[#2C3A2B] transition-colors placeholder:text-[#8B8B7A] text-[#2C2C1E]"
               />
@@ -1183,19 +1509,97 @@ Please provide an in-depth ergonomic & procurement evaluation for this product b
             <button
               type="submit"
               disabled={!inputMessage.trim() || isLoading}
-              aria-label="Send message to Gemini"
-              className="p-3 rounded-xl bg-[#8B5A2B] hover:bg-[#743815] disabled:opacity-40 text-white shadow-xs transition-colors shrink-0 cursor-pointer disabled:cursor-not-allowed"
+              aria-label="Send message to Sahay AI"
+              className="p-3 rounded-xl bg-[#2C3A2B] hover:bg-[#1E281D] disabled:opacity-40 text-white shadow-xs transition-colors shrink-0 cursor-pointer disabled:cursor-not-allowed"
             >
-              <Send className="w-4 h-4" />
+              <Send className="w-4 h-4 text-[#E6C687]" />
             </button>
           </form>
 
           <div className="mt-2 flex items-center justify-between text-[11px] text-[#8B8B7A] px-1 font-mono">
-            <span>Press Enter to send, Shift+Enter for newline</span>
+            <span>Press Enter to send, Shift+Enter for newline · Direct Orders Active</span>
             <span>Role: {ROLE_DEFINITIONS[activeRole].name}</span>
           </div>
         </div>
       </div>
+
+      {/* Order Success Confirmation Modal */}
+      {orderSuccessModal && (
+        <div className="fixed inset-0 z-60 overflow-y-auto flex items-center justify-center p-4">
+          <div
+            onClick={() => setOrderSuccessModal(null)}
+            className="fixed inset-0 bg-[#2C2C1E]/60 backdrop-blur-xs"
+          />
+
+          <div className="relative bg-white rounded-2xl border border-[#E6E1D3] shadow-2xl max-w-md w-full p-6 text-center z-10 space-y-4">
+            <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center mx-auto border border-emerald-200">
+              <Check className="w-8 h-8 stroke-[2.5]" />
+            </div>
+
+            <div>
+              <span className="text-[11px] font-mono font-semibold px-2.5 py-0.5 rounded-full bg-[#F4F1EA] text-[#5A5A40] border border-[#E6E1D3]">
+                {orderSuccessModal.orderId}
+              </span>
+              <h3 className="font-serif text-xl font-bold text-[#2C3A2B] mt-2">
+                Order Booked via Sahay AI!
+              </h3>
+              <p className="text-xs text-[#5A5A40] mt-1 leading-relaxed">
+                Your order has been recorded and loaded into your active checkout session.
+              </p>
+            </div>
+
+            {/* Itemized summary */}
+            <div className="p-3.5 rounded-xl bg-[#FDFBF7] border border-[#E6E1D3] text-left text-xs space-y-2">
+              <div className="font-semibold text-[#2C3A2B] text-[11px] uppercase tracking-wider border-b border-[#E6E1D3] pb-1">
+                Order Items:
+              </div>
+              {orderSuccessModal.items.map((it, i) => (
+                <div key={i} className="flex justify-between text-[#4A4A35]">
+                  <span>{it.quantity}x {it.name} ({it.id})</span>
+                  <span className="font-mono font-semibold">{formatINR(it.price * it.quantity)}</span>
+                </div>
+              ))}
+              <div className="pt-2 border-t border-[#E6E1D3] flex justify-between font-bold text-xs text-[#2C3A2B]">
+                <span>Total Landed Amount</span>
+                <span className="font-mono text-sm text-[#2C3A2B]">{formatINR(orderSuccessModal.total)}</span>
+              </div>
+            </div>
+
+            <div className="text-[11px] text-[#5A5A40] bg-[#F7F4EC] p-2.5 rounded-xl border border-[#E6E1D3]">
+              📍 Delivering to: <strong className="text-[#2C3A2B]">{userProfile?.name || 'Tanmay Anand'}</strong>, Bangalore / Mumbai.
+            </div>
+
+            <div className="flex flex-col gap-2 pt-2">
+              <button
+                onClick={() => {
+                  setOrderSuccessModal(null);
+                  setActiveTab('checkout');
+                }}
+                className="w-full py-2.5 px-4 rounded-xl text-xs font-bold text-white bg-[#263325] hover:bg-[#1B261A] shadow-md transition-colors cursor-pointer"
+              >
+                Proceed to Checkout & Invoices →
+              </button>
+
+              <button
+                onClick={() => {
+                  setOrderSuccessModal(null);
+                  setIsCartOpen(true);
+                }}
+                className="w-full py-2 px-4 rounded-xl text-xs font-semibold text-[#2C2C1E] bg-[#F4F1EA] hover:bg-[#EAE5D9] border border-[#E6E1D3] transition-colors cursor-pointer"
+              >
+                View in Bundle Cart Drawer
+              </button>
+
+              <button
+                onClick={() => setOrderSuccessModal(null)}
+                className="text-xs text-[#8B8B7A] hover:text-[#2C2C1E] cursor-pointer pt-1"
+              >
+                Close & Continue Chatting
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

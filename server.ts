@@ -167,7 +167,8 @@ app.post('/api/ai/assistant', async (req, res) => {
 - Remaining / Difference: ₹${(currentBudget - (validation.landedPrice.landedPrice || 0))?.toLocaleString('en-IN')} (${validation.landedPrice.isOverBudget ? 'OVER BUDGET' : 'WITHIN BUDGET'})
 ` : 'Not computed yet.';
 
-    const catalogueSummary = availableProducts.slice(0, 35).map((p: any) => {
+    const allProducts = (availableProducts && availableProducts.length > 0) ? availableProducts : defaultFixture.products;
+    const catalogueSummary = allProducts.map((p: any) => {
       const attrs = p.attributes ? Object.entries(p.attributes).map(([k, v]) => `${k}:${typeof v === 'object' ? JSON.stringify(v) : v}`).join(', ') : '';
       return `[${p.id}] ${p.name} | Cat: ${p.category} | ₹${p.price} | Stock: ${p.inStock ? 'In-Stock (' + (p.stockQuantity ?? 'available') + ')' : 'OUT OF STOCK'}${attrs ? ' | Attrs: ' + attrs : ''}`;
     }).join('\n');

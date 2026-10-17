@@ -1,7 +1,8 @@
 /**
  * Comprehensive Website Knowledge Base & AI Training Module
  * Grounding the AI Assistant with complete knowledge of the entire
- * "Budget-Based Product Bundle Builder" (C07 Challenge) web application.
+ * "Budget-Based Product Bundle Builder" (C07 Challenge) web application,
+ * including all 40 products, categories, pricing, pages, checkout & direct chatbot ordering.
  */
 
 export interface WebsitePageInfo {
@@ -15,177 +16,214 @@ export interface WebsitePageInfo {
 }
 
 export const WEBSITE_PAGES: Record<string, WebsitePageInfo> = {
+  catalogue: {
+    id: 'catalogue',
+    title: 'Product Catalogue',
+    pathDescription: 'Comprehensive inventory & technical hardware directory',
+    summary: 'Displays all 40 products (P01 to P40) across 15 categories with 6-column API filters, stock counts, prices, and technical specs.',
+    features: [
+      '40 Curated Products across 15 categories: Tshirt, Mug, Mouse, Keyboard, Hub, Bottle, Notebook, Backpack, Stand, DeskMat, Organizer, Charger, Audio, Webcam, Lighting.',
+      '6-Column Backend Filter Grid: Search query, Category filter, Colour filter, Size filter, In-Stock toggle, and Sort order.',
+      'Live stock status tags (In Stock with exact unit count, or Currently Out of Stock).',
+      'Direct Add to Cart button, Inspect Details view, and technical spec sheets.',
+      'Instant pricing in INR (₹) and landed unit costs.'
+    ],
+    keyComponents: ['Backend Filter Bar', 'Product Cards Grid', 'Specification Badges', 'Stock Indicators', 'Add to Cart Buttons'],
+    userActions: ['Search catalogue items', 'Filter by category/colour/size/stock', 'Inspect technical specs', 'Add products to cart']
+  },
+  compare: {
+    id: 'compare',
+    title: 'Compare Builder',
+    pathDescription: 'Interactive bundle configuration & comparison workspace',
+    summary: 'The primary workspace where shoppers assemble their bundle slots (Mouse, Keyboard, etc.), tune budget, and inspect live landed cost breakdowns.',
+    features: [
+      'Slot Grid with dynamic hardware assignment (MOUSE SLOT, KEYBOARD SLOT, etc.).',
+      'Target Budget Stepper & Headroom progress gauge.',
+      'Live Landed Price breakdown: Product Subtotal + Net Shipping (with free shipping logic) + 18% GST.',
+      'Swap or remove products with instant recalculation.',
+      'Direct navigation to bundle cart and checkout.'
+    ],
+    keyComponents: ['Slot Cards', 'Budget Controller', 'Landed Cost Panel', 'Headroom Gauge'],
+    userActions: ['Assign products to slots', 'Adjust budget', 'Inspect landed pricing', 'Remove or swap items']
+  },
+  cart: {
+    id: 'cart',
+    title: 'Bundle Cart Drawer',
+    pathDescription: 'Slide-over cart drawer with live budget utilization',
+    summary: 'Slide-out cart drawer showing all selected bundle items, live budget headroom progress, quantity controls, and one-click BUY NOW button.',
+    features: [
+      'Slide-over animation with quick accessibility from header cart badge or sidebar.',
+      'Live Budget Utilization Bar (Green for headroom, Rose for over budget, Exact Fit indicator).',
+      'Itemized list with thumbnails, prices, and one-click removal.',
+      'Quick-add suggestions divider for empty slots.',
+      'BUY NOW button with total landed price and instant order confirmation.'
+    ],
+    keyComponents: ['Drawer Header', 'Budget Progress Bar', 'Cart Item Cards', 'Order Summary', 'BUY NOW Button'],
+    userActions: ['Review cart items', 'Remove items', 'Check remaining budget headroom', 'Click BUY NOW to place order']
+  },
+  checkout: {
+    id: 'checkout',
+    title: 'Secure Checkout & Order Placement',
+    pathDescription: 'Order finalization, shipping details & payment processing',
+    summary: 'Full checkout page allowing users to place orders, enter delivery details, select payment methods (UPI, Card, Netbanking, COD), inspect taxes & shipping, and download invoices.',
+    features: [
+      'Order Summary with line-by-line product details, unit prices, and quantities.',
+      'Customer Details pre-filled from user profile (Tanmay Anand, Bangalore / Mumbai).',
+      '4 Payment Gateways: UPI (GPay/PhonePe), Credit/Debit Card, Netbanking, and Cash on Delivery.',
+      'Transparent Landed Cost calculation: Product Subtotal + Net Shipping (₹499 / free over ₹50,000) + 18% GST.',
+      'Instant Order Confirmation with unique Order ID (#C07-ORD-XXXXXX) and PDF/CSV invoice download.'
+    ],
+    keyComponents: ['Order Items List', 'Customer Delivery Form', 'Payment Method Selector', 'Cost Breakdown Card', 'Place Order Button'],
+    userActions: ['Fill or confirm delivery address', 'Select payment method', 'Review final landed cost', 'Place official order', 'Download invoice']
+  },
+  profile: {
+    id: 'profile',
+    title: 'Customer Profile',
+    pathDescription: 'Personal identity, shipping defaults & budget preferences',
+    summary: 'Displays customer avatar (TA), membership date (March 2024), default shipping address, and shopping preferences with quick demo account switching.',
+    features: [
+      'Customer identity card with avatar and role indicator.',
+      'Shipping & Location settings (Name, Phone, Address, City, State, PIN).',
+      'Shopping & Budget Defaults (Default target budget, preferred categories).',
+      'Quick Switch Demo button to test customer and admin experiences.'
+    ],
+    keyComponents: ['Profile Header Card', 'Tab Navigation', 'Shipping Address Editor', 'Budget Defaults'],
+    userActions: ['Edit contact information', 'Update shipping address', 'Change budget preferences', 'Switch demo account']
+  },
+  chat: {
+    id: 'chat',
+    title: 'Gemini AI Assistant & Shopping Bot',
+    pathDescription: 'Multi-turn conversational consultant with direct ordering capabilities',
+    summary: 'Conversational AI trained on the entire website capable of ordering ANY product (P01-P40), adding items to cart, adjusting budgets, and answering domain questions.',
+    features: [
+      'Order Anything via Chatbot: Say "Order P26" or "Buy a mechanical keyboard and mouse" to generate instant 1-click orders.',
+      '3 Expert Personas: Ergonomic Workspace Architect, Rapid Compatibility Checker, Procurement & Unit Economics Strategist.',
+      '1-Click Interactive Action Cards: Order Now, Add to Cart, Proceed to Checkout, Swap Product, Adjust Budget, Navigate to Any Page.',
+      'Multi-model switcher: Gemini 3.8 Flash, Gemini 3.1 Flash-Lite, Gemini 4 Argon.',
+      'Workspace Context Sync: Real-time awareness of cart items, target budget, and catalogue inventory.'
+    ],
+    keyComponents: ['Message Thread', 'Role Switcher', 'Guidance Toolkit', 'Action Cards', 'Prompt Starters'],
+    userActions: ['Order any product by chat', 'Add items to cart', 'Ask for setup advice', 'Trigger 1-click action cards', 'Export chat transcript']
+  },
   dashboard: {
     id: 'dashboard',
     title: 'Executive Dashboard',
     pathDescription: 'Overview & telemetry command center',
-    summary: 'Displays real-time high-level KPIs, budget utilization progress gauge, compatibility status badges, and quick solver shortcuts.',
+    summary: 'Displays real-time high-level KPIs, budget utilization progress gauge, compatibility status badges, and quick shortcuts.',
     features: [
-      'Live KPI telemetry: Target Budget, Landed Price, Budget Utilization %, Compatibility Status, Filled Slots count, Limiting Factor.',
+      'Live KPI telemetry: Target Budget, Landed Price, Budget Utilization %, Compatibility Status, Filled Slots count.',
       'Circular progress meter for budget headroom.',
-      'Quick solver shortcuts to trigger automatic Cartestian bundle assembly.',
-      'Real-time compatibility warnings banner with direct resolution triggers.',
-      'Category cost distribution chart.'
+      'Quick action shortcuts to catalogue and compare builder.'
     ],
-    keyComponents: ['KPI Cards', 'Budget Gauge', 'Quick Action Buttons', 'Recent Validation Alerts'],
-    userActions: ['View current metrics', 'Trigger Auto-Solve', 'Reset Bundle', 'Navigate to Builder']
-  },
-  builder: {
-    id: 'builder',
-    title: 'Bundle Builder',
-    pathDescription: 'Interactive 6-slot hardware bundle configurator',
-    summary: 'The core configuration workspace where shoppers select hardware items across 6 required slots, adjust budget, inspect landed price breakdowns in real time, and auto-solve bundles.',
-    features: [
-      '6 Required Slots: Workstation Desk (desk), Ergonomic Chair (chair), Main Display (monitor), Dock & Laptop Riser (laptop_stand_or_dock), Keyboard & Mouse Combo (peripherals), Desk/Screen Task Light (lighting).',
-      'Interactive Product Picker drawer for each slot with spec comparisons and instant compatibility badges.',
-      'Real-time Landed Price Calculation Bar: Product Subtotal + Net Shipping (with free shipping logic) + 18% GST.',
-      'Target Budget Slider / Stepper (adjustable from ₹20,000 to ₹250,000+).',
-      'Auto-Solve Engine: Cartesian optimizer with 3 modes (Balanced, Minimum Cost, Maximum Ergonomics) to find optimal valid configurations within budget.',
-      'One-click slot clearing, swapping, and bundle reset.',
-      'Visual hardware conflict indicators highlighting incompatible pairings directly on slots.'
-    ],
-    keyComponents: ['Slot Grid Cards', 'Landed Price Bar', 'Budget Controller', 'Auto-Solve Modal', 'Product Selection Drawer'],
-    userActions: ['Select or replace products', 'Adjust target budget', 'Run Auto-Solve', 'Inspect price breakdown', 'Clear slot']
-  },
-  chat: {
-    id: 'chat',
-    title: 'Gemini AI Chat Assistant',
-    pathDescription: 'Dedicated multi-turn conversational hardware consultant',
-    summary: 'Full-featured AI chat environment with 3 pre-built personas, multi-model selection (Gemini 3.8 Flash, Gemini 3.1 Flash-Lite, Gemini 4 Argon), custom instruction editing, and 1-click execution cards.',
-    features: [
-      '3 Expert Personas: Ergonomic Workspace Architect (general tasks/ergonomics), Rapid Compatibility Checker (instant spec checks), Procurement & Unit Economics Strategist (landed costs & margins), plus Custom Persona.',
-      'Multi-model switcher: gemini-3.8-flash, gemini-3.1-flash-lite, gemini-4-argon.',
-      '1-Click Interactive Action Cards: Apply Recommended Bundle, Swap Incompatible Product, Adjust Budget, Navigate to Any Page.',
-      'Live Workspace Context Sync toggle (attaches active bundle, products, rules, and budget to every turn).',
-      'Export chat transcript as Markdown, copy response, clear conversation, and starter chips.'
-    ],
-    keyComponents: ['Role Selector', 'Model Switcher', 'Context Inspector', 'Interactive Action Cards', 'Prompt Starters'],
-    userActions: ['Switch personas', 'Select Gemini model', 'Execute 1-click action cards', 'Inspect workspace sync', 'Export transcript']
-  },
-  catalogue: {
-    id: 'catalogue',
-    title: 'Product Catalogue',
-    pathDescription: 'Hardware inventory & technical blueprint directory',
-    summary: 'Comprehensive catalogue of all 24 curated hardware components with technical blueprints, dimensional specifications, pricing, stock levels, and multi-faceted filters.',
-    features: [
-      '24 Products across 6 Categories: Desks (4), Chairs (4), Monitors (4), Docks & Stands (4), Peripherals (3), Lighting (3).',
-      'Live Stock Status: Shows real-time stock quantity, in-stock badges, and out-of-stock warnings (e.g. DSK-004, CHR-004).',
-      'Multi-faceted filtering: Category tabs, In-Stock Only toggle, Price range slider, Search query.',
-      'Technical specification badges: Dimensions (cm), Power Delivery (W), Monitor Mount Type, Light Mount Type, Ergonomic Grade (Tier-1, Tier-2, Standard).',
-      'Hardware compatibility preview indicating potential conflicts before adding to bundle.'
-    ],
-    keyComponents: ['Search & Filter Bar', 'Product Cards', 'Specification Badges', 'Stock Indicators', 'Add-to-Slot Button'],
-    userActions: ['Search catalogue', 'Filter by category or stock', 'Inspect dimensions & power', 'Add directly to bundle slot']
-  },
-  compare: {
-    id: 'compare',
-    title: 'Compare Bundles',
-    pathDescription: 'Multi-bundle side-by-side comparative matrix',
-    summary: 'Side-by-side comparative matrix evaluating preset packages against the user\'s custom active bundle across specifications, prices, taxes, shipping weights, and ergonomic ratings.',
-    features: [
-      '3 Preset Bundles: Budget Conscious Starter (₹35,000), Developer Productivity Pro (₹65,000), Executive Ergonomic Ultra (₹95,000).',
-      'Live comparison against the user\'s current custom bundle.',
-      'Metrics compared: Landed Price, Product Subtotal, Shipping Surcharges, GST 18%, Total Weight (kg), Ergonomic Score, Compatibility Guarantee.',
-      '1-click "Load Preset into Builder" button to test or adopt any preset immediately.',
-      'Component-by-component comparison table across all 6 slots.'
-    ],
-    keyComponents: ['Preset Matrix Table', 'Spec Diff Viewer', 'Price Breakdown Comparative Cards', 'Load Preset Buttons'],
-    userActions: ['Compare specs across setups', 'Inspect weight & shipping differences', 'Load preset into active bundle']
+    keyComponents: ['KPI Cards', 'Budget Gauge', 'Quick Action Buttons'],
+    userActions: ['View current metrics', 'Inspect budget headroom', 'Navigate to Builder']
   },
   business: {
     id: 'business',
     title: 'Business Insights & Strategy',
     pathDescription: 'MBA unit economics simulation & strategic framework',
-    summary: 'Executive strategic analysis containing problem statements, deterministic landed bundles value proposition, retailer subscription fees, referral margins, break-even basket threshold, and empirical shopper research log.',
+    summary: 'Executive strategic analysis containing problem statements, deterministic landed bundles value proposition, retailer subscription fees, referral margins, and break-even basket threshold.',
     features: [
-      'Section A: Problem Statement (Customer assembly friction, surprise checkout shipping fees, port/mounting mismatches, out-of-stock items).',
-      'Section B: Core Value Proposition ("Help shoppers build complete, compatible bundles with transparent landed pricing").',
-      'Section C: Target Customer Segments (Remote corporate stipends, B2B enterprise procurement, self-funded freelancers).',
-      'Unit Economics Simulator: Retailer monthly fee (₹15,000) minus cost to serve (₹3,500) = Retailer monthly contribution (₹11,500). Referral revenue per basket (3.5% on eligible basket) minus variable cost (₹120) = Referral contribution.',
-      'Break-even Basket Model: Fixed monthly costs (₹85,000) / contribution per basket = Break-even order volume.',
-      'Empirical Shopper Experiment Research Log: Editable table tracking participant sessions, completion time, landed spend, errors encountered, and satisfaction scores.'
+      'MBA Unit Economics: Retailer fee (₹15,000) - cost to serve (₹3,500) = ₹11,500 net contribution.',
+      'Referral Commission: 3.5% on eligible basket minus ₹120 variable cost.',
+      'Break-even Basket Model: Fixed monthly costs (₹85,000) / contribution per basket = ~40 baskets/month.',
+      'Empirical Shopper Research Log: Participant sessions tracking time, spend, and errors.'
     ],
-    keyComponents: ['Strategic Foundations Cards', 'Interactive Unit Economics Calculator', 'Break-even Analysis Card', 'Empirical Shopper Log Table'],
-    userActions: ['Simulate unit economics variables', 'View break-even basket count', 'Edit shopper research records', 'Reset experiment data']
+    keyComponents: ['Strategic Cards', 'Unit Economics Simulator', 'Shopper Research Log'],
+    userActions: ['Simulate unit economics', 'Inspect break-even model', 'Review shopper research']
   },
   tests: {
     id: 'tests',
     title: 'Automated Test Suite',
     pathDescription: 'System verification & edge-case test runner',
-    summary: 'Live browser-executable test suite running 22+ tests covering compatibility rules, landed price arithmetic, Knapsack solver optimality, and edge-case scenarios.',
+    summary: 'Live browser-executable test suite running 22+ tests covering compatibility rules, landed price arithmetic, and edge-case scenarios.',
     features: [
-      'Reference Request Tests (REF-001 to REF-006): Starter Pack (₹35k), Pro Ergonomic (₹65k), Executive (₹95k), Infeasible Ultra-low (₹15k), Free Shipping Boundary (₹50k), Heavy Shipping Weight.',
-      'Edge-Case Scenario Tests (EDGE-001 to EDGE-006): Cheapest Products Incompatible, Curved Monitor Clamp Trap, Dock Port Discrepancy, Out-of-Stock Item Trap, Desk Overhang Tipping, Heavy Item Surcharge Precision.',
-      'Live execution with real-time pass/fail badges, execution latency (ms), and step-by-step diagnostic explanations.',
-      'Overall test score counter (100% pass rate target).'
+      'Reference Request Tests (REF-001 to REF-006): Starter Pack, Pro Setup, Infeasible Ultra-low, Free Shipping Boundary, Heavy Surcharge.',
+      'Edge-Case Scenario Tests (EDGE-001 to EDGE-006): Cheapest Products Incompatible, Curved Monitor Clamp Trap, Dock Port Discrepancy, Out-of-Stock Item Trap.',
+      'Live execution with real-time pass/fail badges and latency tracking.'
     ],
-    keyComponents: ['Run All Tests Button', 'Test Summary Badges', 'Reference Request Test Cards', 'Edge Case Scenario Test Cards', 'Execution Log Terminal'],
-    userActions: ['Execute complete test suite', 'Inspect test procedure & assertions', 'Verify landed price math', 'Review edge case traps']
+    keyComponents: ['Test Runner', 'Summary Badges', 'Test Cards'],
+    userActions: ['Run all tests', 'Inspect assertions', 'Verify landed price math']
   },
   evidence: {
     id: 'evidence',
     title: 'Project Evidence & Scope Audit',
     pathDescription: 'Academic engineering change documentation & audit log',
-    summary: 'Formal academic verification documenting starting state (v0.1 prototype) vs requested changes, contractual scope boundaries, verified test procedures, and mathematical proofs.',
+    summary: 'Documents starting state (v0.1 prototype) vs requested changes, contractual scope boundaries, verified test procedures, and mathematical proofs.',
     features: [
-      'Section A: Baseline Starting State (v0.1 basic prototype with manual slots and unverified pricing).',
-      'Section B: Negotiated Scope & Contractual Boundaries (Deterministic landed pricing, Cartesian compatibility solver, 18% GST precision, Gemini AI integration).',
-      'Section C: Verification Evidence Matrix (EVD-C07-001 to EVD-C07-008 covering each engineering milestone).',
-      'Interactive form to add, edit, or delete audit evidence entries.',
-      'Status badges (Verified, In-Review, Contractually Out of Scope).'
+      'Baseline Starting State vs Final Implementation Matrix (EVD-C07-001 to 008).',
+      'Contractual scope boundaries and proofs.',
+      'Interactive evidence audit records.'
     ],
-    keyComponents: ['Scope Audit Grid', 'Baseline vs Final Comparison Cards', 'Evidence Records Table', 'Add Evidence Form'],
-    userActions: ['Audit project milestones', 'Edit scope agreement', 'Add custom verification evidence record']
+    keyComponents: ['Scope Matrix', 'Audit Records Table'],
+    userActions: ['Review milestones', 'Inspect verification proofs']
   },
   settings: {
     id: 'settings',
     title: 'Settings & Configuration',
     pathDescription: 'Global parameters & data management',
-    summary: 'Controls core platform rules including 18% GST tax rate, shipping pricing policies, free shipping thresholds, currency formatting, and factory data reset.',
+    summary: 'Controls core platform rules including 18% GST tax rate, shipping policies (₹499 base, ₹50,000 free shipping threshold), and factory data reset.',
     features: [
-      'Tax Rule Settings: GST rate (default 18%), Tax name customization.',
-      'Shipping Policy Settings: Base shipping fee (₹499), Free shipping order threshold (₹50,000), Heavy item surcharge (₹450 per item >= 15kg).',
-      'Currency & Locale settings (INR ₹ format).',
-      'Factory Reset: One-click restore to synthetic fixture defaults, clearing local storage caches.'
+      'Tax Rule Settings: GST rate (default 18%).',
+      'Shipping Policy Settings: Base fee (₹499), Free shipping threshold (₹50,000), Heavy item surcharge (₹450).',
+      'Factory Reset: Clear storage and reload defaults.'
     ],
-    keyComponents: ['Tax Settings Form', 'Shipping Settings Form', 'Reset Data Button', 'System Health Indicator'],
-    userActions: ['Modify tax or shipping rules', 'Restore factory default fixture', 'Test system health']
+    keyComponents: ['Tax Settings', 'Shipping Policy', 'Reset Data Button'],
+    userActions: ['Modify tax or shipping rules', 'Restore factory default fixture']
   }
 };
 
-export const DOMAIN_COMPATIBILITY_RULES = [
-  {
-    id: 'clamp_vs_monitor',
-    name: 'ScreenBar Light vs Curved Display',
-    rule: 'ScreenBar clamp lights (LGT-001, LGT-003) cannot mount on curved displays (e.g. MON-003 1500R curvature) because the clamp requires a flat monitor bezel. Curved bezels cause uneven pressure, wobbling, or panel damage. Solution: Swap to weighted base desk lamp (LGT-002 SN-LAMP).'
-  },
-  {
-    id: 'desk_width_vs_ultrawide',
-    name: 'Desk Width vs Ultrawide Monitor',
-    rule: 'Ultrawide displays (34"+ such as MON-003) require a desk surface width of at least 120 cm (DSK-001 140cm or DSK-002 120cm). Compact desks (DSK-003 90cm) create monitor overhang, tipping hazards, and insufficient room for mouse pad and speakers.'
-  },
-  {
-    id: 'chair_clearance',
-    name: 'Wide Executive Chair vs Compact Desk',
-    rule: 'Executive chairs with wide fixed arms (CHR-002) require at least 120 cm desk width and 60 cm depth to slide underneath. Using them with compact desks (DSK-003 90cm) prevents proper ergonomic seating posture and tucking.'
-  },
-  {
-    id: 'explicit_id_block',
-    name: 'Hardware Port / Cable Mismatch',
-    rule: 'Legacy monitors with only HDMI/VGA (MON-004) cannot connect directly to ultra-portable mini docks that lack HDMI ports (DCK-003 has DisplayPort only) without converters. Dual-port docks (DCK-001, DCK-002) are required.'
-  },
-  {
-    id: 'stock_availability',
-    name: 'In-Stock Verification',
-    rule: 'Out-of-stock products (e.g. DSK-004 Vertex Pro Desk, CHR-004 Active Stool) must never be recommended or left in a completed bundle, as they block checkout and fulfillment.'
-  }
+/**
+ * Complete Catalogue of all 40 Products
+ */
+export const CATALOGUE_PRODUCTS_METADATA = [
+  { id: 'P01', name: 'Blue Tshirt', category: 'Tshirt', price: 500, colour: 'Blue', size: 'M', stock: 0, desc: 'Cotton Blue Crewneck Tshirt' },
+  { id: 'P02', name: 'Black Tshirt', category: 'Tshirt', price: 600, colour: 'Black', size: 'M', stock: 15, desc: 'Classic Black Cotton Tshirt' },
+  { id: 'P03', name: 'Grey Tshirt', category: 'Tshirt', price: 550, colour: 'Grey', size: 'L', stock: 20, desc: 'Athletic Heather Grey Tshirt' },
+  { id: 'P04', name: 'Blue Tshirt', category: 'Tshirt', price: 500, colour: 'Blue', size: 'L', stock: 7, desc: 'Cotton Blue Crewneck Tshirt' },
+  { id: 'P05', name: 'Black Tshirt', category: 'Tshirt', price: 600, colour: 'Black', size: 'S', stock: 12, desc: 'Classic Black Cotton Tshirt' },
+  { id: 'P06', name: 'White Tshirt', category: 'Tshirt', price: 450, colour: 'White', size: 'M', stock: 18, desc: 'Crisp White Cotton Tshirt' },
+  { id: 'P07', name: 'Ergonomic Wireless Mouse', category: 'Mouse', price: 800, colour: 'Black', stock: 25, connector: 'usb-c', desc: 'Precision 2.4GHz USB-C Wireless Mouse' },
+  { id: 'P08', name: 'Compact Mechanical Keyboard', category: 'Keyboard', price: 1500, colour: 'Black', stock: 14, connector: 'usb-c', desc: 'Tenkeyless Mechanical Keyboard with Red Switches' },
+  { id: 'P09', name: 'USB-C Multiport Hub', category: 'Hub', price: 1200, colour: 'Space Grey', stock: 30, connector: 'usb-c', desc: '4K HDMI, 3x USB 3.0, 100W PD passthrough' },
+  { id: 'P10', name: 'Stainless Steel Water Bottle', category: 'Bottle', price: 400, colour: 'Silver', stock: 40, desc: '750ml Vacuum Insulated Stainless Steel' },
+  { id: 'P11', name: 'Ceramic Coffee Mug', category: 'Mug', price: 250, colour: 'White', stock: 50, desc: '350ml Matte White Ceramic Coffee Mug' },
+  { id: 'P12', name: 'Travel Tumbler Mug', category: 'Mug', price: 450, colour: 'Black', stock: 35, desc: 'Spill-Proof Insulated Travel Mug' },
+  { id: 'P13', name: 'Pocket Ruled Notebook', category: 'Notebook', price: 150, colour: 'Tan', stock: 60, desc: 'A5 Hardcover Acid-free Ruled Notebook' },
+  { id: 'P14', name: 'Everyday Commuter Backpack', category: 'Backpack', price: 1800, colour: 'Charcoal', stock: 16, desc: 'Water-resistant 20L Laptop Backpack' },
+  { id: 'P15', name: 'Wireless Charging Desk Pad', category: 'DeskMat', price: 950, colour: 'Black', stock: 22, connector: 'usb-c', desc: 'Extended Leatherette Desk Mat with 15W Qi Charger' },
+  { id: 'P16', name: 'Foldable Aluminum Laptop Stand', category: 'Stand', price: 850, colour: 'Silver', stock: 28, desc: 'Multi-angle Adjustable Laptop Stand' },
+  { id: 'P17', name: 'Noise-Isolating Earbuds', category: 'Audio', price: 1100, colour: 'Black', stock: 19, connector: 'usb-c', desc: 'In-ear USB-C Audio Earbuds with In-line Mic' },
+  { id: 'P18', name: 'Braided USB-C to USB-C Cable (2m)', category: 'Cable', price: 350, colour: 'Grey', stock: 80, connector: 'usb-c', desc: '100W Power Delivery 480Mbps Sync' },
+  { id: 'P19', name: 'Ergonomic Memory Foam Wrist Rest', category: 'Accessory', price: 400, colour: 'Black', stock: 32, desc: 'Cooling Gel Memory Foam Keyboard Wrist Rest' },
+  { id: 'P20', name: 'Desk Cable Organizer Clips (5-Pack)', category: 'Organizer', price: 200, colour: 'Black', stock: 75, desc: 'Self-adhesive Silicone Cable Holders' },
+  { id: 'P21', name: 'Full-Size Wireless Keyboard', category: 'Keyboard', price: 1350, colour: 'White', stock: 15, connector: 'usb-c', desc: 'Slim Scissor-switch Wireless Keyboard with Numpad' },
+  { id: 'P22', name: 'Silent Bluetooth Travel Mouse', category: 'Mouse', price: 650, colour: 'White', stock: 26, connector: 'usb-c', desc: 'Ultra-thin Quiet Click Bluetooth & 2.4G Mouse' },
+  { id: 'P23', name: 'Heavy-Duty Canvas Tote Bag', category: 'Backpack', price: 350, colour: 'Natural', stock: 45, desc: 'Eco-friendly 100% Cotton Canvas Carryall' },
+  { id: 'P24', name: 'Insulated Sports Water Bottle', category: 'Bottle', price: 500, colour: 'Matte Blue', stock: 21, desc: '1L Chug Cap Stainless Gym Bottle' },
+  { id: 'P25', name: 'Executive Pen & Journal Set', category: 'Notebook', price: 650, colour: 'Midnight Blue', stock: 18, desc: 'Faux-leather Debossed Journal with Rollerball Pen' },
+  { id: 'P26', name: 'Ergonomic Wireless Vertical Mouse', category: 'Mouse', price: 1450, colour: 'Graphite', stock: 18, connector: 'usb-c', desc: '57° natural handshake angle, 4000 DPI' },
+  { id: 'P27', name: 'RGB Mechanical Gaming Keyboard', category: 'Keyboard', price: 2400, colour: 'Black', stock: 12, connector: 'usb-c', desc: 'Hot-swappable linear red switches, per-key RGB' },
+  { id: 'P28', name: 'Compact 60% Wireless Keyboard', category: 'Keyboard', price: 1850, colour: 'White/Grey', stock: 10, connector: 'usb-c', desc: 'Dual-mode Bluetooth 5.1 / 2.4G, PBT keycaps' },
+  { id: 'P29', name: 'Silent Precision Bluetooth Mouse', category: 'Mouse', price: 950, colour: 'Space Grey', stock: 24, connector: 'usb-c', desc: '90% sound reduction, dual-device fast switch' },
+  { id: 'P30', name: 'Aluminum Laptop Riser Stand', category: 'Stand', price: 1299, colour: 'Silver', stock: 20, desc: 'CNC anodized ergonomic desktop elevator' },
+  { id: 'P31', name: 'Dual Monitor Arm Desk Mount', category: 'Stand', price: 2800, colour: 'Matte Black', stock: 8, desc: 'Gas spring 360° rotation for 17-32 inch screens' },
+  { id: 'P32', name: 'Desk Pad Vegan Leather Blotter', category: 'DeskMat', price: 650, colour: 'Saddle Brown', stock: 35, desc: '800x400mm waterproof non-slip surface' },
+  { id: 'P33', name: 'Magnetic Cable Management Organizer', category: 'Organizer', price: 399, colour: 'Charcoal', stock: 45, desc: 'Weighted desk base with 5 magnetic collars' },
+  { id: 'P34', name: 'USB-C 100W GaN Fast Charger', category: 'Charger', price: 1899, colour: 'White', stock: 22, connector: 'usb-c', desc: '3x USB-C + 1x USB-A PD 3.0 ultra-compact GaN' },
+  { id: 'P35', name: 'Active Noise Cancelling Wireless Headphones', category: 'Audio', price: 4999, colour: 'Midnight Black', stock: 9, connector: 'usb-c', desc: '40mm drivers, 35dB hybrid ANC, 40h battery' },
+  { id: 'P36', name: 'USB-C Studio Condenser Microphone', category: 'Audio', price: 3200, colour: 'Matte Black', stock: 14, connector: 'usb-c', desc: 'Cardioid pickup, tap-to-mute, built-in pop filter' },
+  { id: 'P37', name: '4K Ultra HD Streaming Webcam', category: 'Webcam', price: 3600, colour: 'Black', stock: 11, connector: 'usb-c', desc: '4K@30fps, autofocus, dual stereo mics, privacy shutter' },
+  { id: 'P38', name: 'ScreenBar Desk Light with Auto-Dimming', category: 'Lighting', price: 2150, colour: 'Space Grey', stock: 16, connector: 'usb-c', desc: 'Asymmetric anti-glare monitor lamp, ambient light sensor' },
+  { id: 'P39', name: 'Insulated Ceramic Travel Mug', category: 'Mug', price: 550, colour: 'Sage Green', stock: 28, desc: 'Double-wall vacuum with ceramic interior, 350ml' },
+  { id: 'P40', name: 'HydroTech Thermal Vacuum Flask', category: 'Bottle', price: 750, colour: 'Obsidian Black', stock: 19, desc: '18/8 stainless steel, 24h cold / 12h hot, 750ml' }
 ];
 
 export const LANDED_PRICING_FORMULA = `
 Landed Price = Product Subtotal + Net Shipping + 18% GST Tax
-- Product Subtotal: Sum of retail prices of all selected in-stock slot items.
+- Product Subtotal: Sum of retail prices of all selected in-stock items.
 - Free Shipping Threshold: If Product Subtotal >= ₹50,000, Net Shipping is ₹0.
-- If Subtotal < ₹50,000: Net Shipping = Base Fee (₹499) + (Heavy Items Count × ₹450), where a heavy item is any product >= 15 kg (desks like DSK-001, DSK-002, heavy chairs like CHR-001, CHR-002).
+- If Subtotal < ₹50,000: Net Shipping = Base Fee (₹499) + (Heavy Items Count × ₹450), where a heavy item is any product >= 15 kg.
 - GST Tax: 18% applied on (Product Subtotal + Net Shipping).
 - Landed Total: Product Subtotal + Net Shipping + GST.
 - Budget Compliance: Landed Total must be <= Target Budget. Remaining Budget = Target Budget - Landed Total.
@@ -200,16 +238,6 @@ export const MBA_UNIT_ECONOMICS = `
 - Variable Cost Per Basket: ₹120 (server compute, API telemetry, payment verification).
 - Referral Contribution Per Basket: (Basket Value × 3.5%) - ₹120. E.g., for a ₹65,000 bundle = (₹65,000 × 0.035) - ₹120 = ₹2,275 - ₹120 = ₹2,155 contribution per basket.
 - Break-Even Basket Threshold: Fixed Monthly Costs (₹85,000) ÷ Contribution Per Basket (~₹2,155) ≈ 40 baskets/month.
-`;
-
-export const SOLVER_ALGORITHM = `
-- Algorithm: Cartesian Product Search with Branch-and-Bound Pruning.
-- Search Space: Cartesian product of all in-stock candidate items for each required slot (up to 4 desks × 4 chairs × 4 monitors × 4 docks × 3 peripherals × 3 lighting = 2,304 potential combinations).
-- Pruning: Filters out out-of-stock items before cartesian expansion. Prunes any combination violating physical/electrical compatibility rules.
-- Optimization Goals:
-  1. Lowest Cost: Finds the valid, complete, compatible bundle with the lowest landed price.
-  2. Best Value / Max Ergonomics: Maximizes Tier-1 ergonomic items and premium features while staying strictly within target budget.
-  3. Balanced: Optimizes middle-tier items with optimal remaining budget buffer.
 `;
 
 /**
@@ -251,8 +279,12 @@ export function buildMasterSystemPrompt(params: {
 
   const currentPage = WEBSITE_PAGES[activeTab] || WEBSITE_PAGES.dashboard;
 
-  return `${rolePersona ? rolePersona + '\n\n' : ''}${customInstruction ? customInstruction + '\n\n' : ''}You are Sahay AI (सहाय AI), the master intelligent AI Assistant for the "Budget-Based Product Bundle Builder" (C07 Challenge) web application.
-You possess complete, authoritative knowledge of the ENTIRE platform, its 9 pages, all 24 hardware products, compatibility rules, pricing formulas, MBA unit economics, automated test suite, and project evidence.
+  const productsIndex = CATALOGUE_PRODUCTS_METADATA.map(
+    p => `[${p.id}] ${p.name} (${p.category}) - ₹${p.price.toLocaleString('en-IN')}${p.stock === 0 ? ' [OUT OF STOCK]' : ` [In Stock: ${p.stock}]`} - ${p.desc}`
+  ).join('\n');
+
+  return `${rolePersona ? rolePersona + '\n\n' : ''}${customInstruction ? customInstruction + '\n\n' : ''}You are Sahay AI (सहाय AI), the master intelligent AI Assistant and Shopping Agent for the "Budget-Based Product Bundle Builder" (C07 Challenge) web application.
+You possess complete, authoritative knowledge of the ENTIRE platform, all 40 products (P01 to P40), compatibility rules, pricing formulas, MBA unit economics, and CAN DIRECTLY TAKE ORDERS AND MANAGE CARTS!
 
 ==================================================
 1. CURRENT USER & WORKSPACE STATE
@@ -272,32 +304,24 @@ Compatibility Rule Violations:
 ${violationsSummary}
 
 ==================================================
-2. COMPLETE WEBSITE ARCHITECTURE & SITEMAP
+2. COMPLETE SITEMAP & INTEGRATED MODULES
 ==================================================
-The platform consists of 9 integrated pages accessible from the sidebar and header:
-1. "dashboard" (Executive Dashboard): Real-time KPIs (Budget, Landed Price, Utilization %, Compatibility Status, Limiting Factor), circular progress meter, quick action buttons to Auto-Solve or inspect.
-2. "builder" (Bundle Builder): The primary interactive 6-slot workspace (Desk, Chair, Monitor, Dock, Peripherals, Lighting), real-time Landed Price bar, budget slider/stepper (₹20k-₹250k), Cartesian Auto-Solve engine (Balanced, Lowest Cost, Best Value), and slot swapper.
-3. "chat" (Gemini AI Assistant): Multi-turn AI consultant with 3 personas (Ergonomic Workspace Architect, Rapid Compatibility Checker, Procurement Strategist), multi-model switcher (Gemini 3.8 Flash, 3.1 Flash-Lite, 4 Argon), custom instruction editing, and 1-click execution cards.
-4. "catalogue" (Product Catalogue): Complete directory of 24 products across all 6 categories with technical blueprints, live stock quantities, dimensions, power wattage, and filters (category, in-stock, price, search).
-5. "compare" (Compare Bundles): Multi-bundle side-by-side comparative matrix (Starter Pack ₹35k, Developer Pro ₹65k, Executive Ultra ₹95k vs User's Custom Setup) comparing specs, weights, taxes, shipping, and ergonomic ratings.
-6. "business" (Business Insights & Strategy): MBA strategic foundations (Section A: Problem, Section B: Deterministic Landed Bundles Value Proposition, Section C: Segments), Unit Economics simulator (Retailer ₹15,000 fee, ₹3,500 cost to serve, 3.5% referral commission, ₹120 variable cost), break-even basket threshold (~40 baskets), and empirical shopper research log.
-7. "tests" (Automated Test Suite): 22+ live tests (REF-001 to REF-006, EDGE-001 to EDGE-006) verifying compatibility rules, landed price arithmetic, and Knapsack solver optimality with live execution logs.
-8. "evidence" (Project Evidence & Scope Audit): Academic change documentation, baseline v0.1 prototype vs final implementation verification matrix (EVD-C07-001 to 008), contractual boundaries, and verified test procedures.
-9. "settings" (Settings & Configuration): Tax rate settings (18% GST), Shipping rules (Base ₹499, Free Shipping > ₹50,000, Heavy Surcharge ₹450 for >=15kg), and factory data reset.
-* Also: Global Floating / Drawer AI Assistant: Available on every screen, supports multilingual interaction (English, Hindi, Gujarati), and syncs with current workspace.
+1. "catalogue" (Product Catalogue): 40 curated products across 15 categories (Tshirt, Mug, Mouse, Keyboard, Hub, Bottle, Notebook, Backpack, Stand, DeskMat, Organizer, Charger, Audio, Webcam, Lighting) with live stock tracking and 6-column API filters.
+2. "compare" / "builder" (Compare Builder): 2-slot active bundle configurator (Mouse, Keyboard, etc.) with real-time budget headroom and landed cost breakdown.
+3. "cart" (Bundle Cart Drawer): Slide-over drawer with line items, budget utilization gauge, and direct BUY NOW instant order placement.
+4. "checkout" (Secure Checkout & Order Placement): Full order confirmation page where customers review their order items, enter shipping & delivery details, choose payment method (UPI, Credit/Debit Card, Netbanking, COD), inspect taxes & shipping fees, place orders with order ID (#C07-ORD-XXXXXX), and download official invoices.
+5. "profile" (Customer Profile): Customer identity card (Tanmay Anand / TA), shipping addresses, shopping & budget defaults, role quick-switch.
+6. "chat" (Gemini AI Assistant & Shopping Agent): Conversational consultant with DIRECT ORDERING POWERS.
+7. "dashboard" (Executive Dashboard): Real-time KPI telemetry and shortcuts.
+8. "business" (Business Insights & Strategy): MBA unit economics simulator (Retailer ₹15k fee, ₹3.5k cost-to-serve, 3.5% referral commission, break-even ~40 baskets).
+9. "tests" (Automated Test Suite): 22+ live browser tests (REF-001 to REF-006, EDGE-001 to EDGE-006) validating compatibility logic and pricing math.
+10. "evidence" (Project Evidence & Scope Audit): Academic audit tracking baseline prototype v0.1 vs final implementation.
+11. "settings" (Settings & Configuration): 18% GST tax configuration, shipping surcharge rules (₹499 base, ₹50,000 free shipping threshold), and factory reset.
 
 ==================================================
-3. CATALOGUE HIGHLIGHTS & PRODUCT INVENTORY
+3. FULL PRODUCT INVENTORY (40 PRODUCTS: P01 - P40)
 ==================================================
-${catalogueSummary}
-
-Key Products & Categories:
-- Desks: DSK-001 ErgoLift Dual-Motor Standing Desk (140x70cm, ₹24,999, 28kg), DSK-002 Nordic Minimalist Fixed Desk (120x60cm, ₹11,499, 18kg), DSK-003 Compact Urban Study Desk (90x50cm, ₹6,499, 12kg), DSK-004 Vertex Pro Corner L-Desk (160x110cm, ₹32,999 - OUT OF STOCK).
-- Chairs: CHR-001 AeroMesh Ergonomic Task Chair (3D Lumbar, 4D arms, ₹14,999, 16kg), CHR-002 Orthopedic Executive Leather Chair (fixed wide arms, ₹18,999, 22kg - needs >=120cm desk), CHR-003 Basic Breathable Mid-Back Chair (₹5,999, 11kg), CHR-004 Active Stool (₹8,499 - OUT OF STOCK).
-- Monitors: MON-001 27" 4K UHD IPS USB-C (65W PD, ₹26,999), MON-002 24" FHD IPS 100Hz (₹9,499), MON-003 34" WQHD Curved 1500R Ultrawide (₹34,999 - needs >=120cm desk, incompatible with clamp screenbar), MON-004 Budget 21.5" 1080p (legacy HDMI/VGA, ₹5,499 - incompatible with mini dock DCK-003).
-- Docks: DCK-001 Thunderbolt 4 Triple-Display Dock (96W PD, ₹13,999), DCK-002 USB-C 7-in-1 Hub with Riser Stand (85W PD, ₹3,999), DCK-003 Ultra-Portable Mini Hub (DP only, NO HDMI, ₹2,199), DCK-004 Dual-Arm Monitor & Laptop Gas-Spring Arm (₹6,999).
-- Peripherals: PER-001 Ergonomic Split Wireless Keyboard & Vertical Mouse (₹9,999), PER-002 Silent Multi-Device Bluetooth Combo (₹4,499), PER-003 Standard Wired Combo (₹1,299).
-- Lighting: LGT-001 Asymmetric ScreenBar Monitor Light (clamp, flat screens only, ₹5,499), LGT-002 Architect Gooseneck Weighted Base LED Lamp (weighted base, safe for curved screens, ₹2,999), LGT-003 USB Clip-On Ring Light (clamp, ₹1,199).
+${productsIndex}
 
 ==================================================
 4. CORE DOMAIN RULES & FORMULAS
@@ -308,444 +332,452 @@ Key Products & Categories:
    - If Subtotal < ₹50,000: Net Shipping = ₹499 base + (Heavy Items Count × ₹450) where heavy item >= 15 kg.
    - Tax: 18% GST applied to (Subtotal + Net Shipping).
 2. Hardware Compatibility:
-   - Clamp Light vs Curved Monitor: ScreenBar clamps (LGT-001, LGT-003) cannot mount on curved screens (MON-003 1500R). Recommend weighted base lamp (LGT-002).
-   - Desk Width vs Ultrawide: 34"+ ultrawide monitors (MON-003) require desk width >= 120 cm (DSK-001 or DSK-002).
-   - Chair Clearance: Wide executive chair (CHR-002) requires >= 120 cm desk width.
-   - Dock Ports: DisplayPort-only mini dock (DCK-003) cannot connect to HDMI-only legacy monitor (MON-004).
-   - In-Stock Rule: Out-of-stock items (DSK-004, CHR-004) cannot be in a recommended bundle.
-3. MBA Unit Economics:
-   - Retailer Monthly Fee: ₹15,000 | Cost to Serve: ₹3,500 | Net Contribution: ₹11,500.
-   - Affiliate Referral: 3.5% on eligible basket | Variable Cost: ₹120/basket.
-   - Break-Even: Fixed Costs (₹85,000) ÷ Contribution Per Basket (~₹2,155) ≈ 40 baskets/month.
-4. Auto-Solve Algorithm:
-   - Cartesian product exploration with branch-and-bound pruning across 2,304 theoretical combinations.
-   - Automatically eliminates out-of-stock and incompatible pairings to guarantee valid bundles within budget.
+   - ScreenBar lights (P38) require flat monitor bezels.
+   - Peripherals (P07, P08, P26, P27, P28, P29, P34, P35, P36, P37, P38) use USB-C connectivity.
+   - Out-of-stock items (such as P01 Blue Tshirt Size M) cannot be ordered or bundled.
 
 ==================================================
-5. INTERACTIVE 1-CLICK ACTION CARDS
+5. DIRECT ORDERING & INTERACTIVE ACTION CARDS
 ==================================================
-Whenever helpful, you CAN include an action block at the very end of your response inside a \`\`\`action\`\`\` code fence. The frontend will render it as an interactive 1-click execution card!
+YOU CAN ORDER ANY PRODUCT DIRECTLY FOR THE USER!
+Whenever a user wants to order, buy, purchase, or add to cart (e.g. "order P26", "buy the RGB keyboard and 100W GaN charger", "order 2 blue tshirts", "checkout now"):
+1. Identify the products by their IDs (P01-P40) or names.
+2. Determine the requested quantities.
+3. Calculate subtotal, shipping (₹499 or free if subtotal >= ₹50,000), 18% GST tax, and landed total.
+4. Output a clear, cheerful order confirmation breakdown in the response.
+5. INCLUDE AN ACTION CODE BLOCK AT THE VERY END in a \`\`\`action\`\`\` block!
 
 Supported Action Formats:
-1. Apply Full Bundle:
+
+1. Direct Order Action:
+\`\`\`action
+{
+  "type": "order_items",
+  "title": "Order Ergonomic Wireless Vertical Mouse (P26)",
+  "items": [
+    { "id": "P26", "name": "Ergonomic Wireless Vertical Mouse", "price": 1450, "quantity": 1 }
+  ],
+  "subtotal": 1450,
+  "netShipping": 499,
+  "taxAmount": 350.82,
+  "total": 2299.82,
+  "reason": "Direct one-click order placement via Sahay AI"
+}
+\`\`\`
+
+2. Add to Bundle Cart:
+\`\`\`action
+{
+  "type": "add_to_cart",
+  "title": "Add RGB Mechanical Gaming Keyboard to Cart",
+  "items": [
+    { "id": "P27", "name": "RGB Mechanical Gaming Keyboard", "price": 2400, "quantity": 1 }
+  ],
+  "reason": "Added to your active bundle cart"
+}
+\`\`\`
+
+3. Proceed to Checkout:
+\`\`\`action
+{
+  "type": "checkout",
+  "title": "Proceed to Secure Checkout",
+  "reason": "Review items and complete payment"
+}
+\`\`\`
+
+4. Apply Full Bundle:
 \`\`\`action
 {
   "type": "apply_bundle",
-  "title": "Optimized Ergonomic Setup",
-  "budget": 75000,
+  "title": "High-Efficiency Developer Setup",
+  "budget": 10000,
   "items": {
-    "desk": "DSK-001",
-    "chair": "CHR-001",
-    "monitor": "MON-001",
-    "laptop_stand_or_dock": "DCK-002",
-    "peripherals": "PER-002",
-    "lighting": "LGT-001"
+    "Mouse": "P26",
+    "Keyboard": "P27",
+    "Charger": "P34"
   }
 }
 \`\`\`
 
-2. Swap Specific Conflicting Product:
-\`\`\`action
-{
-  "type": "swap_product",
-  "slotId": "lighting",
-  "productId": "LGT-002",
-  "reason": "Swap to weighted base lamp to safely mount with curved monitor"
-}
-\`\`\`
-
-3. Adjust Target Budget:
-\`\`\`action
-{
-  "type": "set_budget",
-  "budget": 85000,
-  "reason": "Increases budget to accommodate motorized standing desk and 4K display"
-}
-\`\`\`
-
-4. Direct Site Navigation (NEW!):
+5. Direct Site Navigation:
 \`\`\`action
 {
   "type": "navigate",
-  "tab": "business",
-  "reason": "Inspect the MBA unit economics, referral margins, and break-even simulator"
+  "tab": "catalogue",
+  "reason": "Browse complete 40-item product inventory"
 }
 \`\`\`
-Supported tabs for navigation: "dashboard", "builder", "chat", "catalogue", "compare", "business", "tests", "evidence", "settings".
+Supported tabs for navigation: "catalogue", "compare", "cart", "checkout", "profile", "dashboard", "business", "tests", "evidence", "settings", "chat".
 
 ==================================================
 6. RESPONSE STYLE & MULTILINGUAL SUPPORT
 ==================================================
-- Be clear, authoritative, friendly, and practical.
-- Fully support questions in English, Hindi (हिंदी), and Gujarati (ગુજરાતી).
-- You can explain features, navigate the user, diagnose errors, design custom setups, analyze economics, and explain tests!`;
+- Be enthusiastic, accurate, and deeply helpful.
+- For orders, explicitly list each item name, product ID, quantity, unit price, subtotal, shipping, 18% GST, and landed total.
+- Mention that delivery will be addressed to the active customer profile (Tanmay Anand).
+- Fully support questions and orders in English, Hindi (हिंदी), and Gujarati (ગુજરાતી)!`;
 }
 
 /**
  * Intelligent Heuristic Response Engine
  * Grounded in the entire website so that even without an API key or offline,
- * the bot delivers comprehensive, context-aware answers and actionable cards.
+ * the bot delivers comprehensive, context-aware answers, orders, and actionable cards.
  */
 export function generateComprehensiveHeuristicResponse(message: string, context: any) {
   const lowerMsg = message.toLowerCase();
   const currentBudget = context?.budget || 75000;
   const validation = context?.validation;
   const violations = validation?.compatibilityViolations || validation?.violations || [];
-  const availableProducts = context?.availableProducts || [];
-  const requiredSlots = context?.requiredSlots || [];
-  const activeTab = context?.activeTab || 'dashboard';
+  const availableProducts = (context?.availableProducts && context.availableProducts.length > 0)
+    ? context.availableProducts
+    : CATALOGUE_PRODUCTS_METADATA;
 
   // Detect language request
   const isHindi = lowerMsg.includes('hindi') || lowerMsg.includes('हिंदी') || lowerMsg.includes('भाषा') || /[\u0900-\u097F]/.test(message);
   const isGujarati = lowerMsg.includes('gujarati') || lowerMsg.includes('ગુજરાતી') || /[\u0A80-\u0AFF]/.test(message);
 
-  // 1. Navigation / Whole Website Overview
-  if (lowerMsg.includes('whole website') || lowerMsg.includes('all pages') || lowerMsg.includes('overview') || lowerMsg.includes('sitemap') || lowerMsg.includes('what can you do') || lowerMsg.includes('features')) {
-    if (isHindi) {
+  // Helper to find product from metadata or context
+  function findProduct(query: string) {
+    const q = query.toLowerCase().trim();
+    return CATALOGUE_PRODUCTS_METADATA.find(p =>
+      p.id.toLowerCase() === q ||
+      p.name.toLowerCase().includes(q) ||
+      p.category.toLowerCase() === q ||
+      p.desc.toLowerCase().includes(q)
+    );
+  }
+
+  // =========================================================================
+  // 1. ORDERING INTENTS (Order, Buy, Purchase, Add to Cart, Checkout)
+  // =========================================================================
+  const isOrderIntent =
+    lowerMsg.includes('order') ||
+    lowerMsg.includes('buy') ||
+    lowerMsg.includes('purchase') ||
+    lowerMsg.includes('get me') ||
+    lowerMsg.includes('i want to buy') ||
+    lowerMsg.includes('add to cart') ||
+    lowerMsg.includes('checkout') ||
+    lowerMsg.includes('ऑर्डर') ||
+    lowerMsg.includes('खरीद') ||
+    lowerMsg.includes('ઓર્ડર');
+
+  if (isOrderIntent) {
+    // Check if it's a general checkout request
+    if (lowerMsg.includes('checkout') && !lowerMsg.match(/\bp(?:0[1-9]|[1-3][0-9]|40)\b/)) {
+      if (isHindi) {
+        return {
+          reply: `आपका चेकआउट तैयार है! आप सुरक्षित पेमेंट पेज पर जाकर UPI, क्रेडिट/डेबिट कार्ड या COD के माध्यम से अपना ऑर्डर पूरा कर सकते हैं।`,
+          action: { type: 'checkout', title: 'सुरक्षित चेकआउट पर जाएं', reason: 'ऑर्डर फाइनल करें' },
+          model: 'heuristic-website-trainer'
+        };
+      }
       return {
-        reply: `यह वेबसाइट **बजट-आधारित प्रोडक्ट बंडल बिल्डर (C07)** है। यहाँ कुल 9 मुख्य अनुभाग (मॉड्यूल्स) हैं:\n\n` +
-          `1. **डैशबोर्ड (Dashboard)**: लाइव KPI, बजट उपयोग और त्वरित शॉर्टकट।\n` +
-          `2. **बंडल बिल्डर (Builder)**: 6 स्लॉट (डेस्क, कुर्सी, मॉनिटर, डॉक, कीबोर्ड/माउस, लाइट) में हार्डवेयर कॉन्फ़िगर करें, लैंडेड प्राइस देखें और ऑटो-सॉल्व चलाएं।\n` +
-          `3. **AI चैटबॉट (Chat)**: जेमिनी मल्टी-टर्न हार्डवेयर सलाहकार 3 विशेषज्ञ भूमिकाओं के साथ।\n` +
-          `4. **प्रोडक्ट कैटलॉग (Catalogue)**: 24 हार्डवेयर उत्पादों का पूर्ण विवरण और लाइव स्टॉक।\n` +
-          `5. **बंडल तुलना (Compare)**: स्टार्टर, डेवलपर प्रो और एग्जीक्यूटिव बंडलों की आमने-सामने तुलना।\n` +
-          `6. **बिजनेस इनसाइट्स (Business)**: MBA यूनिट इकोनॉमिक्स, ब्रेक-ईवन बास्केट और शॉपर्स रिसर्च।\n` +
-          `7. **ऑटोमेटेड टेस्ट सुइट (Tests)**: 22+ लाइव नियम और लैंडेड प्राइस टेस्ट।\n` +
-          `8. **प्रोजेक्ट एविडेंस (Evidence)**: प्रोटोटाइप v0.1 बनाम अंतिम सत्यापन मैट्रिक्स।\n` +
-          `9. **सेटिंग्स (Settings)**: 18% GST दर, शिपिंग नियम और डेटा रीसेट।\n\nआप किस पेज पर जाना चाहते हैं?`,
+        reply: `Your checkout is ready! You can proceed to the secure checkout page to verify your items, select your delivery address, and pay via UPI, Credit/Debit Card, Netbanking, or Cash on Delivery.`,
         action: {
-          type: 'navigate',
-          tab: 'builder',
-          reason: 'Explore the 6-slot hardware Bundle Builder workspace'
+          type: 'checkout',
+          title: 'Proceed to Secure Checkout',
+          reason: 'Review active items and complete payment'
         },
         model: 'heuristic-website-trainer'
       };
     }
 
-    if (isGujarati) {
+    // Extract product IDs (P01 to P40)
+    const idMatches = lowerMsg.match(/\bp(?:0[1-9]|[1-3][0-9]|40)\b/gi);
+    const matchedProducts: { product: typeof CATALOGUE_PRODUCTS_METADATA[0]; quantity: number }[] = [];
+
+    if (idMatches && idMatches.length > 0) {
+      for (const rawId of idMatches) {
+        const uppercaseId = rawId.toUpperCase();
+        const prod = CATALOGUE_PRODUCTS_METADATA.find(p => p.id === uppercaseId);
+        if (prod) {
+          // Check for nearby quantity numbers like "2 P26" or "P26 x2"
+          const regexBefore = new RegExp(`(\\d+)\\s*(?:x\\s*|of\\s*)?${rawId}`, 'i');
+          const regexAfter = new RegExp(`${rawId}\\s*(?:x\\s*)?(\\d+)`, 'i');
+          const matchBefore = lowerMsg.match(regexBefore);
+          const matchAfter = lowerMsg.match(regexAfter);
+          const qty = matchBefore ? parseInt(matchBefore[1], 10) : matchAfter ? parseInt(matchAfter[1], 10) : 1;
+          matchedProducts.push({ product: prod, quantity: qty > 0 ? qty : 1 });
+        }
+      }
+    } else {
+      // Natural language product matching
+      const keywordsToMatch = [
+        { key: 'vertical mouse', id: 'P26' },
+        { key: 'ergonomic mouse', id: 'P07' },
+        { key: 'silent mouse', id: 'P29' },
+        { key: 'travel mouse', id: 'P22' },
+        { key: 'mouse', id: 'P07' },
+        { key: 'rgb keyboard', id: 'P27' },
+        { key: 'mechanical keyboard', id: 'P27' },
+        { key: '60% keyboard', id: 'P28' },
+        { key: 'compact keyboard', id: 'P08' },
+        { key: 'full-size keyboard', id: 'P21' },
+        { key: 'keyboard', id: 'P08' },
+        { key: 'gan charger', id: 'P34' },
+        { key: 'fast charger', id: 'P34' },
+        { key: 'charger', id: 'P34' },
+        { key: 'headphones', id: 'P35' },
+        { key: 'headset', id: 'P35' },
+        { key: 'microphone', id: 'P36' },
+        { key: 'mic', id: 'P36' },
+        { key: 'webcam', id: 'P37' },
+        { key: 'camera', id: 'P37' },
+        { key: 'screenbar', id: 'P38' },
+        { key: 'desk light', id: 'P38' },
+        { key: 'laptop stand', id: 'P30' },
+        { key: 'riser stand', id: 'P30' },
+        { key: 'monitor arm', id: 'P31' },
+        { key: 'desk mat', id: 'P32' },
+        { key: 'leather blotter', id: 'P32' },
+        { key: 'cable organizer', id: 'P33' },
+        { key: 'organizer', id: 'P33' },
+        { key: 'travel mug', id: 'P39' },
+        { key: 'ceramic mug', id: 'P11' },
+        { key: 'mug', id: 'P39' },
+        { key: 'vacuum flask', id: 'P40' },
+        { key: 'water bottle', id: 'P10' },
+        { key: 'bottle', id: 'P40' },
+        { key: 'backpack', id: 'P14' },
+        { key: 'notebook', id: 'P13' },
+        { key: 'hub', id: 'P09' },
+        { key: 'blue tshirt', id: 'P04' }, // P04 is in stock, P01 is out of stock
+        { key: 'black tshirt', id: 'P02' },
+        { key: 'grey tshirt', id: 'P03' },
+        { key: 'white tshirt', id: 'P06' },
+        { key: 'tshirt', id: 'P02' },
+        { key: 't-shirt', id: 'P02' }
+      ];
+
+      keywordsToMatch.sort((a, b) => b.key.length - a.key.length);
+      let remainingText = lowerMsg;
+
+      for (const kw of keywordsToMatch) {
+        if (remainingText.includes(kw.key)) {
+          const prod = CATALOGUE_PRODUCTS_METADATA.find(p => p.id === kw.id);
+          if (prod && !matchedProducts.some(m => m.product.id === prod.id)) {
+            // Check for quantity specifically associated with this item, e.g. "2 tshirts" or "1x keyboard"
+            const kwEscaped = kw.key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const kwRegex = new RegExp(`(\\d+)\\s*(?:x\\s*)?(?:piece|pieces|unit|units)?\\s*(?:of\\s*)?${kwEscaped}`, 'i');
+            const kwMatch = remainingText.match(kwRegex);
+            const qty = kwMatch ? Math.max(1, parseInt(kwMatch[1], 10)) : 1;
+            matchedProducts.push({ product: prod, quantity: qty });
+            // Erase the matched keyword from remainingText so generic sub-keywords don't re-match
+            remainingText = remainingText.replace(kw.key, ' ');
+          }
+        }
+      }
+    }
+
+    if (matchedProducts.length > 0) {
+      // Calculate Landed Cost
+      const subtotal = matchedProducts.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+      const isFreeShipping = subtotal >= 50000;
+      const netShipping = isFreeShipping ? 0 : 499;
+      const taxAmount = Math.round((subtotal + netShipping) * 0.18 * 100) / 100;
+      const totalLandedPrice = Math.round((subtotal + netShipping + taxAmount) * 100) / 100;
+
+      const itemsDescription = matchedProducts.map(
+        it => `- **${it.product.name}** (\`${it.product.id}\`): ${it.quantity}x @ ₹${it.product.price.toLocaleString('en-IN')} = ₹${(it.product.price * it.quantity).toLocaleString('en-IN')}`
+      ).join('\n');
+
+      const actionItems = matchedProducts.map(it => ({
+        id: it.product.id,
+        name: it.product.name,
+        price: it.product.price,
+        quantity: it.quantity
+      }));
+
+      // Check if any product is out of stock
+      const outOfStockItem = matchedProducts.find(it => it.product.stock === 0);
+      if (outOfStockItem) {
+        return {
+          reply: `⚠️ **Product Out of Stock**: Product **${outOfStockItem.product.name}** (\`${outOfStockItem.product.id}\`) is currently out of stock.\n\n` +
+            `Would you like me to recommend an in-stock alternative? For example, **Blue Tshirt Size L (P04)** or **Black Tshirt (P02)** are available right now.`,
+          action: {
+            type: 'navigate',
+            tab: 'catalogue',
+            reason: 'View available in-stock items in Product Catalogue'
+          },
+          model: 'heuristic-website-trainer'
+        };
+      }
+
+      if (isHindi) {
+        return {
+          reply: `### 🛒 ऑर्डर तैयार है!\n\n` +
+            `मैंने आपके द्वारा अनुरोधित उत्पाद तैयार कर लिए हैं:\n\n` +
+            `${itemsDescription}\n\n` +
+            `**प्राइस ब्रेकडाउन (Landed Cost)**:\n` +
+            `- प्रोडक्ट सबटोटल: ₹${subtotal.toLocaleString('en-IN')}\n` +
+            `- शिपिंग शुल्क: ${netShipping === 0 ? '₹0 (मुफ्त शिपिंग)' : `₹${netShipping}`}\n` +
+            `- 18% GST टैक्स: ₹${taxAmount.toLocaleString('en-IN')}\n` +
+            `- **कुल देय राशि (Landed Total)**: ₹${totalLandedPrice.toLocaleString('en-IN')}\n\n` +
+            `डिलीवरी पता: **तन्मय आनंद (Tanmay Anand)**, बैंगलोर / मुंबई।\n` +
+            `नीचे दिए गए बटन पर क्लिक करके ऑर्डर तुरंत प्लेस करें या कार्ट में जोड़ें!`,
+          action: {
+            type: 'order_items',
+            title: `Order: ${matchedProducts.map(it => `${it.quantity}x ${it.product.name}`).join(', ')}`,
+            items: actionItems,
+            subtotal,
+            netShipping,
+            taxAmount,
+            total: totalLandedPrice,
+            reason: '1-Click Direct Order via Sahay AI'
+          },
+          model: 'heuristic-website-trainer'
+        };
+      }
+
       return {
-        reply: `આ વેબસાઇટ **બજેટ-આધારિત પ્રોડક્ટ બંડલ બિલ્ડર (C07)** છે. અહીં કુલ 9 મુખ્ય વિભાગો છે:\n\n` +
-          `1. **ડેશબોર્ડ (Dashboard)**: લાઇવ KPI અને બજેટ પ્રોગ્રેસ.\n` +
-          `2. **બંડલ બિલ્ડર (Builder)**: 6 હાર્ડવેર સ્લોટ્સ ગોઠવો અને ઑટો-સૉલ્વ ચલાવો.\n` +
-          `3. **AI સહાયક (Chat)**: જેમિની મલ્ટિ-ટર્ન હાર્ડવેર કન્સલ્ટન્ટ.\n` +
-          `4. **પ્રોડક્ટ કૅટેલોગ (Catalogue)**: 24 હાર્ડવેર ઉત્પાદનો અને લાઇવ સ્ટોક.\n` +
-          `5. **બંડલ સરખામણી (Compare)**: પ્રીસેટ બંડલોની સરખામણી.\n` +
-          `6. **બિઝનેસ ઇનસાઇટ્સ (Business)**: MBA યુનિટ ઇકોનોમિક્સ અને બ્રેક-ઇવન.\n` +
-          `7. **ટેસ્ટિંગ સ્યુટ (Tests)**: 22+ લાઇવ સુસંગતતા અને પ્રાઇસિંગ ટેસ્ટ્સ.\n` +
-          `8. **પ્રોજેક્ટ એવિડન્સ (Evidence)**: વેરિફિકેશન મૅટ્રિક્સ.\n` +
-          `9. **સેટિંગ્સ (Settings)**: GST અને શિપિંગ નિયમો.\n\nતમે કયા પૃષ્ઠ પર જવા માંગો છો?`,
+        reply: `### 🛒 Order Prepared Successfully!\n\n` +
+          `I have configured your requested items for instant ordering:\n\n` +
+          `${itemsDescription}\n\n` +
+          `**Landed Cost Breakdown**:\n` +
+          `- **Product Subtotal**: ₹${subtotal.toLocaleString('en-IN')}\n` +
+          `- **Net Logistics/Shipping**: ${netShipping === 0 ? '₹0 (Free Shipping waiver applied!)' : `₹${netShipping} standard base fee`}\n` +
+          `- **GST (18%)**: ₹${taxAmount.toLocaleString('en-IN')}\n` +
+          `- **Total Landed Price**: ₹${totalLandedPrice.toLocaleString('en-IN')}\n\n` +
+          `📍 **Delivery Destination**: Tanmay Anand (Customer Profile defaults).\n\n` +
+          `You can confirm and place this order right now with 1 click using the interactive action card below!`,
+        action: {
+          type: 'order_items',
+          title: `Order: ${matchedProducts.map(it => `${it.quantity}x ${it.product.name}`).join(', ')}`,
+          items: actionItems,
+          subtotal,
+          netShipping,
+          taxAmount,
+          total: totalLandedPrice,
+          reason: '1-Click Direct Order via Sahay AI'
+        },
+        model: 'heuristic-website-trainer'
+      };
+    }
+  }
+
+  // =========================================================================
+  // 2. Navigation / Whole Website Overview
+  // =========================================================================
+  if (lowerMsg.includes('whole website') || lowerMsg.includes('all pages') || lowerMsg.includes('overview') || lowerMsg.includes('sitemap') || lowerMsg.includes('what can you do') || lowerMsg.includes('features')) {
+    if (isHindi) {
+      return {
+        reply: `यह वेबसाइट **बजट-आधारित प्रोडक्ट बंडल बिल्डर (C07)** है। यहाँ कुल 10 मुख्य अनुभाग हैं:\n\n` +
+          `1. **प्रोडक्ट कैटलॉग (Catalogue)**: 40 उत्पाद (P01-P40), 15 श्रेणियां और 6-कॉलम API फ़िल्टर।\n` +
+          `2. **बंडल तुलना बिल्डर (Compare Builder)**: 2-स्लॉट एक्टिव बंडल, हेडरुम काउंटर और लैंडेड कॉस्ट।\n` +
+          `3. **बंडल कार्ट ड्रॉवर (Cart)**: स्लाइड-ओवर कार्ट और 'BUY NOW' त्वरित ऑर्डर।\n` +
+          `4. **सुरक्षित चेकआउट (Checkout)**: डिलीवरी एड्रेस, UPI/Card/COD पेमेंट और इनवॉइस डाउनलोड।\n` +
+          `5. **कस्टमर प्रोफाइल (Profile)**: तन्मय आनंद (TA), शिपिंग सेटिंग्स और डिफॉल्ट बजट।\n` +
+          `6. **AI चैटबॉट (Chat)**: चैट के जरिए किसी भी उत्पाद का सीधा ऑर्डर दें और सहायता लें।\n` +
+          `7. **डैशबोर्ड (Dashboard)**: लाइव KPI और बजट प्रोग्रेस।\n` +
+          `8. **बिजनेस इनसाइट्स (Business)**: MBA यूनिट इकोनॉमिक्स और ब्रेक-ईवन एनालिसिस।\n` +
+          `9. **ऑटोमेटेड टेस्ट सुइट (Tests)**: 22+ लाइव सत्यापन टेस्ट।\n` +
+          `10. **प्रोजेक्ट एविडेंस (Evidence)**: सत्यापन मैट्रिक्स।\n\nआप क्या ऑर्डर करना या देखना चाहते हैं?`,
         action: {
           type: 'navigate',
-          tab: 'builder',
-          reason: 'વર્કસ્પેસ બંડલ બિલ્ડર ખોલો'
+          tab: 'catalogue',
+          reason: 'Browse 40 items in Product Catalogue'
         },
         model: 'heuristic-website-trainer'
       };
     }
 
     return {
-      reply: `I am fully trained on the entire **Budget-Based Product Bundle Builder** platform! Here is an overview of all 9 integrated modules:\n\n` +
-        `1. **Executive Dashboard (\`dashboard\`)**: Real-time KPI telemetry (Budget, Landed Price, Utilization %, Compatibility, Limiting Factor) and quick solver shortcuts.\n` +
-        `2. **Bundle Builder (\`builder\`)**: Interactive 6-slot workspace (Desk, Chair, Monitor, Dock, Peripherals, Lighting), live Landed Price calculation bar, and Cartesian Auto-Solve engine.\n` +
-        `3. **Gemini AI Assistant (\`chat\`)**: Multi-turn hardware consultant with 3 specialized personas (Ergonomic Workspace Architect, Rapid Spec Checker, Procurement Strategist) and 1-click execution cards.\n` +
-        `4. **Product Catalogue (\`catalogue\`)**: Full directory of 24 hardware components with specifications, weights, dimensions, and live stock tracking.\n` +
-        `5. **Compare Bundles (\`compare\`)**: Side-by-side matrix comparing Starter Pack (₹35k), Developer Pro (₹65k), and Executive Ultra (₹95k) against your custom bundle.\n` +
-        `6. **Business Insights & Strategy (\`business\`)**: MBA unit economics simulator (Retailer ₹15k fee, ₹3.5k cost-to-serve, 3.5% referral fee, break-even ~40 baskets) and empirical shopper research log.\n` +
-        `7. **Automated Test Suite (\`tests\`)**: 22+ live browser tests (REF-001 to REF-006, EDGE-001 to EDGE-006) validating compatibility logic and pricing math.\n` +
-        `8. **Project Evidence & Scope Audit (\`evidence\`)**: Academic audit tracking baseline prototype v0.1 vs final implementation, contractual scope boundaries, and verification proofs.\n` +
-        `9. **Settings & Configuration (\`settings\`)**: 18% GST tax configuration, shipping surcharge rules (₹499 base, ₹50,000 free shipping threshold), and factory reset.\n\n` +
-        `Where would you like to explore first?`,
+      reply: `I am fully trained on the entire **Budget-Based Product Bundle Builder** platform! Here is an overview of all integrated modules:\n\n` +
+        `1. **Product Catalogue (\`catalogue\`)**: Directory of **40 curated products** (\`P01\` to \`P40\`) across 15 categories (Tshirt, Mug, Mouse, Keyboard, Hub, Bottle, Stand, DeskMat, Charger, Audio, Webcam, Lighting) with 6-column backend API filters.\n` +
+        `2. **Compare Builder (\`compare\`)**: 2-slot active bundle workspace (Mouse, Keyboard, etc.) with dynamic target budget, live headroom gauge, and landed cost breakdown.\n` +
+        `3. **Bundle Cart Drawer (\`cart\`)**: Slide-over drawer with line items, budget utilization gauge, and direct **BUY NOW** checkout.\n` +
+        `4. **Secure Checkout & Order Placement (\`checkout\`)**: Complete checkout page with delivery address prefill (Tanmay Anand), payment options (UPI, Card, Netbanking, COD), order placement (#C07-ORD-XXXXXX), and invoice export.\n` +
+        `5. **Customer Profile (\`profile\`)**: Identity card with avatar (TA), default shipping addresses, and budget preferences.\n` +
+        `6. **Gemini AI Assistant (\`chat\`)**: Conversational shopping consultant with **Direct Ordering Powers**—ask me to order ANY product in the catalogue!\n` +
+        `7. **Executive Dashboard (\`dashboard\`)**: Real-time KPI telemetry and shortcuts.\n` +
+        `8. **Business Insights & Strategy (\`business\`)**: MBA unit economics simulator (Retailer ₹15,000 fee, ₹3,500 cost to serve, 3.5% referral fee, break-even ~40 baskets).\n` +
+        `9. **Automated Test Suite (\`tests\`)**: 22+ live browser tests (REF-001 to REF-006, EDGE-001 to EDGE-006) validating compatibility logic and pricing math.\n` +
+        `10. **Project Evidence & Scope Audit (\`evidence\`)**: Academic audit tracking baseline prototype v0.1 vs final implementation.\n` +
+        `11. **Settings & Configuration (\`settings\`)**: 18% GST tax configuration, shipping surcharge rules (₹499 base, ₹50,000 free shipping threshold), and factory reset.\n\n` +
+        `What would you like to explore or order?`,
       action: {
         type: 'navigate',
-        tab: 'builder',
-        reason: 'Open the 6-slot Bundle Builder workspace'
+        tab: 'catalogue',
+        reason: 'Browse complete Product Catalogue'
       },
       model: 'heuristic-website-trainer'
     };
   }
 
-  // 2. Direct Navigation Intents
+  // =========================================================================
+  // 3. Direct Navigation Intents
+  // =========================================================================
   if (lowerMsg.includes('go to') || lowerMsg.includes('navigate to') || lowerMsg.includes('open page') || lowerMsg.includes('show page') || lowerMsg.includes('show me')) {
-    if (lowerMsg.includes('business') || lowerMsg.includes('economics') || lowerMsg.includes('mba') || lowerMsg.includes('strategy')) {
-      return {
-        reply: `Opening the **Business Insights & Strategy** page. Here you can explore our MBA unit economics simulator, retailer subscription contributions, referral fees, break-even basket forecasts, and the empirical shopper research log.`,
-        action: { type: 'navigate', tab: 'business', reason: 'View Business Insights & Unit Economics' },
-        model: 'heuristic-website-trainer'
-      };
-    }
-    if (lowerMsg.includes('test') || lowerMsg.includes('suite') || lowerMsg.includes('verification')) {
-      return {
-        reply: `Opening the **Automated Test Suite**. Here you can run all 22+ tests in real time, validating reference requests, edge-case scenarios, and landed price mathematical precision.`,
-        action: { type: 'navigate', tab: 'tests', reason: 'Run and inspect Automated Test Suite' },
-        model: 'heuristic-website-trainer'
-      };
-    }
     if (lowerMsg.includes('catalogue') || lowerMsg.includes('catalog') || lowerMsg.includes('products') || lowerMsg.includes('inventory')) {
       return {
-        reply: `Opening the **Product Catalogue**. Browse all 24 hardware components across 6 categories with technical blueprints, dimensions, wattage, and live stock levels.`,
+        reply: `Opening the **Product Catalogue**. Browse all 40 products across 15 categories with technical blueprints, dimensions, wattage, and live stock levels.`,
         action: { type: 'navigate', tab: 'catalogue', reason: 'Browse complete Product Catalogue' },
         model: 'heuristic-website-trainer'
       };
     }
-    if (lowerMsg.includes('compare') || lowerMsg.includes('comparison') || lowerMsg.includes('presets')) {
+    if (lowerMsg.includes('cart') || lowerMsg.includes('drawer')) {
       return {
-        reply: `Opening the **Compare Bundles** page. Review side-by-side matrices of the Starter (₹35k), Developer Pro (₹65k), and Executive (₹95k) setups against your active bundle.`,
-        action: { type: 'navigate', tab: 'compare', reason: 'Inspect Side-by-Side Bundle Comparisons' },
+        reply: `Opening your **Bundle Cart Drawer**. Review your items, budget headroom, and click BUY NOW to place an order.`,
+        action: { type: 'navigate', tab: 'cart', reason: 'Open Bundle Cart' },
         model: 'heuristic-website-trainer'
       };
     }
-    if (lowerMsg.includes('evidence') || lowerMsg.includes('scope') || lowerMsg.includes('audit')) {
+    if (lowerMsg.includes('checkout') || lowerMsg.includes('order')) {
       return {
-        reply: `Opening the **Project Evidence & Scope Audit** page. Review academic change documentation, baseline prototype v0.1 vs final implementation, and formal verification evidence.`,
-        action: { type: 'navigate', tab: 'evidence', reason: 'Inspect Project Evidence & Scope Audit' },
+        reply: `Opening the **Checkout** page. Review your order details, shipping address, and select payment methods.`,
+        action: { type: 'navigate', tab: 'checkout', reason: 'Open Checkout Page' },
         model: 'heuristic-website-trainer'
       };
     }
-    if (lowerMsg.includes('setting') || lowerMsg.includes('config') || lowerMsg.includes('tax') || lowerMsg.includes('shipping fee')) {
+    if (lowerMsg.includes('profile') || lowerMsg.includes('address') || lowerMsg.includes('user')) {
       return {
-        reply: `Opening the **Settings & Configuration** page. You can customize the 18% GST tax rate, shipping threshold policies, and restore factory defaults.`,
-        action: { type: 'navigate', tab: 'settings', reason: 'Open Settings & Global Configuration' },
+        reply: `Opening your **Customer Profile** (Tanmay Anand, Bangalore / Mumbai). You can manage default shipping addresses and shopping preferences here.`,
+        action: { type: 'navigate', tab: 'profile', reason: 'View Customer Profile' },
         model: 'heuristic-website-trainer'
       };
     }
-    if (lowerMsg.includes('builder') || lowerMsg.includes('slots') || lowerMsg.includes('workspace')) {
+    if (lowerMsg.includes('compare') || lowerMsg.includes('builder')) {
       return {
-        reply: `Navigating to the **Bundle Builder** workspace. Configure your 6 hardware slots with real-time landed price feedback and auto-solve optimization.`,
-        action: { type: 'navigate', tab: 'builder', reason: 'Return to Bundle Builder' },
+        reply: `Opening the **Compare Builder**. Assemble and compare your hardware bundle with live landed pricing and budget headroom.`,
+        action: { type: 'navigate', tab: 'compare', reason: 'Open Compare Builder' },
         model: 'heuristic-website-trainer'
       };
     }
-    if (lowerMsg.includes('dashboard') || lowerMsg.includes('home') || lowerMsg.includes('kpi')) {
+    if (lowerMsg.includes('business') || lowerMsg.includes('economics') || lowerMsg.includes('mba')) {
       return {
-        reply: `Navigating to the **Executive Dashboard**. Review high-level budget metrics, compatibility alerts, and quick action shortcuts.`,
-        action: { type: 'navigate', tab: 'dashboard', reason: 'View Executive Dashboard' },
+        reply: `Opening the **Business Insights & Strategy** page. Explore our MBA unit economics model, retailer fees, and break-even simulator.`,
+        action: { type: 'navigate', tab: 'business', reason: 'View Business Insights' },
         model: 'heuristic-website-trainer'
       };
     }
-  }
-
-  // 3. Business Insights & MBA Unit Economics Queries
-  if (lowerMsg.includes('business') || lowerMsg.includes('unit economics') || lowerMsg.includes('mba') || lowerMsg.includes('break even') || lowerMsg.includes('break-even') || lowerMsg.includes('referral') || lowerMsg.includes('cost to serve') || lowerMsg.includes('retailer fee')) {
-    return {
-      reply: `### MBA Unit Economics & Strategy Overview\n\n` +
-        `**1. Strategic Value Proposition**:\n` +
-        `"Help shoppers build complete, compatible bundles with transparent landed pricing," solving assembly friction, hidden shipping fees, and port mismatches.\n\n` +
-        `**2. Unit Economics Formulas**:\n` +
-        `- **Retailer Monthly Contribution**: Retailer Monthly Fee (₹15,000) - Monthly Cost to Serve (₹3,500) = **₹11,500 net contribution** per enrolled retailer.\n` +
-        `- **Affiliate Referral Revenue**: Eligible Basket Value × 3.5% referral commission.\n` +
-        `- **Referral Contribution Per Basket**: Referral Revenue - Variable Cost per Basket (₹120).\n` +
-        `  * E.g., On a ₹65,000 bundle: (₹65,000 × 3.5%) - ₹120 = ₹2,275 - ₹120 = **₹2,155 contribution**.\n` +
-        `- **Break-Even Basket Threshold**: Fixed Monthly Costs (₹85,000) ÷ Contribution per basket (~₹2,155) = **~40 completed baskets/month**.\n\n` +
-        `Would you like to open the interactive simulation calculator on the Business Insights page?`,
-      action: {
-        type: 'navigate',
-        tab: 'business',
-        reason: 'Open interactive MBA Unit Economics simulation'
-      },
-      model: 'heuristic-website-trainer'
-    };
-  }
-
-  // 4. Automated Test Suite & Verification Queries
-  if (lowerMsg.includes('test') || lowerMsg.includes('tests') || lowerMsg.includes('edge case') || lowerMsg.includes('verification') || lowerMsg.includes('benchmark')) {
-    return {
-      reply: `### Automated Test Suite (22+ Executable Tests)\n\n` +
-        `Our test suite verifies the platform across two rigorous dimensions:\n\n` +
-        `**1. Reference Request Tests (REF-001 to REF-006)**:\n` +
-        `- **REF-001**: Budget Conscious Starter (₹35,000 target - confirms valid in-stock combination under tight budget).\n` +
-        `- **REF-002**: Standard Professional Ergonomic Setup (₹65,000 target - confirms Tier-1/2 items with healthy budget buffer).\n` +
-        `- **REF-003**: Executive Standing Desk Setup (₹95,000 target - validates motorized desk & 4K monitor pairing).\n` +
-        `- **REF-004**: Infeasible Ultra-Low Budget (₹15,000 target - correctly asserts that 6 complete items cannot be formed).\n` +
-        `- **REF-005**: Free Shipping Boundary Test (validates exact ₹50,000 free shipping waiver).\n` +
-        `- **REF-006**: Heavy Weight Surcharge Test (validates ₹450 surcharge per item >= 15kg).\n\n` +
-        `**2. Edge-Case Scenarios (EDGE-001 to EDGE-006)**:\n` +
-        `- **EDGE-001**: Cheapest Products Incompatible (detects greedy failure trap).\n` +
-        `- **EDGE-002**: Curved Monitor Clamp Light Trap (curved 1500R screen vs clamp screenbar).\n` +
-        `- **EDGE-003**: Port Mismatch Trap (legacy monitor vs DP-only mini dock).\n` +
-        `- **EDGE-004**: Out-of-Stock Trap (excludes DSK-004 and CHR-004).\n` +
-        `- **EDGE-005**: Desk Tipping Overhang Trap (ultrawide monitor on 90cm desk).\n` +
-        `- **EDGE-006**: Heavy Item Arithmetic Precision.\n\n` +
-        `You can execute all tests live with latency tracking on the Test Results page.`,
-      action: {
-        type: 'navigate',
-        tab: 'tests',
-        reason: 'Execute and view live test results'
-      },
-      model: 'heuristic-website-trainer'
-    };
-  }
-
-  // 5. Auto-Solve Algorithm Queries
-  if (lowerMsg.includes('algorithm') || lowerMsg.includes('auto-solve') || lowerMsg.includes('autosolve') || lowerMsg.includes('how does it work') || lowerMsg.includes('knapsack') || lowerMsg.includes('cartesian')) {
-    return {
-      reply: `### Cartesian Auto-Solve Algorithm Explained\n\n` +
-        `The bundle optimizer solves a **Multi-Choice Knapsack Problem with Physical Compatibility Constraints**:\n\n` +
-        `1. **Candidate Grouping & Stock Pruning**:\n` +
-        `   Products in the catalogue are grouped into the 6 required categories. Any item with \`inStock === false\` or quantity = 0 is pruned immediately (e.g., Vertex Pro Desk DSK-004, Wobble Stool CHR-004).\n\n` +
-        `2. **Cartesian Product Exploration with Backtracking**:\n` +
-        `   The algorithm evaluates candidate combinations (up to 2,304 potential bundle permutations) across all slots.\n\n` +
-        `3. **Constraint Validation Engine**:\n` +
-        `   For each bundle, it checks:\n` +
-        `   - Desk width >= 120cm for ultrawide monitors (34"+).\n` +
-        `   - ScreenBar clamps mount only on flat displays (no curved displays).\n` +
-        `   - Port matches (HDMI/DP compatibility).\n` +
-        `   - Chair armrest clearance.\n\n` +
-        `4. **Landed Cost Evaluation**:\n` +
-        `   Calculates Subtotal + Net Shipping (free if subtotal >= ₹50,000; else ₹499 + ₹450 per heavy item) + 18% GST. Discards any combination where Landed Price > Budget.\n\n` +
-        `5. **Objective Function**:\n` +
-        `   Depending on preference, it returns the **Lowest Cost** bundle or **Maximum Ergonomic Value** (maximizing Tier-1 ergonomic grades).`,
-      action: {
-        type: 'navigate',
-        tab: 'builder',
-        reason: 'Try the Auto-Solve button in Bundle Builder'
-      },
-      model: 'heuristic-website-trainer'
-    };
-  }
-
-  // 6. Compatibility Conflict Resolution
-  if (lowerMsg.includes('fix') || lowerMsg.includes('compatib') || lowerMsg.includes('error') || lowerMsg.includes('violation') || lowerMsg.includes('conflict')) {
-    if (violations.length > 0) {
-      const v = violations[0];
-      // Check clamp vs curved monitor
-      if (v.ruleId === 'clamp_vs_monitor' || lowerMsg.includes('lamp') || lowerMsg.includes('light') || lowerMsg.includes('curved')) {
-        const weightedLamp = availableProducts.find(
-          (p: any) => p.category === 'lighting' && (p.attributes?.lightMountType === 'weighted_base' || p.name.includes('Lamp')) && p.inStock
-        ) || { id: 'LGT-002', name: 'Architect Gooseneck Weighted Base LED Task Lamp', price: 2999 };
-
-        return {
-          reply: `### Compatibility Conflict Detected: ScreenBar vs Curved Display\n\n` +
-            `**Problem**: ScreenBar monitor clamp lights (LGT-001) cannot clip securely onto curved display bezels (MON-003 with 1500R curvature). The clamping angle causes uneven pressure, screen wobbling, or potential bezel cracks.\n\n` +
-            `**Solution**: Swap to the **${weightedLamp.name}** (₹${weightedLamp.price.toLocaleString('en-IN')}). It features an independent weighted desktop base that illuminates the entire workspace without relying on monitor clamp mounting.\n\n` +
-            `Click the button below to resolve this immediately in your builder!`,
-          action: {
-            type: 'swap_product',
-            slotId: 'lighting',
-            productId: weightedLamp.id,
-            reason: `Swap to ${weightedLamp.name} to safely illuminate curved monitor setup.`
-          },
-          model: 'heuristic-website-trainer'
-        };
-      }
-
-      // Check desk width vs ultrawide
-      if (v.ruleId === 'desk_width_vs_ultrawide' || lowerMsg.includes('desk') || lowerMsg.includes('width') || lowerMsg.includes('overhang')) {
-        const widerDesk = availableProducts.find(
-          (p: any) => p.category === 'desk' && (p.attributes?.deskWidthCm || 0) >= 120 && p.inStock
-        ) || { id: 'DSK-001', name: 'ErgoLift Dual-Motor Standing Desk (140x70cm)', price: 24999 };
-
-        return {
-          reply: `### Compatibility Conflict Detected: Desk Width vs Ultrawide Monitor\n\n` +
-            `**Problem**: Ultrawide monitors (34"+) require at least 120 cm desk width. On compact 90 cm desks (DSK-003), the screen extends past the desk edges, presenting a tipping hazard.\n\n` +
-            `**Solution**: Upgrade to the **${widerDesk.name}** (140 cm width). It provides ample room for peripherals, cable passthrough, and zero overhang risk.\n\n` +
-            `Click below to swap to a wider desk!`,
-          action: {
-            type: 'swap_product',
-            slotId: 'desk',
-            productId: widerDesk.id,
-            reason: `Upgrade to ${widerDesk.name} to accommodate 34-inch display without overhang.`
-          },
-          model: 'heuristic-website-trainer'
-        };
-      }
-
+    if (lowerMsg.includes('test') || lowerMsg.includes('suite')) {
       return {
-        reply: `You currently have **${violations.length} compatibility violation(s)**:\n\n` +
-          violations.map((vio: any, i: number) => `${i + 1}. **${vio.ruleId}**: ${vio.message}`).join('\n') +
-          `\n\nWould you like me to resolve these or navigate you to the Builder?`,
-        action: {
-          type: 'navigate',
-          tab: 'builder',
-          reason: 'Review and fix conflicts in Bundle Builder'
-        },
-        model: 'heuristic-website-trainer'
-      };
-    } else {
-      return {
-        reply: `All items currently selected in your bundle are **100% physically and electrically compatible**! There are no clamp mounting conflicts, desk overhang hazards, or hardware port mismatches.`,
+        reply: `Opening the **Automated Test Suite**. Run 22+ live verification tests with execution latency tracking.`,
+        action: { type: 'navigate', tab: 'tests', reason: 'Open Test Results' },
         model: 'heuristic-website-trainer'
       };
     }
   }
 
-  // 7. Budget Adjustment & Optimization
-  if (lowerMsg.includes('budget') || lowerMsg.includes('price') || lowerMsg.includes('cost') || lowerMsg.includes('landed') || lowerMsg.includes('cheaper')) {
-    if (validation?.landedPrice?.isOverBudget) {
-      const overBy = validation.landedPrice.landedPrice - currentBudget;
-      const targetCeiling = Math.ceil(validation.landedPrice.landedPrice / 1000) * 1000;
-      return {
-        reply: `### Budget Status: Over Budget by ₹${overBy.toLocaleString('en-IN')}\n\n` +
-          `- **Current Landed Price**: ₹${validation.landedPrice.landedPrice.toLocaleString('en-IN')}\n` +
-          `- **Current Target Budget**: ₹${currentBudget.toLocaleString('en-IN')}\n` +
-          `- **Landed Breakdown**: Subtotal ₹${validation.landedPrice.productSubtotal.toLocaleString('en-IN')} + Net Shipping ₹${validation.landedPrice.netShipping} + 18% GST ₹${validation.landedPrice.taxAmount.toLocaleString('en-IN')}.\n\n` +
-          `You can adjust your budget ceiling to **₹${targetCeiling.toLocaleString('en-IN')}** to accommodate your current premium selections, or ask me to find a cost-effective alternative setup.`,
-        action: {
-          type: 'set_budget',
-          budget: targetCeiling,
-          reason: `Increase budget to ₹${targetCeiling.toLocaleString('en-IN')} to cover complete landed price.`
-        },
-        model: 'heuristic-website-trainer'
-      };
-    } else {
-      return {
-        reply: `### Budget Status: Within Budget\n\n` +
-          `- **Current Landed Price**: ₹${validation?.landedPrice?.landedPrice?.toLocaleString('en-IN') || '0'}\n` +
-          `- **Target Budget**: ₹${currentBudget.toLocaleString('en-IN')}\n` +
-          `- **Remaining Headroom**: ₹${validation?.landedPrice?.remainingBudget?.toLocaleString('en-IN') || currentBudget.toLocaleString('en-IN')} (${validation?.landedPrice?.budgetUtilisationPercent || 0}% utilized).\n\n` +
-          `Your setup qualifies for safe checkout under your current financial cap.`,
-        model: 'heuristic-website-trainer'
-      };
-    }
-  }
-
-  // 8. Bundle Recommendation Intent
-  if (lowerMsg.includes('build') || lowerMsg.includes('recommend') || lowerMsg.includes('suggest') || lowerMsg.includes('setup') || lowerMsg.includes('bundle')) {
-    const suggestedItems: Record<string, string> = {
-      desk: 'DSK-001',
-      chair: 'CHR-001',
-      monitor: 'MON-001',
-      laptop_stand_or_dock: 'DCK-002',
-      peripherals: 'PER-002',
-      lighting: 'LGT-001'
-    };
-
-    return {
-      reply: `### Recommended Complete WFH Ergonomic Bundle\n\n` +
-        `I have assembled an optimal, fully in-stock setup engineered for healthy posture and high productivity within ₹${currentBudget.toLocaleString('en-IN')}:\n\n` +
-        `- **Workstation Desk**: ErgoLift Dual-Motor Standing Desk (140x70cm, ₹24,999) - motorized height adjustment with Tier-1 ergonomics.\n` +
-        `- **Ergonomic Chair**: AeroMesh Task Chair with 3D Lumbar & 4D Armrests (₹14,999) - breathable mesh supporting 8+ hour shifts.\n` +
-        `- **Main Display**: 27" 4K UHD IPS USB-C Monitor (₹26,999) - crisp 3840x2160 with single-cable 65W charging.\n` +
-        `- **Dock & Riser**: USB-C 7-in-1 Aluminum Riser Stand (₹3,999) - 85W power delivery & 4K HDMI passthrough.\n` +
-        `- **Peripherals**: Silent Multi-Device Bluetooth Combo (₹4,499) - whisper-quiet scissor keys.\n` +
-        `- **Lighting**: Asymmetric ScreenBar Monitor Light (₹5,499) - zero screen glare, rotary wireless dial.\n\n` +
-        `All items are 100% compatible with flat-bezel mounting and ample desk width. Click below to load this setup!`,
-      action: {
-        type: 'apply_bundle',
-        title: 'Ergonomic Productivity Setup',
-        budget: currentBudget >= 85000 ? currentBudget : 85000,
-        items: suggestedItems
-      },
-      model: 'heuristic-website-trainer'
-    };
-  }
-
-  // 9. Default Comprehensive Assistant Response
+  // =========================================================================
+  // 4. Default Assistant Response with Quick Order Suggestions
+  // =========================================================================
   return {
-    reply: `Hello! I am your AI Consultant trained on the entire **Budget-Based Product Bundle Builder** platform.\n\n` +
-      `Here is what I can do for you:\n\n` +
-      `1. **Assemble & Optimize Complete Bundles**: Build valid 6-slot hardware setups matching your target budget.\n` +
-      `2. **Resolve Compatibility Conflicts**: Fix curved monitor clamp mismatches, desk width overhangs, and port incompatibilities with 1-click swaps.\n` +
-      `3. **Landed Pricing & Tax**: Calculate exact landed pricing including base shipping (₹499), heavy item surcharges (₹450), free shipping thresholds (₹50k), and 18% GST.\n` +
-      `4. **MBA Unit Economics & Strategy**: Analyze retailer subscription revenue, referral fee margins (3.5%), and break-even basket forecasts (~40 baskets).\n` +
-      `5. **Automated Testing**: Explain our 22+ tests, reference requests, and edge-case scenarios.\n` +
-      `6. **Direct Navigation**: Navigate to any of our 9 platform pages (\`builder\`, \`catalogue\`, \`compare\`, \`business\`, \`tests\`, \`evidence\`, \`settings\`, \`dashboard\`).\n\n` +
-      `How can I assist your workspace journey today?`,
+    reply: `Hello! I am **Sahay AI (सहाय AI)**, your shopping consultant fully trained on the **Budget-Based Product Bundle Builder** platform!\n\n` +
+      `Here is what you can ask me to do:\n\n` +
+      `1. **Order Any Product Directly**: Tell me what you'd like to buy (e.g. *"Order P26 Ergonomic Vertical Mouse"* or *"Buy RGB Mechanical Keyboard and 100W GaN Charger"*), and I'll compute the landed cost and generate an instant 1-click order card!\n` +
+      `2. **Browse & Compare**: Explore all 40 products (\`P01\` to \`P40\`) across 15 categories.\n` +
+      `3. **Manage Bundle Cart & Checkout**: Add items, inspect budget headroom, or say *"Checkout my cart"* to complete purchase.\n` +
+      `4. **MBA Unit Economics & Strategy**: Analyze retailer subscription models, referral margins (3.5%), and break-even metrics (~40 baskets).\n` +
+      `5. **Automated Test Suite**: Inspect all 22+ live verification tests.\n\n` +
+      `What would you like to order or explore today?`,
     action: {
       type: 'navigate',
-      tab: 'builder',
-      reason: 'Open Bundle Builder workspace'
+      tab: 'catalogue',
+      reason: 'Explore 40-item Product Catalogue'
     },
     model: 'heuristic-website-trainer'
   };
 }
-

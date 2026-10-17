@@ -317,6 +317,204 @@
           "usb-c"
         ],
         "image": "../assets/P25.png"
+      },
+      {
+        "product_id": "P26",
+        "title": "Ergonomic Wireless Vertical Mouse",
+        "category": "Mouse",
+        "size": "One",
+        "colour": "Black",
+        "price_inr": 1450,
+        "unit_cost_inr": 870,
+        "stock": 18,
+        "compatible_with": [
+          "usb-c"
+        ],
+        "image": "../assets/P26.png"
+      },
+      {
+        "product_id": "P27",
+        "title": "RGB Mechanical Gaming Keyboard",
+        "category": "Keyboard",
+        "size": "Full Size",
+        "colour": "Black",
+        "price_inr": 2400,
+        "unit_cost_inr": 1440,
+        "stock": 12,
+        "compatible_with": [
+          "usb-c"
+        ],
+        "image": "../assets/P27.png"
+      },
+      {
+        "product_id": "P28",
+        "title": "Compact 60% Wireless Keyboard",
+        "category": "Keyboard",
+        "size": "Compact",
+        "colour": "White",
+        "price_inr": 1850,
+        "unit_cost_inr": 1100,
+        "stock": 10,
+        "compatible_with": [
+          "usb-c"
+        ],
+        "image": "../assets/P28.png"
+      },
+      {
+        "product_id": "P29",
+        "title": "Silent Precision Bluetooth Mouse",
+        "category": "Mouse",
+        "size": "One",
+        "colour": "White",
+        "price_inr": 950,
+        "unit_cost_inr": 570,
+        "stock": 24,
+        "compatible_with": [
+          "usb-c"
+        ],
+        "image": "../assets/P29.png"
+      },
+      {
+        "product_id": "P30",
+        "title": "Aluminum Laptop Riser Stand",
+        "category": "Stand",
+        "size": "Adjustable",
+        "colour": "Silver",
+        "price_inr": 1299,
+        "unit_cost_inr": 750,
+        "stock": 20,
+        "compatible_with": [],
+        "image": "../assets/P30.png"
+      },
+      {
+        "product_id": "P31",
+        "title": "Dual Monitor Arm Desk Mount",
+        "category": "Stand",
+        "size": "Dual 32in",
+        "colour": "Black",
+        "price_inr": 2800,
+        "unit_cost_inr": 1650,
+        "stock": 8,
+        "compatible_with": [],
+        "image": "../assets/P31.png"
+      },
+      {
+        "product_id": "P32",
+        "title": "Desk Pad Vegan Leather Blotter",
+        "category": "DeskMat",
+        "size": "90x40cm",
+        "colour": "Dark Green",
+        "price_inr": 650,
+        "unit_cost_inr": 380,
+        "stock": 35,
+        "compatible_with": [],
+        "image": "../assets/P32.png"
+      },
+      {
+        "product_id": "P33",
+        "title": "Magnetic Cable Management Organizer",
+        "category": "Organizer",
+        "size": "5-Pack",
+        "colour": "Black",
+        "price_inr": 399,
+        "unit_cost_inr": 200,
+        "stock": 45,
+        "compatible_with": [],
+        "image": "../assets/P33.png"
+      },
+      {
+        "product_id": "P34",
+        "title": "USB-C 100W GaN Fast Charger",
+        "category": "Charger",
+        "size": "Compact",
+        "colour": "White",
+        "price_inr": 1899,
+        "unit_cost_inr": 1100,
+        "stock": 22,
+        "compatible_with": [
+          "usb-c"
+        ],
+        "image": "../assets/P34.png"
+      },
+      {
+        "product_id": "P35",
+        "title": "Active Noise Cancelling Wireless Headphones",
+        "category": "Audio",
+        "size": "Over-Ear",
+        "colour": "Midnight Black",
+        "price_inr": 4999,
+        "unit_cost_inr": 2900,
+        "stock": 9,
+        "compatible_with": [
+          "usb-c"
+        ],
+        "image": "../assets/P35.png"
+      },
+      {
+        "product_id": "P36",
+        "title": "USB-C Studio Condenser Microphone",
+        "category": "Audio",
+        "size": "Desktop",
+        "colour": "Black",
+        "price_inr": 3200,
+        "unit_cost_inr": 1850,
+        "stock": 14,
+        "compatible_with": [
+          "usb-c"
+        ],
+        "image": "../assets/P36.png"
+      },
+      {
+        "product_id": "P37",
+        "title": "4K Ultra HD Streaming Webcam",
+        "category": "Webcam",
+        "size": "Compact",
+        "colour": "Black",
+        "price_inr": 3600,
+        "unit_cost_inr": 2100,
+        "stock": 11,
+        "compatible_with": [
+          "usb-c"
+        ],
+        "image": "../assets/P37.png"
+      },
+      {
+        "product_id": "P38",
+        "title": "ScreenBar Desk Light with Auto-Dimming",
+        "category": "Lighting",
+        "size": "45cm",
+        "colour": "Space Grey",
+        "price_inr": 2150,
+        "unit_cost_inr": 1250,
+        "stock": 16,
+        "compatible_with": [
+          "usb-c"
+        ],
+        "image": "../assets/P38.png"
+      },
+      {
+        "product_id": "P39",
+        "title": "Insulated Ceramic Travel Mug",
+        "category": "Mug",
+        "size": "350ml",
+        "colour": "Matte Black",
+        "price_inr": 550,
+        "unit_cost_inr": 320,
+        "stock": 28,
+        "compatible_with": [],
+        "image": "../assets/P39.png"
+      },
+      {
+        "product_id": "P40",
+        "title": "HydroTech Thermal Vacuum Flask",
+        "category": "Bottle",
+        "size": "1000ml",
+        "colour": "Ocean Blue",
+        "price_inr": 750,
+        "unit_cost_inr": 420,
+        "stock": 19,
+        "compatible_with": [],
+        "image": "../assets/P40.png"
       }
     ],
     "required_slots": [
