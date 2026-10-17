@@ -16,11 +16,17 @@ import { ProjectEvidencePage } from './components/evidence/ProjectEvidencePage';
 import { SettingsPage } from './components/settings/SettingsPage';
 import { GeminiChatbotPage } from './components/chat/GeminiChatbotPage';
 import { ProductDetailPage } from './components/catalogue/ProductDetailPage';
+import { LandingPage } from './components/landing/LandingPage';
+import { ProfilePage } from './components/profile/ProfilePage';
 
 import { motion, AnimatePresence } from 'motion/react';
 
 const AppContent: React.FC = () => {
-  const { activeTab } = useApp();
+  const { userRole, activeTab } = useApp();
+
+  if (!userRole) {
+    return <LandingPage />;
+  }
 
   return (
     <AppLayout>
@@ -43,6 +49,7 @@ const AppContent: React.FC = () => {
           {activeTab === 'business' && <BusinessInsightsPage />}
           {activeTab === 'evidence' && <ProjectEvidencePage />}
           {activeTab === 'settings' && <SettingsPage />}
+          {activeTab === 'profile' && <ProfilePage />}
         </motion.div>
       </AnimatePresence>
     </AppLayout>

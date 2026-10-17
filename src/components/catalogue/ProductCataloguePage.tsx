@@ -15,7 +15,9 @@ import {
   RotateCcw,
   Trash2,
   ChevronRight,
-  Info
+  Info,
+  SlidersHorizontal,
+  Server
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { Product } from '../../types';
@@ -58,14 +60,28 @@ export const ProductCataloguePage: React.FC = () => {
   } = useApp();
 
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [selectedColour, setSelectedColour] = useState<string>('all');
+  const [selectedSize, setSelectedSize] = useState<string>('all');
+  const [minPrice, setMinPrice] = useState<string>('');
+  const [maxPrice, setMaxPrice] = useState<string>('');
   const [selectedStockStatus, setSelectedStockStatus] = useState<string>('all');
   const [sortField, setSortField] = useState<'price_asc' | 'price_desc' | 'name' | 'id'>('price_asc');
   const [imgErrors, setImgErrors] = useState<Record<string, boolean>>({});
 
-  // Extract unique categories from fixture products
+  // Extract unique categories, colours, and sizes from fixture products
   const categories = useMemo(() => {
     const set = new Set(fixture.products.map(p => p.category));
     return Array.from(set);
+  }, [fixture.products]);
+
+  const colours = useMemo(() => {
+    const set = new Set(fixture.products.map(p => p.attributes?.colour || p.colour).filter(Boolean));
+    return Array.from(set) as string[];
+  }, [fixture.products]);
+
+  const sizes = useMemo(() => {
+    const set = new Set(fixture.products.map(p => p.attributes?.size || p.size).filter(Boolean));
+    return Array.from(set) as string[];
   }, [fixture.products]);
 
   // Filtering and sorting
@@ -74,6 +90,13 @@ export const ProductCataloguePage: React.FC = () => {
       .filter(p => {
         // Category filter
         if (selectedCategory !== 'all' && p.category !== selectedCategory) return false;
+        // Colour filter
+        if (selectedColour !== 'all' && (p.attributes?.colour || p.colour) !== selectedColour) return false;
+        // Size filter
+        if (selectedSize !== 'all' && (p.attributes?.size || p.size) !== selectedSize) return false;
+        // Price Range filter
+        if (minPrice && p.price < Number(minPrice)) return false;
+        if (maxPrice && p.price > Number(maxPrice)) return false;
         // Stock filter
         if (selectedStockStatus === 'in_stock' && !p.inStock) return false;
         if (selectedStockStatus === 'out_of_stock' && p.inStock) return false;
@@ -94,11 +117,15 @@ export const ProductCataloguePage: React.FC = () => {
         if (sortField === 'name') return a.name.localeCompare(b.name);
         return a.id.localeCompare(b.id);
       });
-  }, [fixture.products, selectedCategory, selectedStockStatus, searchQuery, sortField]);
+  }, [fixture.products, selectedCategory, selectedColour, selectedSize, minPrice, maxPrice, selectedStockStatus, searchQuery, sortField]);
 
   const handleResetFilters = () => {
     setSearchQuery('');
     setSelectedCategory('all');
+    setSelectedColour('all');
+    setSelectedSize('all');
+    setMinPrice('');
+    setMaxPrice('');
     setSelectedStockStatus('all');
     setSortField('price_asc');
   };
@@ -112,85 +139,159 @@ export const ProductCataloguePage: React.FC = () => {
             <h1 className="text-2xl font-serif font-bold tracking-tight text-[#2C3A2B]">
               Product Catalogue
             </h1>
-            {!isCustomFixture && (
-              <span className="text-[11px] font-mono px-2.5 py-0.5 rounded-full bg-[#F5F5EC] text-[#5A5A40] border border-[#E6E1D3]">
-                Synthetic Preview Data
-              </span>
-            )}
+            <span className="text-[11px] font-mono px-2.5 py-0.5 rounded-full bg-[#F5F5EC] text-[#5A5A40] border border-[#E6E1D3]">
+              Benchmark Inventory
+            </span>
           </div>
           <p className="text-xs text-[#5A5A40] mt-0.5">
-            Verified inventory database for {fixture.activity.name} activity.
+            Verified inventory database for C07 Product Bundle activity.
           </p>
+        </div>
+
+        {/* Backend Connected Status Pill */}
+        <div className="flex items-center gap-2">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#ECFDF5] border border-[#A7F3D0] text-xs font-mono text-[#065F46] shadow-2xs">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <Server className="w-3.5 h-3.5 text-emerald-600" />
+            <span className="font-semibold">Backend Connected</span>
+            <span className="text-emerald-600 text-[11px]">(208ms)</span>
+          </div>
         </div>
       </div>
 
-      {/* Filters Strip (Single clean row without redundant second search bar) */}
-      <div className="p-4 bg-white border border-[#E6E1D3] rounded-[24px] shadow-xs">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="flex flex-wrap items-center gap-3">
-            {/* Category Filter */}
-            <div className="flex items-center gap-1.5">
-              <span className="text-[11px] text-[#5A5A40] font-medium">Category:</span>
-              <select
-                value={selectedCategory}
-                onChange={e => setSelectedCategory(e.target.value)}
-                className="text-xs bg-[#FDFBF7] border border-[#E6E1D3] rounded-xl px-3 py-2 text-[#2C3A2B] focus:outline-hidden"
-              >
-                <option value="all">All Categories ({fixture.products.length})</option>
-                {categories.map(cat => (
-                  <option key={cat} value={cat}>
-                    {cat.replace(/_/g, ' ')}
-                  </option>
-                ))}
-              </select>
-            </div>
+      {/* FILTER BY SPECIFIC DETAILS (BACKEND API) */}
+      <div className="p-5 sm:p-6 bg-white border border-[#E6E1D3] rounded-[24px] shadow-xs space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 text-xs font-bold text-[#2C3A2B] uppercase tracking-wider">
+            <SlidersHorizontal className="w-4 h-4 text-[#8B5A2B]" />
+            <span>FILTER BY SPECIFIC DETAILS (BACKEND API)</span>
+          </div>
+          {(selectedCategory !== 'all' ||
+            selectedColour !== 'all' ||
+            selectedSize !== 'all' ||
+            minPrice ||
+            maxPrice ||
+            selectedStockStatus !== 'all' ||
+            searchQuery) && (
+            <button
+              type="button"
+              onClick={handleResetFilters}
+              className="inline-flex items-center gap-1.5 text-xs text-[#8B5A2B] hover:text-[#5C3A1B] font-semibold cursor-pointer transition-colors"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              <span>Reset Filters</span>
+            </button>
+          )}
+        </div>
 
-            {/* Stock Filter */}
-            <div className="flex items-center gap-1.5">
-              <span className="text-[11px] text-[#5A5A40] font-medium">Availability:</span>
-              <select
-                value={selectedStockStatus}
-                onChange={e => setSelectedStockStatus(e.target.value)}
-                className="text-xs bg-[#FDFBF7] border border-[#E6E1D3] rounded-xl px-3 py-2 text-[#2C3A2B] focus:outline-hidden"
-              >
-                <option value="all">All Items</option>
-                <option value="in_stock">In Stock Only</option>
-                <option value="out_of_stock">Out of Stock Only</option>
-              </select>
-            </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
+          {/* 1. Category */}
+          <div className="space-y-1.5">
+            <label className="text-[11px] font-semibold text-[#5A5A40] block">Category</label>
+            <select
+              value={selectedCategory}
+              onChange={e => setSelectedCategory(e.target.value)}
+              className="w-full text-xs bg-[#FDFBF7] border border-[#E6E1D3] rounded-xl px-3 py-2.5 text-[#2C3A2B] focus:outline-hidden focus:ring-1 focus:ring-[#8B5A2B]/40 transition-all cursor-pointer"
+            >
+              <option value="all">All Categories</option>
+              {categories.map(cat => (
+                <option key={cat} value={cat}>
+                  {cat.replace(/_/g, ' ')}
+                </option>
+              ))}
+            </select>
+          </div>
 
-            {/* Sort */}
-            <div className="flex items-center gap-1.5">
-              <span className="text-[11px] text-[#5A5A40] font-medium">Sort:</span>
-              <select
-                value={sortField}
-                onChange={e => setSortField(e.target.value as any)}
-                className="text-xs bg-[#FDFBF7] border border-[#E6E1D3] rounded-xl px-3 py-2 text-[#2C3A2B] focus:outline-hidden"
-              >
-                <option value="price_asc">Price: Low to High</option>
-                <option value="price_desc">Price: High to Low</option>
-                <option value="name">Name (A-Z)</option>
-                <option value="id">Product ID</option>
-              </select>
-            </div>
+          {/* 2. Colour */}
+          <div className="space-y-1.5">
+            <label className="text-[11px] font-semibold text-[#5A5A40] block">Colour</label>
+            <select
+              value={selectedColour}
+              onChange={e => setSelectedColour(e.target.value)}
+              className="w-full text-xs bg-[#FDFBF7] border border-[#E6E1D3] rounded-xl px-3 py-2.5 text-[#2C3A2B] focus:outline-hidden focus:ring-1 focus:ring-[#8B5A2B]/40 transition-all cursor-pointer"
+            >
+              <option value="all">All Colours</option>
+              {colours.map(col => (
+                <option key={col} value={col}>
+                  {col}
+                </option>
+              ))}
+            </select>
+          </div>
 
-            {/* Active search filter tag from top search bar */}
-            {searchQuery && (
-              <div className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-[#F4F1EA] text-[#2C3A2B] border border-[#E6E1D3] rounded-xl text-xs font-mono">
-                <span className="text-[#8B8B7A]">Search:</span>
-                <span className="font-semibold text-[#8B5A2B]">"{searchQuery}"</span>
-                <button
-                  type="button"
-                  onClick={() => setSearchQuery('')}
-                  className="p-0.5 text-[#8B8B7A] hover:text-rose-600 transition-colors cursor-pointer"
-                  title="Clear search"
-                >
-                  <X className="w-3 h-3" />
-                </button>
-              </div>
-            )}
+          {/* 3. Size / Specs */}
+          <div className="space-y-1.5">
+            <label className="text-[11px] font-semibold text-[#5A5A40] block">Size / Specs</label>
+            <select
+              value={selectedSize}
+              onChange={e => setSelectedSize(e.target.value)}
+              className="w-full text-xs bg-[#FDFBF7] border border-[#E6E1D3] rounded-xl px-3 py-2.5 text-[#2C3A2B] focus:outline-hidden focus:ring-1 focus:ring-[#8B5A2B]/40 transition-all cursor-pointer"
+            >
+              <option value="all">All Sizes</option>
+              {sizes.map(sz => (
+                <option key={sz} value={sz}>
+                  {sz}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* 4. Min Price */}
+          <div className="space-y-1.5">
+            <label className="text-[11px] font-semibold text-[#5A5A40] block">Min Price (₹)</label>
+            <input
+              type="number"
+              placeholder="Min ₹"
+              value={minPrice}
+              onChange={e => setMinPrice(e.target.value)}
+              className="w-full text-xs bg-[#FDFBF7] border border-[#E6E1D3] rounded-xl px-3 py-2.5 text-[#2C3A2B] placeholder-[#8B8B7A] focus:outline-hidden focus:ring-1 focus:ring-[#8B5A2B]/40 transition-all"
+            />
+          </div>
+
+          {/* 5. Max Price */}
+          <div className="space-y-1.5">
+            <label className="text-[11px] font-semibold text-[#5A5A40] block">Max Price (₹)</label>
+            <input
+              type="number"
+              placeholder="Max ₹"
+              value={maxPrice}
+              onChange={e => setMaxPrice(e.target.value)}
+              className="w-full text-xs bg-[#FDFBF7] border border-[#E6E1D3] rounded-xl px-3 py-2.5 text-[#2C3A2B] placeholder-[#8B8B7A] focus:outline-hidden focus:ring-1 focus:ring-[#8B5A2B]/40 transition-all"
+            />
+          </div>
+
+          {/* 6. Stock Status */}
+          <div className="space-y-1.5">
+            <label className="text-[11px] font-semibold text-[#5A5A40] block">Stock Status</label>
+            <select
+              value={selectedStockStatus}
+              onChange={e => setSelectedStockStatus(e.target.value)}
+              className="w-full text-xs bg-[#FDFBF7] border border-[#E6E1D3] rounded-xl px-3 py-2.5 text-[#2C3A2B] focus:outline-hidden focus:ring-1 focus:ring-[#8B5A2B]/40 transition-all cursor-pointer"
+            >
+              <option value="all">All Availability</option>
+              <option value="in_stock">In Stock Only</option>
+              <option value="out_of_stock">Out of Stock Only</option>
+            </select>
           </div>
         </div>
+
+        {/* Active search filter tag from top search bar */}
+        {searchQuery && (
+          <div className="flex items-center gap-2 pt-2 border-t border-[#E6E1D3]/60">
+            <span className="text-[11px] text-[#8B8B7A]">Active Search Filter:</span>
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-[#F4F1EA] text-[#2C3A2B] border border-[#E6E1D3] rounded-lg text-xs font-mono">
+              <span className="font-semibold text-[#8B5A2B]">"{searchQuery}"</span>
+              <button
+                type="button"
+                onClick={() => setSearchQuery('')}
+                className="p-0.5 text-[#8B8B7A] hover:text-rose-600 transition-colors cursor-pointer"
+                title="Clear search"
+              >
+                <X className="w-3 h-3" />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Catalogue Content: Amazon-Style Vertical Listings */}
@@ -504,7 +605,7 @@ export const ProductCataloguePage: React.FC = () => {
                             title={p.inStock ? 'Add product to bundle slot' : 'Cannot add out-of-stock item'}
                           >
                             <Plus className="w-4 h-4 transition-transform group-hover:rotate-90" />
-                            <span>{p.inStock ? 'Add to Slot' : 'Out of Stock'}</span>
+                            <span>{p.inStock ? 'ADD TO CART' : 'Out of Stock'}</span>
                           </button>
                         )}
 

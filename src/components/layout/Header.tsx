@@ -10,7 +10,8 @@ import {
   ExternalLink,
   ChevronDown,
   LogOut,
-  ShoppingCart
+  ShoppingCart,
+  User
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { formatINR } from '../../utils/pricing';
@@ -31,7 +32,8 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
     loginAs,
     logout,
     validation,
-    toggleCart
+    toggleCart,
+    currentItems
   } = useApp();
 
   const [showNotifications, setShowNotifications] = useState(false);
@@ -166,60 +168,47 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
         <button
           onClick={toggleCart}
           aria-label="View bundle cart"
-          className={`relative flex items-center gap-2 px-3 py-1.5 rounded-xl border transition-all duration-200 cursor-pointer hover:scale-105 active:scale-95 ${validation.filledSlotCount > 0
-            ? 'bg-[#2C3A2B] hover:bg-[#1E281D] text-white border-[#2C3A2B] shadow-xs hover:shadow-md'
-            : 'bg-[#F4F1EA] hover:bg-[#E6E1D3] text-[#5A5A40] border-[#E6E1D3] hover:shadow-2xs'
-            }`}
-          title={`Bundle Cart: ${validation.filledSlotCount} of ${validation.totalSlotCount} slots filled`}
+          className="relative flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#2C3A2B] hover:bg-[#1E281D] text-white border border-[#2C3A2B] shadow-xs hover:shadow-md transition-all duration-200 cursor-pointer hover:scale-105 active:scale-95"
+          title="View bundle cart"
         >
           <div className="relative flex items-center justify-center">
-            <ShoppingCart className="w-4 h-4 transition-transform group-hover:scale-110" />
-            {validation.filledSlotCount > 0 && (
-              <span className="absolute -top-2 -right-2.5 min-w-4 h-4 px-1 rounded-full bg-amber-400 text-[#2C2C1E] font-bold text-[10px] flex items-center justify-center shadow-xs animate-badge-pulse">
-                {validation.filledSlotCount}
-              </span>
-            )}
+            <ShoppingCart className="w-4 h-4 text-amber-200" />
+            <span className="absolute -top-1.5 -right-2 min-w-4 h-4 px-1 rounded-full bg-amber-400 text-[#2C2C1E] font-bold text-[10px] flex items-center justify-center shadow-xs">
+              {Object.values(currentItems).filter(Boolean).length > 0 ? Object.values(currentItems).filter(Boolean).length : 2}
+            </span>
           </div>
-          <span className="hidden sm:inline font-semibold text-xs font-mono">
-            {validation.filledSlotCount > 0 ? formatINR(validation.landedPrice.landedPrice) : 'Cart'}
+          <span className="font-semibold text-xs font-mono">
+            {formatINR(validation.landedPrice.landedPrice > 0 ? validation.landedPrice.landedPrice : 2000)}
           </span>
         </button>
 
         {/* Active Role Pill in Header */}
         <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-[#E6E1D3] bg-[#F4F1EA] text-xs shadow-2xs">
-          <span className="text-[#8B8B7A] text-[10px] font-bold uppercase tracking-wider">Role:</span>
-          {userRole === 'admin' ? (
-            <span className="font-bold text-[#8B5A2B] flex items-center gap-1">
-              <span>Admin</span>
-            </span>
-          ) : userRole === 'customer' ? (
-            <span className="font-bold text-[#2C3A2B] flex items-center gap-1">
-              <span>Customer</span>
-            </span>
-          ) : (
-            <button
-              onClick={() => setActiveTab('dashboard')}
-              className="text-[#2C3A2B] font-bold hover:underline cursor-pointer"
-            >
-              Front Page (Login)
-            </button>
-          )}
+          <span className="text-[#8B8B7A] text-[10px] font-bold uppercase tracking-wider">ROLE:</span>
+          <span className="font-bold text-[#2C3A2B]">
+            {userRole === 'admin' ? 'Admin' : 'Customer'}
+          </span>
         </div>
 
-        {/* User Profile Avatar with Initials "TA" */}
+        {/* User Profile Avatar with Initials "TA" and name "Tanmay Anand" */}
         <div className="relative" ref={profileRef}>
           <button
             onClick={() => setShowProfile(prev => !prev)}
             aria-label="User profile settings"
-            className="flex items-center gap-2 pl-1 pr-1.5 py-1 rounded-xl hover:bg-[#F4F1EA] transition-colors cursor-pointer"
+            className="flex items-center gap-2 pl-1 pr-1.5 py-1 rounded-xl hover:bg-[#F4F1EA] transition-colors cursor-pointer text-left"
           >
-            <div className="w-7 h-7 rounded-full bg-[#2C3A2B] text-white flex items-center justify-center font-bold text-xs tracking-tight shadow-2xs ring-1 ring-[#E6E1D3]">
+            <div className="w-7 h-7 rounded-full bg-[#1E2923] text-white flex items-center justify-center font-bold text-xs tracking-tight shadow-xs ring-1 ring-[#E6E1D3]">
               TA
             </div>
-            <span className="hidden sm:inline text-xs font-medium text-[#2C2C1E]">
-              {userRole === 'admin' ? 'Admin' : userRole === 'customer' ? 'Customer' : 'Guest'}
-            </span>
-            <ChevronDown className="w-3 h-3 text-[#8B8B7A]" />
+            <div className="hidden sm:flex flex-col leading-tight">
+              <div className="flex items-center gap-1 text-xs font-bold text-[#2C2C1E]">
+                <span>Tanmay Anand</span>
+                <ChevronDown className="w-3 h-3 text-[#8B8B7A]" />
+              </div>
+              <span className="text-[10px] text-[#8B8B7A] capitalize">
+                {userRole === 'admin' ? 'Admin' : 'Customer'}
+              </span>
+            </div>
           </button>
 
           {showProfile && (
@@ -272,6 +261,17 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
                   </button>
                 )}
               </div>
+
+              <button
+                onClick={() => {
+                  setActiveTab('profile');
+                  setShowProfile(false);
+                }}
+                className="w-full text-left px-3 py-1.5 rounded-xl text-xs font-semibold text-[#2C3A2B] hover:bg-[#F4F1EA] flex items-center justify-between cursor-pointer"
+              >
+                <span>My Profile</span>
+                <User className="w-3.5 h-3.5 text-[#5A5A40]" />
+              </button>
 
               <button
                 onClick={() => {

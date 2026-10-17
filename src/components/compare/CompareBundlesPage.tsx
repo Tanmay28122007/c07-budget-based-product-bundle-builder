@@ -22,11 +22,13 @@ import {
   LayoutGrid,
   Eye,
   SlidersHorizontal,
-  BookmarkPlus
+  BookmarkPlus,
+  X
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { formatINR } from '../../utils/pricing';
-import { SavedBundle, RequiredSlot } from '../../types';
+import { SavedBundle, RequiredSlot, Product, BundleValidationResult } from '../../types';
+import { validateBundle } from '../../utils/bundleValidation';
 import { exportBundleToCSV, downloadFile } from '../../utils/exportUtils';
 import { RequiredSlotCard } from '../builder/RequiredSlotCard';
 import { ProductSelectorModal } from '../builder/ProductSelectorModal';
@@ -43,6 +45,7 @@ export const CompareBundlesPage: React.FC<CompareBundlesPageProps> = ({ initialM
     currentItems,
     validation,
     removeProduct,
+    selectProduct,
     resetBundle,
     saveCurrentBundle,
     optimizeBundle,
@@ -50,14 +53,18 @@ export const CompareBundlesPage: React.FC<CompareBundlesPageProps> = ({ initialM
     loadSavedBundle,
     deleteSavedBundle,
     setActiveTab,
-    toggleAssistant
+    toggleAssistant,
+    userRole
   } = useApp();
 
   // Mode state: 'workspace' for full bundle building, 'compare' for side-by-side comparison
   const [viewMode, setViewMode] = useState<'workspace' | 'compare'>(() => {
     if (initialMode) return initialMode;
+    if (userRole === 'customer') return 'workspace';
     return savedBundles.length === 0 ? 'workspace' : 'compare';
   });
+
+  const [showRecommendationsModal, setShowRecommendationsModal] = useState(false);
 
   // Builder workspace state
   const [activeSlotForSelection, setActiveSlotForSelection] = useState<RequiredSlot | null>(null);
@@ -77,6 +84,51 @@ export const CompareBundlesPage: React.FC<CompareBundlesPageProps> = ({ initialM
   const budgetPresets = fixture.activity.defaultBudget <= 10000 
     ? [1000, 1999, 2000, 2200, 3000]
     : [35000, 55000, 75000, 95000, 120000];
+
+  // Precompute top 10 feasible bundle recommendations
+  const recommendedBundles = useMemo(() => {
+    const slots = fixture.activity.requiredSlots;
+    if (slots.length === 0) return [];
+
+    const slotCandidates: Record<string, Product[]> = {};
+    for (const slot of slots) {
+      slotCandidates[slot.id] = fixture.products.filter(
+        p => p.category === slot.category && p.inStock && (p.stockQuantity === undefined || p.stockQuantity > 0)
+      );
+    }
+
+    if (slots.some(s => (slotCandidates[s.id] || []).length === 0)) return [];
+
+    const slotIds = slots.map(s => s.id);
+    const validList: { items: Record<string, Product>; validation: BundleValidationResult }[] = [];
+
+    function explore(index: number, current: Record<string, Product>) {
+      if (index === slotIds.length) {
+        const val = validateBundle(current, slots, budget, fixture.shippingRule, fixture.taxRule);
+        if (val.isValid) {
+          validList.push({ items: { ...current }, validation: val });
+        }
+        return;
+      }
+      const slotId = slotIds[index];
+      for (const candidate of slotCandidates[slotId] || []) {
+        current[slotId] = candidate;
+        explore(index + 1, current);
+        delete current[slotId];
+      }
+    }
+
+    explore(0, {});
+    validList.sort((a, b) => a.validation.landedPrice.landedPrice - b.validation.landedPrice.landedPrice);
+    return validList.slice(0, 10);
+  }, [fixture, budget]);
+
+  const handleApplyRecommendation = (recItems: Record<string, Product>) => {
+    Object.entries(recItems).forEach(([slotId, prod]) => {
+      selectProduct(slotId, prod);
+    });
+    setShowRecommendationsModal(false);
+  };
 
   const handleRunOptimizer = () => {
     const res = optimizeBundle(optimizerPreference);
@@ -198,71 +250,34 @@ export const CompareBundlesPage: React.FC<CompareBundlesPageProps> = ({ initialM
 
   return (
     <div className="space-y-6 animate-fade-in-up">
-      {/* Top Header & View Segmented Switch */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-2 border-b border-[#E6E1D3]/70">
-        <div>
-          <div className="flex items-center gap-2.5">
-            <h1 className="font-serif text-2xl font-bold tracking-tight text-[#2C3A2B]">
-              Compare Builder
-            </h1>
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold tracking-wider uppercase bg-[#2C3A2B] text-amber-200 shadow-2xs">
-              Workspace & Comparison
-            </span>
+      {/* Top Header & View Segmented Switch (Only for admin or when comparing saved bundles) */}
+      {userRole === 'admin' && viewMode === 'compare' && (
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-2 border-b border-[#E6E1D3]/70">
+          <div>
+            <div className="flex items-center gap-2.5">
+              <h1 className="font-serif text-2xl font-bold tracking-tight text-[#2C3A2B]">
+                Compare Builder
+              </h1>
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold tracking-wider uppercase bg-[#2C3A2B] text-amber-200 shadow-2xs">
+                Comparison View
+              </span>
+            </div>
+            <p className="text-xs text-[#5A5A40] mt-0.5">
+              Compare landed costs, shipping, and tradeoffs side-by-side.
+            </p>
           </div>
-          <p className="text-xs text-[#5A5A40] mt-0.5">
-            Assemble product bundles within fixed budgets, run auto-optimizers, and compare landed costs & tradeoffs side-by-side.
-          </p>
-        </div>
 
-        {/* View Switcher: Workspace vs Compare */}
-        <div className="flex flex-wrap items-center gap-2.5">
-          <div className="inline-flex items-center p-1 bg-[#F4F1EA] border border-[#E6E1D3] rounded-2xl shadow-inner">
+          <div className="flex items-center gap-2">
             <button
               onClick={() => setViewMode('workspace')}
-              className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer hover:scale-102 active:scale-98 ${
-                viewMode === 'workspace'
-                  ? 'bg-[#2C3A2B] text-white shadow-xs'
-                  : 'text-[#5A5A40] hover:text-[#2C3A2B] hover:bg-white/60'
-              }`}
+              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-[#2C3A2B] text-white shadow-xs cursor-pointer"
             >
               <LayoutGrid className="w-3.5 h-3.5" />
-              <span>Bundle Workspace</span>
-              <span className={`text-[10px] font-mono px-1.5 py-0.2 rounded-md ${
-                viewMode === 'workspace' ? 'bg-white/20 text-white' : 'bg-[#E6E1D3] text-[#5A5A40]'
-              }`}>
-                {validation.filledSlotCount}/{validation.totalSlotCount}
-              </span>
-            </button>
-
-            <button
-              onClick={() => setViewMode('compare')}
-              className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer hover:scale-102 active:scale-98 ${
-                viewMode === 'compare'
-                  ? 'bg-[#2C3A2B] text-white shadow-xs'
-                  : 'text-[#5A5A40] hover:text-[#2C3A2B] hover:bg-white/60'
-              }`}
-            >
-              <Columns className="w-3.5 h-3.5" />
-              <span>Compare Bundles</span>
-              <span className={`text-[10px] font-mono px-1.5 py-0.2 rounded-md ${
-                viewMode === 'compare' ? 'bg-white/20 text-white' : 'bg-[#E6E1D3] text-[#5A5A40]'
-              }`}>
-                {savedBundles.length}
-              </span>
+              <span>Back to Workspace</span>
             </button>
           </div>
-
-          {/* Quick Snapshot Action */}
-          <button
-            onClick={handleSnapshotActive}
-            title="Snapshot active setup to saved comparison bundles"
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-[#8B5A2B] bg-white hover:bg-[#F4F1EA] border border-[#E6E1D3] rounded-xl shadow-2xs hover:shadow-md transition-all cursor-pointer hover:scale-105 active:scale-95"
-          >
-            <BookmarkPlus className="w-3.5 h-3.5 text-[#8B5A2B]" />
-            <span>Snapshot Setup</span>
-          </button>
         </div>
-      </div>
+      )}
 
       {/* ========================================================================= */}
       {/* VIEW 1: BUNDLE WORKSPACE (All Bundle Builder Features)                     */}
@@ -270,53 +285,75 @@ export const CompareBundlesPage: React.FC<CompareBundlesPageProps> = ({ initialM
       {viewMode === 'workspace' && (
         <div className="space-y-6">
           {/* Global Workspace Control Bar */}
-          <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 bg-white border border-[#E6E1D3] rounded-2xl shadow-2xs">
-            <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 sm:p-4 bg-white border border-[#E6E1D3] rounded-[24px] shadow-xs">
+            {/* Left Action Buttons */}
+            <div className="flex flex-wrap items-center gap-2.5">
               {/* Optimizer Dropdown & Run Button */}
               <div className="flex items-center rounded-xl border border-[#E6E1D3] bg-[#FDFBF7] p-0.5 shadow-2xs">
                 <select
                   value={optimizerPreference}
                   onChange={e => setOptimizerPreference(e.target.value as any)}
-                  className="text-xs text-[#2C2C1E] bg-transparent px-2.5 py-1 focus:outline-hidden cursor-pointer"
+                  className="text-xs font-semibold text-[#2C2C1E] bg-transparent px-3 py-1.5 focus:outline-hidden cursor-pointer"
                 >
                   <option value="lowest_cost">Lowest Cost</option>
                   <option value="best_value">Best Value</option>
                 </select>
                 <button
                   onClick={handleRunOptimizer}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-[#2C3A2B] hover:bg-[#3A4D39] rounded-lg transition-colors cursor-pointer"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold text-white bg-[#2C3A2B] hover:bg-[#1E281D] rounded-lg transition-all cursor-pointer shadow-xs active:scale-95"
                 >
                   <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-                  Find a Valid Bundle
+                  <span>Find a Valid Bundle</span>
                 </button>
               </div>
 
+              {/* 10 Recommendations Button */}
+              <button
+                onClick={() => setShowRecommendationsModal(true)}
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold text-[#065F46] bg-[#ECFDF5] hover:bg-[#D1FAE5] border border-[#A7F3D0] rounded-xl shadow-2xs transition-all cursor-pointer active:scale-95"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-[#059669]" />
+                <span>10 Recommendations</span>
+              </button>
+
+              {/* AI Assistant Button */}
               <button
                 onClick={toggleAssistant}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-[#8B5A2B] bg-[#F4F1EA] hover:bg-[#E6E1D3] border border-[#E6E1D3] rounded-xl shadow-2xs transition-colors cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold text-[#8B5A2B] bg-[#FDFBF7] hover:bg-[#F4F1EA] border border-[#E6E1D3] rounded-xl shadow-2xs transition-all cursor-pointer active:scale-95"
               >
                 <Sparkles className="w-3.5 h-3.5 text-[#8B5A2B]" />
-                AI Assistant
+                <span>AI Assistant</span>
               </button>
             </div>
 
+            {/* Right Action Buttons */}
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setShowSaveModal(true)}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-[#2C2C1E] bg-white hover:bg-[#F4F1EA] border border-[#E6E1D3] rounded-xl shadow-2xs transition-colors cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-semibold text-[#2C2C1E] bg-white hover:bg-[#F4F1EA] border border-[#E6E1D3] rounded-xl shadow-2xs transition-colors cursor-pointer"
               >
                 <Save className="w-3.5 h-3.5 text-[#8B8B7A]" />
-                Save Bundle
+                <span>Save Bundle</span>
               </button>
 
               <button
                 onClick={() => setShowResetConfirm(true)}
-                className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-[#5A5A40] hover:text-[#2C2C1E] hover:bg-[#F4F1EA] rounded-xl transition-colors cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-[#5A5A40] hover:text-[#2C2C1E] hover:bg-[#F4F1EA] rounded-xl transition-colors cursor-pointer"
                 title="Reset all product slots"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
-                Reset
+                <span>Reset</span>
               </button>
+
+              {userRole === 'admin' && savedBundles.length > 0 && (
+                <button
+                  onClick={() => setViewMode('compare')}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-[#8B5A2B] bg-[#F4F1EA] hover:bg-[#E6E1D3] border border-[#E6E1D3] rounded-xl transition-colors cursor-pointer ml-1"
+                >
+                  <Columns className="w-3.5 h-3.5" />
+                  <span>Compare ({savedBundles.length})</span>
+                </button>
+              )}
             </div>
           </div>
 
@@ -336,43 +373,24 @@ export const CompareBundlesPage: React.FC<CompareBundlesPageProps> = ({ initialM
             </div>
           )}
 
-          {/* Budget Configuration */}
-          <div className="p-5 bg-white border border-[#E6E1D3] rounded-[24px] shadow-xs">
-            <span className="text-[11px] font-semibold text-[#8B5A2B] uppercase tracking-wider block mb-1">
-              Total Budget (₹)
+          {/* Total Budget Card */}
+          <div className="p-5 sm:p-6 bg-white border border-[#E6E1D3] rounded-[24px] shadow-xs space-y-2">
+            <span className="text-[11px] font-bold text-[#8B5A2B] uppercase tracking-wider block">
+              TOTAL BUDGET (₹)
             </span>
 
-            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-              <div className="relative flex-1">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8B8B7A] font-mono text-xs">
-                  ₹
-                </span>
-                <input
-                  type="number"
-                  min="0"
-                  step="1000"
-                  value={budget}
-                  onChange={e => setBudget(Number(e.target.value))}
-                  className="w-full pl-7 pr-3 py-1.5 text-sm font-mono font-bold text-[#2C3A2B] bg-[#F4F1EA]/70 focus:bg-white border border-[#E6E1D3] rounded-xl focus:outline-hidden focus:border-[#2C3A2B]"
-                />
-              </div>
-
-              {/* Presets */}
-              <div className="flex items-center gap-1.5 overflow-x-auto">
-                {budgetPresets.map(preset => (
-                  <button
-                    key={preset}
-                    onClick={() => setBudget(preset)}
-                    className={`px-3 py-1.5 text-[11px] font-mono rounded-lg border transition-colors shrink-0 cursor-pointer ${
-                      budget === preset
-                        ? 'bg-[#2C3A2B] text-white border-[#2C3A2B] font-semibold'
-                        : 'bg-[#F4F1EA] hover:bg-[#E6E1D3] text-[#5A5A40] border-[#E6E1D3]'
-                    }`}
-                  >
-                    ₹{(preset / 1000).toFixed(0)}k
-                  </button>
-                ))}
-              </div>
+            <div className="relative max-w-xs w-full">
+              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8B8B7A] font-mono text-sm font-bold">
+                ₹
+              </span>
+              <input
+                type="number"
+                min="0"
+                step="100"
+                value={budget}
+                onChange={e => setBudget(Number(e.target.value))}
+                className="w-full pl-8 pr-3 py-2 text-sm font-mono font-bold text-[#2C3A2B] bg-[#F4F1EA]/80 focus:bg-white border border-[#E6E1D3] rounded-xl focus:outline-hidden focus:border-[#2C3A2B] transition-all"
+              />
             </div>
           </div>
 
@@ -391,9 +409,9 @@ export const CompareBundlesPage: React.FC<CompareBundlesPageProps> = ({ initialM
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className={`text-xs font-mono font-semibold px-2.5 py-1 rounded-lg border ${
+                  <span className={`text-xs font-mono font-semibold px-3 py-1 rounded-full border ${
                     validation.isComplete
-                      ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                      ? 'bg-[#ECFDF5] text-[#065F46] border-[#A7F3D0]'
                       : validation.filledSlotCount > 0
                       ? 'bg-amber-50 text-amber-800 border-amber-200'
                       : 'bg-[#F4F1EA] text-[#5A5A40] border-[#E6E1D3]'
@@ -489,8 +507,8 @@ export const CompareBundlesPage: React.FC<CompareBundlesPageProps> = ({ initialM
                 <div className="flex items-center justify-between pb-3 border-b border-[#E6E1D3]/80">
                   <h3 className="font-serif text-sm font-bold text-[#2C3A2B]">Budget & Landed Cost</h3>
                   {validation.isValid ? (
-                    <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#A3B18A]/25 text-[#2C3A2B] border border-[#A3B18A]/50 flex items-center gap-1">
-                      <Check className="w-3 h-3 text-[#2C3A2B]" /> Valid Bundle
+                    <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#ECFDF5] text-[#065F46] border border-[#A7F3D0] flex items-center gap-1">
+                      <Check className="w-3 h-3 text-[#065F46]" /> Valid Bundle
                     </span>
                   ) : validation.landedPrice.isOverBudget ? (
                     <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-rose-50 text-rose-700 border border-rose-200 flex items-center gap-1">
@@ -514,11 +532,11 @@ export const CompareBundlesPage: React.FC<CompareBundlesPageProps> = ({ initialM
                 {/* KPI Metric Tiles: Landed Total & Remaining Budget */}
                 <div className="grid grid-cols-2 gap-2.5">
                   {/* Landed Total Metric */}
-                  <div className="p-3 rounded-2xl bg-[#FDFBF7] border border-[#E6E1D3]">
+                  <div className="p-3.5 rounded-2xl bg-[#FDFBF7] border border-[#E6E1D3]">
                     <span className="text-[10px] font-mono font-bold text-[#8B5A2B] uppercase tracking-wider block">
-                      Landed Total
+                      LANDED TOTAL
                     </span>
-                    <div className={`text-lg sm:text-xl font-bold font-mono tabular-nums mt-0.5 ${
+                    <div className={`text-xl sm:text-2xl font-bold font-mono tabular-nums mt-0.5 ${
                       validation.landedPrice.isOverBudget ? 'text-rose-600' : 'text-[#2C3A2B]'
                     }`}>
                       {formatINR(validation.landedPrice.landedPrice)}
@@ -529,15 +547,13 @@ export const CompareBundlesPage: React.FC<CompareBundlesPageProps> = ({ initialM
                   </div>
 
                   {/* Remaining Budget Metric */}
-                  <div className="p-3 rounded-2xl bg-[#FDFBF7] border border-[#E6E1D3]">
+                  <div className="p-3.5 rounded-2xl bg-[#FDFBF7] border border-[#E6E1D3]">
                     <span className="text-[10px] font-mono font-bold text-[#8B5A2B] uppercase tracking-wider block">
-                      {validation.landedPrice.isOverBudget ? 'Budget Deficit' : 'Remaining Budget'}
+                      REMAINING BUDGET
                     </span>
-                    <div className={`text-lg sm:text-xl font-bold font-mono tabular-nums mt-0.5 ${
+                    <div className={`text-xl sm:text-2xl font-bold font-mono tabular-nums mt-0.5 ${
                       validation.landedPrice.isOverBudget
                         ? 'text-rose-600'
-                        : validation.landedPrice.remainingBudget === 0 && validation.filledSlotCount > 0
-                        ? 'text-[#2C3A2B]'
                         : 'text-emerald-700'
                     }`}>
                       {validation.landedPrice.isOverBudget
@@ -546,15 +562,11 @@ export const CompareBundlesPage: React.FC<CompareBundlesPageProps> = ({ initialM
                     </div>
                     <div className="mt-0.5">
                       {validation.landedPrice.isOverBudget ? (
-                        <span className="text-[10px] font-semibold text-rose-700 bg-rose-50 px-1.5 py-0.2 rounded border border-rose-200">
+                        <span className="text-[10px] font-semibold text-rose-700 bg-rose-50 px-2 py-0.5 rounded-full border border-rose-200">
                           Exceeded
                         </span>
-                      ) : validation.landedPrice.remainingBudget === 0 && validation.filledSlotCount > 0 ? (
-                        <span className="text-[10px] font-semibold text-emerald-800 bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200">
-                          Exact Fit
-                        </span>
                       ) : (
-                        <span className="text-[10px] font-semibold text-emerald-800 bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200">
+                        <span className="text-[10px] font-semibold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
                           Within Budget
                         </span>
                       )}
@@ -1190,6 +1202,97 @@ export const CompareBundlesPage: React.FC<CompareBundlesPageProps> = ({ initialM
                 className="px-4 py-1.5 text-xs font-semibold text-white bg-rose-700 hover:bg-rose-800 rounded-xl shadow-xs cursor-pointer"
               >
                 Clear All Slots
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 10 Recommendations Modal */}
+      {showRecommendationsModal && (
+        <div className="fixed inset-0 z-50 bg-[#2C2C1E]/50 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-white rounded-[24px] max-w-2xl w-full border border-[#E6E1D3] p-6 shadow-2xl space-y-4 max-h-[85vh] flex flex-col">
+            <div className="flex items-center justify-between pb-3 border-b border-[#E6E1D3]">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-[#ECFDF5] border border-[#A7F3D0] flex items-center justify-center text-[#065F46]">
+                  <Sparkles className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="font-serif text-base font-bold text-[#2C3A2B]">Top Bundle Recommendations</h3>
+                  <p className="text-xs text-[#5A5A40]">
+                    Evaluated feasible compatible product combinations within your {formatINR(budget)} budget.
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowRecommendationsModal(false)}
+                className="p-1.5 rounded-lg text-[#8B8B7A] hover:text-[#2C2C1E] hover:bg-[#F4F1EA] transition-colors cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="overflow-y-auto space-y-3 flex-1 pr-1">
+              {recommendedBundles.length === 0 ? (
+                <div className="p-8 text-center text-xs text-[#5A5A40] space-y-2">
+                  <p className="font-semibold text-sm text-[#2C3A2B]">No Complete Combinations Found Within Budget</p>
+                  <p>Try increasing your total budget or check inventory stock.</p>
+                </div>
+              ) : (
+                recommendedBundles.map((rec, idx) => (
+                  <div
+                    key={idx}
+                    className="p-4 rounded-2xl border border-[#E6E1D3] bg-[#FDFBF7] hover:border-[#8B5A2B]/40 hover:bg-white transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 group"
+                  >
+                    <div className="space-y-1.5 flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#2C3A2B] text-white">
+                          Option #{idx + 1}
+                        </span>
+                        <span className="text-xs font-semibold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+                          {formatINR(rec.validation.landedPrice.remainingBudget)} Headroom
+                        </span>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-2 pt-1">
+                        {Object.entries(rec.items).map(([slotId, prod]) => (
+                          <span
+                            key={slotId}
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white border border-[#E6E1D3] text-xs font-mono text-[#2C3A2B]"
+                          >
+                            <span className="font-bold text-[#8B5A2B]">{slotId}:</span>
+                            <span className="truncate max-w-[150px]">{prod.name}</span>
+                            <span className="text-[#8B8B7A]">({formatINR(prod.price)})</span>
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-2 shrink-0 border-t sm:border-t-0 pt-2 sm:pt-0 border-[#E6E1D3]/50">
+                      <div className="text-right">
+                        <span className="text-[10px] text-[#8B8B7A] uppercase font-mono block">Landed Price</span>
+                        <span className="font-mono font-bold text-base text-[#2C3A2B]">
+                          {formatINR(rec.validation.landedPrice.landedPrice)}
+                        </span>
+                      </div>
+                      <button
+                        onClick={() => handleApplyRecommendation(rec.items)}
+                        className="px-3.5 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider text-white bg-[#2C3A2B] hover:bg-[#1E281D] shadow-xs hover:shadow-md transition-all cursor-pointer active:scale-95"
+                      >
+                        Apply Bundle
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            <div className="pt-2 border-t border-[#E6E1D3] flex items-center justify-between text-xs text-[#5A5A40]">
+              <span>Showing {recommendedBundles.length} recommendations</span>
+              <button
+                onClick={() => setShowRecommendationsModal(false)}
+                className="px-4 py-1.5 rounded-xl font-medium text-[#5A5A40] hover:bg-[#F4F1EA] cursor-pointer transition-colors"
+              >
+                Close
               </button>
             </div>
           </div>
