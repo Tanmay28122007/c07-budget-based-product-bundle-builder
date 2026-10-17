@@ -15,6 +15,7 @@ import { BusinessInsightsPage } from './components/business/BusinessInsightsPage
 import { ProjectEvidencePage } from './components/evidence/ProjectEvidencePage';
 import { SettingsPage } from './components/settings/SettingsPage';
 import { GeminiChatbotPage } from './components/chat/GeminiChatbotPage';
+import { ProductDetailPage } from './components/catalogue/ProductDetailPage';
 
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -36,6 +37,7 @@ const AppContent: React.FC = () => {
           {activeTab === 'builder' && <CompareBundlesPage initialMode="workspace" />}
           {activeTab === 'chat' && <GeminiChatbotPage />}
           {activeTab === 'catalogue' && <ProductCataloguePage />}
+          {activeTab === 'product-detail' && <ProductDetailPage />}
           {activeTab === 'compare' && <CompareBundlesPage />}
           {activeTab === 'tests' && <TestResultsPage />}
           {activeTab === 'business' && <BusinessInsightsPage />}

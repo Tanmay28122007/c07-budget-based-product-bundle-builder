@@ -150,7 +150,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
 
           {navItems.map(item => {
             const Icon = item.icon;
-            const isActive = activeTab === item.id;
+            const isActive = activeTab === item.id || (item.id === 'catalogue' && activeTab === 'product-detail');
             return (
               <button
                 key={item.id}

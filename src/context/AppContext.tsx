@@ -49,6 +49,9 @@ interface AppContextType {
   // Navigation & View
   activeTab: string;
   setActiveTab: (tab: string) => void;
+  selectedProductId: string | null;
+  openProductDetails: (productId: string) => void;
+  closeProductDetails: () => void;
   searchQuery: string;
   setSearchQuery: (q: string) => void;
 
@@ -268,6 +271,17 @@ const INITIAL_UNIT_ECONOMICS: UnitEconomicsParams = {
   monthlyBasketsForecast: 80
 };
 
+function parseProductHash(hash: string): string | null {
+  const clean = hash.replace('#', '').trim();
+  if (clean.startsWith('product-') && clean !== 'product-detail') {
+    return clean.replace('product-', '');
+  }
+  if (clean.startsWith('product/')) {
+    return clean.replace('product/', '');
+  }
+  return null;
+}
+
 const VALID_TABS = [
   'dashboard',
   'builder',
@@ -277,13 +291,15 @@ const VALID_TABS = [
   'tests',
   'business',
   'evidence',
-  'settings'
+  'settings',
+  'product-detail'
 ];
 
 const getInitialTab = (): string => {
   try {
     if (typeof window !== 'undefined' && window.location.hash) {
       const hash = window.location.hash.replace('#', '').trim();
+      if (parseProductHash(window.location.hash)) return 'product-detail';
       if (hash === 'builder') return 'catalogue';
       if (VALID_TABS.includes(hash)) return hash;
     }
@@ -302,10 +318,25 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [activeTab, setActiveTabState] = useState<string>(getInitialTab);
+  const [selectedProductId, setSelectedProductId] = useState<string | null>(() => {
+    try {
+      if (typeof window !== 'undefined' && window.location.hash) {
+        const prod = parseProductHash(window.location.hash);
+        if (prod) return prod;
+      }
+      if (typeof localStorage !== 'undefined') {
+        return localStorage.getItem('c07_selected_product_v1');
+      }
+    } catch {}
+    return null;
+  });
 
   const setActiveTab = (tab: string) => {
     if (!VALID_TABS.includes(tab)) return;
     setActiveTabState(tab);
+    if (tab !== 'product-detail') {
+      setSelectedProductId(null);
+    }
     try {
       localStorage.setItem('c07_active_tab_v1', tab);
       if (typeof window !== 'undefined' && window.location.hash.replace('#', '') !== tab) {
@@ -314,11 +345,50 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     } catch {}
   };
 
+  const openProductDetails = (productId: string) => {
+    setSelectedProductId(productId);
+    setActiveTabState('product-detail');
+    try {
+      localStorage.setItem('c07_active_tab_v1', 'product-detail');
+      localStorage.setItem('c07_selected_product_v1', productId);
+      if (typeof window !== 'undefined') {
+        window.history.pushState(null, '', `#product-${productId}`);
+      }
+    } catch {}
+  };
+
+  const closeProductDetails = () => {
+    setSelectedProductId(null);
+    setActiveTabState('catalogue');
+    try {
+      localStorage.setItem('c07_active_tab_v1', 'catalogue');
+      localStorage.removeItem('c07_selected_product_v1');
+      if (typeof window !== 'undefined') {
+        window.history.pushState(null, '', '#catalogue');
+      }
+    } catch {}
+  };
+
   // Keep activeTab in sync with browser back/forward and URL hash navigation
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash.replace('#', '').trim();
+      const prodId = parseProductHash(window.location.hash);
+      if (prodId) {
+        setSelectedProductId(prodId);
+        setActiveTabState('product-detail');
+        try {
+          localStorage.setItem('c07_active_tab_v1', 'product-detail');
+          localStorage.setItem('c07_selected_product_v1', prodId);
+        } catch {}
+        return;
+      }
+      if (hash === 'product-detail') {
+        setActiveTabState('product-detail');
+        return;
+      }
       if (VALID_TABS.includes(hash) && hash !== activeTab) {
+        setSelectedProductId(null);
         setActiveTabState(hash);
         try {
           localStorage.setItem('c07_active_tab_v1', hash);
@@ -333,13 +403,18 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   useEffect(() => {
     if (activeTab && VALID_TABS.includes(activeTab)) {
       try {
-        if (window.location.hash.replace('#', '') !== activeTab) {
+        if (activeTab === 'product-detail' && selectedProductId) {
+          const expectedHash = `#product-${selectedProductId}`;
+          if (window.location.hash !== expectedHash) {
+            window.history.replaceState(null, '', expectedHash);
+          }
+        } else if (window.location.hash.replace('#', '') !== activeTab) {
           window.history.replaceState(null, '', `#${activeTab}`);
         }
         localStorage.setItem('c07_active_tab_v1', activeTab);
       } catch {}
     }
-  }, [activeTab]);
+  }, [activeTab, selectedProductId]);
 
   const [searchQuery, setSearchQuery] = useState<string>('');
 
@@ -917,6 +992,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
         activeTab,
         setActiveTab,
+        selectedProductId,
+        openProductDetails,
+        closeProductDetails,
         searchQuery,
         setSearchQuery,
 
