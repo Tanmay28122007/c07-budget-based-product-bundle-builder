@@ -45,10 +45,6 @@ function getColourHex(colour?: string): string {
   if (c.includes('black')) return '#1E293B';
   if (c.includes('grey') || c.includes('gray')) return '#64748B';
   if (c.includes('green')) return '#16A34A';
-  if (c.includes('brown')) return '#8B5A2B';
-  if (c.includes('silver')) return '#94A3B8';
-  if (c.includes('khaki') || c.includes('tan')) return '#C3B091';
-  if (c.includes('white')) return '#FFFFFF';
   return '#9CA3AF';
 }
 
