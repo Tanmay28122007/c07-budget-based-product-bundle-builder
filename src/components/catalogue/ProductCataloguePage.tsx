@@ -15,7 +15,9 @@ import {
   Check,
   PackageSearch,
   RotateCcw,
-  Trash2
+  Trash2,
+  ChevronUp,
+  Info
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { Product } from '../../types';
@@ -58,7 +60,7 @@ export const ProductCataloguePage: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedStockStatus, setSelectedStockStatus] = useState<string>('all');
   const [sortField, setSortField] = useState<'price_asc' | 'price_desc' | 'name' | 'id'>('price_asc');
-  const [viewingProduct, setViewingProduct] = useState<Product | null>(null);
+  const [expandedProductId, setExpandedProductId] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'list' | 'table'>('list');
   const [imgErrors, setImgErrors] = useState<Record<string, boolean>>({});
 
@@ -250,18 +252,23 @@ export const ProductCataloguePage: React.FC = () => {
                 const isInCurrentBundle = Boolean(bundleSlotKey);
                 const imgSrc = getProductImageUrl(p.image, p.id);
                 const hasImgError = imgErrors[p.id];
+                const isExpanded = expandedProductId === p.id;
 
                 return (
                   <div
                     key={p.id}
-                    className={`bg-white border rounded-[24px] p-5 sm:p-6 shadow-xs hover:shadow-md transition-all duration-200 flex flex-col md:flex-row items-stretch gap-6 relative group ${
+                    className={`bg-white border rounded-[24px] p-5 sm:p-6 shadow-xs hover:shadow-md transition-all duration-200 flex flex-col relative group ${
                       isInCurrentBundle
                         ? 'border-[#2C3A2B] ring-2 ring-[#2C3A2B]/15 bg-[#FDFBF7]'
+                        : isExpanded
+                        ? 'border-[#2C3A2B] shadow-md bg-[#FDFBF7]'
                         : 'border-[#E6E1D3] hover:border-[#8B5A2B]/40'
                     }`}
                   >
-                    {/* 1. LEFT SECTION: Main Product Image & Thumbnail */}
-                    <div className="w-full md:w-56 lg:w-64 shrink-0 flex flex-col items-center">
+                    {/* Top Row: 3 Amazon-style Sections */}
+                    <div className="flex flex-col md:flex-row items-stretch gap-6">
+                      {/* 1. LEFT SECTION: Main Product Image & Thumbnail */}
+                      <div className="w-full md:w-56 lg:w-64 shrink-0 flex flex-col items-center">
                       {/* Main Image Box */}
                       <div className="w-full aspect-square bg-[#FDFBF7] rounded-2xl border border-[#E6E1D3] p-4 flex items-center justify-center relative overflow-hidden group/img">
                         {hasImgError ? (
@@ -282,12 +289,16 @@ export const ProductCataloguePage: React.FC = () => {
                           />
                         )}
 
-                        {/* Quick View Button */}
+                        {/* Quick Inspect Button */}
                         <button
-                          onClick={() => setViewingProduct(p)}
-                          className="absolute top-2.5 right-2.5 p-1.5 rounded-lg bg-white/90 backdrop-blur-xs text-[#5A5A40] hover:text-[#2C2C1E] border border-[#E6E1D3] shadow-xs opacity-0 group-hover/img:opacity-100 transition-opacity cursor-pointer"
-                          title="Quick inspect"
-                          aria-label="Quick inspect"
+                          onClick={() => setExpandedProductId(prev => prev === p.id ? null : p.id)}
+                          className={`absolute top-2.5 right-2.5 p-1.5 rounded-lg border shadow-xs transition-all cursor-pointer ${
+                            isExpanded
+                              ? 'bg-[#2C3A2B] text-white border-[#2C3A2B] opacity-100'
+                              : 'bg-white/90 backdrop-blur-xs text-[#5A5A40] hover:text-[#2C2C1E] border-[#E6E1D3] opacity-0 group-hover/img:opacity-100'
+                          }`}
+                          title={isExpanded ? "Close inspection" : "Inspect details"}
+                          aria-label="Inspect details"
                         >
                           <Eye className="w-3.5 h-3.5" />
                         </button>
@@ -358,7 +369,7 @@ export const ProductCataloguePage: React.FC = () => {
 
                         {/* Product Name */}
                         <h3
-                          onClick={() => setViewingProduct(p)}
+                          onClick={() => setExpandedProductId(prev => prev === p.id ? null : p.id)}
                           className="font-serif font-bold text-[#2C3A2B] text-lg sm:text-xl leading-snug group-hover:text-[#8B5A2B] transition-colors cursor-pointer"
                         >
                           {p.name}
@@ -435,11 +446,11 @@ export const ProductCataloguePage: React.FC = () => {
                       {/* Technical Sheet Link */}
                       <div className="pt-3 mt-2 border-t border-[#E6E1D3]/50">
                         <button
-                          onClick={() => setViewingProduct(p)}
+                          onClick={() => setExpandedProductId(prev => prev === p.id ? null : p.id)}
                           className="inline-flex items-center gap-1.5 text-xs text-[#8B5A2B] hover:text-[#5C3A1B] font-semibold transition-colors cursor-pointer"
                         >
                           <Eye className="w-3.5 h-3.5" />
-                          <span>View Full Technical Sheet & Specifications</span>
+                          <span>{isExpanded ? 'Hide Technical Sheet' : 'View Full Technical Sheet & Specifications'}</span>
                         </button>
                       </div>
                     </div>
@@ -526,16 +537,222 @@ export const ProductCataloguePage: React.FC = () => {
                         )}
 
                         <button
-                          onClick={() => setViewingProduct(p)}
-                          className="w-full py-1.5 px-3 text-[11px] font-medium text-[#5A5A40] hover:text-[#2C2C1E] hover:bg-[#F4F1EA] rounded-xl border border-[#E6E1D3] transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                          onClick={() => setExpandedProductId(prev => prev === p.id ? null : p.id)}
+                          className={`w-full py-2 px-3 text-xs font-semibold rounded-xl border transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                            isExpanded
+                              ? 'bg-[#2C3A2B] text-white border-[#2C3A2B] shadow-xs hover:bg-[#1E281D]'
+                              : 'text-[#5A5A40] hover:text-[#2C2C1E] hover:bg-[#F4F1EA] border-[#E6E1D3]'
+                          }`}
                         >
-                          <Eye className="w-3.5 h-3.5" />
-                          <span>Inspect Details</span>
+                          {isExpanded ? (
+                            <>
+                              <ChevronUp className="w-3.5 h-3.5" />
+                              <span>Close Details</span>
+                            </>
+                          ) : (
+                            <>
+                              <Eye className="w-3.5 h-3.5" />
+                              <span>Inspect Details</span>
+                            </>
+                          )}
                         </button>
                       </div>
                     </div>
                   </div>
-                );
+
+                  {/* Inline Product Inspection Panel - Opens right here itself */}
+                  {isExpanded && (
+                    <div className="w-full mt-6 pt-6 border-t border-[#E6E1D3] animate-fadeIn space-y-5">
+                      {/* Inspection Header */}
+                      <div className="flex items-start justify-between pb-3.5 border-b border-[#E6E1D3]/80">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#8B5A2B] bg-[#F4F1EA] px-2.5 py-0.5 rounded-md border border-[#E6E1D3]">
+                              {p.id} · {p.category.toUpperCase()}
+                            </span>
+                            <span className="text-xs text-[#5A5A40]">
+                              Brand: <strong className="text-[#2C3A2B]">{p.brand}</strong> | Model: <strong className="text-[#2C3A2B]">{p.model}</strong>
+                            </span>
+                          </div>
+                          <h4 className="font-serif font-bold text-xl text-[#2C3A2B] mt-1">
+                            {p.name}
+                          </h4>
+                        </div>
+
+                        <button
+                          onClick={() => setExpandedProductId(null)}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-[#5A5A40] hover:text-[#2C2C1E] bg-[#F4F1EA] hover:bg-[#E6E1D3] border border-[#E6E1D3] rounded-xl transition-all cursor-pointer shadow-2xs"
+                          title="Close details"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                          <span>Close</span>
+                        </button>
+                      </div>
+
+                      {/* 2-Column Inspection View */}
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+                        {/* Left: Large High-Res Picture */}
+                        <div className="md:col-span-1 aspect-square bg-[#FDFBF7] rounded-2xl border border-[#E6E1D3] p-5 flex items-center justify-center relative shadow-inner overflow-hidden">
+                          {hasImgError ? (
+                            <Package className="w-16 h-16 text-[#8B8B7A]" />
+                          ) : (
+                            <img
+                              src={imgSrc}
+                              alt={p.name}
+                              className="w-full h-full object-contain mix-blend-multiply transition-transform duration-300 hover:scale-105"
+                            />
+                          )}
+                          <span className="absolute bottom-2.5 left-2.5 text-[9px] font-mono px-2 py-0.5 rounded-md bg-white/85 backdrop-blur-xs text-[#5A5A40] border border-[#E6E1D3]">
+                            Inspecting {p.id}
+                          </span>
+                        </div>
+
+                        {/* Right: Pricing & Full Specs */}
+                        <div className="md:col-span-2 space-y-3.5">
+                          {/* Pricing & Stock Banner */}
+                          <div className="p-4 bg-[#F5F5EC] rounded-2xl border border-[#E6E1D3] space-y-1">
+                            <span className="text-[10px] text-[#5A5A40] font-semibold uppercase tracking-wider block">
+                              Pricing & Stock
+                            </span>
+                            <div className="flex items-center justify-between text-sm">
+                              <span className="font-mono font-bold text-2xl text-[#2C3A2B]">
+                                {formatINR(p.price)}
+                              </span>
+                              <span
+                                className={`text-xs font-bold px-2.5 py-0.5 rounded-full border ${
+                                  p.inStock
+                                    ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                                    : 'bg-rose-50 text-rose-800 border-rose-200'
+                                }`}
+                              >
+                                {p.inStock
+                                  ? `${p.stockQuantity} Units In Stock`
+                                  : 'Out of Stock'}
+                              </span>
+                            </div>
+                            {p.attributes?.unitCostInr && (
+                              <div className="text-[11px] font-mono text-[#5A5A40] pt-0.5">
+                                Product Unit Cost: <strong className="text-[#2C3A2B]">{formatINR(p.attributes.unitCostInr)}</strong>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Description */}
+                          <div>
+                            <span className="text-[10px] text-[#5A5A40] font-semibold uppercase tracking-wider block mb-1">
+                              Description
+                            </span>
+                            <p className="text-xs text-[#4A4A35] leading-relaxed bg-[#FDFBF7] p-3.5 rounded-xl border border-[#E6E1D3]">
+                              {p.description}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Compatibility & Specifications Box */}
+                      <div>
+                        <span className="text-[10px] text-[#5A5A40] font-semibold uppercase tracking-wider block mb-1.5">
+                          Compatibility & Specifications
+                        </span>
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs font-mono bg-[#FDFBF7] p-4 rounded-2xl border border-[#E6E1D3] text-[#2C3A2B]">
+                          <div className="p-2.5 bg-white rounded-xl border border-[#E6E1D3]">
+                            <span className="text-[9px] text-[#8B8B7A] block uppercase font-sans font-semibold">Category</span>
+                            <span className="font-bold">{p.category}</span>
+                          </div>
+
+                          {p.attributes?.size && (
+                            <div className="p-2.5 bg-white rounded-xl border border-[#E6E1D3]">
+                              <span className="text-[9px] text-[#8B8B7A] block uppercase font-sans font-semibold">Size</span>
+                              <span className="font-bold">{p.attributes.size}</span>
+                            </div>
+                          )}
+
+                          {p.attributes?.colour && (
+                            <div className="p-2.5 bg-white rounded-xl border border-[#E6E1D3]">
+                              <span className="text-[9px] text-[#8B8B7A] block uppercase font-sans font-semibold">Colour</span>
+                              <div className="flex items-center gap-1.5 mt-0.5">
+                                <span
+                                  className="w-3 h-3 rounded-full border border-black/20 shrink-0"
+                                  style={{ backgroundColor: getColourHex(p.attributes.colour) }}
+                                />
+                                <span className="font-bold">{p.attributes.colour}</span>
+                              </div>
+                            </div>
+                          )}
+
+                          {p.attributes?.unitCostInr && (
+                            <div className="p-2.5 bg-white rounded-xl border border-[#E6E1D3]">
+                              <span className="text-[9px] text-[#8B8B7A] block uppercase font-sans font-semibold">Unit Cost</span>
+                              <span className="font-bold">{formatINR(p.attributes.unitCostInr)}</span>
+                            </div>
+                          )}
+
+                          {p.attributes?.connector && (
+                            <div className="p-2.5 bg-white rounded-xl border border-[#E6E1D3]">
+                              <span className="text-[9px] text-[#8B8B7A] block uppercase font-sans font-semibold">Port</span>
+                              <span className="font-bold">{p.attributes.connector.toUpperCase()}</span>
+                            </div>
+                          )}
+
+                          {p.attributes?.compatibleWith?.length ? (
+                            <div className="p-2.5 bg-white rounded-xl border border-[#E6E1D3] sm:col-span-2">
+                              <span className="text-[9px] text-[#8B8B7A] block uppercase font-sans font-semibold">Compatibility</span>
+                              <span className="font-bold">{p.attributes.compatibleWith.join(', ')}</span>
+                            </div>
+                          ) : null}
+
+                          {p.weightKg > 0 && !p.attributes?.size && (
+                            <div className="p-2.5 bg-white rounded-xl border border-[#E6E1D3]">
+                              <span className="text-[9px] text-[#8B8B7A] block uppercase font-sans font-semibold">Weight</span>
+                              <span className="font-bold">{p.weightKg} kg</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Compatibility Note if present */}
+                      {p.notes && (
+                        <div className="p-3.5 rounded-xl bg-[#FEF9C3] border border-[#F4E1A1] text-xs text-[#713F12] flex items-start gap-2">
+                          <Info className="w-4 h-4 text-[#854D0E] shrink-0 mt-0.5" />
+                          <div>
+                            <span className="font-bold">Compatibility Note: </span>
+                            <span>{p.notes}</span>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Footer Actions */}
+                      <div className="pt-2 flex items-center justify-end gap-2 border-t border-[#E6E1D3]">
+                        <button
+                          onClick={() => setExpandedProductId(null)}
+                          className="px-4 py-2 text-xs text-[#5A5A40] hover:text-[#2C2C1E] hover:bg-[#F4F1EA] rounded-xl font-medium cursor-pointer transition-colors"
+                        >
+                          Close Details
+                        </button>
+
+                        {isInCurrentBundle ? (
+                          <button
+                            type="button"
+                            onClick={() => bundleSlotKey && removeProduct(bundleSlotKey)}
+                            className="px-4 py-2 text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-xl shadow-xs cursor-pointer flex items-center gap-1.5 transition-colors"
+                          >
+                            <Trash2 className="w-3.5 h-3.5 text-rose-600" />
+                            <span>Remove from Bundle</span>
+                          </button>
+                        ) : p.inStock ? (
+                          <button
+                            onClick={() => selectProduct(p.category, p)}
+                            className="px-4 py-2 text-xs font-semibold text-white bg-[#2C3A2B] hover:bg-[#1E281D] rounded-xl shadow-xs cursor-pointer flex items-center gap-1.5 transition-colors"
+                          >
+                            <Plus className="w-3.5 h-3.5" />
+                            <span>Add to Slot</span>
+                          </button>
+                        ) : null}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
               })}
             </div>
           )}
@@ -665,9 +882,9 @@ export const ProductCataloguePage: React.FC = () => {
                         <td className="py-3.5 px-4 text-right">
                           <div className="flex items-center justify-end gap-1.5">
                             <button
-                              onClick={() => setViewingProduct(p)}
-                              className="p-1.5 text-[#5A5A40] hover:text-[#2C3A2B] hover:bg-[#F4F1EA] rounded-lg transition-colors"
-                              title="View full specs"
+                              onClick={() => setExpandedProductId(prev => prev === p.id ? null : p.id)}
+                              className="p-1.5 text-[#5A5A40] hover:text-[#2C3A2B] hover:bg-[#F4F1EA] rounded-lg transition-colors cursor-pointer"
+                              title={expandedProductId === p.id ? "Close inspection" : "Inspect full specs"}
                             >
                               <Eye className="w-4 h-4" />
                             </button>
@@ -718,163 +935,6 @@ export const ProductCataloguePage: React.FC = () => {
             <span className="font-mono text-[11px]">
               Source of Truth: {isCustomFixture ? 'Loaded JSON' : 'Synthetic Data Engine'}
             </span>
-          </div>
-        </div>
-      )}
-
-      {/* Product Detail Modal / Technical Sheet */}
-      {viewingProduct && (
-        <div className="fixed inset-0 z-50 bg-[#2C3A2B]/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-[24px] max-w-2xl w-full border border-[#E6E1D3] shadow-2xl overflow-hidden p-6 space-y-4">
-            <div className="flex items-start justify-between">
-              <div>
-                <span className="text-[11px] font-mono text-[#8B5A2B] uppercase tracking-wider font-semibold">
-                  {viewingProduct.id} · {viewingProduct.category}
-                </span>
-                <h3 className="text-xl font-serif font-bold text-[#2C3A2B] mt-0.5">
-                  {viewingProduct.name}
-                </h3>
-                <div className="text-xs text-[#5A5A40] font-mono mt-0.5">
-                  Brand: {viewingProduct.brand} | Model: {viewingProduct.model}
-                </div>
-              </div>
-              <button
-                onClick={() => setViewingProduct(null)}
-                className="p-1 rounded-lg text-[#5A5A40] hover:text-[#2C3A2B] hover:bg-[#F4F1EA] cursor-pointer"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {/* Modal Image Box */}
-              <div className="sm:col-span-1 aspect-square bg-[#FDFBF7] rounded-xl border border-[#E6E1D3] p-3 flex items-center justify-center">
-                {imgErrors[viewingProduct.id] ? (
-                  <Package className="w-12 h-12 text-[#8B8B7A]" />
-                ) : (
-                  <img
-                    src={getProductImageUrl(viewingProduct.image, viewingProduct.id)}
-                    alt={viewingProduct.name}
-                    className="w-full h-full object-contain mix-blend-multiply"
-                  />
-                )}
-              </div>
-
-              {/* Modal Details */}
-              <div className="sm:col-span-2 space-y-3">
-                <div className="p-3 bg-[#F5F5EC] rounded-xl border border-[#E6E1D3] space-y-1">
-                  <span className="text-[10px] text-[#5A5A40] font-semibold uppercase tracking-wider">
-                    Pricing & Stock
-                  </span>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="font-mono font-bold text-[#2C3A2B] text-lg">
-                      {formatINR(viewingProduct.price)}
-                    </span>
-                    <span
-                      className={`text-xs font-semibold ${
-                        viewingProduct.inStock ? 'text-[#1E3A1E]' : 'text-[#991B1B]'
-                      }`}
-                    >
-                      {viewingProduct.inStock
-                        ? `${viewingProduct.stockQuantity} Units In Stock`
-                        : 'Out of Stock'}
-                    </span>
-                  </div>
-                  {viewingProduct.attributes.unitCostInr && (
-                    <div className="text-[11px] font-mono text-[#5A5A40] pt-0.5">
-                      Product Unit Cost: {formatINR(viewingProduct.attributes.unitCostInr)}
-                    </div>
-                  )}
-                </div>
-
-                <div>
-                  <span className="text-[10px] text-[#5A5A40] font-semibold uppercase tracking-wider block mb-1">
-                    Description
-                  </span>
-                  <p className="text-xs text-[#5A5A40] leading-relaxed">
-                    {viewingProduct.description}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <span className="text-[10px] text-[#5A5A40] font-semibold uppercase tracking-wider block mb-1">
-                Compatibility & Specifications
-              </span>
-              <div className="grid grid-cols-2 gap-2 text-xs font-mono bg-[#FDFBF7] p-3.5 rounded-xl border border-[#E6E1D3] text-[#2C3A2B]">
-                <div>Category: {viewingProduct.category}</div>
-                {viewingProduct.attributes.size && <div>Size: {viewingProduct.attributes.size}</div>}
-                {viewingProduct.attributes.colour && (
-                  <div className="flex items-center gap-1.5">
-                    <span
-                      className="w-2.5 h-2.5 rounded-full border border-black/20"
-                      style={{ backgroundColor: getColourHex(viewingProduct.attributes.colour) }}
-                    />
-                    <span>Colour: {viewingProduct.attributes.colour}</span>
-                  </div>
-                )}
-                {viewingProduct.attributes.unitCostInr && (
-                  <div>Unit Cost: {formatINR(viewingProduct.attributes.unitCostInr)}</div>
-                )}
-                {viewingProduct.attributes.connector && (
-                  <div>Port: {viewingProduct.attributes.connector.toUpperCase()}</div>
-                )}
-                {viewingProduct.attributes.compatibleWith?.length ? (
-                  <div>Compatibility: {viewingProduct.attributes.compatibleWith.join(', ')}</div>
-                ) : null}
-                {viewingProduct.weightKg > 0 && !viewingProduct.attributes.size && (
-                  <div>Weight: {viewingProduct.weightKg} kg</div>
-                )}
-              </div>
-            </div>
-
-            {viewingProduct.notes && (
-              <div className="p-3 rounded-xl bg-[#FEF9C3] border border-[#F4E1A1] text-xs text-[#713F12]">
-                <span className="font-semibold">Compatibility Note:</span> {viewingProduct.notes}
-              </div>
-            )}
-
-            <div className="pt-2 flex items-center justify-end gap-2 border-t border-[#E6E1D3]">
-              <button
-                onClick={() => setViewingProduct(null)}
-                className="px-3.5 py-2 text-xs text-[#5A5A40] hover:bg-[#F4F1EA] rounded-xl font-medium cursor-pointer"
-              >
-                Close
-              </button>
-              {(() => {
-                const modalSlotKey = Object.entries(currentItems).find(([_, item]) => item?.id === viewingProduct.id)?.[0];
-                if (modalSlotKey) {
-                  return (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        removeProduct(modalSlotKey);
-                        setViewingProduct(null);
-                      }}
-                      className="px-4 py-2 text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-xl shadow-xs cursor-pointer flex items-center gap-1.5"
-                    >
-                      <Trash2 className="w-3.5 h-3.5 text-rose-600" />
-                      <span>Remove from Bundle</span>
-                    </button>
-                  );
-                }
-                if (viewingProduct.inStock) {
-                  return (
-                    <button
-                      onClick={() => {
-                        selectProduct(viewingProduct.category, viewingProduct);
-                        setViewingProduct(null);
-                      }}
-                      className="px-4 py-2 text-xs font-semibold text-white bg-[#2C3A2B] hover:bg-[#3A4D39] rounded-xl shadow-xs cursor-pointer"
-                    >
-                      Assign to Slot
-                    </button>
-                  );
-                }
-                return null;
-              })()}
-            </div>
           </div>
         </div>
       )}
