@@ -821,15 +821,10 @@ Choose your preferred language below or ask me anything to assemble, optimize, o
 
               {isLoading && (
                 <div className="flex justify-start">
-                  <div className="bg-white border border-[#E6E1D3] p-3 rounded-t-2xl rounded-br-2xl shadow-xs flex items-center gap-2 text-[#5A5A40]">
-                    <Loader2 className="w-4 h-4 text-[#8B5A2B] animate-spin" />
-                    <span className="text-xs">
-                      {selectedLang === 'hi'
-                        ? 'Gemini विश्लेषण कर रहा है...'
-                        : selectedLang === 'gu'
-                        ? 'Gemini વિશ્લેષણ કરી રહ્યું છે...'
-                        : 'Gemini is analyzing whole website context...'}
-                    </span>
+                  <div className="bg-white border border-[#E6E1D3] px-3.5 py-2.5 rounded-2xl rounded-bl-xs shadow-xs flex items-center gap-1.5 text-[#5A5A40]">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#8B5A2B] animate-bounce" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#8B5A2B] animate-bounce [animation-delay:0.2s]" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#8B5A2B] animate-bounce [animation-delay:0.4s]" />
                   </div>
                 </div>
               )}

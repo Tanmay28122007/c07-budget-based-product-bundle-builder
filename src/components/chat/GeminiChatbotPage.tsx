@@ -1142,13 +1142,10 @@ Please provide an in-depth ergonomic & procurement evaluation for this product b
               <div className="w-8 h-8 rounded-xl bg-[#2C3A2B] text-white shrink-0 flex items-center justify-center shadow-xs">
                 <Bot className="w-4 h-4 text-[#F5F5EC] animate-pulse" />
               </div>
-              <div className="bg-white border border-[#E6E1D3] rounded-2xl rounded-tl-xs px-4 py-3 shadow-2xs flex items-center gap-2 text-[#5A5A40]">
+              <div className="bg-white border border-[#E6E1D3] rounded-2xl rounded-tl-xs px-4 py-3 shadow-2xs flex items-center gap-1.5 text-[#5A5A40]">
                 <span className="w-2 h-2 rounded-full bg-[#8B5A2B] animate-bounce" />
                 <span className="w-2 h-2 rounded-full bg-[#8B5A2B] animate-bounce [animation-delay:0.2s]" />
                 <span className="w-2 h-2 rounded-full bg-[#8B5A2B] animate-bounce [animation-delay:0.4s]" />
-                <span className="text-xs font-medium text-[#5A5A40] ml-1">
-                  Gemini is evaluating multi-turn context...
-                </span>
               </div>
             </div>
           )}
