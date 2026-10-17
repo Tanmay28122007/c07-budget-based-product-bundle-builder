@@ -191,7 +191,7 @@ export async function fetchSavedBundlesFromDb(): Promise<SavedBundle[]> {
     return [];
   }
 
-  return data.map(row => ({
+  return data.map((row: any) => ({
     id: row.id,
     name: row.name,
     activityId: row.activity_id,
