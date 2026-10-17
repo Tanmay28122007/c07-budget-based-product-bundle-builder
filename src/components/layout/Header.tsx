@@ -7,13 +7,10 @@ import {
   AlertTriangle,
   Info,
   X,
-  ChevronDown,
   LogOut,
-  ShoppingCart,
-  User
+  Wallet
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
-import { formatINR } from '../../utils/pricing';
 
 interface HeaderProps {
   onToggleSidebar: () => void;
@@ -30,9 +27,8 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
     userRole,
     loginAs,
     logout,
-    validation,
-    toggleCart,
-    currentItems
+    budget,
+    setBudget
   } = useApp();
 
   const [showNotifications, setShowNotifications] = useState(false);
@@ -58,8 +54,8 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
 
   return (
     <header className="sticky top-0 z-30 h-16 bg-[#FDFBF7]/90 backdrop-blur-md border-b border-[#E6E1D3] px-4 lg:px-6 flex items-center justify-between gap-4">
-      {/* Left Area: Mobile Menu & Search Bar */}
-      <div className="flex items-center gap-3 flex-1 max-w-md sm:max-w-lg lg:max-w-xl">
+      {/* Left Area: Mobile Menu, Search Bar & Budget Bar Side-by-Side */}
+      <div className="flex items-center gap-3 flex-1 max-w-xl sm:max-w-2xl lg:max-w-3xl">
         <button
           onClick={onToggleSidebar}
           aria-label="Toggle navigation menu"
@@ -69,7 +65,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
         </button>
 
         {/* Global Search Bar */}
-        <div className="relative w-full">
+        <div className="relative flex-1 min-w-[180px]">
           <Search className="w-3.5 h-3.5 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8B8B7A]" />
           <input
             type="text"
@@ -87,10 +83,34 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
             </button>
           )}
         </div>
+
+        {/* Budget Input Bar - Placed next to the product search bar */}
+        <div className="flex items-center gap-1.5 shrink-0">
+          <span className="text-[11px] font-bold text-[#8B5A2B] uppercase tracking-wider hidden sm:inline-flex items-center gap-1">
+            <Wallet className="w-3.5 h-3.5 text-[#8B5A2B]" />
+            <span>Budget:</span>
+          </span>
+          <div className="relative w-28 sm:w-36">
+            <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[#8B5A2B] font-mono text-xs font-bold pointer-events-none">
+              ₹
+            </span>
+            <input
+              type="number"
+              min="0"
+              step="500"
+              value={budget || ''}
+              onChange={e => setBudget(Math.max(0, Number(e.target.value) || 0))}
+              placeholder="Budget"
+              title="Set Target Budget (₹)"
+              className="w-full pl-6 pr-2.5 py-2 text-xs font-mono font-bold text-[#2C2C1E] bg-[#F4F1EA]/70 hover:bg-[#F4F1EA] focus:bg-white border border-[#E6E1D3] rounded-xl focus:outline-hidden focus:border-[#2C3A2B] transition-all placeholder-[#8B8B7A] shadow-2xs"
+            />
+          </div>
+        </div>
       </div>
 
-      {/* Right Controls: Notifications, Cart, Role, Profile & Logout */}
+      {/* Right Controls: Notifications & Profile Avatar */}
       <div className="flex items-center gap-3">
+
         {/* Notifications Popover */}
         <div className="relative" ref={notifRef}>
           <button
@@ -99,7 +119,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
               if (!showNotifications) markNotificationsRead();
             }}
             aria-label="View system notifications"
-            className="relative p-2 text-[#5A5A40] hover:text-[#2C2C1E] hover:bg-[#F4F1EA] rounded-xl transition-colors cursor-pointer"
+            className="relative p-2 text-[#5A5A40] hover:text-[#2C2C1E] hover:bg-[#F4F1EA] rounded-xl transition-colors"
           >
             <Bell className="w-4 h-4" />
             {unreadCount > 0 && (
@@ -119,7 +139,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
                 <div className="flex items-center gap-2">
                   <button
                     onClick={clearNotifications}
-                    className="text-[11px] text-[#5A5A40] hover:text-[#2C2C1E] cursor-pointer"
+                    className="text-[11px] text-[#5A5A40] hover:text-[#2C2C1E]"
                   >
                     Clear all
                   </button>
@@ -162,50 +182,16 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
           )}
         </div>
 
-        {/* Bundle Cart Option in Corner */}
-        <button
-          onClick={toggleCart}
-          aria-label="View bundle cart"
-          className="relative flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#2C3A2B] hover:bg-[#1E281D] text-white border border-[#2C3A2B] shadow-xs hover:shadow-md transition-all duration-200 cursor-pointer hover:scale-105 active:scale-95"
-          title="View bundle cart"
-        >
-          <div className="relative flex items-center justify-center">
-            <ShoppingCart className="w-4 h-4 text-amber-200" />
-            <span className="absolute -top-1.5 -right-2 min-w-4 h-4 px-1 rounded-full bg-amber-400 text-[#2C2C1E] font-bold text-[10px] flex items-center justify-center shadow-xs">
-              {Object.values(currentItems).filter(Boolean).length > 0 ? Object.values(currentItems).filter(Boolean).length : 2}
-            </span>
-          </div>
-          <span className="font-semibold text-xs font-mono">
-            {formatINR(validation.landedPrice.landedPrice > 0 ? validation.landedPrice.landedPrice : 2000)}
-          </span>
-        </button>
-
-        {/* Active Role Pill in Header */}
-        <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-[#E6E1D3] bg-[#F4F1EA] text-xs shadow-2xs">
-          <span className="text-[#8B8B7A] text-[10px] font-bold uppercase tracking-wider">ROLE:</span>
-          <span className="font-bold text-[#2C3A2B]">
-            {userRole === 'admin' ? 'Admin' : 'Customer'}
-          </span>
-        </div>
-
-        {/* User Profile Avatar with Initials "TA" and name "Tanmay Anand" */}
+        {/* User Profile Avatar on Top Right Corner */}
         <div className="relative" ref={profileRef}>
           <button
             onClick={() => setShowProfile(prev => !prev)}
             aria-label="User profile settings"
-            className="flex items-center gap-2 pl-1 pr-1.5 py-1 rounded-xl hover:bg-[#F4F1EA] transition-colors cursor-pointer text-left"
+            title="Tanmay Anand"
+            className="flex items-center justify-center p-0.5 rounded-full hover:ring-2 hover:ring-[#2C3A2B]/20 transition-all cursor-pointer group"
           >
-            <div className="w-7 h-7 rounded-full bg-[#1E2923] text-white flex items-center justify-center font-bold text-xs tracking-tight shadow-xs ring-1 ring-[#E6E1D3]">
+            <div className="w-8 h-8 rounded-full bg-[#2C3A2B] text-white flex items-center justify-center font-bold text-xs tracking-tight shadow-xs ring-2 ring-[#E6E1D3] group-hover:ring-[#2C3A2B] transition-transform group-hover:scale-105">
               TA
-            </div>
-            <div className="hidden sm:flex flex-col leading-tight">
-              <div className="flex items-center gap-1 text-xs font-bold text-[#2C2C1E]">
-                <span>Tanmay Anand</span>
-                <ChevronDown className="w-3 h-3 text-[#8B8B7A]" />
-              </div>
-              <span className="text-[10px] text-[#8B8B7A] capitalize">
-                {userRole === 'admin' ? 'Admin' : 'Customer'}
-              </span>
             </div>
           </button>
 
@@ -222,7 +208,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
               </div>
 
               {/* Role Actions */}
-              <div className="p-1 space-y-1 border-b border-[#E6E1D3] mb-1">
+              <div className="p-1 space-y-1">
                 {userRole !== 'customer' && (
                   <button
                     onClick={() => {
@@ -233,18 +219,6 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
                   >
                     <span>Login as Customer</span>
                     <span className="text-[10px] font-mono text-[#8B8B7A]">Shopper</span>
-                  </button>
-                )}
-                {userRole !== 'admin' && (
-                  <button
-                    onClick={() => {
-                      loginAs('admin');
-                      setShowProfile(false);
-                    }}
-                    className="w-full text-left px-3 py-1.5 rounded-xl text-xs font-medium text-[#8B5A2B] hover:bg-[#F4F1EA] flex items-center justify-between cursor-pointer"
-                  >
-                    <span>Login as Admin</span>
-                    <span className="text-[10px] font-mono text-[#8B8B7A]">Manager</span>
                   </button>
                 )}
                 {userRole && (
@@ -259,33 +233,9 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
                   </button>
                 )}
               </div>
-
-              <button
-                onClick={() => {
-                  setActiveTab('profile');
-                  setShowProfile(false);
-                }}
-                className="w-full text-left px-3 py-1.5 rounded-xl text-xs font-semibold text-[#2C3A2B] hover:bg-[#F4F1EA] flex items-center justify-between cursor-pointer"
-              >
-                <span>My Profile</span>
-                <User className="w-3.5 h-3.5 text-[#5A5A40]" />
-              </button>
             </div>
           )}
         </div>
-
-        {/* Top-Right Corner Logout Button */}
-        {userRole && (
-          <button
-            onClick={() => logout()}
-            aria-label="Logout"
-            title="Log out and return to homepage"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#F4F1EA] hover:bg-rose-50 text-[#5A5A40] hover:text-rose-700 border border-[#E6E1D3] hover:border-rose-200 text-xs font-semibold shadow-2xs transition-all cursor-pointer group shrink-0"
-          >
-            <LogOut className="w-3.5 h-3.5 text-[#8B8B7A] group-hover:text-rose-600 transition-colors" />
-            <span className="hidden sm:inline">Logout</span>
-          </button>
-        )}
       </div>
     </header>
   );

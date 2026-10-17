@@ -16,18 +16,13 @@ import { ProjectEvidencePage } from './components/evidence/ProjectEvidencePage';
 import { SettingsPage } from './components/settings/SettingsPage';
 import { GeminiChatbotPage } from './components/chat/GeminiChatbotPage';
 import { ProductDetailPage } from './components/catalogue/ProductDetailPage';
-import { LandingPage } from './components/landing/LandingPage';
 import { ProfilePage } from './components/profile/ProfilePage';
 import { CheckoutPage } from './components/checkout/CheckoutPage';
 
 import { motion, AnimatePresence } from 'motion/react';
 
 const AppContent: React.FC = () => {
-  const { userRole, activeTab } = useApp();
-
-  if (!userRole) {
-    return <LandingPage />;
-  }
+  const { activeTab } = useApp();
 
   return (
     <AppLayout>
