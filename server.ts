@@ -4,10 +4,14 @@ import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 import { GoogleGenAI } from '@google/genai';
 
-dotenv.config();
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+dotenv.config({ path: path.join(__dirname, '.env') });
+
+function getGeminiApiKey(): string | undefined {
+  return process.env.GEMINI_API_KEY || dotenv.config({ path: path.join(__dirname, '.env') }).parsed?.GEMINI_API_KEY;
+}
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;
@@ -19,9 +23,10 @@ import { buildMasterSystemPrompt, generateComprehensiveHeuristicResponse } from 
 
 // Health check endpoint
 app.get('/api/health', (_req, res) => {
+  const apiKey = getGeminiApiKey();
   res.json({
     status: 'ok',
-    hasApiKey: Boolean(process.env.GEMINI_API_KEY),
+    hasApiKey: Boolean(apiKey),
     timestamp: new Date().toISOString()
   });
 });
@@ -35,7 +40,7 @@ app.post('/api/ai/assistant', async (req, res) => {
       return res.status(400).json({ error: 'A valid message string is required.' });
     }
 
-    const apiKey = process.env.GEMINI_API_KEY;
+    const apiKey = getGeminiApiKey();
 
     // Model selection based on user instructions:
     // - 'gemini-4-argon' for particularly complex tasks
