@@ -159,7 +159,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
               <PackagePlus className="w-5 h-5 text-amber-100" />
             </div>
             <div className="min-w-0">
-              <div className="font-serif text-sm font-bold tracking-tight text-[#2C3A2B] group-hover:text-[#8B5A2B] transition-colors leading-snug">
+              <div className="font-serif text-sm sm:text-base font-bold tracking-tight text-[#2C3A2B] group-hover:text-[#8B5A2B] transition-colors leading-snug">
                 Budget Based Product Bundle Builder
               </div>
             </div>
@@ -167,8 +167,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         </button>
 
         {/* Navigation Section */}
-        <nav className="flex-1 px-3.5 py-4 space-y-2 overflow-y-auto">
-          <div className="px-3 pb-2.5 text-xs font-bold text-[#7A7A68] uppercase tracking-wider">
+        <nav className="flex-1 px-3.5 py-4 space-y-2.5 overflow-y-auto">
+          <div className="px-3 pb-2 text-xs font-bold text-[#7A7A68] uppercase tracking-wider">
             Workspace
           </div>
 
@@ -186,7 +186,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                   }
                   onClose();
                 }}
-                className={`w-full flex items-center justify-between px-3.5 py-3 rounded-2xl text-sm font-medium transition-all duration-200 group/nav ${
+                className={`w-full flex items-center justify-between px-4 py-3.5 rounded-2xl text-sm sm:text-base font-medium transition-all duration-200 group/nav ${
                   isActive
                     ? 'bg-[#2C3A2B] text-white font-semibold shadow-md translate-x-1'
                     : 'text-[#4A4A35] hover:text-[#2C3A2B] hover:bg-[#F4F1EA] hover:translate-x-2 hover:shadow-xs'
@@ -198,7 +198,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                       isActive ? 'text-emerald-300' : 'text-[#7A7A68] group-hover/nav:text-[#2C3A2B]'
                     }`}
                   />
-                  <span className={isActive ? 'font-serif font-bold text-[14.5px]' : 'font-medium'}>{item.label}</span>
+                  <span className={isActive ? 'font-serif font-bold text-base' : 'font-medium text-sm sm:text-base'}>{item.label}</span>
                 </div>
 
                 {item.badge && (

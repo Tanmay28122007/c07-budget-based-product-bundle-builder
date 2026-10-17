@@ -282,56 +282,56 @@ export const BundleRecommendationsSection: React.FC<BundleRecommendationsSection
       {/* ========================================================================= */}
       {/* 1. TOP SEARCH & BUDGET FILTER BAR                                         */}
       {/* ========================================================================= */}
-      <div className="p-6 bg-white border border-[#E6E1D3] rounded-[28px] shadow-xs space-y-5">
+      <div className="p-6 sm:p-7 bg-white border border-[#E6E1D3] rounded-[28px] shadow-xs space-y-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-xs text-[#8B8B7A] font-mono font-semibold">
+              <span className="text-xs sm:text-sm text-[#8B5A2B] font-mono font-bold uppercase tracking-wider">
                 {bundles.length} bundles available
               </span>
             </div>
-            <h2 className="text-2xl font-serif font-bold text-[#2C3A2B] mt-1">
+            <h2 className="text-2xl sm:text-3xl font-serif font-bold text-[#2C3A2B] mt-1.5">
               Find or Build Your Perfect Bundle
             </h2>
-            <p className="text-xs text-[#5A5A40]">
+            <p className="text-sm sm:text-base text-[#4A4A35] leading-relaxed mt-1">
               Filter pre-configured workstation bundles by inserting required items and setting your target budget.
             </p>
           </div>
 
           {/* Quick preset chips */}
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2.5">
             <button
               onClick={() => {
                 const randomList = generateRandomDatabaseBundles(fixture.products, 25, fixture.shippingRule, fixture.taxRule, appBudget);
                 setBackendBundles(randomList);
                 addNotification('Bundles Shuffled', 'Loaded 25 randomized product bundles from database.', 'info');
               }}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-[#8B5A2B] bg-[#FDFBF7] hover:bg-[#F4F1EA] border border-[#E6E1D3] rounded-xl transition-all cursor-pointer shadow-2xs"
+              className="inline-flex items-center gap-2 px-4 py-2 text-xs sm:text-sm font-semibold text-[#8B5A2B] bg-[#FDFBF7] hover:bg-[#F4F1EA] border border-[#E6E1D3] rounded-xl transition-all cursor-pointer shadow-2xs hover:shadow-sm"
             >
-              <Sparkles className="w-3.5 h-3.5" />
+              <Sparkles className="w-4 h-4 text-[#8B5A2B]" />
               <span>Shuffle 25 Bundles</span>
             </button>
 
             <button
               onClick={handleResetFilters}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-[#5A5A40] bg-[#F4F1EA] hover:bg-[#E6E1D3] border border-[#E6E1D3] rounded-xl transition-all cursor-pointer shadow-2xs"
+              className="inline-flex items-center gap-2 px-4 py-2 text-xs sm:text-sm font-semibold text-[#5A5A40] bg-[#F4F1EA] hover:bg-[#E6E1D3] border border-[#E6E1D3] rounded-xl transition-all cursor-pointer shadow-2xs hover:shadow-sm"
             >
-              <RotateCcw className="w-3.5 h-3.5" />
+              <RotateCcw className="w-4 h-4 text-[#5A5A40]" />
               <span>Reset Filters</span>
             </button>
           </div>
         </div>
 
         {/* Filter Controls: Must-Have Product */}
-        <div className="pt-2 max-w-xl">
-          <label className="text-[10px] font-mono uppercase tracking-wider text-[#8B8B7A] font-bold block mb-1.5">
+        <div className="pt-1 max-w-2xl">
+          <label className="text-xs font-mono uppercase tracking-wider text-[#5A5A40] font-bold block mb-2">
             Insert Must-Have Product
           </label>
-          <form onSubmit={handleAddRequirement} className="flex items-center gap-2">
+          <form onSubmit={handleAddRequirement} className="flex items-center gap-2.5">
             <select
               value={selectedProductIdInput}
               onChange={(e) => setSelectedProductIdInput(e.target.value)}
-              className="flex-1 py-2.5 px-3 rounded-xl text-xs bg-[#FDFBF7] border border-[#E6E1D3] text-[#2C3A2B] focus:outline-none focus:border-[#2C3A2B] shadow-2xs cursor-pointer truncate"
+              className="flex-1 py-3 px-3.5 rounded-xl text-sm bg-[#FDFBF7] border border-[#E6E1D3] text-[#2C3A2B] focus:outline-none focus:border-[#2C3A2B] shadow-2xs cursor-pointer truncate"
             >
               <option value="">+ Choose product to insert...</option>
               {fixture.products.map(p => (
@@ -343,7 +343,7 @@ export const BundleRecommendationsSection: React.FC<BundleRecommendationsSection
             <button
               type="submit"
               disabled={!selectedProductIdInput}
-              className="px-4 py-2.5 rounded-xl text-xs font-bold text-white bg-[#2C3A2B] hover:bg-[#1E281D] disabled:bg-[#E6E1D3] disabled:text-[#8B8B7A] disabled:cursor-not-allowed transition-colors shadow-2xs shrink-0 cursor-pointer"
+              className="px-5 py-3 rounded-xl text-sm font-bold text-white bg-[#2C3A2B] hover:bg-[#1E281D] disabled:bg-[#E6E1D3] disabled:text-[#8B8B7A] disabled:cursor-not-allowed transition-colors shadow-xs shrink-0 cursor-pointer"
             >
               Insert
             </button>
@@ -352,8 +352,8 @@ export const BundleRecommendationsSection: React.FC<BundleRecommendationsSection
 
         {/* Active Requirements List / Filter Chips */}
         {requirements.length > 0 && (
-          <div className="pt-3 border-t border-[#E6E1D3]/80 flex flex-wrap items-center gap-2">
-            <span className="text-[11px] font-bold text-[#8B5A2B] uppercase tracking-wider">
+          <div className="pt-3 border-t border-[#E6E1D3]/80 flex flex-wrap items-center gap-2.5">
+            <span className="text-xs sm:text-sm font-bold text-[#8B5A2B] uppercase tracking-wider">
               Must Contain ({requirements.length}):
             </span>
             {requirements.map(req => {
@@ -361,7 +361,7 @@ export const BundleRecommendationsSection: React.FC<BundleRecommendationsSection
               return (
                 <span
                   key={req.id}
-                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-amber-50 text-amber-900 border border-amber-200 text-xs font-medium shadow-2xs"
+                  className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-amber-50 text-amber-900 border border-amber-200 text-xs sm:text-sm font-medium shadow-2xs"
                 >
                   <span className="font-bold">{req.quantity}x</span>
                   <span>{prod ? prod.name : req.productId}</span>
@@ -369,7 +369,7 @@ export const BundleRecommendationsSection: React.FC<BundleRecommendationsSection
                     onClick={() => handleRemoveRequirement(req.id)}
                     className="p-0.5 text-amber-700 hover:text-amber-900 rounded cursor-pointer"
                   >
-                    <X className="w-3 h-3" />
+                    <X className="w-3.5 h-3.5" />
                   </button>
                 </span>
               );
@@ -383,47 +383,47 @@ export const BundleRecommendationsSection: React.FC<BundleRecommendationsSection
         <button
           type="button"
           onClick={() => setActiveTab('catalogue')}
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider text-white bg-[#2C3A2B] hover:bg-[#1E281D] transition-all cursor-pointer shadow-xs hover:shadow-md hover:scale-102 active:scale-98"
+          className="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-2xl text-xs sm:text-sm font-bold uppercase tracking-wider text-white bg-[#2C3A2B] hover:bg-[#1E281D] transition-all cursor-pointer shadow-xs hover:shadow-md hover:scale-102 active:scale-98"
         >
-          <PackagePlus className="w-4 h-4 text-amber-300" />
+          <PackagePlus className="w-4.5 h-4.5 text-amber-300" />
           <span>+ Create Bundle</span>
         </button>
       </div>
 
       {/* Results Header Count Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 py-3 rounded-2xl bg-[#FDFBF7] border border-[#E6E1D3] shadow-2xs text-xs">
-        <div className="flex items-center gap-2 text-[#2C2C1E]">
-          <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-          <span className="font-semibold">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-6 py-4 rounded-2xl bg-[#FDFBF7] border border-[#E6E1D3] shadow-2xs text-sm">
+        <div className="flex items-center gap-2.5 text-[#2C2C1E]">
+          <CheckCircle2 className="w-4.5 h-4.5 text-emerald-600 shrink-0" />
+          <span className="font-bold text-sm sm:text-base">
             Showing {bundles.length} {bundles.length === 1 ? 'matching bundle' : 'matching bundles'}
           </span>
           {bundleSearch && (
-            <span className="text-[#8B5A2B] font-medium">
+            <span className="text-[#8B5A2B] font-semibold">
               for "{bundleSearch}"
             </span>
           )}
           {onlyWithinBudget && (
-            <span className="text-emerald-800 font-medium">
+            <span className="text-emerald-800 font-semibold">
               under {formatINR(appBudget)}
             </span>
           )}
         </div>
 
-        <div className="flex items-center gap-3">
-          <label className="flex items-center gap-1.5 cursor-pointer text-[#5A5A40]">
+        <div className="flex items-center gap-4">
+          <label className="flex items-center gap-2 cursor-pointer text-[#4A4A35]">
             <input
               type="checkbox"
               checked={onlyWithinBudget}
               onChange={(e) => setOnlyWithinBudget(e.target.checked)}
-              className="w-3.5 h-3.5 rounded text-[#2C3A2B] accent-[#2C3A2B] cursor-pointer"
+              className="w-4 h-4 rounded text-[#2C3A2B] accent-[#2C3A2B] cursor-pointer"
             />
-            <span className="text-xs font-medium">Filter strictly under budget</span>
+            <span className="text-xs sm:text-sm font-semibold">Filter strictly under budget</span>
           </label>
 
           <select
             value={bundleSort}
             onChange={(e) => setBundleSort(e.target.value as any)}
-            className="py-1 px-2.5 rounded-lg text-xs font-semibold bg-white border border-[#E6E1D3] text-[#2C3A2B] focus:outline-none cursor-pointer"
+            className="py-1.5 px-3 rounded-xl text-xs sm:text-sm font-semibold bg-white border border-[#E6E1D3] text-[#2C3A2B] focus:outline-none cursor-pointer shadow-2xs"
           >
             <option value="price_asc">Price: Low to High</option>
             <option value="price_desc">Price: High to Low</option>
