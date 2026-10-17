@@ -18,8 +18,7 @@ import {
   Info,
   SlidersHorizontal,
   Sparkles,
-  Loader2,
-  Server
+  Loader2
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { Product } from '../../types';
@@ -209,25 +208,6 @@ export const ProductCataloguePage: React.FC = () => {
             Verified inventory database for {fixture.activity.name} activity.
           </p>
         </div>
-
-        {/* Backend Connection Status Badge */}
-        <div className="flex items-center gap-2">
-          {backendStatus === 'connected' ? (
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-2xs">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <Server className="w-3 h-3 text-emerald-700" />
-              <span>Backend Connected</span>
-              {backendLatency !== null && (
-                <span className="font-mono text-[10px] text-emerald-600">({backendLatency}ms)</span>
-              )}
-            </div>
-          ) : (
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-800 border border-amber-200">
-              <span className="w-2 h-2 rounded-full bg-amber-500" />
-              <span>Client Memory Fallback</span>
-            </div>
-          )}
-        </div>
       </div>
 
       {/* Specific Details Filtering Panel */}
@@ -236,7 +216,7 @@ export const ProductCataloguePage: React.FC = () => {
           <div className="flex items-center gap-2">
             <SlidersHorizontal className="w-4 h-4 text-[#8B5A2B]" />
             <span className="text-xs font-bold text-[#2C3A2B] uppercase tracking-wider">
-              Filter by Specific Details (Backend API)
+              Filter by Specific Details
             </span>
           </div>
 

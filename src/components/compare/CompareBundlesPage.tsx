@@ -336,20 +336,10 @@ export const CompareBundlesPage: React.FC<CompareBundlesPageProps> = ({ initialM
               <span className={`text-[10px] font-mono px-1.5 py-0.2 rounded-md ${
                 viewMode === 'recommendations' ? 'bg-amber-400/20 text-amber-900 border border-amber-300/40' : 'bg-[#E6E1D3] text-[#5A5A40]'
               }`}>
-                20
+                25
               </span>
             </button>
           </div>
-
-          {/* Quick Snapshot Action */}
-          <button
-            onClick={handleSnapshotActive}
-            title="Snapshot active setup to saved comparison bundles"
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-[#8B5A2B] bg-white hover:bg-[#F4F1EA] border border-[#E6E1D3] rounded-xl shadow-2xs hover:shadow-md transition-all cursor-pointer hover:scale-105 active:scale-95"
-          >
-            <BookmarkPlus className="w-3.5 h-3.5 text-[#8B5A2B]" />
-            <span>Snapshot Setup</span>
-          </button>
         </div>
       </div>
 
@@ -358,7 +348,7 @@ export const CompareBundlesPage: React.FC<CompareBundlesPageProps> = ({ initialM
       {/* ========================================================================= */}
       {viewMode === 'workspace' && (
         <div className="space-y-6">
-          {/* Global Workspace Control Bar */}
+          {/* Global Workspace Control Bar - Merged with Minimalist Budget Input */}
           <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 bg-white border border-[#E6E1D3] rounded-2xl shadow-2xs">
             <div className="flex flex-wrap items-center gap-2">
               {/* Optimizer Dropdown & Run Button */}
@@ -383,10 +373,10 @@ export const CompareBundlesPage: React.FC<CompareBundlesPageProps> = ({ initialM
               <button
                 onClick={() => setViewMode('recommendations')}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-[#2C3A2B] bg-[#E8EFE9] hover:bg-[#D5E3D7] border border-[#C2D6C5] rounded-xl shadow-2xs transition-colors cursor-pointer"
-                title="Browse 10 dynamic bundle options matching requirements"
+                title="Browse 25 dynamic bundle options matching requirements"
               >
                 <Sparkles className="w-3.5 h-3.5 text-emerald-700" />
-                <span>10 Recommendations</span>
+                <span>25 Recommendations</span>
               </button>
 
               <button
@@ -433,27 +423,6 @@ export const CompareBundlesPage: React.FC<CompareBundlesPageProps> = ({ initialM
               </button>
             </div>
           )}
-
-          {/* Budget Configuration */}
-          <div className="p-5 bg-white border border-[#E6E1D3] rounded-[24px] shadow-xs">
-            <span className="text-[11px] font-semibold text-[#8B5A2B] uppercase tracking-wider block mb-1">
-              Total Budget (₹)
-            </span>
-
-            <div className="relative w-full sm:w-1/4 min-w-[200px]">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8B8B7A] font-mono text-xs">
-                ₹
-              </span>
-              <input
-                type="number"
-                min="0"
-                step="1000"
-                value={budget}
-                onChange={e => setBudget(Number(e.target.value))}
-                className="w-full pl-7 pr-3 py-2 text-sm font-mono font-bold text-[#2C3A2B] bg-[#F4F1EA]/70 focus:bg-white border border-[#E6E1D3] rounded-xl focus:outline-hidden focus:border-[#2C3A2B] transition-all"
-              />
-            </div>
-          </div>
 
           {/* Main Layout: Required Product Slots (Left) + Sticky Budget Summary (Right) */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
