@@ -320,7 +320,7 @@ const allSlotsHaveMatchingCategory = requiredSlots.every((slot: any) =>
 );
 
 assert(
-  benchmarkProducts.length === 60 &&
+  benchmarkProducts.length >= 60 &&
     requiredSlots.length >= 2 &&
     allSlotsHaveMatchingCategory &&
     activityName === 'C07 Product Bundle',

@@ -104,18 +104,43 @@ export const AIAssistantDrawer: React.FC = () => {
   const handleAddProductToCart = (product: Product) => {
     addItemToCart(product);
     setAddedProductIds(prev => ({ ...prev, [product.id]: true }));
+    addNotification('Added to Cart', `${product.name} has been added to your bundle cart.`, 'success');
     setTimeout(() => {
       setAddedProductIds(prev => ({ ...prev, [product.id]: false }));
     }, 2000);
   };
 
+  const handleAddAllToCart = (products: Product[]) => {
+    products.forEach(p => {
+      if (p.inStock) {
+        addItemToCart(p);
+        setAddedProductIds(prev => ({ ...prev, [p.id]: true }));
+      }
+    });
+    setIsCartOpen(true);
+    addNotification('Added All to Cart', `${products.length} products added to your bundle cart.`, 'success');
+    setTimeout(() => {
+      setAddedProductIds({});
+    }, 2200);
+  };
+
   const getProductsMentioned = (text: string): Product[] => {
-    const matches = text.match(/\bP(?:0[1-9]|[1-5][0-9]|60)\b/gi);
-    if (!matches) return [];
-    const uniqueIds = Array.from(new Set(matches.map(m => m.toUpperCase())));
-    return uniqueIds
+    const matches = text.match(/\bP(?:0[1-9]|[1-9][0-9])\b/gi);
+    const uniqueIds = new Set<string>();
+    if (matches) {
+      matches.forEach(m => uniqueIds.add(m.toUpperCase()));
+    }
+
+    // If text or query mentions computer / laptop / pc and no specific IDs found
+    const isComputer = /\b(computer|computers|laptop|laptops|pc|pcs|desktop|desktops|computing|workstation|ultrabook|notebook)\b/i.test(text);
+    if (isComputer && uniqueIds.size === 0) {
+      ['P64', 'P61', 'P62', 'P41', 'P67', 'P68'].forEach(id => uniqueIds.add(id));
+    }
+
+    return Array.from(uniqueIds)
       .map(id => fixture.products.find(p => p.id === id))
-      .filter((p): p is Product => Boolean(p));
+      .filter((p): p is Product => Boolean(p))
+      .slice(0, 6);
   };
   const drawerModel = 'gemini-flash-lite-latest';
 
@@ -784,9 +809,22 @@ Choose your preferred language below or ask me anything to assemble, optimize, o
                             <div className="flex items-center justify-between mb-2">
                               <span className="text-[13px] font-bold text-[#2C3A2B] flex items-center gap-1.5 tracking-tight">
                                 <Package className="w-3.5 h-3.5 text-[#8B5A2B]" />
-                                Products Mentioned ({mentionedProds.length})
+                                Recommended Products ({mentionedProds.length})
                               </span>
-                              <span className="text-[11px] text-[#8A8A88]">Click to inspect or add</span>
+                              <div className="flex items-center gap-2">
+                                {mentionedProds.length > 1 && (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleAddAllToCart(mentionedProds)}
+                                    className="px-2 py-0.5 rounded text-[11px] font-bold bg-[#E6C687]/30 hover:bg-[#E6C687]/50 text-[#8B5A2B] border border-[#E6C687] transition-all cursor-pointer flex items-center gap-1"
+                                    title="Add all recommended items to your cart"
+                                  >
+                                    <ShoppingCart className="w-3 h-3" />
+                                    Add All
+                                  </button>
+                                )}
+                                <span className="text-[11px] text-[#8A8A88]">Click to inspect or add</span>
+                              </div>
                             </div>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                               {mentionedProds.map(prod => (
