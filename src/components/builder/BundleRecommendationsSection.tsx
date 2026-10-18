@@ -152,6 +152,9 @@ export const BundleRecommendationsSection: React.FC<BundleRecommendationsSection
       if (q.includes('coperat') || q.includes('coporat')) {
         q = 'corporate';
       }
+      if (q.includes('appliance') || q.includes('applience') || q.includes('apliance')) {
+        q = 'appliance';
+      }
       filtered = filtered.filter(b => {
         const name = b.name.toLowerCase();
         const tagline = b.tagline.toLowerCase();
@@ -325,6 +328,19 @@ export const BundleRecommendationsSection: React.FC<BundleRecommendationsSection
 
             <button
               onClick={() => {
+                setBundleSearch('Home Appliances');
+                setBundleCategory('all');
+                setOnlyWithinBudget(false);
+                setRequirements([]);
+                addNotification('Home Appliances Bundles', 'Showing kitchen, cafe, breakfast, and home automation bundles.', 'success');
+              }}
+              className="inline-flex items-center gap-2 px-4 py-2 text-xs sm:text-sm font-semibold text-[#1E3A8A] bg-[#EFF6FF] hover:bg-[#DBEAFE] border border-[#BFDBFE] rounded-xl transition-all cursor-pointer shadow-2xs hover:shadow-sm"
+            >
+              <span>🏡 Home Appliances</span>
+            </button>
+
+            <button
+              onClick={() => {
                 const randomList = generateRandomDatabaseBundles(fixture.products, 25, fixture.shippingRule, fixture.taxRule, appBudget);
                 setBackendBundles(randomList);
                 addNotification('Bundles Shuffled', 'Loaded 25 randomized product bundles from database.', 'info');
@@ -375,7 +391,7 @@ export const BundleRecommendationsSection: React.FC<BundleRecommendationsSection
               <option value="all">All Categories</option>
               {availableCategories.map(cat => (
                 <option key={cat} value={cat}>
-                  {cat === 'Laptop' ? '💻 Laptop' : cat === 'Mouse' ? '🖱️ Mouse' : cat === 'Keyboard' ? '⌨️ Keyboard' : cat}
+                  {cat === 'Laptop' ? '💻 Laptop' : cat === 'Mouse' ? '🖱️ Mouse' : cat === 'Keyboard' ? '⌨️ Keyboard' : cat === 'Home Appliance' ? '🏡 Home Appliance' : cat}
                 </option>
               ))}
             </select>

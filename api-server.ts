@@ -457,6 +457,9 @@ app.post(['/api/bundles/filter', '/bundles/filter'], (req, res) => {
       if (q.includes('coperat') || q.includes('coporat')) {
         q = 'corporate';
       }
+      if (q.includes('appliance') || q.includes('applience') || q.includes('apliance')) {
+        q = 'appliance';
+      }
       bundles = bundles.filter(b => {
         const name = b.name.toLowerCase();
         const tagline = b.tagline.toLowerCase();
