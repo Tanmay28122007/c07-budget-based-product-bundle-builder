@@ -27,8 +27,18 @@ async function startServer() {
     });
   }
 
-  app.listen(PORT, () => {
+  const server = app.listen(PORT, () => {
     console.log(`Server listening on http://localhost:${PORT} (and http://127.0.0.1:${PORT}) [mode: ${isProduction ? 'production' : 'development'}]`);
+  });
+
+  server.on('error', (err: any) => {
+    if (err.code === 'EADDRINUSE') {
+      console.error(`\n⚠️  Port ${PORT} is already in use by another process.`);
+      console.error(`💡 Tip: Free it with 'lsof -ti :${PORT} | xargs kill -9' or run on another port with 'PORT=3001 npm run dev'\n`);
+      process.exit(1);
+    } else {
+      console.error('Server error:', err);
+    }
   });
 }
 
