@@ -26,6 +26,7 @@ import { useApp } from '../../context/AppContext';
 import { formatINR } from '../../utils/pricing';
 import { Product } from '../../types';
 import { getProductImageUrl, getProductImageFallback } from '../../utils/imageUtils';
+import { generateComprehensiveHeuristicResponse } from '../../data/websiteKnowledge';
 
 export interface ChatMessage {
   id: string;
@@ -247,36 +248,42 @@ Choose your preferred language below or ask me anything to assemble, optimize, o
         clearTimeout(timeoutId);
       }
 
-      if (!res.ok) {
-        throw new Error(`Server returned ${res.status}: ${res.statusText}`);
+      let data: any = null;
+      if (res && res.ok) {
+        try {
+          data = await res.json();
+        } catch (jsonErr) {
+          console.warn('Failed to parse AI response JSON:', jsonErr);
+        }
       }
 
-      const data = await res.json();
+      // If server returned non-200 (e.g. 500 on Vercel) or empty, fall back to offline intelligence engine
+      if (!data || !data.reply) {
+        console.warn('API returned non-200 or missing reply. Using robust client-side reasoning engine.');
+        data = generateComprehensiveHeuristicResponse(promptWithLanguage, contextPayload);
+      }
 
       const assistantMsg: ChatMessage = {
         id: `msg-${Date.now()}-a`,
         role: 'assistant',
-        text: data.reply || "I've analyzed your workspace requirements and current configuration.",
-        action: data.action || null,
+        text: data?.reply || "I've analyzed your workspace requirements and current configuration.",
+        action: data?.action || null,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
 
       setMessages(prev => [...prev, assistantMsg]);
     } catch (err: any) {
-      console.error('Failed to get AI assistant response:', err);
-      const fallbackReplies: Record<'en' | 'hi' | 'gu', string> = {
-        en: `I encountered an issue connecting to the AI service (${err.message}). You can still use the bundle builder tools or retry in a moment.`,
-        hi: `AI सेवा से कनेक्ट करने में समस्या आई (${err.message})। कृपया कुछ क्षणों बाद पुनः प्रयास करें।`,
-        gu: `AI સેવા સાથે કનેક્ટ કરવામાં સમસ્યા આવી (${err.message})। કૃપા કરીને થોડીવાર પછી ફરી પ્રયાસ કરો.`
-      };
-
-      const errorMsg: ChatMessage = {
-        id: `msg-${Date.now()}-err`,
+      console.warn('Network exception during AI fetch, activating local intelligence fallback:', err);
+      // Seamlessly answer using the local knowledge engine rather than breaking the UI
+      const localData = generateComprehensiveHeuristicResponse(promptWithLanguage, contextPayload);
+      const assistantMsg: ChatMessage = {
+        id: `msg-${Date.now()}-a`,
         role: 'assistant',
-        text: fallbackReplies[selectedLang],
+        text: localData?.reply || `I've analyzed your configuration. What would you like to build or optimize next?`,
+        action: localData?.action || null,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
-      setMessages(prev => [...prev, errorMsg]);
+      setMessages(prev => [...prev, assistantMsg]);
     } finally {
       setIsLoading(false);
     }

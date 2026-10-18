@@ -27,8 +27,6 @@ function getGeminiApiKey(): string | undefined {
 
 const app = express();
 
-app.use(express.json({ limit: '10mb' }));
-
 // Enable CORS for same-origin and development requests
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -38,6 +36,14 @@ app.use((req, res, next) => {
     return res.sendStatus(200);
   }
   next();
+});
+
+// Safely parse JSON body: skip if already parsed by Vercel serverless runtime
+app.use((req, res, next) => {
+  if (req.body && typeof req.body === 'object') {
+    return next();
+  }
+  express.json({ limit: '10mb' })(req, res, next);
 });
 
 import { buildMasterSystemPrompt, generateComprehensiveHeuristicResponse } from './src/data/websiteKnowledge.ts';
@@ -130,7 +136,7 @@ function filterProductsList(products: any[], filters: {
 }
 
 // Health check endpoint
-app.get('/api/health', (_req, res) => {
+app.get(['/api/health', '/health'], (_req, res) => {
   const apiKey = getGeminiApiKey();
   res.json({
     status: 'ok',
@@ -153,7 +159,7 @@ function cleanAssistantReply(text: string): string {
 }
 
 // AI Assistant Chat & Recommendation API
-app.post('/api/ai/assistant', async (req, res) => {
+app.post(['/api/ai/assistant', '/ai/assistant'], async (req, res) => {
   try {
     const { message, history = [], context, model: requestedModel, role, systemInstruction: customInstruction } = req.body;
 
@@ -248,12 +254,12 @@ app.post('/api/ai/assistant', async (req, res) => {
           parts: [{ text: message }]
         });
 
-        // Build candidate models order
+        // Build candidate models order (fast fallback within serverless limits)
         const candidateModels: string[] = [];
         if (requestedModel && supportedModels.includes(requestedModel)) {
           candidateModels.push(requestedModel);
         }
-        for (const m of ['gemini-3.1-flash-lite', 'gemini-flash-lite-latest', 'gemini-3-flash-preview', 'gemini-3.8-flash']) {
+        for (const m of ['gemini-3.1-flash-lite', 'gemini-flash-lite-latest']) {
           if (!candidateModels.includes(m)) {
             candidateModels.push(m);
           }
@@ -270,9 +276,9 @@ app.post('/api/ai/assistant', async (req, res) => {
               }
             });
 
-            // Strict 7.5s timeout per model to prevent browser hanging
+            // 3.5s timeout per model so execution stays well under Vercel's 10s serverless limit
             const timeoutPromise = new Promise<never>((_, reject) =>
-              setTimeout(() => reject(new Error(`Timeout waiting for model ${modelToTry}`)), 7500)
+              setTimeout(() => reject(new Error(`Timeout waiting for model ${modelToTry}`)), 3500)
             );
 
             const response = await Promise.race([generatePromise, timeoutPromise]);
@@ -327,7 +333,7 @@ app.post('/api/ai/assistant', async (req, res) => {
 // ============================================================================
 // BACKEND API: Product Query & Filtering (Supports specific user inputs)
 // ============================================================================
-app.get('/api/products', (req, res) => {
+app.get(['/api/products', '/products'], (req, res) => {
   try {
     const filters = {
       search: typeof req.query.search === 'string' ? req.query.search : (typeof req.query.q === 'string' ? req.query.q : undefined),
@@ -366,7 +372,7 @@ app.get('/api/products', (req, res) => {
   }
 });
 
-app.post('/api/products/filter', (req, res) => {
+app.post(['/api/products/filter', '/products/filter'], (req, res) => {
   try {
     const filters = req.body || {};
     const filtered = filterProductsList(defaultFixture.products, filters);
@@ -395,7 +401,7 @@ app.post('/api/products/filter', (req, res) => {
   }
 });
 
-app.get('/api/products/:id', (req, res) => {
+app.get(['/api/products/:id', '/products/:id'], (req, res) => {
   const prod = defaultFixture.products.find(p => p.id.toLowerCase() === req.params.id.toLowerCase());
   if (!prod) {
     return res.status(404).json({ success: false, error: `Product '${req.params.id}' not found.` });
@@ -413,7 +419,7 @@ app.get('/api/products/:id', (req, res) => {
 // ============================================================================
 // BACKEND API: Bundle Generation & Filtering (Supports specific user details)
 // ============================================================================
-app.post('/api/bundles/filter', (req, res) => {
+app.post(['/api/bundles/filter', '/bundles/filter'], (req, res) => {
   try {
     const {
       requirements = [],
@@ -495,7 +501,7 @@ app.post('/api/bundles/filter', (req, res) => {
   }
 });
 
-app.get('/api/bundles', (req, res) => {
+app.get(['/api/bundles', '/bundles'], (req, res) => {
   try {
     const budgetParam = req.query.budget ? Number(req.query.budget) : undefined;
     const baseline = getPredefinedBaselineBundles(
@@ -513,6 +519,23 @@ app.get('/api/bundles', (req, res) => {
   } catch (err: any) {
     res.status(500).json({ success: false, error: err.message });
   }
+});
+
+// Fallback root handler in case Vercel rewrote request to /api or /
+app.all(['/api', '/'], (req, res, next) => {
+  if (req.method === 'POST' && req.body && req.body.message) {
+    req.url = '/api/ai/assistant';
+    return app._router.handle(req, res, next);
+  }
+  if (req.method === 'GET') {
+    return res.json({
+      status: 'ok',
+      hasApiKey: Boolean(getGeminiApiKey()),
+      message: 'Budget-Based Product Bundle Builder API Service',
+      timestamp: new Date().toISOString()
+    });
+  }
+  next();
 });
 
 export default app;
