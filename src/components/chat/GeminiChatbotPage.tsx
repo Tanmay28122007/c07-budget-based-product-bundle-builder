@@ -36,20 +36,10 @@ import {
 import { useApp } from '../../context/AppContext';
 import { Product } from '../../types';
 import { formatINR } from '../../utils/pricing';
+import { getProductImageUrl } from '../../utils/imageUtils';
 
 export type ChatbotRole = 'workspace_architect' | 'rapid_checker' | 'procurement_strategist' | 'custom';
-export type GeminiModel = 'gemini-3.8-flash' | 'gemini-3.1-flash-lite' | 'gemini-4-argon';
-
-function getProductImageUrl(img?: string, id?: string): string {
-  if (!img) return id ? `/assets/${id}.png` : '';
-  if (img.startsWith('../assets/')) {
-    return img.replace('../assets/', '/assets/');
-  }
-  if (img.startsWith('./assets/')) {
-    return img.replace('./assets/', '/assets/');
-  }
-  return img;
-}
+export type GeminiModel = 'gemini-3.1-flash-lite' | 'gemini-flash-lite-latest' | 'gemini-3-flash-preview' | 'gemini-3.8-flash' | 'gemini-4-argon';
 
 interface Message {
   id: string;
@@ -100,7 +90,7 @@ const ROLE_DEFINITIONS: Record<ChatbotRole, {
   workspace_architect: {
     name: 'Sahay Shopping & Setup Consultant',
     badge: 'Direct Orders & Assembly',
-    defaultModel: 'gemini-3.8-flash',
+    defaultModel: 'gemini-3.1-flash-lite',
     icon: Bot,
     description: 'Expert in ordering products, bundle assembly, human ergonomics, and complete setup recommendations across all 40 products.',
     systemInstruction: 'You are Sahay AI (सहाय AI), the master intelligent Shopping Consultant and Ordering Agent for the Budget-Based Product Bundle Builder. You can directly place orders, manage carts, compute landed costs, and recommend hardware across all 40 products (P01 to P40).',
@@ -129,7 +119,7 @@ const ROLE_DEFINITIONS: Record<ChatbotRole, {
   procurement_strategist: {
     name: 'Procurement & Unit Economics Analyst',
     badge: 'Complex Tasks',
-    defaultModel: 'gemini-4-argon',
+    defaultModel: 'gemini-3.1-flash-lite',
     icon: Brain,
     description: 'Deep financial reasoning covering landed price modeling, shipping surcharge thresholds, platform referral fees, and B2B volume pricing.',
     systemInstruction: 'You are a Senior IT Procurement & Unit Economics Strategist. Analyze landed margins, shipping fee breakpoints, tax implications, platform commission referral models, and basket economics with rigorous quantitative detail.',
@@ -143,7 +133,7 @@ const ROLE_DEFINITIONS: Record<ChatbotRole, {
   custom: {
     name: 'Custom Persona / Prompt',
     badge: 'Configurable',
-    defaultModel: 'gemini-3.8-flash',
+    defaultModel: 'gemini-3.1-flash-lite',
     icon: Settings2,
     description: 'Define your own specialized chatbot persona, custom system instructions, and task parameters.',
     systemInstruction: 'You are a specialized hardware consultant and ordering assistant for budget-conscious corporate IT equipment.',
@@ -175,7 +165,7 @@ export const GeminiChatbotPage: React.FC = () => {
   } = useApp();
 
   const [activeRole, setActiveRole] = useState<ChatbotRole>('workspace_architect');
-  const [selectedModel, setSelectedModel] = useState<GeminiModel>('gemini-3.8-flash');
+  const [selectedModel, setSelectedModel] = useState<GeminiModel>('gemini-3.1-flash-lite');
   const [customInstruction, setCustomInstruction] = useState<string>(
     ROLE_DEFINITIONS.workspace_architect.systemInstruction
   );
@@ -207,7 +197,7 @@ I am fully trained on our **entire website**, all **40 products (P01 to P40)**, 
 • *"Checkout my active bundle cart"*
 
 Your active bundle context is **${attachWorkspaceContext ? 'synced' : 'disconnected'}**. What would you like to buy or configure today?`,
-      model: 'gemini-3.8-flash',
+      model: 'gemini-3.1-flash-lite',
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }
   ]);
@@ -358,18 +348,27 @@ Please provide an in-depth evaluation for this product based on our current cata
         text: m.text
       }));
 
-      const res = await fetch('/api/ai/assistant', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: text,
-          history: historyPayload,
-          context: contextPayload,
-          model: selectedModel,
-          role: activeRole,
-          systemInstruction: customInstruction
-        })
-      });
+      const abortController = new AbortController();
+      const timeoutId = setTimeout(() => abortController.abort(), 18000);
+
+      let res: Response;
+      try {
+        res = await fetch('/api/ai/assistant', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message: text,
+            history: historyPayload,
+            context: contextPayload,
+            model: selectedModel,
+            role: activeRole,
+            systemInstruction: customInstruction
+          }),
+          signal: abortController.signal
+        });
+      } finally {
+        clearTimeout(timeoutId);
+      }
 
       if (!res.ok) {
         throw new Error(`Chat API error (${res.status}): ${res.statusText}`);
@@ -702,6 +701,22 @@ Please provide an in-depth evaluation for this product based on our current cata
         {/* Configuration Bar: Model Selector, System Instruction, Context Toggle */}
         <div className="mt-3 pt-3 border-t border-stone-100 flex flex-wrap items-center justify-between gap-3 text-xs">
           <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg border border-stone-200 bg-white text-stone-700 font-medium">
+              <Brain className="w-3.5 h-3.5 text-[#2C3A2B]" />
+              <span className="text-[11px] text-[#5A5A40]">Model:</span>
+              <select
+                value={selectedModel}
+                onChange={e => setSelectedModel(e.target.value as GeminiModel)}
+                className="bg-transparent text-xs font-semibold text-[#2C3A2B] focus:outline-none cursor-pointer"
+              >
+                <option value="gemini-3.1-flash-lite">gemini-3.1-flash-lite (Fast & Responsive)</option>
+                <option value="gemini-flash-lite-latest">gemini-flash-lite-latest (Ultra Low Latency)</option>
+                <option value="gemini-3-flash-preview">gemini-3-flash-preview (High Accuracy)</option>
+                <option value="gemini-3.8-flash">gemini-3.8-flash (Standard)</option>
+                <option value="gemini-4-argon">gemini-4-argon (Analytical)</option>
+              </select>
+            </div>
+
             <button
               onClick={() => setShowSystemInstruction(prev => !prev)}
               className="flex items-center gap-1 px-2.5 py-1 rounded-lg border border-stone-200 hover:bg-stone-50 text-stone-700 font-medium cursor-pointer"

@@ -36,17 +36,7 @@ import {
 } from '../../utils/bundleRecommendations';
 import { fetchFilteredBundles, BundleApiResponse } from '../../services/apiClient';
 import { BundleAddOnsPanel } from './BundleAddOnsPanel';
-
-function getProductImageUrl(img?: string, id?: string): string {
-  if (!img) return id ? `/assets/${id}.png` : '';
-  if (img.startsWith('../assets/')) {
-    return img.replace('../assets/', '/assets/');
-  }
-  if (img.startsWith('./assets/')) {
-    return img.replace('./assets/', '/assets/');
-  }
-  return img;
-}
+import { getProductImageUrl } from '../../utils/imageUtils';
 
 function getColourHex(colour?: string): string {
   if (!colour) return '#9CA3AF';

@@ -37,17 +37,7 @@ import { ProductSelectorModal } from '../builder/ProductSelectorModal';
 import { BundleRecommendationsSection } from '../builder/BundleRecommendationsSection';
 import { BundleRecommendation } from '../../utils/bundleRecommendations';
 import { Product } from '../../types';
-
-function getProductImageUrl(img?: string, id?: string): string {
-  if (!img) return id ? `/assets/${id}.png` : '';
-  if (img.startsWith('../assets/')) {
-    return img.replace('../assets/', '/assets/');
-  }
-  if (img.startsWith('./assets/')) {
-    return img.replace('./assets/', '/assets/');
-  }
-  return img;
-}
+import { getProductImageUrl } from '../../utils/imageUtils';
 
 interface CompareBundlesPageProps {
   initialMode?: 'workspace' | 'compare' | 'recommendations';

@@ -73,7 +73,7 @@ export const AIAssistantDrawer: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [selectedLang, setSelectedLang] = useState<'en' | 'hi' | 'gu'>('en');
-  const drawerModel = 'gemini-3.8-flash';
+  const drawerModel = 'gemini-3.1-flash-lite';
 
   const [messages, setMessages] = useState<ChatMessage[]>(() => [
     {
@@ -203,16 +203,25 @@ Choose your preferred language below or ask me anything to assemble, optimize, o
         text: m.text
       }));
 
-      const res = await fetch('/api/ai/assistant', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: promptWithLanguage,
-          history: historyPayload,
-          context: contextPayload,
-          model: drawerModel
-        })
-      });
+      const abortController = new AbortController();
+      const timeoutId = setTimeout(() => abortController.abort(), 18000);
+
+      let res: Response;
+      try {
+        res = await fetch('/api/ai/assistant', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message: promptWithLanguage,
+            history: historyPayload,
+            context: contextPayload,
+            model: drawerModel
+          }),
+          signal: abortController.signal
+        });
+      } finally {
+        clearTimeout(timeoutId);
+      }
 
       if (!res.ok) {
         throw new Error(`Server returned ${res.status}: ${res.statusText}`);
@@ -473,12 +482,9 @@ Choose your preferred language below or ask me anything to assemble, optimize, o
                   <Sparkles className="w-4 h-4 text-amber-300" />
                 </div>
                 <div className="min-w-0">
-                  <div className="flex items-center gap-1.5">
-                    <h3 className="font-serif font-bold text-xs sm:text-sm text-[#2C2C1E] truncate">
-                      Sahay AI
-                    </h3>
-                  </div>
-                  <p className="text-[10px] text-[#8A8A88] truncate">Hardware Feasibility & Optimization</p>
+                  <h3 className="font-serif font-bold text-xs sm:text-sm text-[#2C2C1E] truncate">
+                    Sahay AI
+                  </h3>
                 </div>
               </div>
 

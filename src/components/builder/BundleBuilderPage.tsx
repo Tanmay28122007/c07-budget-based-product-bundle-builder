@@ -27,6 +27,7 @@ import { formatINR } from '../../utils/pricing';
 import { exportBundleToCSV, downloadFile } from '../../utils/exportUtils';
 import { RequiredSlotCard } from './RequiredSlotCard';
 import { ProductSelectorModal } from './ProductSelectorModal';
+import { getProductImageUrl } from '../../utils/imageUtils';
 
 export const BundleBuilderPage: React.FC = () => {
   const {
@@ -325,7 +326,7 @@ export const BundleBuilderPage: React.FC = () => {
                 {Object.entries(currentItems)
                   .filter(([slotId, prod]) => prod !== null && !fixture.activity.requiredSlots.some(s => s.id === slotId))
                   .map(([slotId, prod]) => {
-                    const prodImg = prod!.image ? prod!.image.replace('../assets/', '/assets/').replace('./assets/', '/assets/') : `/assets/${prod!.id}.png`;
+                    const prodImg = getProductImageUrl(prod?.image, prod?.id);
                     return (
                       <div
                         key={slotId}

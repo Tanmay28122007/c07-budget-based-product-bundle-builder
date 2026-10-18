@@ -21,17 +21,7 @@ import {
 import { useApp } from '../../context/AppContext';
 import { Product } from '../../types';
 import { formatINR } from '../../utils/pricing';
-
-function getProductImageUrl(img?: string, id?: string): string {
-  if (!img) return id ? `/assets/${id}.png` : '';
-  if (img.startsWith('../assets/')) {
-    return img.replace('../assets/', '/assets/');
-  }
-  if (img.startsWith('./assets/')) {
-    return img.replace('./assets/', '/assets/');
-  }
-  return img;
-}
+import { getProductImageUrl, getProductImageFallback } from '../../utils/imageUtils';
 
 function getColourHex(colour?: string): string {
   if (!colour) return '#9CA3AF';
@@ -205,8 +195,18 @@ export const ProductDetailPage: React.FC = () => {
               <img
                 src={imgSrc}
                 alt={product.name}
-                onError={() => setImgError(true)}
+                onError={(e) => {
+                  const target = e.currentTarget;
+                  const fallback = getProductImageFallback(target.src);
+                  if (fallback !== target.src) {
+                    target.src = fallback;
+                  } else {
+                    setImgError(true);
+                  }
+                }}
                 className="w-full h-full object-contain mix-blend-multiply transition-transform duration-500 group-hover:scale-105"
+                loading="eager"
+                decoding="async"
               />
             )}
 
