@@ -130,13 +130,6 @@ export const DashboardPage: React.FC = () => {
 
           <div className="flex items-center gap-2.5">
             <button
-              onClick={() => loginAs('admin')}
-              className="px-3.5 py-2 rounded-xl border border-[#E6E1D3] text-xs font-semibold text-[#2C2C1E] hover:bg-[#F4F1EA] transition-all cursor-pointer flex items-center gap-1.5"
-            >
-              <ShieldCheck className="w-3.5 h-3.5 text-[#8B5A2B]" />
-              <span>Switch to Admin</span>
-            </button>
-            <button
               onClick={logout}
               className="px-3.5 py-2 rounded-xl bg-[#F4F1EA] hover:bg-rose-50 text-xs font-semibold text-[#8B5A2B] hover:text-rose-700 border border-[#E6E1D3] hover:border-rose-200 transition-all cursor-pointer flex items-center gap-1.5"
             >
