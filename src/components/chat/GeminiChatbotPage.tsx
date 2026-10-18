@@ -37,6 +37,7 @@ import { useApp } from '../../context/AppContext';
 import { Product } from '../../types';
 import { formatINR } from '../../utils/pricing';
 import { getProductImageUrl, getProductImageFallback } from '../../utils/imageUtils';
+import { generateComprehensiveHeuristicResponse } from '../../data/websiteKnowledge';
 
 export type ChatbotRole = 'workspace_architect' | 'rapid_checker' | 'procurement_strategist' | 'custom';
 export type GeminiModel = 'gemini-3.1-flash-lite' | 'gemini-flash-lite-latest' | 'gemini-3-flash-preview' | 'gemini-3.8-flash' | 'gemini-4-argon';
@@ -369,32 +370,43 @@ Please provide an in-depth evaluation for this product based on our current cata
         clearTimeout(timeoutId);
       }
 
-      if (!res.ok) {
-        throw new Error(`Chat API error (${res.status}): ${res.statusText}`);
+      let data: any = null;
+      if (res && res.ok) {
+        try {
+          data = await res.json();
+        } catch (jsonErr) {
+          console.warn('Failed to parse AI response JSON:', jsonErr);
+        }
       }
 
-      const data = await res.json();
+      // If server returned non-200 (e.g. 500 on Vercel) or empty, fall back to offline intelligence engine
+      if (!data || !data.reply) {
+        console.warn('API returned non-200 or missing reply. Using robust client-side reasoning engine.');
+        data = generateComprehensiveHeuristicResponse(text, contextPayload);
+      }
 
       const botMessage: Message = {
         id: `bot-${Date.now()}`,
         role: 'assistant',
-        text: data.reply || "I've analyzed your prompt.",
-        model: data.model || selectedModel,
-        action: data.action || null,
+        text: data?.reply || "I've analyzed your prompt.",
+        model: data?.model || selectedModel,
+        action: data?.action || null,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
 
       setMessages(prev => [...prev, botMessage]);
     } catch (err: any) {
-      console.error('Chat error:', err);
-      const errMsg: Message = {
-        id: `err-${Date.now()}`,
+      console.warn('Network exception during AI chat fetch, activating local intelligence fallback:', err);
+      const localData = generateComprehensiveHeuristicResponse(text, contextPayload);
+      const botMessage: Message = {
+        id: `bot-${Date.now()}-fallback`,
         role: 'assistant',
-        text: `Sorry, an error occurred while processing your request: ${err.message}.`,
-        model: selectedModel,
+        text: localData?.reply || `I've analyzed your configuration. What would you like to build or optimize next?`,
+        model: localData?.model || 'heuristic-engine',
+        action: localData?.action || null,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
-      setMessages(prev => [...prev, errMsg]);
+      setMessages(prev => [...prev, botMessage]);
     } finally {
       setIsLoading(false);
     }
