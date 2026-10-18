@@ -173,6 +173,49 @@ export const GeminiChatbotPage: React.FC = () => {
   );
   const [showSystemInstruction, setShowSystemInstruction] = useState(false);
   const [attachWorkspaceContext, setAttachWorkspaceContext] = useState(true);
+  const [addedProductIds, setAddedProductIds] = useState<Record<string, boolean>>({});
+
+  const handleAddProductToCart = (product: Product) => {
+    addItemToCart(product);
+    setAddedProductIds(prev => ({ ...prev, [product.id]: true }));
+    addNotification('Added to Cart', `${product.name} has been added to your bundle cart.`, 'success');
+    setTimeout(() => {
+      setAddedProductIds(prev => ({ ...prev, [product.id]: false }));
+    }, 2000);
+  };
+
+  const handleAddAllToCart = (products: Product[]) => {
+    products.forEach(p => {
+      if (p.inStock) {
+        addItemToCart(p);
+        setAddedProductIds(prev => ({ ...prev, [p.id]: true }));
+      }
+    });
+    setIsCartOpen(true);
+    addNotification('Added All to Cart', `${products.length} products added to your bundle cart.`, 'success');
+    setTimeout(() => {
+      setAddedProductIds({});
+    }, 2200);
+  };
+
+  const getProductsMentioned = (text: string): Product[] => {
+    const matches = text.match(/\bP(?:0[1-9]|[1-9][0-9])\b/gi);
+    const uniqueIds = new Set<string>();
+    if (matches) {
+      matches.forEach(m => uniqueIds.add(m.toUpperCase()));
+    }
+
+    // If query refers to computer / laptop / pc and no specific IDs were found
+    const isComputer = /\b(computer|computers|laptop|laptops|pc|pcs|desktop|desktops|computing|workstation|ultrabook|notebook)\b/i.test(text);
+    if (isComputer && uniqueIds.size === 0) {
+      ['P64', 'P61', 'P62', 'P41', 'P67', 'P68'].forEach(id => uniqueIds.add(id));
+    }
+
+    return Array.from(uniqueIds)
+      .map(id => fixture.products.find(p => p.id === id))
+      .filter((p): p is Product => Boolean(p))
+      .slice(0, 6);
+  };
 
   // Instant order confirmation modal
   const [orderSuccessModal, setOrderSuccessModal] = useState<{
@@ -1207,6 +1250,102 @@ Please provide an in-depth evaluation for this product based on our current cata
                       <div className="space-y-1.5 text-sm">{renderFormatted(msg.text)}</div>
                     )}
                   </div>
+
+                  {/* Visual Product Recommendation Cards */}
+                  {!isUser && (() => {
+                    const mentionedProds = getProductsMentioned(msg.text);
+                    if (mentionedProds.length === 0) return null;
+                    return (
+                      <div className="mt-3.5 pt-3 border-t border-[#E6E1D3]">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-xs font-bold text-[#2C3A2B] flex items-center gap-1.5 tracking-tight">
+                            <Package className="w-3.5 h-3.5 text-[#8B5A2B]" />
+                            Recommended Products ({mentionedProds.length})
+                          </span>
+                          <div className="flex items-center gap-2">
+                            {mentionedProds.length > 1 && (
+                              <button
+                                type="button"
+                                onClick={() => handleAddAllToCart(mentionedProds)}
+                                className="px-2 py-0.5 rounded text-[11px] font-bold bg-[#E6C687]/30 hover:bg-[#E6C687]/50 text-[#8B5A2B] border border-[#E6C687] transition-all cursor-pointer flex items-center gap-1"
+                                title="Add all recommended items to your cart"
+                              >
+                                <ShoppingCart className="w-3 h-3" />
+                                Add All to Cart
+                              </button>
+                            )}
+                            <span className="text-[10px] text-[#8A8A88]">Click to inspect or add</span>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          {mentionedProds.map(prod => (
+                            <div
+                              key={prod.id}
+                              className="p-2.5 rounded-xl bg-white border border-[#E6E1D3] hover:border-[#8B5A2B] hover:shadow-xs transition-all flex items-center gap-2.5 group"
+                            >
+                              <div
+                                onClick={() => openProductDetails(prod.id)}
+                                className="w-13 h-13 rounded-lg bg-[#FDFBF7] border border-[#E6E1D3] flex items-center justify-center p-1 shrink-0 overflow-hidden cursor-pointer group-hover:scale-105 transition-transform"
+                                title={`View details of ${prod.name}`}
+                              >
+                                <img
+                                  src={getProductImageUrl(prod.image, prod.id)}
+                                  alt={prod.name}
+                                  className="w-full h-full object-contain"
+                                  onError={(e) => {
+                                    e.currentTarget.src = getProductImageFallback(e.currentTarget.src);
+                                  }}
+                                />
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <div className="flex items-center gap-1.5 text-[10px] font-mono text-[#8A8A88]">
+                                  <span className="font-bold text-[#8B5A2B]">{prod.id}</span>
+                                  <span>•</span>
+                                  <span className="truncate">{prod.category}</span>
+                                </div>
+                                <h5
+                                  onClick={() => openProductDetails(prod.id)}
+                                  className="font-semibold text-xs text-[#2C2C1E] truncate cursor-pointer group-hover:text-[#8B5A2B] transition-colors"
+                                  title={prod.name}
+                                >
+                                  {prod.name}
+                                </h5>
+                                <div className="flex items-center justify-between mt-1">
+                                  <span className="font-mono font-bold text-xs text-[#2C3A2B]">
+                                    {formatINR(prod.price)}
+                                  </span>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleAddProductToCart(prod)}
+                                    disabled={!prod.inStock}
+                                    className={`px-2 py-0.5 rounded-md text-[10px] font-semibold flex items-center gap-1 transition-all cursor-pointer shadow-2xs ${
+                                      addedProductIds[prod.id]
+                                        ? 'bg-emerald-600 text-white'
+                                        : prod.inStock
+                                        ? 'bg-[#2C3A2B] hover:bg-[#1B281B] text-white'
+                                        : 'bg-stone-200 text-stone-500 cursor-not-allowed'
+                                    }`}
+                                  >
+                                    {addedProductIds[prod.id] ? (
+                                      <>
+                                        <Check className="w-3 h-3" />
+                                        Added
+                                      </>
+                                    ) : (
+                                      <>
+                                        <ShoppingCart className="w-3 h-3 text-[#E6C687]" />
+                                        + Cart
+                                      </>
+                                    )}
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })()}
 
                   {/* Interactive Action Card if returned by Gemini */}
                   {!isUser && msg.action && (

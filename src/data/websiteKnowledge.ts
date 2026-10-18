@@ -236,7 +236,29 @@ export const CATALOGUE_PRODUCTS_METADATA = [
   { id: 'P57', name: '10-inch Bi-Color LED Ring Light with Desktop Tripod', category: 'Lighting', price: 1599, colour: 'White/Warm', stock: 27, connector: 'usb-c', desc: '3200K-5600K dimmable USB ring light with phone holder' },
   { id: 'P58', name: '4K Overhead USB Document Camera & Visualiser', category: 'DocCamera', price: 4800, colour: 'Matte Black', stock: 15, connector: 'usb-c', desc: '13MP sensor, multi-joint arm for online teaching & demos' },
   { id: 'P59', name: 'Multi-Tier Desktop Document Organiser & Filing Tray', category: 'Organizer', price: 899, colour: 'Mesh Black', stock: 38, desc: '3-tier pull-out steel mesh file and folder tray' },
-  { id: 'P60', name: 'Wireless Thermal Shipping Label Printer & Barcode Scanner Kit', category: 'Printer', price: 6200, colour: 'White', stock: 20, connector: 'usb-c', desc: '4x6 inch direct thermal label printer with handheld 2D scanner' }
+  { id: 'P60', name: 'Wireless Thermal Shipping Label Printer & Barcode Scanner Kit', category: 'Printer', price: 6200, colour: 'White', stock: 20, connector: 'usb-c', desc: '4x6 inch direct thermal label printer with handheld 2D scanner' },
+  { id: 'P61', name: 'Enterprise Fleet 14" Business Ultrabook (i5/16GB/512GB)', category: 'Laptop', price: 54999, colour: 'Space Grey', stock: 45, connector: 'usb-c', desc: '14" FHD IPS, Intel Core i5, 16GB RAM, 512GB SSD, Thunderbolt 4' },
+  { id: 'P62', name: 'Developer Pro 16" High-Performance Workstation Laptop (i7/32GB/1TB)', category: 'Laptop', price: 89999, colour: 'Matte Black', stock: 30, connector: 'usb-c', desc: '16" QHD 165Hz, Intel Core i7, 32GB RAM, 1TB NVMe, Thunderbolt' },
+  { id: 'P63', name: 'Executive Carbon 13.3" Ultra-Slim Touchscreen Laptop (Ultra 7/16GB/512GB OLED)', category: 'Laptop', price: 104999, colour: 'Carbon Black', stock: 25, connector: 'usb-c', desc: '13.3" 2.8K OLED Touch, Intel Core Ultra 7, 16GB RAM, 512GB SSD' },
+  { id: 'P64', name: 'Entry Corporate Staff 15.6" Office Productivity Laptop (i3/16GB/512GB)', category: 'Laptop', price: 42999, colour: 'Silver', stock: 50, connector: 'usb-c', desc: '15.6" FHD Anti-Glare, Intel Core i3, 16GB RAM, 512GB SSD, Numeric Keypad' },
+  { id: 'P65', name: 'Creative Studio 16" RTX Workstation Laptop (i9/64GB/2TB/RTX 4070 4K)', category: 'Laptop', price: 149999, colour: 'Midnight Blue', stock: 18, connector: 'usb-c', desc: '16" 4K Mini-LED, Intel Core i9, 64GB RAM, 2TB SSD, NVIDIA RTX 4070 8GB' },
+  { id: 'P66', name: 'Finance & Enterprise Secure 14" Rugged vPro Laptop (i7 vPro/32GB/1TB TPM 2.0)', category: 'Laptop', price: 78999, colour: 'Gunmetal Grey', stock: 35, connector: 'usb-c', desc: '14" FHD Anti-Glare, Intel Core i7 vPro, 32GB RAM, 1TB SSD, Hardware TPM 2.0' },
+  { id: 'P67', name: 'Corporate Silent Multi-Device Wireless Mouse (Bluetooth + 2.4G)', category: 'Mouse', price: 1299, colour: 'Matte Black', stock: 60, connector: 'usb-c', desc: 'Multi-device pairing, silent acoustic switches, 4000 DPI' },
+  { id: 'P68', name: 'Enterprise Low-Profile Quiet Office Keyboard with Numeric Keypad', category: 'Keyboard', price: 1799, colour: 'Space Grey', stock: 55, connector: 'usb-c', desc: 'Full-size scissor keys, whisper-quiet membrane, dedicated numpad' },
+  { id: 'P69', name: 'Professional Ergonomic Split Wave Wireless Keyboard & Cushioned Palm Rest', category: 'Keyboard', price: 3499, colour: 'Graphite', stock: 40, connector: 'usb-c', desc: 'Curved split wave layout, memory foam wrist pad, dual wireless' },
+  { id: 'P70', name: 'Vertical Ergonomic Precision Laser Mouse with Thumb Rest', category: 'Mouse', price: 2299, colour: 'Graphite', stock: 48, connector: 'usb-c', desc: 'Ergonomic 57° vertical contour, precision laser tracking, thumb scroll' },
+  { id: 'P71', name: '100W GaN Triple-Port USB-C Corporate Fast Power Adapter', category: 'Charger', price: 2499, colour: 'White', stock: 50, connector: 'usb-c', desc: 'Compact GaN III 2x USB-C + 1x USB-A PD 3.0 ultra-safe power block' },
+  { id: 'P72', name: 'Magnetic Anti-Glare & Privacy Screen Filter (14" & 15.6")', category: 'Stand', price: 1499, colour: 'Matte Privacy', stock: 70, desc: '60° micro-louver privacy angle with magnetic snap-on for laptops' },
+  { id: 'P73', name: 'Executive Leatherette Corporate Laptop Briefcase & Tech Folio', category: 'Backpack', price: 2799, colour: 'Brown', stock: 35, desc: 'Padded 15.6" laptop compartment, waterproof vegan leather' },
+  { id: 'P74', name: '2K QHD 60FPS Enterprise AI Auto-Framing Conference Webcam', category: 'Webcam', price: 3999, colour: 'Black', stock: 40, connector: 'usb-c', desc: '2K QHD, Sony Starvis sensor, AI auto-framing, dual noise-cancelling mics' },
+  { id: 'P75', name: 'Dual-Arm Gas Spring Heavy-Duty Desk Monitor Stand (Dual up to 32")', category: 'Stand', price: 4500, colour: 'Matte Black', stock: 25, desc: 'Dual monitor desk clamp supporting up to 32" screens, 360° rotation' },
+  { id: 'P76', name: 'Smart Electric Rapid-Boil Kettle (1.7L Stainless Steel)', category: 'Home Appliance', price: 2199, colour: 'Silver', stock: 40, desc: '1500W rapid boil, auto shut-off, food-grade 304 stainless steel' },
+  { id: 'P77', name: '15-Bar Compact Espresso & Cappuccino Coffee Machine', category: 'Home Appliance', price: 6499, colour: 'Matte Black', stock: 25, desc: '15-bar high pressure pump, milk frother steam wand, compact footprint' },
+  { id: 'P78', name: 'Smart HEPA Air Purifier with Real-Time Air Quality Display', category: 'Home Appliance', price: 7999, colour: 'White', stock: 30, desc: 'True HEPA H13 filtration, PM2.5 sensor, covers up to 350 sq ft' },
+  { id: 'P79', name: 'High-Speed Nutrient Extractor Countertop Blender (1000W)', category: 'Home Appliance', price: 3499, colour: 'Stainless Grey', stock: 35, desc: '1000W copper motor, 6-leaf stainless blade, 2 travel cups included' },
+  { id: 'P80', name: 'Smart Robotic Vacuum & Mop Cleaner with Auto-Docking', category: 'Home Appliance', price: 18999, colour: 'Piano Black', stock: 20, desc: 'LiDAR laser navigation, 3000Pa suction, app control & auto charging' },
+  { id: 'P81', name: 'Digital 4-Slice Convection Pop-Up Toaster with Browning Control', category: 'Home Appliance', price: 2799, colour: 'Brushed Steel', stock: 45, desc: '4-slice extra-wide slots, 7 browning settings, defrost & reheat' },
+  { id: 'P82', name: 'Cordless Handheld Cyclonic Stick Vacuum Cleaner (22.2V)', category: 'Home Appliance', price: 8499, colour: 'Cobalt Blue', stock: 28, desc: 'Brushless motor, 20kPa suction, 45min runtime, multi-surface brush' }
 ];
 
 export const LANDED_PRICING_FORMULA = `
@@ -339,7 +361,7 @@ ${violationsSummary}
 11. "settings" (Settings & Configuration): 18% GST tax configuration, shipping surcharge rules (₹499 base, ₹50,000 free shipping threshold), and factory reset.
 
 ==================================================
-3. FULL PRODUCT INVENTORY (40 PRODUCTS: P01 - P40)
+3. FULL PRODUCT INVENTORY (PRODUCTS: P01 - P82)
 ==================================================
 ${productsIndex}
 
@@ -353,16 +375,20 @@ ${productsIndex}
    - Tax: 18% GST applied to (Subtotal + Net Shipping).
 2. Hardware Compatibility:
    - ScreenBar lights (P38) require flat monitor bezels.
-   - Peripherals (P07, P08, P26, P27, P28, P29, P34, P35, P36, P37, P38) use USB-C connectivity.
+   - Peripherals (P07, P08, P26, P27, P28, P29, P34, P35, P36, P37, P38, P67, P68, P69, P70, P71, P74) use USB-C connectivity.
    - Out-of-stock items (such as P01 Blue Tshirt Size M) cannot be ordered or bundled.
 
 ==================================================
 5. DIRECT ORDERING & INTERACTIVE ACTION CARDS
 ==================================================
 YOU CAN ORDER ANY PRODUCT DIRECTLY FOR THE USER!
-Whenever a user wants to order, buy, purchase, show, find, or add to cart (e.g. "order P26", "lets buy a laptop", "buy alptop", "buy the RGB keyboard and 100W GaN charger", "order 2 blue tshirts", "checkout now"):
-1. Identify the products by their IDs (P01-P60) or names.
-   - Note on Laptop queries: If the user asks for a laptop ("lets buy a laptop", "buy alptop", "laptop"), explain our top laptop workstation gear: P30 Aluminum Laptop Riser Stand (₹1,299), P55 Laptop Cooling Pad (₹1,650), P43 15.6" Portable FHD Second Screen (₹12,999), and P19 Laptop Backpack (₹1,650), and configure P30 in the action card!
+Whenever a user wants to order, buy, purchase, show, find, or add to cart (e.g. "order P26", "computer product", "show me computer products", "buy a laptop", "PC", "desktop", "buy the RGB keyboard and 100W GaN charger", "order 2 blue tshirts", "checkout now"):
+1. Identify the products by their IDs (P01-P82) or names.
+   - Note on Computer & Laptop queries: If the user asks about a computer, computer products, laptop, PC, desktop, or workstation (e.g. "computer product", "show me computer products", "buy a laptop", "PC", "desktop"):
+     * Explicitly showcase our enterprise laptops: [P64] Entry Corporate Staff 15.6" Laptop (₹42,999), [P61] Enterprise Fleet 14" Business Ultrabook (₹54,999), [P62] Developer Pro 16" Workstation Laptop (₹89,999), [P65] Creative Studio 16" RTX Workstation (₹1,49,999).
+     * Also showcase complementary computer peripherals: [P41] 27" 4K UHD Monitor (₹28,500), [P43] 15.6" Portable FHD Monitor (₹12,999), [P67] Multi-Device Mouse (₹1,299), [P68] Quiet Office Keyboard (₹1,799), [P48] Thunderbolt 4 Dock (₹14,500), [P30] Aluminum Laptop Riser Stand (₹1,299).
+     * ALWAYS format IDs in brackets like [P64], [P61], [P67] so interactive product cards render in the chat with direct "Add to Cart" and "Inspect" buttons!
+     * Include an action block of type "add_to_cart" or "order_items" for the recommended computer products!
 2. Determine the requested quantities.
 3. Calculate subtotal, shipping (₹499 or free if subtotal >= ₹50,000), 18% GST tax, and landed total.
 4. Output a clear, cheerful order confirmation breakdown in the response.
@@ -514,8 +540,44 @@ export function generateComprehensiveHeuristicResponse(message: string, context:
     lowerMsg.includes('ઓર્ડર');
 
   if (isOrderIntent) {
+    // Check for Computer / Laptop query intent
+    const isComputerQuery = /\b(computer|computers|laptop|laptops|pc|pcs|desktop|desktops|computing|workstation|ultrabook|notebook)\b/i.test(lowerMsg);
+
+    // Extract product IDs (P01 to P99)
+    const idMatches = lowerMsg.match(/\bp(?:0[1-9]|[1-9][0-9])\b/gi);
+
+    if (isComputerQuery && (!idMatches || idMatches.length === 0)) {
+      return {
+        reply: `### 💻 Official Computer Systems & Workstation Hardware\n\n` +
+          `Here are our premier enterprise laptops, high-performance PCs, and computing workstation peripherals available in our catalog:\n\n` +
+          `#### 🖥️ Business & High-Performance Laptops\n` +
+          `* **[P64] Entry Corporate Staff 15.6" Office Productivity Laptop** — ₹42,999 *(In Stock: 50)*: Intel Core i3, 16GB RAM, 512GB SSD, Anti-Glare FHD display with full numeric keypad.\n` +
+          `* **[P61] Enterprise Fleet 14" Business Ultrabook** — ₹54,999 *(In Stock: 45)*: Intel Core i5, 16GB RAM, 512GB SSD, Thunderbolt 4, ultra-light 1.3kg magnesium chassis.\n` +
+          `* **[P62] Developer Pro 16" Workstation Laptop** — ₹89,999 *(In Stock: 30)*: Intel Core i7, 32GB RAM, 1TB NVMe, QHD 165Hz display, dual Thunderbolt ports.\n` +
+          `* **[P65] Creative Studio 16" RTX Workstation Laptop** — ₹1,49,999 *(In Stock: 18)*: Intel Core i9, 64GB RAM, 2TB SSD, NVIDIA RTX 4070 8GB, 4K Mini-LED display.\n\n` +
+          `#### 🖱️ Computer Displays & Peripherals\n` +
+          `* **[P41] 27" 4K UHD Designer Color-Accurate Monitor** — ₹28,500 *(In Stock: 15)*: Factory-calibrated IPS, 99% DCI-P3 with 65W USB-C Power Delivery.\n` +
+          `* **[P43] 15.6" Portable USB-C FHD Second Screen Monitor** — ₹12,999 *(In Stock: 18)*: Ultra-slim 1080p IPS second monitor for dual-screen productivity.\n` +
+          `* **[P67] Corporate Silent Multi-Device Wireless Mouse** — ₹1,299 *(In Stock: 60)*: Bluetooth 5.2 + 2.4G dual wireless, silent clicks, 4000 DPI sensor.\n` +
+          `* **[P68] Enterprise Low-Profile Quiet Office Keyboard** — ₹1,799 *(In Stock: 55)*: Full-size low-profile scissor keys with dedicated numeric keypad.\n` +
+          `* **[P48] Thunderbolt 4 / USB-C 12-in-1 Triple Display Docking Station** — ₹14,500 *(In Stock: 14)*: Dual HDMI + DP, 100W PD charging, Gigabit Ethernet, 4x USB ports.\n` +
+          `* **[P30] Aluminum Laptop Riser Stand** — ₹1,299 *(In Stock: 20)*: CNC-machined anodized aluminum stand for optimal eye-level ergonomics.\n\n` +
+          `👇 **Inspect, Check Specs, or Add to Cart directly below**: Click any item card to inspect or add it directly to your cart with one click!`,
+        action: {
+          type: 'add_to_cart',
+          title: 'Add Recommended Computer Setup to Cart',
+          items: [
+            { id: 'P64', name: 'Entry Corporate Staff 15.6" Office Productivity Laptop', price: 42999, quantity: 1 },
+            { id: 'P67', name: 'Corporate Silent Multi-Device Wireless Mouse', price: 1299, quantity: 1 }
+          ],
+          reason: 'Selected computer productivity hardware ready for cart'
+        },
+        model: 'heuristic-website-trainer'
+      };
+    }
+
     // Check if it's a general checkout request
-    if (lowerMsg.includes('checkout') && !lowerMsg.match(/\bp(?:0[1-9]|[1-3][0-9]|40)\b/)) {
+    if (lowerMsg.includes('checkout') && !lowerMsg.match(/\bp(?:0[1-9]|[1-9][0-9])\b/)) {
       if (isHindi) {
         return {
           reply: `आपका चेकआउट तैयार है! आप सुरक्षित पेमेंट पेज पर जाकर UPI, क्रेडिट/डेबिट कार्ड या COD के माध्यम से अपना ऑर्डर पूरा कर सकते हैं।`,
@@ -534,8 +596,6 @@ export function generateComprehensiveHeuristicResponse(message: string, context:
       };
     }
 
-    // Extract product IDs (P01 to P60)
-    const idMatches = lowerMsg.match(/\bp(?:0[1-9]|[1-5][0-9]|60)\b/gi);
     const matchedProducts: { product: typeof CATALOGUE_PRODUCTS_METADATA[0]; quantity: number }[] = [];
 
     if (idMatches && idMatches.length > 0) {
@@ -640,16 +700,26 @@ export function generateComprehensiveHeuristicResponse(message: string, context:
         { key: 'portable screen', id: 'P43' },
         { key: 'second screen', id: 'P43' },
         { key: 'portable monitor', id: 'P43' },
-        { key: 'laptop', id: 'P30' },
-        { key: 'alptop', id: 'P30' },
-        { key: 'leptop', id: 'P30' },
-        { key: 'laptops', id: 'P30' },
-        { key: 'alptops', id: 'P30' },
-        { key: 'macbook', id: 'P30' },
-        { key: 'notebook pc', id: 'P30' },
-        { key: 'computer', id: 'P30' },
-        { key: 'pc', id: 'P30' },
-        { key: 'desktop', id: 'P30' },
+        { key: 'business ultrabook', id: 'P61' },
+        { key: 'workstation laptop', id: 'P62' },
+        { key: 'developer laptop', id: 'P62' },
+        { key: 'executive laptop', id: 'P63' },
+        { key: 'office laptop', id: 'P64' },
+        { key: 'corporate laptop', id: 'P64' },
+        { key: 'creative laptop', id: 'P65' },
+        { key: 'rtx laptop', id: 'P65' },
+        { key: 'laptop', id: 'P61' },
+        { key: 'alptop', id: 'P61' },
+        { key: 'leptop', id: 'P61' },
+        { key: 'laptops', id: 'P64' },
+        { key: 'alptops', id: 'P64' },
+        { key: 'macbook', id: 'P63' },
+        { key: 'notebook pc', id: 'P61' },
+        { key: 'computer', id: 'P61' },
+        { key: 'computers', id: 'P64' },
+        { key: 'pc', id: 'P61' },
+        { key: 'desktop', id: 'P64' },
+        { key: 'workstation', id: 'P62' },
         { key: 'monitor arm', id: 'P31' },
         { key: 'desk mat', id: 'P32' },
         { key: 'leather blotter', id: 'P32' },
