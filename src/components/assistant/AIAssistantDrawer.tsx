@@ -979,39 +979,6 @@ Choose your preferred language below or ask me anything to assemble, optimize, o
               )}
               <div ref={messagesEndRef} />
             </div>
-
-            {/* Whole Website Starter Prompt Chips */}
-            <div className="px-3.5 py-2.5 bg-[#FAF8F5] border-t border-[#E6E1D3]/80 flex items-center gap-2 overflow-x-auto text-xs">
-              <button
-                type="button"
-                onClick={() => handleSendMessage('Give me a complete overview of the whole website and its 9 pages.')}
-                className="px-3 py-1.5 rounded-full bg-white border border-[#E6E1D3] text-[#2C3A2B] hover:border-[#8B5A2B] hover:bg-[#F5F5EC] shrink-0 transition-colors shadow-2xs font-medium cursor-pointer text-xs"
-              >
-                🌐 Whole Website Overview
-              </button>
-              <button
-                type="button"
-                onClick={() => handleSendMessage('How does the Cartesian Auto-Solve algorithm work under the hood?')}
-                className="px-3 py-1.5 rounded-full bg-white border border-[#E6E1D3] text-[#2C3A2B] hover:border-[#8B5A2B] hover:bg-[#F5F5EC] shrink-0 transition-colors shadow-2xs font-medium cursor-pointer text-xs"
-              >
-                ⚡ Auto-Solve Logic
-              </button>
-              <button
-                type="button"
-                onClick={() => handleSendMessage('Check my current bundle for any hardware compatibility conflicts and fix them.')}
-                className="px-3 py-1.5 rounded-full bg-white border border-[#E6E1D3] text-[#2C3A2B] hover:border-[#8B5A2B] hover:bg-[#F5F5EC] shrink-0 transition-colors shadow-2xs font-medium cursor-pointer text-xs"
-              >
-                🔧 Fix Conflicts
-              </button>
-              <button
-                type="button"
-                onClick={() => handleSendMessage('Compare the Starter Pack, Developer Pro, and Executive Ultra presets.')}
-                className="px-3 py-1.5 rounded-full bg-white border border-[#E6E1D3] text-[#2C3A2B] hover:border-[#8B5A2B] hover:bg-[#F5F5EC] shrink-0 transition-colors shadow-2xs font-medium cursor-pointer text-xs"
-              >
-                ⚖️ Compare Presets
-              </button>
-            </div>
-
             {/* Input Area */}
             <form
               onSubmit={e => {
