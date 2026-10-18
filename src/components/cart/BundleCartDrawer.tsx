@@ -20,7 +20,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { useApp } from '../../context/AppContext';
 import { formatINR } from '../../utils/pricing';
 import { exportBundleToCSV, downloadFile } from '../../utils/exportUtils';
-import { getProductImageUrl } from '../../utils/imageUtils';
+import { getProductImageUrl, getProductImageFallback } from '../../utils/imageUtils';
 
 export const BundleCartDrawer: React.FC = () => {
   const {
@@ -243,8 +243,14 @@ export const BundleCartDrawer: React.FC = () => {
                                 <img
                                   src={getProductImageUrl(prod.image, prod.id)}
                                   alt={prod.name}
+                                  loading="lazy"
+                                  decoding="async"
                                   onError={e => {
-                                    (e.currentTarget as HTMLImageElement).src = '/assets/P01.png';
+                                    const target = e.currentTarget;
+                                    const fallback = getProductImageFallback(target.src);
+                                    if (fallback !== target.src) {
+                                      target.src = fallback;
+                                    }
                                   }}
                                   className="w-full h-full object-contain p-1 mix-blend-multiply group-hover/cartitem:scale-110 transition-transform duration-300"
                                 />

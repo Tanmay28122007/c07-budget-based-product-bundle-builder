@@ -31,6 +31,16 @@ import {
   getSupabaseConfig
 } from '../services/supabaseClient';
 
+import {
+  InventoryTestRun,
+  InventoryTestType,
+  runInventoryAvailabilityTest,
+  validateStockQuantity,
+  DEFAULT_LOW_STOCK_THRESHOLD
+} from '../utils/inventoryRules';
+import { trackProductClick } from '../utils/analytics';
+import { recordUserSignIn } from '../utils/userActivity';
+
 export type UserRole = 'customer' | 'admin' | null;
 
 export interface AppNotification {
@@ -45,10 +55,24 @@ export interface AppNotification {
 interface AppContextType {
   // Authentication & Role
   userRole: UserRole;
-  loginAs: (role: 'customer' | 'admin') => void;
+  loginAs: (role: 'customer' | 'admin', email?: string, name?: string) => void;
   logout: () => void;
   adminSignInRequested: boolean;
   setAdminSignInRequested: (req: boolean) => void;
+
+  // Inventory Management & Testing (Admin)
+  lowStockThreshold: number;
+  setLowStockThreshold: (threshold: number) => void;
+  updateProductStock: (productId: string, newQuantity: number) => { success: boolean; error?: string };
+  inventoryTestHistory: InventoryTestRun[];
+  activeTestRun: InventoryTestRun | null;
+  setActiveTestRun: (run: InventoryTestRun | null) => void;
+  runInventoryTest: (
+    testType?: InventoryTestType,
+    filterParam?: string,
+    threshold?: number
+  ) => InventoryTestRun;
+  clearInventoryTestHistory: () => void;
 
   // Navigation & View
   activeTab: string;
@@ -409,6 +433,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   const openProductDetails = (productId: string) => {
+    trackProductClick(productId, userRole);
     setSelectedProductId(productId);
     setActiveTabState('product-detail');
     try {
@@ -787,9 +812,15 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     setNotifications([]);
   };
 
-  const loginAs = (role: 'customer' | 'admin') => {
+  const loginAs = (role: 'customer' | 'admin', email?: string, name?: string) => {
     setUserRole(role);
     setAdminSignInRequested(false);
+
+    // Record persistent sign-in event (never storing passwords/tokens)
+    const userEmail = email || (role === 'admin' ? 'admin@workspace.com' : 'tanmay.anand@craftbundle.io');
+    const userName = name || (role === 'admin' ? 'Lead Administrator' : 'Tanmay Anand');
+    recordUserSignIn(userEmail, userName, role);
+
     try {
       sessionStorage.setItem('c07_user_role_v1', role);
     } catch {}
@@ -822,6 +853,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   const selectProduct = (slotId: string, product: Product) => {
+    trackProductClick(product.id, userRole);
     setCurrentItems(prev => {
       const next = { ...prev, [slotId]: product };
       return next;
@@ -830,6 +862,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   const addItemToCart = (product: Product) => {
+    trackProductClick(product.id, userRole);
     // 1. Check if an empty required slot exists for this product's category
     const matchingEmptyRequiredSlot = fixture.activity.requiredSlots.find(
       s => (s.id === product.category || s.category.toLowerCase() === product.category.toLowerCase()) && !currentItems[s.id]
@@ -1176,6 +1209,165 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     setUnitEconomics(prev => ({ ...prev, ...updates }));
   };
 
+  // ==========================================================================
+  // INVENTORY MANAGEMENT & AVAILABILITY TESTING (Admin Portal)
+  // ==========================================================================
+  const [lowStockThreshold, setLowStockThresholdState] = useState<number>(() => {
+    try {
+      if (typeof localStorage !== 'undefined') {
+        const saved = localStorage.getItem('c07_low_stock_threshold');
+        if (saved) {
+          const num = Number(saved);
+          if (!isNaN(num) && num >= 0) return num;
+        }
+      }
+    } catch {}
+    return DEFAULT_LOW_STOCK_THRESHOLD;
+  });
+
+  const setLowStockThreshold = (th: number) => {
+    const safeTh = Math.max(0, Math.floor(th));
+    setLowStockThresholdState(safeTh);
+    try {
+      localStorage.setItem('c07_low_stock_threshold', String(safeTh));
+    } catch {}
+  };
+
+  const updateProductStock = (productId: string, newQuantity: number): { success: boolean; error?: string } => {
+    if (userRole !== 'admin') {
+      addNotification("Unauthorized", "Only authorized administrators can modify inventory.", 'error');
+      return { success: false, error: "Unauthorized: Admin privileges required." };
+    }
+
+    const validation = validateStockQuantity(newQuantity);
+    if (!validation.isValid || validation.parsedQuantity === undefined) {
+      addNotification("Invalid Stock Input", validation.error || "Quantity must be a non-negative integer.", 'error');
+      return { success: false, error: validation.error || "Quantity must be a non-negative integer." };
+    }
+
+    const validQty = validation.parsedQuantity;
+    const nowIso = new Date().toISOString();
+
+    let productFound = false;
+    let targetProductName = '';
+
+    const updatedProducts = fixture.products.map(p => {
+      if (p.id === productId) {
+        productFound = true;
+        targetProductName = p.name;
+        return {
+          ...p,
+          stockQuantity: validQty,
+          inStock: validQty > 0,
+          lastUpdated: nowIso
+        };
+      }
+      return p;
+    });
+
+    if (!productFound) {
+      addNotification("Product Not Found", `Product ID ${productId} does not exist in catalogue.`, 'error');
+      return { success: false, error: `Product ID ${productId} does not exist.` };
+    }
+
+    const nextFixture = {
+      ...fixture,
+      products: updatedProducts
+    };
+
+    setFixture(nextFixture);
+    try {
+      localStorage.setItem('c07_fixture_v3', JSON.stringify(nextFixture));
+    } catch {}
+
+    // Update in current bundle if present
+    setCurrentItems(prev => {
+      let changed = false;
+      const nextItems = { ...prev };
+      for (const [slotId, item] of Object.entries(nextItems)) {
+        if (item && item.id === productId) {
+          nextItems[slotId] = {
+            ...item,
+            stockQuantity: validQty,
+            inStock: validQty > 0,
+            lastUpdated: nowIso
+          };
+          changed = true;
+        }
+      }
+      return changed ? nextItems : prev;
+    });
+
+    addNotification(
+      "Inventory Updated",
+      `Stock for "${targetProductName}" (${productId}) set to ${validQty} units (${validQty > 0 ? (validQty <= lowStockThreshold ? 'Low Stock' : 'In Stock') : 'Out of Stock'}).`,
+      'success'
+    );
+
+    return { success: true };
+  };
+
+  const [inventoryTestHistory, setInventoryTestHistory] = useState<InventoryTestRun[]>(() => {
+    try {
+      if (typeof localStorage !== 'undefined') {
+        const saved = localStorage.getItem('c07_inventory_test_history_v2');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed)) return parsed;
+        }
+      }
+    } catch {}
+    return [];
+  });
+
+  const [activeTestRun, setActiveTestRun] = useState<InventoryTestRun | null>(() => {
+    try {
+      if (typeof localStorage !== 'undefined') {
+        const saved = localStorage.getItem('c07_inventory_test_history_v2');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed[0];
+        }
+      }
+    } catch {}
+    return null;
+  });
+
+  const runInventoryTest = (
+    testType: InventoryTestType = 'ALL_PRODUCTS',
+    filterParam?: string,
+    threshold: number = lowStockThreshold
+  ): InventoryTestRun => {
+    // Uses latest saved inventory quantities directly from fixture.products
+    const testRun = runInventoryAvailabilityTest(fixture.products, testType, filterParam, threshold);
+    setActiveTestRun(testRun);
+    setInventoryTestHistory(prev => {
+      // Historical test integrity: newly prepended runs preserve prior test snapshots
+      const updated = [testRun, ...prev].slice(0, 50);
+      try {
+        localStorage.setItem('c07_inventory_test_history_v2', JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
+
+    addNotification(
+      `Inventory Test Completed: ${testRun.summary.overallStatus}`,
+      `Tested ${testRun.summary.totalTested} items. ${testRun.summary.passed} Passed, ${testRun.summary.failed} Failed in ${testRun.summary.executionTimeMs}ms.`,
+      testRun.summary.overallStatus === 'PASS' ? 'success' : 'warning'
+    );
+
+    return testRun;
+  };
+
+  const clearInventoryTestHistory = () => {
+    setInventoryTestHistory([]);
+    setActiveTestRun(null);
+    try {
+      localStorage.removeItem('c07_inventory_test_history_v2');
+    } catch {}
+    addNotification("Test History Cleared", "Inventory test execution history was cleared.", 'info');
+  };
+
   // Checkout & Payment Simulation State
   const [checkoutData, setCheckoutData] = useState<CheckoutBundleData | null>(() => {
     try {
@@ -1269,6 +1461,15 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         logout,
         adminSignInRequested,
         setAdminSignInRequested,
+
+        lowStockThreshold,
+        setLowStockThreshold,
+        updateProductStock,
+        inventoryTestHistory,
+        activeTestRun,
+        setActiveTestRun,
+        runInventoryTest,
+        clearInventoryTestHistory,
 
         activeTab,
         setActiveTab,
