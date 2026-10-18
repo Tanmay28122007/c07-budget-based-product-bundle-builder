@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { Product, RequiredSlot, CompatibilityViolation } from '../../types';
 import { formatINR } from '../../utils/pricing';
+import { getProductImageUrl, getProductImageFallback } from '../../utils/imageUtils';
 
 interface RequiredSlotCardProps {
   slot: RequiredSlot;
@@ -20,16 +21,6 @@ interface RequiredSlotCardProps {
   onRemove: () => void;
   compatibilityViolations: CompatibilityViolation[];
   availableCount?: number;
-}
-
-function getProductImageUrl(img?: string, id?: string): string {
-  if (img && !img.startsWith('blob:') && !img.startsWith('data:')) {
-    return img;
-  }
-  if (id && /^P\d+$/i.test(id)) {
-    return `/assets/${id.toUpperCase()}.png`;
-  }
-  return img || '/assets/P01.png';
 }
 
 export const RequiredSlotCard: React.FC<RequiredSlotCardProps> = ({

@@ -139,6 +139,19 @@ app.get('/api/health', (_req, res) => {
   });
 });
 
+// Sanitizer to strip repetitive intro preambles
+function cleanAssistantReply(text: string): string {
+  if (!text || typeof text !== 'string') return text;
+  let cleaned = text;
+  // Remove robotic "I have complete knowledge of our entire catalog..." block
+  cleaned = cleaned.replace(/I have complete knowledge of our entire catalog[\s\S]*?unit economics\.[\r\n]*/gi, '');
+  cleaned = cleaned.replace(/I have complete knowledge of our entire catalog[^\n]*\n*/gi, '');
+  // Remove robotic "Right now, you are on the ... workspace/page with a target budget of..." block
+  cleaned = cleaned.replace(/Right now, you are on the [\s\S]*?budget headroom\)\.[\r\n]*/gi, '');
+  cleaned = cleaned.replace(/Right now, you are on the [^\n]*budget of[^\n]*\n*/gi, '');
+  return cleaned.trim();
+}
+
 // AI Assistant Chat & Recommendation API
 app.post('/api/ai/assistant', async (req, res) => {
   try {
@@ -150,12 +163,14 @@ app.post('/api/ai/assistant', async (req, res) => {
 
     const apiKey = getGeminiApiKey();
 
-    // Model selection based on user instructions:
-    // - 'gemini-4-argon' for particularly complex tasks
-    // - 'gemini-3.8-flash' for general tasks (default)
-    // - 'gemini-3.1-flash-lite' for tasks that should happen fast
-    const allowedModels = ['gemini-4-argon', 'gemini-3.8-flash', 'gemini-3.1-flash-lite'];
-    const activeModel = allowedModels.includes(requestedModel) ? requestedModel : 'gemini-3.8-flash';
+    const supportedModels = [
+      'gemini-3.1-flash-lite',
+      'gemini-flash-lite-latest',
+      'gemini-3-flash-preview',
+      'gemini-3.8-flash',
+      'gemini-3.5-flash',
+      'gemini-4-argon'
+    ];
 
     // Build context summary for the AI
     const activityName = context?.activityName || 'Work from Home Setup';
@@ -233,44 +248,71 @@ app.post('/api/ai/assistant', async (req, res) => {
           parts: [{ text: message }]
         });
 
-        const response = await ai.models.generateContent({
-          model: activeModel,
-          contents: formattedContents,
-          config: {
-            systemInstruction,
-            temperature: activeModel === 'gemini-3.1-flash-lite' ? 0.3 : 0.7
-          }
-        });
-
-        const replyText = response.text || "I've analyzed your workspace bundle.";
-        
-        // Extract any action block
-        const actionMatch = replyText.match(/```action\s*([\s\S]*?)\s*```/);
-        let actionData = null;
-        let cleanedReply = replyText;
-
-        if (actionMatch) {
-          try {
-            actionData = JSON.parse(actionMatch[1]);
-            cleanedReply = replyText.replace(/```action\s*[\s\S]*?\s*```/, '').trim();
-          } catch (e) {
-            console.error('Failed to parse action json:', e);
+        // Build candidate models order
+        const candidateModels: string[] = [];
+        if (requestedModel && supportedModels.includes(requestedModel)) {
+          candidateModels.push(requestedModel);
+        }
+        for (const m of ['gemini-3.1-flash-lite', 'gemini-flash-lite-latest', 'gemini-3-flash-preview', 'gemini-3.8-flash']) {
+          if (!candidateModels.includes(m)) {
+            candidateModels.push(m);
           }
         }
 
-        return res.json({
-          reply: cleanedReply,
-          action: actionData,
-          model: activeModel
-        });
+        for (const modelToTry of candidateModels) {
+          try {
+            const generatePromise = ai.models.generateContent({
+              model: modelToTry,
+              contents: formattedContents,
+              config: {
+                systemInstruction,
+                temperature: modelToTry.includes('lite') ? 0.3 : 0.7
+              }
+            });
+
+            // Strict 7.5s timeout per model to prevent browser hanging
+            const timeoutPromise = new Promise<never>((_, reject) =>
+              setTimeout(() => reject(new Error(`Timeout waiting for model ${modelToTry}`)), 7500)
+            );
+
+            const response = await Promise.race([generatePromise, timeoutPromise]);
+            const replyText = response.text || "I've analyzed your workspace bundle.";
+
+            // Extract any action block
+            const actionMatch = replyText.match(/```action\s*([\s\S]*?)\s*```/);
+            let actionData = null;
+            let cleanedReply = replyText;
+
+            if (actionMatch) {
+              try {
+                actionData = JSON.parse(actionMatch[1]);
+                cleanedReply = replyText.replace(/```action\s*[\s\S]*?\s*```/, '').trim();
+              } catch (e) {
+                console.error('Failed to parse action json:', e);
+              }
+            }
+
+            cleanedReply = cleanAssistantReply(cleanedReply);
+
+            return res.json({
+              reply: cleanedReply,
+              action: actionData,
+              model: modelToTry
+            });
+          } catch (modelError: any) {
+            console.warn(`Model ${modelToTry} attempt failed: ${modelError?.status || modelError?.message}. Cascading to next candidate...`);
+          }
+        }
       } catch (geminiError: any) {
-        console.warn('Gemini API call failed, falling back to local heuristic reasoning engine:', geminiError?.message || geminiError);
-        // Fall through to heuristic response below
+        console.warn('Gemini client initialization failed, falling back to local heuristic reasoning engine:', geminiError?.message || geminiError);
       }
     }
 
-    // Heuristic Fallback Engine Grounded in the Entire Website
+    // Heuristic Fallback Engine Grounded in the Entire Website (instant response)
     const fallbackResponse = generateComprehensiveHeuristicResponse(message, context);
+    if (fallbackResponse && fallbackResponse.reply) {
+      fallbackResponse.reply = cleanAssistantReply(fallbackResponse.reply);
+    }
     return res.json(fallbackResponse);
 
   } catch (error: any) {

@@ -18,17 +18,7 @@ import { Product } from '../../types';
 import { BundleRecommendation } from '../../utils/bundleRecommendations';
 import { useApp } from '../../context/AppContext';
 import { formatINR } from '../../utils/pricing';
-
-function getProductImageUrl(img?: string, id?: string): string {
-  if (!img) return id ? `/assets/${id}.png` : '';
-  if (img.startsWith('../assets/')) {
-    return img.replace('../assets/', '/assets/');
-  }
-  if (img.startsWith('./assets/')) {
-    return img.replace('./assets/', '/assets/');
-  }
-  return img;
-}
+import { getProductImageUrl } from '../../utils/imageUtils';
 
 interface BundleAddOnsPanelProps {
   referenceBundle: BundleRecommendation | null;

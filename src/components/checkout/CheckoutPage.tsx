@@ -27,17 +27,7 @@ import { useApp } from '../../context/AppContext';
 import { formatINR } from '../../utils/pricing';
 import { downloadFile } from '../../utils/exportUtils';
 import { CheckoutBundleData, CheckoutBundleItem, Product } from '../../types';
-
-function getProductImageUrl(img?: string, id?: string): string {
-  if (!img) return id ? `/assets/${id}.png` : '';
-  if (img.startsWith('../assets/')) {
-    return img.replace('../assets/', '/assets/');
-  }
-  if (img.startsWith('./assets/')) {
-    return img.replace('./assets/', '/assets/');
-  }
-  return img;
-}
+import { getProductImageUrl } from '../../utils/imageUtils';
 
 type PaymentMethodType = 'upi' | 'card' | 'netbanking' | 'cod';
 
