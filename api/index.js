@@ -2,7 +2,7 @@
 import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
-import dotenv from "dotenv";
+import dotenv2 from "dotenv";
 import { GoogleGenAI } from "@google/genai";
 
 // src/data/websiteKnowledge.ts
@@ -3357,11 +3357,340 @@ function generateBundleRecommendations(allProducts, requirements, maxBudget, exa
   };
 }
 
+// src/server/paymentService.ts
+import crypto from "crypto";
+import dotenv from "dotenv";
+try {
+  dotenv.config();
+} catch {
+}
+var fixture = mapC07Fixture();
+var ordersStore = /* @__PURE__ */ new Map();
+var paymentsStore = /* @__PURE__ */ new Map();
+var processedWebhookEvents = /* @__PURE__ */ new Set();
+function getRazorpayConfig() {
+  const keyId = (process.env.RAZORPAY_KEY_ID || "").trim();
+  const keySecret = (process.env.RAZORPAY_KEY_SECRET || "").trim();
+  const webhookSecret = (process.env.RAZORPAY_WEBHOOK_SECRET || "").trim();
+  const isConfigured = Boolean(keyId && keySecret && !keyId.includes("your_key_id"));
+  return {
+    keyId: isConfigured ? keyId : keyId || "rzp_test_placeholder",
+    keySecret,
+    webhookSecret,
+    isConfigured,
+    currency: "INR",
+    isTestMode: true
+  };
+}
+function validateAndCalculateOrder(items, shippingRule, taxRule) {
+  if (!Array.isArray(items) || items.length === 0) {
+    throw new Error("Order must contain at least one item.");
+  }
+  const sRule = shippingRule || fixture.shippingRule;
+  const tRule = taxRule || fixture.taxRule;
+  let productSubtotal = 0;
+  let heavyItemCount = 0;
+  const resolvedItems = [];
+  for (const item of items) {
+    if (!item.productId || typeof item.productId !== "string") {
+      throw new Error("Invalid product identifier provided.");
+    }
+    const qty = Number(item.quantity);
+    if (!Number.isInteger(qty) || qty < 1 || qty > 50) {
+      throw new Error(`Invalid quantity ${item.quantity} for product ${item.productId}. Must be between 1 and 50.`);
+    }
+    const product = fixture.products.find((p) => p.id.toLowerCase() === item.productId.toLowerCase());
+    if (!product) {
+      throw new Error(`Product '${item.productId}' not found in official catalog.`);
+    }
+    if (!product.inStock || (product.stockQuantity ?? 1) < qty) {
+      throw new Error(`Product '${product.name}' (${product.id}) is out of stock or requested quantity exceeds available stock.`);
+    }
+    const itemTotal = product.price * qty;
+    productSubtotal += itemTotal;
+    if ((product.weightKg || 0) >= (sRule.heavyThresholdKg || 15)) {
+      heavyItemCount += qty;
+    }
+    resolvedItems.push({
+      productId: product.id,
+      productName: product.name,
+      unitPrice: product.price,
+      quantity: qty,
+      totalPrice: itemTotal,
+      image: product.image
+    });
+  }
+  let baseShipping = 0;
+  if (productSubtotal > 0) {
+    if (productSubtotal >= (sRule.freeShippingThreshold || 5e4)) {
+      baseShipping = 0;
+    } else {
+      baseShipping = sRule.baseFee ?? 100;
+    }
+  }
+  const heavySurcharge = heavyItemCount * (sRule.heavyItemSurchargePerItem || 0);
+  const netShipping = baseShipping + heavySurcharge;
+  const taxRate = typeof tRule.taxRate === "number" ? tRule.taxRate : 0.18;
+  const taxAmount = Math.round(productSubtotal * taxRate);
+  const totalAmount = productSubtotal + netShipping + taxAmount;
+  const amountInPaise = Math.round(totalAmount * 100);
+  return {
+    resolvedItems,
+    productSubtotal,
+    netShipping,
+    taxAmount,
+    totalAmount,
+    amountInPaise,
+    heavyItemCount
+  };
+}
+async function createRazorpayOrder(params) {
+  const config = getRazorpayConfig();
+  if (config.isConfigured) {
+    const authHeader = "Basic " + Buffer.from(`${config.keyId}:${config.keySecret}`).toString("base64");
+    try {
+      const response = await fetch("https://api.razorpay.com/v1/orders", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": authHeader
+        },
+        body: JSON.stringify({
+          amount: params.amountInPaise,
+          currency: params.currency || "INR",
+          receipt: params.receipt,
+          notes: params.notes || {}
+        })
+      });
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error("Razorpay API error response:", errorData);
+        throw new Error(errorData?.error?.description || `Razorpay order creation failed with status ${response.status}`);
+      }
+      const orderData = await response.json();
+      return {
+        id: orderData.id,
+        amount: orderData.amount,
+        currency: orderData.currency
+      };
+    } catch (err) {
+      console.error(`Razorpay official order creation failed:`, err.message);
+      throw new Error(`Razorpay gateway order creation failed: ${err.message}`);
+    }
+  }
+  const testOrderId = `order_${crypto.randomBytes(8).toString("hex")}`;
+  return {
+    id: testOrderId,
+    amount: params.amountInPaise,
+    currency: params.currency || "INR"
+  };
+}
+async function initiatePaymentOrder(data) {
+  if (!data.customer?.fullName?.trim()) {
+    throw new Error("Customer full name is required.");
+  }
+  if (!data.customer?.email?.trim() || !data.customer.email.includes("@")) {
+    throw new Error("A valid customer email address is required.");
+  }
+  if (!data.customer?.phone?.trim() || data.customer.phone.replace(/[^0-9]/g, "").length < 10) {
+    throw new Error("A valid 10-digit mobile number is required.");
+  }
+  if (!data.customer?.address?.trim()) {
+    throw new Error("Customer shipping address is required.");
+  }
+  const calculation = validateAndCalculateOrder(data.items);
+  const internalOrderId = `C07-ORD-${Date.now().toString().slice(-6)}${Math.floor(100 + Math.random() * 900)}`;
+  const rzpOrder = await createRazorpayOrder({
+    amountInPaise: calculation.amountInPaise,
+    currency: "INR",
+    receipt: internalOrderId,
+    notes: {
+      orderId: internalOrderId,
+      customerName: data.customer.fullName,
+      customerPhone: data.customer.phone,
+      bundleName: data.bundleName || "C07 Product Bundle"
+    }
+  });
+  const now = (/* @__PURE__ */ new Date()).toISOString();
+  const orderRecord = {
+    id: internalOrderId,
+    userId: data.userId,
+    customer: data.customer,
+    items: calculation.resolvedItems,
+    subtotal: calculation.productSubtotal,
+    netShipping: calculation.netShipping,
+    taxAmount: calculation.taxAmount,
+    totalAmount: calculation.totalAmount,
+    amountInPaise: calculation.amountInPaise,
+    currency: "INR",
+    status: "pending",
+    razorpayOrderId: rzpOrder.id,
+    createdAt: now,
+    updatedAt: now
+  };
+  ordersStore.set(internalOrderId, orderRecord);
+  ordersStore.set(rzpOrder.id, orderRecord);
+  const config = getRazorpayConfig();
+  return {
+    orderId: internalOrderId,
+    razorpayOrderId: rzpOrder.id,
+    amount: calculation.amountInPaise,
+    currency: "INR",
+    totalAmountINR: calculation.totalAmount,
+    keyId: config.keyId,
+    customer: data.customer,
+    calculation: {
+      subtotal: calculation.productSubtotal,
+      netShipping: calculation.netShipping,
+      taxAmount: calculation.taxAmount,
+      totalAmount: calculation.totalAmount
+    }
+  };
+}
+function verifyRazorpaySignature(params) {
+  const secret = params.keySecret || getRazorpayConfig().keySecret;
+  if (secret) {
+    const payload = `${params.razorpayOrderId}|${params.razorpayPaymentId}`;
+    const generatedSignature = crypto.createHmac("sha256", secret).update(payload).digest("hex");
+    try {
+      const a = Buffer.from(generatedSignature, "utf8");
+      const b = Buffer.from(params.razorpaySignature, "utf8");
+      if (a.length !== b.length) return false;
+      return crypto.timingSafeEqual(a, b);
+    } catch {
+      return false;
+    }
+  }
+  if (params.razorpayOrderId.startsWith("order_") && params.razorpayPaymentId.startsWith("pay_") && typeof params.razorpaySignature === "string" && params.razorpaySignature.length >= 10) {
+    return true;
+  }
+  return false;
+}
+function verifyAndConfirmPayment(params) {
+  const order = ordersStore.get(params.orderId || params.razorpayOrderId);
+  if (!order) {
+    throw new Error(`Order corresponding to Razorpay Order ID '${params.razorpayOrderId}' was not found.`);
+  }
+  if (order.status === "paid") {
+    return {
+      success: true,
+      alreadyPaid: true,
+      order,
+      message: "Order has already been verified and paid."
+    };
+  }
+  const isSignatureValid = verifyRazorpaySignature({
+    razorpayOrderId: params.razorpayOrderId,
+    razorpayPaymentId: params.razorpayPaymentId,
+    razorpaySignature: params.razorpaySignature
+  });
+  const now = (/* @__PURE__ */ new Date()).toISOString();
+  const paymentRecord = {
+    id: `C07-PAY-${Date.now().toString().slice(-6)}${Math.floor(100 + Math.random() * 900)}`,
+    orderId: order.id,
+    razorpayOrderId: params.razorpayOrderId,
+    razorpayPaymentId: params.razorpayPaymentId,
+    razorpaySignature: params.razorpaySignature,
+    amount: order.totalAmount,
+    currency: order.currency,
+    status: isSignatureValid ? "captured" : "failed",
+    signatureVerified: isSignatureValid,
+    paymentMethod: params.paymentMethod || "Razorpay Checkout",
+    createdAt: now,
+    updatedAt: now
+  };
+  paymentsStore.set(paymentRecord.id, paymentRecord);
+  paymentsStore.set(params.razorpayPaymentId, paymentRecord);
+  if (!isSignatureValid) {
+    order.status = "failed";
+    order.failureReason = "Cryptographic signature mismatch during verification.";
+    order.updatedAt = now;
+    throw new Error("Payment signature verification failed. The transaction payload was invalid or tampered with.");
+  }
+  order.status = "paid";
+  order.razorpayPaymentId = params.razorpayPaymentId;
+  order.paymentMethod = params.paymentMethod || "Razorpay Verified";
+  order.updatedAt = now;
+  for (const item of order.items) {
+    const prod = fixture.products.find((p) => p.id === item.productId);
+    if (prod && typeof prod.stockQuantity === "number") {
+      prod.stockQuantity = Math.max(0, prod.stockQuantity - item.quantity);
+      if (prod.stockQuantity === 0) {
+        prod.inStock = false;
+      }
+    }
+  }
+  return {
+    success: true,
+    order,
+    payment: paymentRecord,
+    message: "Payment successfully verified and order marked as paid."
+  };
+}
+function processRazorpayWebhook(params) {
+  const config = getRazorpayConfig();
+  if (config.webhookSecret && params.signatureHeader) {
+    const expectedSignature = crypto.createHmac("sha256", config.webhookSecret).update(params.rawBody).digest("hex");
+    if (expectedSignature !== params.signatureHeader) {
+      throw new Error("Invalid Razorpay webhook signature header.");
+    }
+  }
+  const eventPayload = params.event;
+  const eventId = eventPayload?.event_id || eventPayload?.payload?.payment?.entity?.id || `evt_${Date.now()}`;
+  if (processedWebhookEvents.has(eventId)) {
+    return {
+      received: true,
+      duplicate: true,
+      message: "Event has already been processed idempotently."
+    };
+  }
+  processedWebhookEvents.add(eventId);
+  const eventType = eventPayload?.event;
+  const paymentEntity = eventPayload?.payload?.payment?.entity;
+  const orderEntity = eventPayload?.payload?.order?.entity;
+  const razorpayOrderId = paymentEntity?.order_id || orderEntity?.id;
+  const razorpayPaymentId = paymentEntity?.id;
+  if (razorpayOrderId) {
+    const order = ordersStore.get(razorpayOrderId);
+    if (order) {
+      const now = (/* @__PURE__ */ new Date()).toISOString();
+      if (eventType === "payment.captured" || eventType === "order.paid") {
+        if (order.status !== "paid") {
+          order.status = "paid";
+          order.razorpayPaymentId = razorpayPaymentId || order.razorpayPaymentId;
+          order.updatedAt = now;
+        }
+      } else if (eventType === "payment.failed") {
+        if (order.status !== "paid") {
+          order.status = "failed";
+          order.failureReason = paymentEntity?.error_description || "Payment failed via webhook.";
+          order.updatedAt = now;
+        }
+      }
+    }
+  }
+  return {
+    received: true,
+    eventType,
+    eventId
+  };
+}
+function getOrderById(orderId) {
+  return ordersStore.get(orderId);
+}
+function getAllOrders() {
+  const set = /* @__PURE__ */ new Set();
+  for (const ord of ordersStore.values()) {
+    set.add(ord);
+  }
+  return Array.from(set);
+}
+
 // api-server.ts
 var __filename = fileURLToPath(import.meta.url);
 var __dirname = path.dirname(__filename);
 try {
-  dotenv.config({ path: path.join(__dirname, ".env") });
+  dotenv2.config({ path: path.join(__dirname, ".env") });
 } catch {
 }
 function getGeminiApiKey() {
@@ -3369,7 +3698,7 @@ function getGeminiApiKey() {
     return process.env.GEMINI_API_KEY;
   }
   try {
-    const key = dotenv.config({ path: path.join(__dirname, ".env") }).parsed?.GEMINI_API_KEY;
+    const key = dotenv2.config({ path: path.join(__dirname, ".env") }).parsed?.GEMINI_API_KEY;
     if (key) return key;
   } catch {
   }
@@ -3396,7 +3725,12 @@ app.use((req, res, next) => {
   if (req.body && typeof req.body === "object") {
     return next();
   }
-  express.json({ limit: "10mb" })(req, res, next);
+  express.json({
+    limit: "10mb",
+    verify: (req2, _res, buf) => {
+      req2.rawBody = buf.toString("utf8");
+    }
+  })(req, res, next);
 });
 var defaultFixture = mapC07Fixture();
 function filterProductsList(products, filters) {
@@ -3779,6 +4113,109 @@ app.get(["/api/bundles", "/bundles"], (req, res) => {
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
+});
+app.get(["/api/payment/config", "/payment/config"], (_req, res) => {
+  try {
+    const config = getRazorpayConfig();
+    res.json({
+      success: true,
+      keyId: config.keyId,
+      currency: config.currency,
+      isTestMode: config.isTestMode,
+      isConfigured: config.isConfigured
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+app.post(["/api/payment/create-order", "/payment/create-order"], async (req, res) => {
+  try {
+    const { items, customer, userId, bundleName } = req.body || {};
+    if (!items || !customer) {
+      return res.status(400).json({
+        success: false,
+        error: "Missing required parameters: items and customer details are required."
+      });
+    }
+    const orderData = await initiatePaymentOrder({
+      items,
+      customer,
+      userId,
+      bundleName
+    });
+    res.json({
+      success: true,
+      ...orderData
+    });
+  } catch (err) {
+    console.error("Error creating payment order:", err.message);
+    res.status(400).json({
+      success: false,
+      error: err.message
+    });
+  }
+});
+app.post(["/api/payment/verify", "/payment/verify"], (req, res) => {
+  try {
+    const { orderId, razorpayOrderId, razorpayPaymentId, razorpaySignature, paymentMethod } = req.body || {};
+    if (!razorpayOrderId || !razorpayPaymentId || !razorpaySignature) {
+      return res.status(400).json({
+        success: false,
+        error: "Incomplete payment payload: razorpayOrderId, razorpayPaymentId, and razorpaySignature are required."
+      });
+    }
+    const result = verifyAndConfirmPayment({
+      orderId,
+      razorpayOrderId,
+      razorpayPaymentId,
+      razorpaySignature,
+      paymentMethod
+    });
+    res.json(result);
+  } catch (err) {
+    console.error("Payment verification error:", err.message);
+    res.status(400).json({
+      success: false,
+      error: err.message
+    });
+  }
+});
+app.post(["/api/payment/webhook", "/payment/webhook"], (req, res) => {
+  try {
+    const signature = req.headers["x-razorpay-signature"] || "";
+    const rawBody = req.rawBody || (typeof req.body === "string" ? req.body : JSON.stringify(req.body));
+    const event = req.body;
+    const result = processRazorpayWebhook({
+      rawBody,
+      signatureHeader: signature,
+      event
+    });
+    res.json({
+      status: "ok",
+      ...result
+    });
+  } catch (err) {
+    console.error("Webhook processing error:", err.message);
+    res.status(400).json({
+      status: "error",
+      error: err.message
+    });
+  }
+});
+app.get(["/api/payment/order/:id", "/payment/order/:id"], (req, res) => {
+  const order = getOrderById(req.params.id);
+  if (!order) {
+    return res.status(404).json({ success: false, error: `Order '${req.params.id}' not found.` });
+  }
+  res.json({ success: true, order });
+});
+app.get(["/api/payment/orders", "/payment/orders"], (_req, res) => {
+  const orders = getAllOrders();
+  res.json({
+    success: true,
+    total: orders.length,
+    orders
+  });
 });
 app.all(["/api", "/api/"], (req, res, next) => {
   if (req.method === "POST" && req.body && req.body.message) {

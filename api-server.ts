@@ -52,12 +52,25 @@ app.use((req, res, next) => {
   if (req.body && typeof req.body === 'object') {
     return next();
   }
-  express.json({ limit: '10mb' })(req, res, next);
+  express.json({
+    limit: '10mb',
+    verify: (req: any, _res, buf) => {
+      req.rawBody = buf.toString('utf8');
+    }
+  })(req, res, next);
 });
 
 import { buildMasterSystemPrompt, generateComprehensiveHeuristicResponse } from './src/data/websiteKnowledge.ts';
 import { mapC07Fixture } from './src/data/defaultFixture.ts';
 import { generateBundleRecommendations, getPredefinedBaselineBundles } from './src/utils/bundleRecommendations.ts';
+import {
+  getRazorpayConfig,
+  initiatePaymentOrder,
+  verifyAndConfirmPayment,
+  processRazorpayWebhook,
+  getOrderById,
+  getAllOrders
+} from './src/server/paymentService.ts';
 
 const defaultFixture = mapC07Fixture();
 
@@ -544,6 +557,132 @@ app.get(['/api/bundles', '/bundles'], (req, res) => {
   } catch (err: any) {
     res.status(500).json({ success: false, error: err.message });
   }
+});
+
+// ============================================================================
+// BACKEND API: Razorpay Payment Gateway Endpoints
+// ============================================================================
+
+// Public payment configuration (never exposes secret keys)
+app.get(['/api/payment/config', '/payment/config'], (_req, res) => {
+  try {
+    const config = getRazorpayConfig();
+    res.json({
+      success: true,
+      keyId: config.keyId,
+      currency: config.currency,
+      isTestMode: config.isTestMode,
+      isConfigured: config.isConfigured
+    });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Create Order: Validates items, prices, stock, and creates order
+app.post(['/api/payment/create-order', '/payment/create-order'], async (req, res) => {
+  try {
+    const { items, customer, userId, bundleName } = req.body || {};
+    if (!items || !customer) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing required parameters: items and customer details are required.'
+      });
+    }
+
+    const orderData = await initiatePaymentOrder({
+      items,
+      customer,
+      userId,
+      bundleName
+    });
+
+    res.json({
+      success: true,
+      ...orderData
+    });
+  } catch (err: any) {
+    console.error('Error creating payment order:', err.message);
+    res.status(400).json({
+      success: false,
+      error: err.message
+    });
+  }
+});
+
+// Verify Payment: HMAC SHA-256 signature verification & status update
+app.post(['/api/payment/verify', '/payment/verify'], (req, res) => {
+  try {
+    const { orderId, razorpayOrderId, razorpayPaymentId, razorpaySignature, paymentMethod } = req.body || {};
+
+    if (!razorpayOrderId || !razorpayPaymentId || !razorpaySignature) {
+      return res.status(400).json({
+        success: false,
+        error: 'Incomplete payment payload: razorpayOrderId, razorpayPaymentId, and razorpaySignature are required.'
+      });
+    }
+
+    const result = verifyAndConfirmPayment({
+      orderId,
+      razorpayOrderId,
+      razorpayPaymentId,
+      razorpaySignature,
+      paymentMethod
+    });
+
+    res.json(result);
+  } catch (err: any) {
+    console.error('Payment verification error:', err.message);
+    res.status(400).json({
+      success: false,
+      error: err.message
+    });
+  }
+});
+
+// Webhook endpoint: handles external asynchronous payment notifications
+app.post(['/api/payment/webhook', '/payment/webhook'], (req, res) => {
+  try {
+    const signature = (req.headers['x-razorpay-signature'] as string) || '';
+    const rawBody = (req as any).rawBody || (typeof req.body === 'string' ? req.body : JSON.stringify(req.body));
+    const event = req.body;
+
+    const result = processRazorpayWebhook({
+      rawBody,
+      signatureHeader: signature,
+      event
+    });
+
+    res.json({
+      status: 'ok',
+      ...result
+    });
+  } catch (err: any) {
+    console.error('Webhook processing error:', err.message);
+    res.status(400).json({
+      status: 'error',
+      error: err.message
+    });
+  }
+});
+
+// Get Order Details by internal or Razorpay order ID
+app.get(['/api/payment/order/:id', '/payment/order/:id'], (req, res) => {
+  const order = getOrderById(req.params.id);
+  if (!order) {
+    return res.status(404).json({ success: false, error: `Order '${req.params.id}' not found.` });
+  }
+  res.json({ success: true, order });
+});
+
+// Get All Orders for administrative audit
+app.get(['/api/payment/orders', '/payment/orders'], (_req, res) => {
+  const orders = getAllOrders();
+  res.json({
+    success: true,
+    total: orders.length,
+    orders
+  });
 });
 
 // Fallback root handler in case Vercel rewrote request to /api or /api/
