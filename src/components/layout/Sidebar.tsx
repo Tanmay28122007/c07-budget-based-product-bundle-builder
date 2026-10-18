@@ -9,7 +9,9 @@ import {
   FileCode2,
   Settings,
   ShoppingCart,
-  User
+  User,
+  LogIn,
+  LogOut
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 
@@ -83,6 +85,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     : userRole === 'customer'
     ? [
         {
+          id: 'dashboard',
+          label: 'Dashboard',
+          icon: LayoutDashboard,
+          badge: null
+        },
+        {
           id: 'catalogue',
           label: 'Product Catalogue',
           icon: Layers,
@@ -92,13 +100,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           id: 'compare',
           label: 'Bundles',
           icon: Columns,
-          badge: cartItemsCount > 0 ? `${cartItemsCount} in cart` : (savedBundles.length > 0 ? `${savedBundles.length} saved` : '2 in cart')
+          badge: cartItemsCount > 0 ? `${cartItemsCount} in cart` : (savedBundles.length > 0 ? `${savedBundles.length} saved` : null)
         },
         {
           id: 'cart',
           label: 'Bundle Cart',
           icon: ShoppingCart,
-          badge: cartItemsCount > 0 ? `${cartItemsCount}` : '2'
+          badge: cartItemsCount > 0 ? `${cartItemsCount}` : null
         },
         {
           id: 'profile',
@@ -119,12 +127,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           label: 'Bundles',
           icon: Columns,
           badge: savedBundles.length > 0 ? `${savedBundles.length} saved` : (cartItemsCount > 0 ? `${cartItemsCount} in cart` : null)
-        },
-        {
-          id: 'cart',
-          label: 'Bundle Cart',
-          icon: ShoppingCart,
-          badge: cartItemsCount > 0 ? `${cartItemsCount}` : null
         }
       ];
 
@@ -216,6 +218,58 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
             );
           })}
         </nav>
+
+        {/* Sidebar Session Footer */}
+        <div className="p-3 border-t border-[#E6E1D3] bg-white/50">
+          {!userRole ? (
+            <div className="p-3 rounded-2xl bg-[#F4F1EA] border border-[#E6E1D3] text-left">
+              <div className="flex items-center gap-1.5 mb-1 text-xs font-bold text-[#2C3A2B]">
+                <LogIn className="w-3.5 h-3.5 text-[#8B5A2B]" />
+                <span>Sign In Required</span>
+              </div>
+              <p className="text-[11px] text-[#5A5A40] leading-snug mb-2.5">
+                Sign in to customize bundles, check hardware compatibility & view landed GST pricing.
+              </p>
+              <button
+                onClick={() => {
+                  setActiveTab('dashboard');
+                  onClose();
+                }}
+                className="w-full py-2 px-3 rounded-xl bg-[#2C3A2B] hover:bg-[#1E281D] text-white text-[11px] font-bold uppercase tracking-wider text-center cursor-pointer transition-colors shadow-2xs"
+              >
+                Sign In Dashboard
+              </button>
+            </div>
+          ) : (
+            <div className="p-2.5 rounded-2xl bg-white border border-[#E6E1D3] shadow-xs flex items-center justify-between gap-2">
+              <div className="min-w-0 flex items-center gap-2">
+                <div className="w-7 h-7 rounded-lg bg-[#2C3A2B] text-white flex items-center justify-center font-bold text-[11px] shrink-0">
+                  {userRole === 'admin' ? 'AD' : 'TA'}
+                </div>
+                <div className="min-w-0">
+                  <div className="text-xs font-bold text-[#2C2C1E] truncate">
+                    {userRole === 'admin' ? 'Administrator' : 'Tanmay Anand'}
+                  </div>
+                  <div className="text-[10px] text-[#8B5A2B] font-mono font-semibold uppercase">
+                    {userRole} session
+                  </div>
+                </div>
+              </div>
+
+              <button
+                onClick={() => {
+                  logout();
+                  onClose();
+                }}
+                title="Sign out and return to front page"
+                className="p-1.5 rounded-lg text-[#8B8B7A] hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer shrink-0"
+                aria-label="Log Out"
+              >
+                <LogOut className="w-4 h-4" />
+              </button>
+            </div>
+          )}
+        </div>
       </aside>
     </>
   );

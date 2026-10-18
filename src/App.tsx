@@ -35,7 +35,7 @@ const AppContent: React.FC = () => {
           transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
           className="w-full"
         >
-          {activeTab === 'dashboard' && <DashboardPage />}
+          {(activeTab === 'dashboard' || activeTab === 'signin' || activeTab === 'login') && <DashboardPage />}
           {activeTab === 'builder' && <CompareBundlesPage initialMode="workspace" />}
           {activeTab === 'chat' && <GeminiChatbotPage />}
           {activeTab === 'catalogue' && <ProductCataloguePage />}
@@ -48,7 +48,7 @@ const AppContent: React.FC = () => {
           {activeTab === 'profile' && <ProfilePage />}
           {activeTab === 'checkout' && <CheckoutPage />}
           {/* Fallback for unknown or legacy 'landing' tab */}
-          {(!['dashboard', 'builder', 'chat', 'catalogue', 'product-detail', 'compare', 'tests', 'business', 'evidence', 'settings', 'profile', 'checkout'].includes(activeTab)) && <ProductCataloguePage />}
+          {(!['dashboard', 'signin', 'login', 'builder', 'chat', 'catalogue', 'product-detail', 'compare', 'tests', 'business', 'evidence', 'settings', 'profile', 'checkout'].includes(activeTab)) && <ProductCataloguePage />}
         </motion.div>
       </AnimatePresence>
     </AppLayout>

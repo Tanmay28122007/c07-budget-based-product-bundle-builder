@@ -9,7 +9,8 @@ import {
   X,
   LogOut,
   Wallet,
-  User
+  User,
+  LogIn
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 
@@ -182,57 +183,83 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
           )}
         </div>
 
-        {/* User Profile Avatar on Top Right Corner */}
-        <div className="relative" ref={profileRef}>
+        {/* User Profile Avatar or Sign In button on Top Right Corner */}
+        {!userRole ? (
           <button
-            onClick={() => setShowProfile(prev => !prev)}
-            aria-label="User profile settings"
-            title="Tanmay Anand"
-            className="flex items-center justify-center p-0.5 rounded-full hover:ring-2 hover:ring-[#2C3A2B]/20 transition-all cursor-pointer group"
+            onClick={() => setActiveTab('dashboard')}
+            aria-label="Sign In"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#2C3A2B] hover:bg-[#1E281D] text-white text-xs font-bold uppercase tracking-wider shadow-xs transition-all cursor-pointer shrink-0"
           >
-            <div className="w-8 h-8 rounded-full bg-[#2C3A2B] text-white flex items-center justify-center font-bold text-xs tracking-tight shadow-xs ring-2 ring-[#E6E1D3] group-hover:ring-[#2C3A2B] transition-transform group-hover:scale-105">
-              TA
-            </div>
+            <LogIn className="w-3.5 h-3.5 text-amber-200" />
+            <span>Sign In</span>
           </button>
-
-          {showProfile && (
-            <div className="absolute right-0 mt-2 w-60 bg-white border border-[#E6E1D3] rounded-2xl shadow-xl z-50 p-2">
-              <div className="px-3 py-2 border-b border-[#E6E1D3] mb-1">
-                <div className="text-xs font-serif font-bold text-[#2C3A2B]">Tanmay Anand</div>
-                <div className="text-[11px] text-[#5A5A40] flex items-center justify-between mt-0.5">
-                  <span>Current Session:</span>
-                  <span className="font-bold uppercase text-[10px] text-[#8B5A2B]">
-                    {userRole ? userRole : 'Not Logged In'}
-                  </span>
-                </div>
+        ) : (
+          <div className="relative" ref={profileRef}>
+            <button
+              onClick={() => setShowProfile(prev => !prev)}
+              aria-label="User profile settings"
+              title={userRole === 'admin' ? 'Administrator' : 'Tanmay Anand'}
+              className="flex items-center justify-center p-0.5 rounded-full hover:ring-2 hover:ring-[#2C3A2B]/20 transition-all cursor-pointer group"
+            >
+              <div className="w-8 h-8 rounded-full bg-[#2C3A2B] text-white flex items-center justify-center font-bold text-xs tracking-tight shadow-xs ring-2 ring-[#E6E1D3] group-hover:ring-[#2C3A2B] transition-transform group-hover:scale-105">
+                {userRole === 'admin' ? 'AD' : 'TA'}
               </div>
+            </button>
 
-              <button
-                onClick={() => {
-                  setActiveTab('profile');
-                  setShowProfile(false);
-                }}
-                className="w-full text-left px-3 py-1.5 rounded-xl text-xs font-semibold text-[#2C3A2B] hover:bg-[#F4F1EA] flex items-center justify-between cursor-pointer"
-              >
-                <span>My Profile</span>
-                <User className="w-3.5 h-3.5 text-[#5A5A40]" />
-              </button>
+            {showProfile && (
+              <div className="absolute right-0 mt-2 w-64 bg-white border border-[#E6E1D3] rounded-2xl shadow-xl z-50 p-2">
+                <div className="px-3 py-2 border-b border-[#E6E1D3] mb-1">
+                  <div className="text-xs font-serif font-bold text-[#2C3A2B]">
+                    {userRole === 'admin' ? 'Administrator' : 'Tanmay Anand'}
+                  </div>
+                  <div className="text-[11px] text-[#5A5A40] flex items-center justify-between mt-0.5">
+                    <span>Current Session:</span>
+                    <span className="font-bold uppercase text-[10px] text-[#8B5A2B]">
+                      {userRole}
+                    </span>
+                  </div>
+                </div>
 
-              <div className="my-1 border-t border-[#E6E1D3]" />
+                {userRole === 'customer' && (
+                  <button
+                    onClick={() => {
+                      setActiveTab('profile');
+                      setShowProfile(false);
+                    }}
+                    className="w-full text-left px-3 py-1.5 rounded-xl text-xs font-semibold text-[#2C3A2B] hover:bg-[#F4F1EA] flex items-center justify-between cursor-pointer"
+                  >
+                    <span>My Profile</span>
+                    <User className="w-3.5 h-3.5 text-[#5A5A40]" />
+                  </button>
+                )}
 
-              <button
-                onClick={() => {
-                  logout();
-                  setShowProfile(false);
-                }}
-                className="w-full text-left px-3 py-1.5 rounded-xl text-xs font-semibold text-rose-700 hover:bg-rose-50 flex items-center justify-between cursor-pointer transition-colors"
-              >
-                <span>Log Out</span>
-                <LogOut className="w-3.5 h-3.5 text-rose-600" />
-              </button>
-            </div>
-          )}
-        </div>
+                <button
+                  onClick={() => {
+                    logout();
+                    setShowProfile(false);
+                  }}
+                  className="w-full text-left px-3 py-1.5 rounded-xl text-xs font-semibold text-[#8B5A2B] hover:bg-[#F4F1EA] flex items-center justify-between cursor-pointer"
+                >
+                  <span>Switch Account / Sign In</span>
+                  <LogIn className="w-3.5 h-3.5 text-[#8B5A2B]" />
+                </button>
+
+                <div className="my-1 border-t border-[#E6E1D3]" />
+
+                <button
+                  onClick={() => {
+                    logout();
+                    setShowProfile(false);
+                  }}
+                  className="w-full text-left px-3 py-1.5 rounded-xl text-xs font-semibold text-rose-700 hover:bg-rose-50 flex items-center justify-between cursor-pointer transition-colors"
+                >
+                  <span>Log Out</span>
+                  <LogOut className="w-3.5 h-3.5 text-rose-600" />
+                </button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </header>
   );
