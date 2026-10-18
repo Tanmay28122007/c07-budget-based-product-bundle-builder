@@ -73,13 +73,61 @@ create table if not exists public.evidence_records (
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
--- 6. Enable Row Level Security (RLS)
+-- 6. Orders Table (Razorpay Integrated)
+create table if not exists public.orders (
+  id text primary key,
+  user_id text,
+  customer_name text not null,
+  customer_email text not null,
+  customer_phone text not null,
+  shipping_address jsonb not null default '{}'::jsonb,
+  items jsonb not null default '[]'::jsonb,
+  subtotal numeric not null,
+  net_shipping numeric not null default 0,
+  tax_amount numeric not null default 0,
+  total_amount numeric not null,
+  currency text not null default 'INR',
+  status text not null default 'pending', -- 'pending', 'paid', 'failed', 'cancelled'
+  razorpay_order_id text,
+  razorpay_payment_id text,
+  payment_method text,
+  failure_reason text,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
+  updated_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+-- 7. Payments Table (Transaction Audit Records)
+create table if not exists public.payments (
+  id text primary key,
+  order_id text references public.orders(id) on delete cascade,
+  razorpay_order_id text not null,
+  razorpay_payment_id text not null,
+  razorpay_signature text,
+  amount numeric not null,
+  currency text not null default 'INR',
+  payment_method text,
+  payment_status text not null default 'pending', -- 'pending', 'captured', 'failed'
+  signature_verified boolean not null default false,
+  error_details jsonb,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
+  updated_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+-- Indices for performance
+create index if not exists idx_orders_status on public.orders(status);
+create index if not exists idx_orders_razorpay_order on public.orders(razorpay_order_id);
+create index if not exists idx_payments_razorpay_payment on public.payments(razorpay_payment_id);
+create index if not exists idx_payments_order_id on public.payments(order_id);
+
+-- 8. Enable Row Level Security (RLS)
 alter table public.products enable row level security;
 alter table public.saved_bundles enable row level security;
 alter table public.shopper_records enable row level security;
 alter table public.evidence_records enable row level security;
+alter table public.orders enable row level security;
+alter table public.payments enable row level security;
 
--- 7. Public Read & Write Policies for Anon Key (Development & Prototyping)
+-- 9. Public Read & Write Policies for Anon Key (Development & Prototyping)
 drop policy if exists "Allow public read access on products" on public.products;
 create policy "Allow public read access on products" on public.products for select using (true);
 
@@ -94,3 +142,9 @@ create policy "Allow public all access on shopper_records" on public.shopper_rec
 
 drop policy if exists "Allow public all access on evidence_records" on public.evidence_records;
 create policy "Allow public all access on evidence_records" on public.evidence_records for all using (true);
+
+drop policy if exists "Allow public all access on orders" on public.orders;
+create policy "Allow public all access on orders" on public.orders for all using (true);
+
+drop policy if exists "Allow public all access on payments" on public.payments;
+create policy "Allow public all access on payments" on public.payments for all using (true);

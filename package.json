@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "clean": "rm -rf dist server.js",
     "lint": "tsc --noEmit",
-    "test:acceptance": "tsx scripts/verify-admin-portal.ts"
+    "test:acceptance": "tsx scripts/verify-admin-portal.ts",
+    "test:payment": "tsx scripts/verify-razorpay-integration.ts"
   },
   "dependencies": {
     "@google/genai": "^2.4.0",

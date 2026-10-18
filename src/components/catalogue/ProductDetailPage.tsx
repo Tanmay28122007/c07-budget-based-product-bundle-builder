@@ -21,7 +21,8 @@ import {
   TrendingUp,
   BarChart2,
   Clock,
-  Layers
+  Layers,
+  CreditCard
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { Product } from '../../types';
@@ -58,6 +59,7 @@ export const ProductDetailPage: React.FC = () => {
     removeProduct,
     toggleCart,
     setActiveTab,
+    initiateCheckout,
     userRole,
     lowStockThreshold,
     updateProductStock
@@ -670,22 +672,40 @@ export const ProductDetailPage: React.FC = () => {
                 <button
                   disabled={!product.inStock}
                   onClick={() => addItemToCart(product)}
-                  className={`flex-1 py-3.5 px-6 rounded-2xl text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                  className={`flex-1 py-3.5 px-4 rounded-2xl text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer ${
                     product.inStock
                       ? 'bg-[#2C3A2B] hover:bg-[#1E281D] text-white shadow-md hover:shadow-lg active:scale-[0.99]'
                       : 'bg-[#F4F1EA] text-[#8B8B7A] cursor-not-allowed border border-[#E6E1D3]'
                   }`}
                 >
                   <Plus className="w-4 h-4" />
-                  <span>{product.inStock ? `Add to Bundle Cart` : 'Out of Stock'}</span>
+                  <span>{product.inStock ? `Add to Cart` : 'Out of Stock'}</span>
+                </button>
+
+                <button
+                  disabled={!product.inStock}
+                  onClick={() => {
+                    initiateCheckout({
+                      items: [{ product, quantity: 1 }],
+                      bundleName: product.name
+                    });
+                  }}
+                  className={`flex-1 py-3.5 px-4 rounded-2xl text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                    product.inStock
+                      ? 'bg-[#8B5A2B] hover:bg-[#724822] text-white shadow-md hover:shadow-lg active:scale-[0.99]'
+                      : 'bg-[#F4F1EA] text-[#8B8B7A] cursor-not-allowed border border-[#E6E1D3]'
+                  }`}
+                >
+                  <CreditCard className="w-4 h-4 text-amber-200" />
+                  <span>Buy Now</span>
                 </button>
 
                 <button
                   onClick={() => setActiveTab('compare')}
-                  className="py-3.5 px-5 rounded-2xl text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer bg-white hover:bg-[#F4F1EA] text-[#2C3A2B] border border-[#E6E1D3] shadow-xs"
+                  className="py-3.5 px-4 rounded-2xl text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer bg-white hover:bg-[#F4F1EA] text-[#2C3A2B] border border-[#E6E1D3] shadow-xs"
                 >
                   <Columns className="w-4 h-4 text-[#8B5A2B]" />
-                  <span>Compare Builder</span>
+                  <span>Compare</span>
                 </button>
               </div>
             )}
