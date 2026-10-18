@@ -14,9 +14,11 @@ import {
   ProjectEvidenceRecord,
   NegotiatedScope,
   UserProfile,
+  DEFAULT_USER_PROFILE,
   CheckoutBundleItem,
   CheckoutBundleData
 } from '../types';
+export { DEFAULT_USER_PROFILE };
 export type { UserProfile, CheckoutBundleItem, CheckoutBundleData };
 import { DEFAULT_SYNTHETIC_FIXTURE, C07_DEFAULT_FIXTURE, mapC07Fixture } from '../data/defaultFixture';
 import { validateBundle } from '../utils/bundleValidation';
@@ -173,28 +175,6 @@ interface AppContextType {
     bundleName?: string;
   }) => void;
 }
-
-export const DEFAULT_USER_PROFILE: UserProfile = {
-  name: 'Tanmay Anand',
-  email: 'tanmay.anand@craftbundle.io',
-  phone: '+91 98765 43210',
-  roleTitle: 'Lead Bundle Architect',
-  department: 'Product & Merchandising',
-  bio: 'Specializing in budget-optimized workspace bundles, landed cost analytics, and AI recommendations.',
-  avatarColor: '#2C3A2B',
-  address: '42 Indiranagar 100ft Road',
-  city: 'Bengaluru',
-  state: 'Karnataka',
-  postalCode: '560038',
-  country: 'India',
-  preferredCurrency: 'INR',
-  defaultBudget: 75000,
-  optimizationPreference: 'best_value',
-  emailAlerts: true,
-  aiTips: true,
-  compactView: false,
-  memberSince: 'March 2024'
-};
 
 const INITIAL_SHOPPER_RECORDS: ShopperExperimentRecord[] = [
   {

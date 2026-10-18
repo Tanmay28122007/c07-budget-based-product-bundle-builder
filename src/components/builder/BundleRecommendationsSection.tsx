@@ -65,7 +65,7 @@ export const BundleRecommendationsSection: React.FC<BundleRecommendationsSection
   const [bundleSearch, setBundleSearch] = useState<string>('');
   const [bundleCategory, setBundleCategory] = useState<string>('all');
   const [bundleSort, setBundleSort] = useState<'price_asc' | 'price_desc' | 'items_asc' | 'items_desc'>('price_asc');
-  const [onlyWithinBudget, setOnlyWithinBudget] = useState<boolean>(true);
+  const [onlyWithinBudget, setOnlyWithinBudget] = useState<boolean>(false);
 
   // Requirements / Inserted Items state
   const [requirements, setRequirements] = useState<ProductRequirement[]>([]);
@@ -100,7 +100,7 @@ export const BundleRecommendationsSection: React.FC<BundleRecommendationsSection
         setIsBackendLoading(true);
         const res: BundleApiResponse = await fetchFilteredBundles({
           requirements,
-          budget: appBudget || undefined,
+          budget: onlyWithinBudget ? (appBudget || undefined) : undefined,
           exactOnly,
           category: bundleCategory !== 'all' ? bundleCategory : undefined,
           search: bundleSearch.trim() || undefined,
@@ -130,24 +130,28 @@ export const BundleRecommendationsSection: React.FC<BundleRecommendationsSection
       isMounted = false;
       clearTimeout(timer);
     };
-  }, [requirements, appBudget, exactOnly, bundleCategory, bundleSearch, bundleSort]);
+  }, [requirements, appBudget, exactOnly, bundleCategory, bundleSearch, bundleSort, onlyWithinBudget]);
 
   // Local engine fallback calculation
   const localRecommendationResult = useMemo(() => {
     const base = generateBundleRecommendations(
       fixture.products,
       requirements,
-      appBudget,
+      onlyWithinBudget ? (appBudget || undefined) : undefined,
       exactOnly,
       fixture.shippingRule,
-      fixture.taxRule
+      fixture.taxRule,
+      100
     );
 
     let filtered = [...base.bundles];
 
     // Filter by keyword search (items, name, tagline, role, category)
     if (bundleSearch.trim()) {
-      const q = bundleSearch.toLowerCase().trim();
+      let q = bundleSearch.toLowerCase().trim();
+      if (q.includes('coperat') || q.includes('coporat')) {
+        q = 'corporate';
+      }
       filtered = filtered.filter(b => {
         const name = b.name.toLowerCase();
         const tagline = b.tagline.toLowerCase();
@@ -202,7 +206,10 @@ export const BundleRecommendationsSection: React.FC<BundleRecommendationsSection
       list = list.filter(b => b.landedPrice <= appBudget);
     }
     if (bundleSearch.trim()) {
-      const q = bundleSearch.toLowerCase().trim();
+      let q = bundleSearch.toLowerCase().trim();
+      if (q.includes('coperat') || q.includes('coporat')) {
+        q = 'corporate';
+      }
       list = list.filter(b => {
         const name = b.name.toLowerCase();
         const tagline = b.tagline.toLowerCase();
@@ -292,11 +299,37 @@ export const BundleRecommendationsSection: React.FC<BundleRecommendationsSection
           <div className="flex flex-wrap items-center gap-2.5">
             <button
               onClick={() => {
+                setBundleSearch('Corporate');
+                setBundleCategory('all');
+                setOnlyWithinBudget(false);
+                setRequirements([]);
+                addNotification('Corporate Bundles Active', 'Filtered to corporate bundles with Laptops, Wireless Mice, Office Keyboards & Workstations.', 'success');
+              }}
+              className="inline-flex items-center gap-2 px-4 py-2 text-xs sm:text-sm font-semibold text-white bg-[#2C3A2B] hover:bg-[#1E281D] border border-[#2C3A2B] rounded-xl transition-all cursor-pointer shadow-xs hover:shadow-md"
+            >
+              <span>🏢 Corporate Bundles (Laptops + Peripherals)</span>
+            </button>
+
+            <button
+              onClick={() => {
+                setBundleSearch('Developer');
+                setBundleCategory('all');
+                setOnlyWithinBudget(false);
+                setRequirements([]);
+                addNotification('Developer Workstations', 'Showing high-performance developer laptop and mechanical peripheral rigs.', 'info');
+              }}
+              className="inline-flex items-center gap-2 px-4 py-2 text-xs sm:text-sm font-semibold text-[#8B5A2B] bg-[#FDFBF7] hover:bg-[#F4F1EA] border border-[#E6E1D3] rounded-xl transition-all cursor-pointer shadow-2xs hover:shadow-sm"
+            >
+              <span>💻 Developer & Executive Rigs</span>
+            </button>
+
+            <button
+              onClick={() => {
                 const randomList = generateRandomDatabaseBundles(fixture.products, 25, fixture.shippingRule, fixture.taxRule, appBudget);
                 setBackendBundles(randomList);
                 addNotification('Bundles Shuffled', 'Loaded 25 randomized product bundles from database.', 'info');
               }}
-              className="inline-flex items-center gap-2 px-4 py-2 text-xs sm:text-sm font-semibold text-[#8B5A2B] bg-[#FDFBF7] hover:bg-[#F4F1EA] border border-[#E6E1D3] rounded-xl transition-all cursor-pointer shadow-2xs hover:shadow-sm"
+              className="inline-flex items-center gap-2 px-4 py-2 text-xs sm:text-sm font-semibold text-[#5A5A40] bg-[#FDFBF7] hover:bg-[#F4F1EA] border border-[#E6E1D3] rounded-xl transition-all cursor-pointer shadow-2xs hover:shadow-sm"
             >
               <Sparkles className="w-4 h-4 text-[#8B5A2B]" />
               <span>Shuffle 25 Bundles</span>
@@ -312,32 +345,66 @@ export const BundleRecommendationsSection: React.FC<BundleRecommendationsSection
           </div>
         </div>
 
-        {/* Filter Controls: Must-Have Product */}
-        <div className="pt-1 max-w-2xl">
-          <label className="text-xs font-mono uppercase tracking-wider text-[#5A5A40] font-bold block mb-2">
-            Insert Must-Have Product
-          </label>
-          <form onSubmit={handleAddRequirement} className="flex items-center gap-2.5">
+        {/* Search & Category Filter Row */}
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-3 pt-2 border-t border-[#E6E1D3]/80">
+          <div className="md:col-span-5 relative">
+            <Search className="w-4 h-4 text-[#8B8B7A] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <input
+              type="text"
+              value={bundleSearch}
+              onChange={(e) => setBundleSearch(e.target.value)}
+              placeholder="Search bundles (e.g. Laptop, Mouse, Keyboard, Executive, Fleet)..."
+              className="w-full pl-9 pr-8 py-2.5 rounded-xl text-sm bg-[#FDFBF7] border border-[#E6E1D3] text-[#2C3A2B] focus:outline-none focus:border-[#2C3A2B] shadow-2xs"
+            />
+            {bundleSearch && (
+              <button
+                onClick={() => setBundleSearch('')}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#8B8B7A] hover:text-[#2C2C1E] p-1"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
+
+          <div className="md:col-span-3">
             <select
-              value={selectedProductIdInput}
-              onChange={(e) => setSelectedProductIdInput(e.target.value)}
-              className="flex-1 py-3 px-3.5 rounded-xl text-sm bg-[#FDFBF7] border border-[#E6E1D3] text-[#2C3A2B] focus:outline-none focus:border-[#2C3A2B] shadow-2xs cursor-pointer truncate"
+              value={bundleCategory}
+              onChange={(e) => setBundleCategory(e.target.value)}
+              className="w-full py-2.5 px-3 rounded-xl text-sm bg-[#FDFBF7] border border-[#E6E1D3] text-[#2C3A2B] focus:outline-none focus:border-[#2C3A2B] shadow-2xs cursor-pointer"
             >
-              <option value="">+ Choose product to insert...</option>
-              {fixture.products.map(p => (
-                <option key={p.id} value={p.id}>
-                  {p.name} ({formatINR(p.price)})
+              <option value="all">All Categories</option>
+              {availableCategories.map(cat => (
+                <option key={cat} value={cat}>
+                  {cat === 'Laptop' ? '💻 Laptop' : cat === 'Mouse' ? '🖱️ Mouse' : cat === 'Keyboard' ? '⌨️ Keyboard' : cat}
                 </option>
               ))}
             </select>
-            <button
-              type="submit"
-              disabled={!selectedProductIdInput}
-              className="px-5 py-3 rounded-xl text-sm font-bold text-white bg-[#2C3A2B] hover:bg-[#1E281D] disabled:bg-[#E6E1D3] disabled:text-[#8B8B7A] disabled:cursor-not-allowed transition-colors shadow-xs shrink-0 cursor-pointer"
-            >
-              Insert
-            </button>
-          </form>
+          </div>
+
+          {/* Filter Controls: Must-Have Product */}
+          <div className="md:col-span-4">
+            <form onSubmit={handleAddRequirement} className="flex items-center gap-2">
+              <select
+                value={selectedProductIdInput}
+                onChange={(e) => setSelectedProductIdInput(e.target.value)}
+                className="flex-1 py-2.5 px-3 rounded-xl text-sm bg-[#FDFBF7] border border-[#E6E1D3] text-[#2C3A2B] focus:outline-none focus:border-[#2C3A2B] shadow-2xs cursor-pointer truncate"
+              >
+                <option value="">+ Must-have product...</option>
+                {fixture.products.map(p => (
+                  <option key={p.id} value={p.id}>
+                    {p.name} ({formatINR(p.price)})
+                  </option>
+                ))}
+              </select>
+              <button
+                type="submit"
+                disabled={!selectedProductIdInput}
+                className="px-4 py-2.5 rounded-xl text-sm font-bold text-white bg-[#2C3A2B] hover:bg-[#1E281D] disabled:bg-[#E6E1D3] disabled:text-[#8B8B7A] disabled:cursor-not-allowed transition-colors shadow-xs shrink-0 cursor-pointer"
+              >
+                Insert
+              </button>
+            </form>
+          </div>
         </div>
 
         {/* Active Requirements List / Filter Chips */}

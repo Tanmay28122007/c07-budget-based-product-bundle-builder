@@ -447,14 +447,18 @@ app.post(['/api/bundles/filter', '/bundles/filter'], (req, res) => {
       budget,
       exactOnly,
       defaultFixture.shippingRule,
-      defaultFixture.taxRule
+      defaultFixture.taxRule,
+      100
     );
 
     let bundles = result.bundles;
 
     // Filter by keyword search if provided
     if (search && typeof search === 'string' && search.trim()) {
-      const q = search.toLowerCase().trim();
+      let q = search.toLowerCase().trim();
+      if (q.includes('coperat') || q.includes('coporat')) {
+        q = 'corporate';
+      }
       bundles = bundles.filter(b => {
         const name = b.name.toLowerCase();
         const tagline = b.tagline.toLowerCase();
@@ -531,7 +535,7 @@ app.get(['/api/bundles', '/bundles'], (req, res) => {
 });
 
 // Fallback root handler in case Vercel rewrote request to /api or /
-app.all(['/api', '/'], (req, res, next) => {
+app.all(process.env.VERCEL ? ['/api', '/'] : ['/api', '/api/'], (req, res, next) => {
   if (req.method === 'POST' && req.body && req.body.message) {
     req.url = '/api/ai/assistant';
     return app._router.handle(req, res, next);
