@@ -29,7 +29,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
         <div className="fixed bottom-16 right-10 w-96 h-96 rounded-full bg-[#8B5A2B]/8 blur-3xl pointer-events-none -z-10 animate-float-reverse" />
         <div className="fixed top-1/2 right-1/3 w-80 h-80 rounded-full bg-[#F5F5EC] blur-3xl pointer-events-none -z-10 animate-pulse-glow" />
 
-        <main className="w-full flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-8">
+        <main className="w-full flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-8 relative z-10">
           {children}
         </main>
 
