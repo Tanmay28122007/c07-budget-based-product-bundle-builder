@@ -348,7 +348,6 @@ const VALID_TABS = [
   'compare',
   'tests',
   'business',
-  'evidence',
   'settings',
   'product-detail',
   'profile',
@@ -361,6 +360,7 @@ const getInitialTab = (): string => {
       const hash = window.location.hash ? window.location.hash.replace('#', '').trim() : '';
       if (parseProductHash(window.location.hash)) return 'product-detail';
       if (hash === 'login' || hash === 'home') return 'login';
+      if (hash === 'evidence') return 'dashboard';
 
       const savedRole = (typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('c07_user_role_v1') : null)
         || (typeof localStorage !== 'undefined' ? localStorage.getItem('c07_user_role_v1') : null);
@@ -370,6 +370,7 @@ const getInitialTab = (): string => {
         if (hash && VALID_TABS.includes(hash) && hash !== 'landing') return hash;
         const savedTab = (typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('c07_active_tab_v1') : null)
           || (typeof localStorage !== 'undefined' ? localStorage.getItem('c07_active_tab_v1') : null);
+        if (savedTab === 'evidence') return 'dashboard';
         if (savedTab && VALID_TABS.includes(savedTab) && savedTab !== 'landing') return savedTab;
         return 'catalogue';
       }
