@@ -169,9 +169,12 @@ Choose your preferred language below or ask me anything to assemble, optimize, o
     if (!textToSend) setInputMessage('');
     setIsLoading(true);
 
+    let promptWithLanguage = text;
+    let contextPayload: any = null;
+
     try {
       const activeLangName = selectedLang === 'hi' ? 'Hindi' : selectedLang === 'gu' ? 'Gujarati' : 'English';
-      const promptWithLanguage = `[SYSTEM: Selected Language = ${activeLangName}]\nPlease respond in ${activeLangName}.\n${text}`;
+      promptWithLanguage = `[SYSTEM: Selected Language = ${activeLangName}]\nPlease respond in ${activeLangName}.\n${text}`;
 
       // Build context payload for the server
       const currentItemsSummary: Record<string, any> = {};
@@ -202,7 +205,7 @@ Choose your preferred language below or ask me anything to assemble, optimize, o
         incompatibleProductIds: p.incompatibleProductIds
       }));
 
-      const contextPayload = {
+      contextPayload = {
         activeTab,
         activityName: fixture.activity.name,
         budget,
@@ -267,7 +270,7 @@ Choose your preferred language below or ask me anything to assemble, optimize, o
         id: `msg-${Date.now()}-a`,
         role: 'assistant',
         text: data?.reply || "I've analyzed your workspace requirements and current configuration.",
-        action: data?.action || null,
+        action: (data?.action as any) || null,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
 
@@ -280,7 +283,7 @@ Choose your preferred language below or ask me anything to assemble, optimize, o
         id: `msg-${Date.now()}-a`,
         role: 'assistant',
         text: localData?.reply || `I've analyzed your configuration. What would you like to build or optimize next?`,
-        action: localData?.action || null,
+        action: (localData?.action as any) || null,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
       setMessages(prev => [...prev, assistantMsg]);

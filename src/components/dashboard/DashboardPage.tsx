@@ -29,6 +29,7 @@ import { useApp } from '../../context/AppContext';
 import { formatINR } from '../../utils/pricing';
 import { exportBundleToCSV, exportTestResultsToCSV, downloadFile } from '../../utils/exportUtils';
 import { SignInDashboard } from './SignInDashboard';
+import { AdminDashboardView } from './AdminDashboardView';
 
 export const DashboardPage: React.FC = () => {
   const {
@@ -258,7 +259,10 @@ export const DashboardPage: React.FC = () => {
   }
 
   // Admin view
-  return (
+  return <AdminDashboardView />;
+};
+
+const _unusedAdminJSX = () => (
     <div className="space-y-8 py-2">
       {/* Admin Session Header Bar */}
       <div className="p-4 rounded-2xl bg-white border border-[#E6E1D3] shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -740,4 +744,4 @@ export const DashboardPage: React.FC = () => {
       </div>
     </div>
   );
-};
+

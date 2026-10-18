@@ -36,6 +36,7 @@ export interface Product {
   };
   incompatibleProductIds?: string[];
   notes?: string;
+  lastUpdated?: string;
 }
 
 export interface RequiredSlot {

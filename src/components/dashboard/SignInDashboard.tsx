@@ -67,7 +67,7 @@ export const SignInDashboard: React.FC = () => {
     setIsSubmitting(true);
     setTimeout(() => {
       setIsSubmitting(false);
-      loginAs('customer');
+      loginAs('customer', customerId, customerName || customerId.split('@')[0]);
     }, 250);
   };
 
@@ -88,7 +88,7 @@ export const SignInDashboard: React.FC = () => {
     setTimeout(() => {
       setIsSubmitting(false);
       setAdminSignInRequested(false);
-      loginAs('admin');
+      loginAs('admin', adminId, 'Lead Administrator');
     }, 250);
   };
 
@@ -96,7 +96,7 @@ export const SignInDashboard: React.FC = () => {
     setIsSubmitting(true);
     setTimeout(() => {
       setIsSubmitting(false);
-      loginAs('customer');
+      loginAs('customer', 'tanmay.anand@craftbundle.io', 'Tanmay Anand');
     }, 200);
   };
 
@@ -105,7 +105,7 @@ export const SignInDashboard: React.FC = () => {
     setTimeout(() => {
       setIsSubmitting(false);
       setAdminSignInRequested(false);
-      loginAs('admin');
+      loginAs('admin', 'admin@workspace.com', 'Lead Administrator');
     }, 200);
   };
 

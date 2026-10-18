@@ -290,8 +290,9 @@ Please provide an in-depth evaluation for this product based on our current cata
     if (!textOverride) setInputMessage('');
     setIsLoading(true);
 
+    let contextPayload: any = null;
+
     try {
-      let contextPayload = null;
       if (attachWorkspaceContext) {
         const currentItemsSummary: Record<string, any> = {};
         for (const [slotId, prod] of Object.entries(currentItems)) {
@@ -403,7 +404,7 @@ Please provide an in-depth evaluation for this product based on our current cata
         role: 'assistant',
         text: localData?.reply || `I've analyzed your configuration. What would you like to build or optimize next?`,
         model: localData?.model || 'heuristic-engine',
-        action: localData?.action || null,
+        action: (localData?.action as any) || null,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
       setMessages(prev => [...prev, botMessage]);

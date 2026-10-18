@@ -37,31 +37,38 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
 
   const cartItemsCount = Object.values(currentItems).filter(Boolean).length;
 
+  const { activeTestRun } = useApp();
   const navItems = userRole === 'admin'
     ? [
         {
           id: 'dashboard',
-          label: 'Admin Overview',
+          label: 'Dashboard',
           icon: LayoutDashboard,
-          badge: null
+          badge: 'Overview'
         },
         {
           id: 'business',
           label: 'Business Insights',
           icon: TrendingUp,
-          badge: 'Unit Econ'
+          badge: 'Analytics'
+        },
+        {
+          id: 'catalogue',
+          label: 'Product Catalogue',
+          icon: Layers,
+          badge: `${fixture.products.length}`
         },
         {
           id: 'tests',
           label: 'Test Results',
           icon: CheckCircle2,
-          badge: testResults.length > 0 ? `${testResults.filter(t => t.passed).length}/${testResults.length}` : '20'
+          badge: activeTestRun ? `${activeTestRun.summary.passed}/${activeTestRun.summary.totalTested}` : 'Test'
         },
         {
-          id: 'evidence',
-          label: 'Project Evidence',
-          icon: FileCode2,
-          badge: null
+          id: 'compare',
+          label: 'Customer Builder',
+          icon: Columns,
+          badge: 'Workspace'
         },
         {
           id: 'settings',
@@ -70,16 +77,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           badge: isCustomFixture ? 'Custom' : 'Demo'
         },
         {
-          id: 'catalogue',
-          label: 'Product Catalogue',
-          icon: Layers,
-          badge: fixture.products.length.toString()
-        },
-        {
-          id: 'compare',
-          label: 'Bundles',
-          icon: Columns,
-          badge: savedBundles.length > 0 ? `${savedBundles.length} saved` : (validation.filledSlotCount > 0 ? `${validation.filledSlotCount}/${validation.totalSlotCount}` : null)
+          id: 'evidence',
+          label: 'Project Evidence',
+          icon: FileCode2,
+          badge: null
         }
       ]
     : userRole === 'customer'
