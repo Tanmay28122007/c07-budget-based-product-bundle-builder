@@ -10,8 +10,7 @@ import {
   LogOut,
   Wallet,
   User,
-  LogIn,
-  Database
+  LogIn
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 
@@ -30,8 +29,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
     userRole,
     logout,
     budget,
-    setBudget,
-    setIsSupabaseModalOpen
+    setBudget
   } = useApp();
 
   const [showNotifications, setShowNotifications] = useState(false);
@@ -111,17 +109,8 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
         </div>
       </div>
 
-      {/* Right Controls: Database, Notifications & Profile Avatar */}
+      {/* Right Controls: Notifications & Profile Avatar */}
       <div className="flex items-center gap-3">
-        {/* Supabase Database Connection Modal Trigger */}
-        <button
-          onClick={() => setIsSupabaseModalOpen(true)}
-          aria-label="Open Supabase database settings"
-          title="Supabase Database Settings & Health"
-          className="p-2 text-[#5A5A40] hover:text-[#2C2C1E] hover:bg-[#F4F1EA] rounded-xl transition-colors cursor-pointer"
-        >
-          <Database className="w-4 h-4" />
-        </button>
 
         {/* Notifications Popover */}
         <div className="relative" ref={notifRef}>
