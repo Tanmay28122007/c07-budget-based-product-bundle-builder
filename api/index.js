@@ -2972,7 +2972,7 @@ app.get(["/api/bundles", "/bundles"], (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 });
-app.all(["/api", "/"], (req, res, next) => {
+app.all(["/api", "/api/"], (req, res, next) => {
   if (req.method === "POST" && req.body && req.body.message) {
     req.url = "/api/ai/assistant";
     return app._router.handle(req, res, next);
