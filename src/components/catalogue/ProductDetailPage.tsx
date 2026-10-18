@@ -21,6 +21,7 @@ import {
 import { useApp } from '../../context/AppContext';
 import { Product } from '../../types';
 import { formatINR } from '../../utils/pricing';
+import { HOME_APPLIANCE_PRODUCTS } from '../../data/homeAppliancesData';
 
 function getProductImageUrl(img?: string, id?: string): string {
   if (!img) return id ? `/assets/${id}.png` : '';
@@ -60,8 +61,11 @@ export const ProductDetailPage: React.FC = () => {
   const [copiedLink, setCopiedLink] = useState(false);
   const [imgError, setImgError] = useState(false);
 
-  // Find product from fixture or fallback to first product
-  const product: Product | undefined = fixture.products.find(p => p.id === selectedProductId) || fixture.products[0];
+  // Find product from fixture or home appliances library or fallback to first product
+  const product: Product | undefined =
+    fixture.products.find(p => p.id === selectedProductId) ||
+    HOME_APPLIANCE_PRODUCTS.find(p => p.id === selectedProductId) ||
+    fixture.products[0];
 
   if (!product) {
     return (

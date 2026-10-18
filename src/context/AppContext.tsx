@@ -21,6 +21,11 @@ import { findValidBundle, OptimizationResult } from '../utils/bundleOptimizer';
 import { runAllTests, runReferenceRequestTest, EDGE_CASE_TESTS } from '../utils/testRunner';
 import { formatINR } from '../utils/pricing';
 import {
+  HOME_APPLIANCES_FIXTURE,
+  INITIAL_HOME_APPLIANCE_BUNDLES,
+  generateRandomHomeApplianceBundle
+} from '../data/homeAppliancesData';
+import {
   fetchSavedBundlesFromDb,
   upsertSavedBundleToDb,
   deleteSavedBundleFromDb,
@@ -82,6 +87,9 @@ interface AppContextType {
   loadSavedBundle: (bundle: SavedBundle) => void;
   comparedBundleIds: string[];
   toggleCompareBundle: (id: string) => void;
+  loadHomeAppliancesActivity: () => void;
+  generateRandomHomeBundle: (customBudget?: number) => SavedBundle;
+  generateMultipleRandomHomeBundles: (count?: number) => void;
 
   // Test Suite
   testResults: TestExecutionResult[];
@@ -509,11 +517,20 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [savedBundles, setSavedBundles] = useState<SavedBundle[]>(() => {
     try {
       const saved = localStorage.getItem('c07_saved_bundles_v1');
-      if (saved) return JSON.parse(saved);
+      if (saved) {
+        const parsed: SavedBundle[] = JSON.parse(saved);
+        if (parsed.length > 0) {
+          const hasHomeBundles = parsed.some(b => b.name?.toLowerCase().includes('home appliances'));
+          if (!hasHomeBundles) {
+            return [...INITIAL_HOME_APPLIANCE_BUNDLES, ...parsed];
+          }
+          return parsed;
+        }
+      }
     } catch (e) {
       console.warn('Could not load saved bundles:', e);
     }
-    return [];
+    return INITIAL_HOME_APPLIANCE_BUNDLES;
   });
 
   // Comparison State
@@ -859,10 +876,93 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   const loadSavedBundle = (bundle: SavedBundle) => {
+    if (bundle.activityId === 'home-appliances' || bundle.name?.toLowerCase().includes('home appliances')) {
+      if (fixture.activity.id !== 'home-appliances') {
+        setFixture(HOME_APPLIANCES_FIXTURE);
+        try {
+          localStorage.setItem('c07_fixture_v2', JSON.stringify(HOME_APPLIANCES_FIXTURE));
+        } catch {}
+      }
+    } else if (bundle.activityId === 'act-wfh-01' || (fixture.activity.id === 'home-appliances' && bundle.activityId !== 'home-appliances')) {
+      if (fixture.activity.id !== 'act-wfh-01') {
+        setFixture(DEFAULT_SYNTHETIC_FIXTURE);
+        try {
+          localStorage.setItem('c07_fixture_v2', JSON.stringify(DEFAULT_SYNTHETIC_FIXTURE));
+        } catch {}
+      }
+    }
     setBudget(bundle.budget);
     setCurrentItems({ ...bundle.items });
     addNotification("Bundle Loaded", `Restored "${bundle.name}" into workspace.`, 'info');
     setActiveTab('catalogue');
+  };
+
+  const loadHomeAppliancesActivity = () => {
+    setFixture(HOME_APPLIANCES_FIXTURE);
+    setBudget(HOME_APPLIANCES_FIXTURE.activity.defaultBudget);
+    const initial: Record<string, Product | null> = {};
+    for (const slot of HOME_APPLIANCES_FIXTURE.activity.requiredSlots) {
+      initial[slot.id] = null;
+    }
+    setCurrentItems(initial);
+    try {
+      localStorage.setItem('c07_fixture_v2', JSON.stringify(HOME_APPLIANCES_FIXTURE));
+      localStorage.setItem('c07_budget_v2', String(HOME_APPLIANCES_FIXTURE.activity.defaultBudget));
+      localStorage.setItem('c07_current_items_v2', JSON.stringify(initial));
+    } catch {}
+    addNotification(
+      'Home Appliances Loaded',
+      'Switched workspace to Home Appliances activity with 25 products & 5 appliance slots.',
+      'success'
+    );
+  };
+
+  const generateRandomHomeBundle = (customBudget?: number): SavedBundle => {
+    const bundle = generateRandomHomeApplianceBundle(customBudget);
+    setSavedBundles(prev => {
+      const updated = [bundle, ...prev];
+      try {
+        localStorage.setItem('c07_saved_bundles_v1', JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
+    if (isSupabaseConnected) {
+      upsertSavedBundleToDb(bundle).catch(err => {
+        console.warn('Supabase bundle sync warning:', err);
+      });
+    }
+    addNotification(
+      'Random Home Appliance Bundle Generated',
+      `Created "${bundle.name}" with 5 matching home appliances!`,
+      'success'
+    );
+    return bundle;
+  };
+
+  const generateMultipleRandomHomeBundles = (count: number = 6) => {
+    const newBundles: SavedBundle[] = [];
+    for (let i = 0; i < count; i++) {
+      newBundles.push(generateRandomHomeApplianceBundle());
+    }
+    setSavedBundles(prev => {
+      const merged = [...newBundles, ...prev];
+      try {
+        localStorage.setItem('c07_saved_bundles_v1', JSON.stringify(merged));
+      } catch {}
+      return merged;
+    });
+    if (isSupabaseConnected) {
+      newBundles.forEach(bundle => {
+        upsertSavedBundleToDb(bundle).catch(err => {
+          console.warn('Supabase bundle sync warning:', err);
+        });
+      });
+    }
+    addNotification(
+      'Multiple Random Home Bundles Generated',
+      `Successfully generated ${count} diverse Home Appliances bundles!`,
+      'success'
+    );
   };
 
   const toggleCompareBundle = (id: string) => {
@@ -1090,6 +1190,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         loadSavedBundle,
         comparedBundleIds,
         toggleCompareBundle,
+        loadHomeAppliancesActivity,
+        generateRandomHomeBundle,
+        generateMultipleRandomHomeBundles,
 
         testResults,
         isTesting,

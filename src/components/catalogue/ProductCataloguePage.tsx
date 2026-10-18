@@ -15,7 +15,9 @@ import {
   RotateCcw,
   Trash2,
   ChevronRight,
-  Info
+  Info,
+  Home,
+  Sparkles
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { Product } from '../../types';
@@ -54,7 +56,9 @@ export const ProductCataloguePage: React.FC = () => {
     openProductDetails,
     searchQuery,
     setSearchQuery,
-    setIsCartOpen
+    setIsCartOpen,
+    loadHomeAppliancesActivity,
+    resetFixtureToDefault
   } = useApp();
 
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -108,19 +112,67 @@ export const ProductCataloguePage: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2.5">
             <h1 className="text-2xl font-serif font-bold tracking-tight text-[#2C3A2B]">
-              Product Catalogue
+              {fixture.activity.id === 'home-appliances' ? 'Home Appliances' : 'Product Catalogue'}
             </h1>
-            {!isCustomFixture && (
-              <span className="text-[11px] font-mono px-2.5 py-0.5 rounded-full bg-[#F5F5EC] text-[#5A5A40] border border-[#E6E1D3]">
-                Synthetic Preview Data
-              </span>
-            )}
+            <span className={`text-[11px] font-mono px-2.5 py-0.5 rounded-full border ${
+              fixture.activity.id === 'home-appliances'
+                ? 'bg-amber-100/70 text-[#8B5A2B] border-amber-300 font-semibold'
+                : 'bg-[#F5F5EC] text-[#5A5A40] border-[#E6E1D3]'
+            }`}>
+              {fixture.activity.id === 'home-appliances' ? 'Home Needs & Appliances' : 'Peripherals Database'}
+            </span>
           </div>
           <p className="text-xs text-[#5A5A40] mt-0.5">
-            Verified inventory database for {fixture.activity.name} activity.
+            {fixture.activity.id === 'home-appliances'
+              ? 'Verified inventory of 25 premium home appliances: cooking, automated floorcare, air & climate, barista hydration, and countertop food prep.'
+              : `Verified inventory database for ${fixture.activity.name} activity.`}
           </p>
+        </div>
+
+        {/* Activity / Category Switcher Pills */}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => {
+              if (fixture.activity.id !== 'home-appliances') {
+                loadHomeAppliancesActivity();
+              }
+            }}
+            className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+              fixture.activity.id === 'home-appliances'
+                ? 'bg-[#8B5A2B] text-white shadow-xs'
+                : 'bg-white text-[#5A5A40] border border-[#E6E1D3] hover:bg-[#F4F1EA] hover:text-[#2C3A2B]'
+            }`}
+          >
+            <Home className="w-3.5 h-3.5" />
+            <span>Home Appliances</span>
+            <span className={`text-[10px] font-mono px-1.5 py-0.2 rounded-md ${
+              fixture.activity.id === 'home-appliances' ? 'bg-white/20 text-white' : 'bg-[#E6E1D3] text-[#5A5A40]'
+            }`}>
+              25
+            </span>
+          </button>
+
+          <button
+            onClick={() => {
+              if (fixture.activity.id === 'home-appliances') {
+                resetFixtureToDefault();
+              }
+            }}
+            className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+              fixture.activity.id !== 'home-appliances'
+                ? 'bg-[#2C3A2B] text-white shadow-xs'
+                : 'bg-white text-[#5A5A40] border border-[#E6E1D3] hover:bg-[#F4F1EA] hover:text-[#2C3A2B]'
+            }`}
+          >
+            <span>Work From Home</span>
+            <span className={`text-[10px] font-mono px-1.5 py-0.2 rounded-md ${
+              fixture.activity.id !== 'home-appliances' ? 'bg-white/20 text-white' : 'bg-[#E6E1D3] text-[#5A5A40]'
+            }`}>
+              Peripherals
+            </span>
+          </button>
         </div>
       </div>
 

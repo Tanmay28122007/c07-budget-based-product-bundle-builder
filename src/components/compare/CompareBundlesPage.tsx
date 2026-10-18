@@ -22,7 +22,13 @@ import {
   LayoutGrid,
   Eye,
   SlidersHorizontal,
-  BookmarkPlus
+  BookmarkPlus,
+  Home,
+  Flame,
+  Zap,
+  Shuffle,
+  Coffee,
+  Wind
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { formatINR } from '../../utils/pricing';
@@ -50,7 +56,11 @@ export const CompareBundlesPage: React.FC<CompareBundlesPageProps> = ({ initialM
     loadSavedBundle,
     deleteSavedBundle,
     setActiveTab,
-    toggleAssistant
+    toggleAssistant,
+    loadHomeAppliancesActivity,
+    generateRandomHomeBundle,
+    generateMultipleRandomHomeBundles,
+    resetFixtureToDefault
   } = useApp();
 
   // Mode state: 'workspace' for full bundle building, 'compare' for side-by-side comparison
@@ -73,6 +83,35 @@ export const CompareBundlesPage: React.FC<CompareBundlesPageProps> = ({ initialM
     return savedBundles.slice(0, 3).map(b => b.id);
   });
   const [includeActiveInComparison, setIncludeActiveInComparison] = useState(true);
+
+  // Home appliances & WFH bundle filtering state
+  const [bundleCategoryFilter, setBundleCategoryFilter] = useState<'all' | 'home-appliances' | 'wfh'>('all');
+
+  const isHomeBundle = (b: SavedBundle) => {
+    return (
+      b.activityId === 'home-appliances' ||
+      b.name?.toLowerCase().includes('home appliances') ||
+      b.name?.toLowerCase().includes('home setup') ||
+      b.name?.toLowerCase().includes('living pack') ||
+      b.name?.toLowerCase().includes('kitchen') ||
+      b.name?.toLowerCase().includes('suite') ||
+      Object.keys(b.items).some(k => k.includes('kitchen') || k.includes('cleaning') || k.includes('air') || k.includes('beverage') || k.includes('countertop'))
+    );
+  };
+
+  const homeApplianceBundles = useMemo(() => {
+    return savedBundles.filter(isHomeBundle);
+  }, [savedBundles]);
+
+  const wfhBundles = useMemo(() => {
+    return savedBundles.filter(b => !isHomeBundle(b));
+  }, [savedBundles]);
+
+  const filteredSavedBundles = useMemo(() => {
+    if (bundleCategoryFilter === 'home-appliances') return homeApplianceBundles;
+    if (bundleCategoryFilter === 'wfh') return wfhBundles;
+    return savedBundles;
+  }, [savedBundles, bundleCategoryFilter, homeApplianceBundles, wfhBundles]);
 
   const budgetPresets = fixture.activity.defaultBudget <= 10000 
     ? [1000, 1999, 2000, 2200, 3000]
@@ -261,6 +300,108 @@ export const CompareBundlesPage: React.FC<CompareBundlesPageProps> = ({ initialM
             <BookmarkPlus className="w-3.5 h-3.5 text-[#8B5A2B]" />
             <span>Snapshot Setup</span>
           </button>
+        </div>
+      </div>
+
+      {/* ========================================================================= */}
+      {/* FEATURE HERO: HOME APPLIANCES & DYNAMIC RANDOM BUNDLE GENERATOR          */}
+      {/* ========================================================================= */}
+      <div className="relative overflow-hidden p-6 sm:p-7 rounded-[28px] bg-gradient-to-br from-[#1C281B] via-[#2C3A2B] to-[#3B4D39] text-white shadow-xl border border-white/10 group">
+        {/* Ambient atmospheric glows */}
+        <div className="absolute -right-16 -top-16 w-64 h-64 rounded-full bg-emerald-500/15 blur-3xl pointer-events-none" />
+        <div className="absolute right-1/4 -bottom-10 w-72 h-72 rounded-full bg-amber-500/10 blur-3xl pointer-events-none" />
+
+        <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+          <div className="space-y-2 max-w-2xl">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md border border-white/20 text-xs font-semibold text-amber-200">
+              <Home className="w-3.5 h-3.5 text-amber-300" />
+              <span>Curated Bundles for Home Needs</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="font-mono text-[10px] text-white/80">25 Products • 5 Appliance Slots</span>
+            </div>
+
+            <h2 className="text-2xl sm:text-3xl font-serif font-bold text-white tracking-tight flex items-center gap-3">
+              <span>Home Appliances</span>
+              {fixture.activity.id === 'home-appliances' && (
+                <span className="text-[11px] font-sans font-semibold px-2.5 py-0.5 rounded-lg bg-emerald-500/30 text-emerald-200 border border-emerald-400/30">
+                  Active in Workspace
+                </span>
+              )}
+            </h2>
+
+            <p className="text-xs sm:text-sm text-white/85 leading-relaxed">
+              Curated home appliance solutions for cooking & meal prep, cordless cleaning, smart climate control, barista coffee & hydration, and countertop breakfast. Generate unlimited random bundles with live landed cost pricing (18% GST + heavy shipping math).
+            </p>
+
+            {/* Micro Category Tags */}
+            <div className="flex flex-wrap items-center gap-2 pt-1 text-[11px] text-white/80">
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white/10 border border-white/10">
+                <Flame className="w-3 h-3 text-orange-400" /> Kitchen & Cooking
+              </span>
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white/10 border border-white/10">
+                <Zap className="w-3 h-3 text-cyan-300" /> Cleaning & Floorcare
+              </span>
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white/10 border border-white/10">
+                <Wind className="w-3 h-3 text-teal-300" /> Air & Climate
+              </span>
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white/10 border border-white/10">
+                <Coffee className="w-3 h-3 text-amber-300" /> Beverage & Water
+              </span>
+            </div>
+          </div>
+
+          {/* Action Buttons: Generate Random Bundles */}
+          <div className="flex flex-col sm:flex-row lg:flex-col gap-2.5 shrink-0">
+            <button
+              onClick={() => {
+                generateRandomHomeBundle();
+                if (viewMode !== 'compare') setViewMode('compare');
+              }}
+              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-[#1C281B] bg-gradient-to-r from-amber-300 to-amber-200 hover:from-amber-200 hover:to-white shadow-md hover:shadow-lg transition-all cursor-pointer hover:scale-103 active:scale-97"
+              title="Generate a single random home appliance bundle"
+            >
+              <Shuffle className="w-4 h-4 text-[#8B5A2B]" />
+              <span>🎲 Generate Random Bundle</span>
+            </button>
+
+            <button
+              onClick={() => {
+                generateMultipleRandomHomeBundles(6);
+                if (viewMode !== 'compare') setViewMode('compare');
+              }}
+              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-white bg-white/15 hover:bg-white/25 border border-white/25 backdrop-blur-md shadow-sm hover:shadow-md transition-all cursor-pointer hover:scale-103 active:scale-97"
+              title="Rapidly generate 6 random home appliance bundles"
+            >
+              <Zap className="w-4 h-4 text-amber-300" />
+              <span>⚡ Generate 6+ Random Bundles</span>
+            </button>
+
+            <div className="flex items-center gap-2">
+              {fixture.activity.id !== 'home-appliances' ? (
+                <button
+                  onClick={() => {
+                    loadHomeAppliancesActivity();
+                    setViewMode('workspace');
+                  }}
+                  className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-[11px] font-semibold text-emerald-100 bg-emerald-950/60 hover:bg-emerald-900/80 border border-emerald-500/30 transition-all cursor-pointer"
+                >
+                  <Home className="w-3.5 h-3.5 text-emerald-300" />
+                  <span>Build Home Workspace</span>
+                </button>
+              ) : (
+                <button
+                  onClick={() => {
+                    resetFixtureToDefault();
+                    setViewMode('workspace');
+                  }}
+                  className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-[11px] font-semibold text-stone-200 bg-black/40 hover:bg-black/60 border border-white/15 transition-all cursor-pointer"
+                >
+                  <RotateCcw className="w-3.5 h-3.5 text-stone-400" />
+                  <span>Switch to WFH Peripherals</span>
+                </button>
+              )}
+            </div>
+          </div>
         </div>
       </div>
 
@@ -747,39 +888,90 @@ export const CompareBundlesPage: React.FC<CompareBundlesPageProps> = ({ initialM
           </div>
 
           {/* Saved Bundles Selector Strip */}
-          <div className="p-5 bg-white border border-[#E6E1D3] rounded-[24px] shadow-xs">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-[11px] font-semibold text-[#5A5A40] uppercase tracking-wider">
-                Select Saved Bundles to Compare (Up to 3)
-              </span>
-              <span className="text-xs text-[#5A5A40] font-mono">
-                {selectedBundleIds.length} of 3 selected
-              </span>
+          <div className="p-5 bg-white border border-[#E6E1D3] rounded-[24px] shadow-xs space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <span className="text-[11px] font-semibold text-[#5A5A40] uppercase tracking-wider block">
+                  Select Saved Bundles to Compare (Up to 3)
+                </span>
+                <span className="text-xs text-[#8B8B7A]">
+                  Click any card to select for side-by-side comparison below.
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => generateRandomHomeBundle()}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-[#8B5A2B] bg-[#F4F1EA] hover:bg-[#E6E1D3] border border-[#E6E1D3] rounded-xl transition-all cursor-pointer hover:scale-103 active:scale-97"
+                  title="Generate a new random Home Appliances bundle"
+                >
+                  <Shuffle className="w-3.5 h-3.5 text-[#8B5A2B]" />
+                  <span>🎲 +1 Random Home Bundle</span>
+                </button>
+                <span className="text-xs text-[#2C3A2B] font-mono font-bold bg-[#F4F1EA] px-2.5 py-1 rounded-xl border border-[#E6E1D3]">
+                  {selectedBundleIds.length} of 3 selected
+                </span>
+              </div>
             </div>
 
-            {savedBundles.length === 0 ? (
+            {/* Category Filter Tabs */}
+            <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-[#E6E1D3]/60">
+              <button
+                onClick={() => setBundleCategoryFilter('all')}
+                className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                  bundleCategoryFilter === 'all'
+                    ? 'bg-[#2C3A2B] text-white shadow-xs'
+                    : 'bg-[#F4F1EA] text-[#5A5A40] hover:bg-[#E6E1D3]'
+                }`}
+              >
+                All Saved ({savedBundles.length})
+              </button>
+              <button
+                onClick={() => setBundleCategoryFilter('home-appliances')}
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                  bundleCategoryFilter === 'home-appliances'
+                    ? 'bg-[#8B5A2B] text-white shadow-xs'
+                    : 'bg-[#F4F1EA] text-[#5A5A40] hover:bg-[#E6E1D3]'
+                }`}
+              >
+                <Home className="w-3 h-3" />
+                <span>Home Appliances ({homeApplianceBundles.length})</span>
+              </button>
+              <button
+                onClick={() => setBundleCategoryFilter('wfh')}
+                className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                  bundleCategoryFilter === 'wfh'
+                    ? 'bg-[#2C3A2B] text-white shadow-xs'
+                    : 'bg-[#F4F1EA] text-[#5A5A40] hover:bg-[#E6E1D3]'
+                }`}
+              >
+                Work From Home ({wfhBundles.length})
+              </button>
+            </div>
+
+            {filteredSavedBundles.length === 0 ? (
               <div className="text-center py-8 border border-dashed border-[#E6E1D3] rounded-2xl bg-[#FDFBF7] text-xs text-[#5A5A40] space-y-3">
-                <p>No saved bundle records found in memory yet.</p>
+                <p>No saved bundle records found in this category.</p>
                 <div className="flex items-center justify-center gap-2">
                   <button
-                    onClick={handleSnapshotActive}
-                    className="px-3.5 py-1.5 text-xs font-semibold text-white bg-[#2C3A2B] hover:bg-[#3A4D39] rounded-xl shadow-xs transition-colors cursor-pointer"
+                    onClick={() => generateRandomHomeBundle()}
+                    className="px-3.5 py-1.5 text-xs font-semibold text-white bg-[#8B5A2B] hover:bg-[#743815] rounded-xl shadow-xs transition-colors cursor-pointer"
                   >
-                    Snapshot Active Workspace Setup
+                    Generate Random Home Appliances Bundle
                   </button>
                   <button
-                    onClick={() => setViewMode('workspace')}
+                    onClick={() => setBundleCategoryFilter('all')}
                     className="px-3.5 py-1.5 text-xs font-semibold text-[#2C3A2B] bg-[#F5F5EC] border border-[#E6E1D3] rounded-xl hover:bg-[#F4F1EA] transition-colors cursor-pointer"
                   >
-                    Go to Workspace Editor
+                    View All Bundles
                   </button>
                 </div>
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                {savedBundles.map(bundle => {
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 max-h-[460px] overflow-y-auto pr-1">
+                {filteredSavedBundles.map(bundle => {
                   const isChecked = selectedBundleIds.includes(bundle.id);
                   const isValid = bundle.validation.isValid;
+                  const isHome = isHomeBundle(bundle);
 
                   return (
                     <div
@@ -792,25 +984,42 @@ export const CompareBundlesPage: React.FC<CompareBundlesPageProps> = ({ initialM
                       }`}
                     >
                       <div>
-                        <div className="flex items-center justify-between mb-1.5">
-                          <span className="font-semibold text-[#2C3A2B] line-clamp-1">
-                            {bundle.name}
-                          </span>
-                          {isValid ? (
-                            <span className="text-[10px] text-[#2C3A2B] bg-[#A3B18A]/25 border border-[#A3B18A]/40 px-1.5 py-0.5 rounded font-medium">Valid</span>
+                        {/* Domain Category Badge & Validity */}
+                        <div className="flex items-center justify-between gap-1 mb-2">
+                          {isHome ? (
+                            <span className="text-[10px] text-[#8B5A2B] bg-[#8B5A2B]/10 border border-[#8B5A2B]/25 px-1.5 py-0.5 rounded-md font-semibold flex items-center gap-1 truncate">
+                              <Home className="w-2.5 h-2.5 shrink-0" /> Home Appliances
+                            </span>
                           ) : (
-                            <span className="text-[10px] text-[#C05621] bg-[#C05621]/10 border border-[#C05621]/20 px-1.5 py-0.5 rounded font-medium">Invalid</span>
+                            <span className="text-[10px] text-[#5A5A40] bg-[#F4F1EA] border border-[#E6E1D3] px-1.5 py-0.5 rounded-md font-medium truncate">
+                              WFH Peripherals
+                            </span>
+                          )}
+
+                          {isValid ? (
+                            <span className="text-[10px] text-emerald-800 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded-md font-semibold shrink-0">Valid</span>
+                          ) : (
+                            <span className="text-[10px] text-[#C05621] bg-[#C05621]/10 border border-[#C05621]/20 px-1.5 py-0.5 rounded-md font-medium shrink-0">Invalid</span>
                           )}
                         </div>
+
+                        <span className="font-semibold text-[#2C3A2B] line-clamp-1 block mb-1">
+                          {bundle.name}
+                        </span>
+
                         <div className="text-sm font-bold font-mono tabular-nums text-[#2C3A2B]">
                           {formatINR(bundle.validation.landedPrice.landedPrice)}
+                        </div>
+
+                        <div className="text-[10px] text-[#8B8B7A] mt-1 line-clamp-1">
+                          Budget: {formatINR(bundle.budget)} • {bundle.validation.filledSlotCount} items
                         </div>
                       </div>
 
                       <div className="mt-3 pt-2.5 border-t border-[#E6E1D3] flex items-center justify-between text-[11px]">
-                        <span className="text-[#5A5A40] font-mono text-[10px]">{bundle.savedAt}</span>
+                        <span className="text-[#5A5A40] font-mono text-[10px]">{bundle.savedAt.split(',')[0]}</span>
                         <span className={`font-semibold ${isChecked ? 'text-[#8B5A2B]' : 'text-[#5A5A40]'}`}>
-                          {isChecked ? 'Comparing' : 'Click to compare'}
+                          {isChecked ? '✓ Comparing' : '+ Compare'}
                         </span>
                       </div>
                     </div>
