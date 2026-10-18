@@ -2486,6 +2486,13 @@ function getGeminiApiKey() {
 }
 var app = express();
 app.use((req, res, next) => {
+  const original = req.headers["x-matched-path"] || req.headers["x-forwarded-uri"] || req.headers["x-original-url"];
+  if (original && typeof original === "string") {
+    req.url = original;
+  }
+  next();
+});
+app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
@@ -2884,15 +2891,7 @@ app.all(["/api", "/"], (req, res, next) => {
   next();
 });
 var api_server_default = app;
-
-// api/index.ts
-function handler(req, res) {
-  const original = req.headers["x-matched-path"] || req.headers["x-forwarded-uri"] || req.headers["x-original-url"];
-  if (original && typeof original === "string") {
-    req.url = original;
-  }
-  return api_server_default(req, res);
-}
 export {
-  handler as default
+  app,
+  api_server_default as default
 };

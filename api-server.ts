@@ -27,6 +27,15 @@ function getGeminiApiKey(): string | undefined {
 
 const app = express();
 
+// Restore original URL if rewritten by Vercel serverless router
+app.use((req, res, next) => {
+  const original = req.headers['x-matched-path'] || req.headers['x-forwarded-uri'] || req.headers['x-original-url'];
+  if (original && typeof original === 'string') {
+    req.url = original;
+  }
+  next();
+});
+
 // Enable CORS for same-origin and development requests
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
