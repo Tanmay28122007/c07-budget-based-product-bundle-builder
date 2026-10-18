@@ -240,6 +240,28 @@ export interface UserProfile {
   memberSince?: string;
 }
 
+export const DEFAULT_USER_PROFILE: UserProfile = {
+  name: 'Tanmay Anand',
+  email: 'tanmay.anand@craftbundle.io',
+  phone: '+91 98765 43210',
+  roleTitle: 'Lead Bundle Architect',
+  department: 'Product & Merchandising',
+  bio: 'Specializing in budget-optimized workspace bundles, landed cost analytics, and AI recommendations.',
+  avatarColor: '#2C3A2B',
+  address: '42 Indiranagar 100ft Road',
+  city: 'Bengaluru',
+  state: 'Karnataka',
+  postalCode: '560038',
+  country: 'India',
+  preferredCurrency: 'INR',
+  defaultBudget: 75000,
+  optimizationPreference: 'best_value',
+  emailAlerts: true,
+  aiTips: true,
+  compactView: false,
+  memberSince: 'March 2024'
+};
+
 export interface CheckoutBundleItem {
   product: Product;
   quantity: number;

@@ -445,14 +445,18 @@ app.post(['/api/bundles/filter', '/bundles/filter'], (req, res) => {
       budget,
       exactOnly,
       defaultFixture.shippingRule,
-      defaultFixture.taxRule
+      defaultFixture.taxRule,
+      100
     );
 
     let bundles = result.bundles;
 
     // Filter by keyword search if provided
     if (search && typeof search === 'string' && search.trim()) {
-      const q = search.toLowerCase().trim();
+      let q = search.toLowerCase().trim();
+      if (q.includes('coperat') || q.includes('coporat')) {
+        q = 'corporate';
+      }
       bundles = bundles.filter(b => {
         const name = b.name.toLowerCase();
         const tagline = b.tagline.toLowerCase();

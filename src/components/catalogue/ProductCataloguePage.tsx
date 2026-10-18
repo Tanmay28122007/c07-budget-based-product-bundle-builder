@@ -219,7 +219,12 @@ export const ProductCataloguePage: React.FC = () => {
     e.preventDefault();
     if (!editingProduct) return;
 
-    const res = updateProductStock(editingProduct.id, newStockQty);
+    const qtyNum = parseInt(newStockQty, 10);
+    if (isNaN(qtyNum) || qtyNum < 0) {
+      setStockEditError('Please enter a valid non-negative number for stock.');
+      return;
+    }
+    const res = updateProductStock(editingProduct.id, qtyNum);
     if (!res.success) {
       setStockEditError(res.error || 'Failed to update stock quantity.');
       setStockEditSuccess(null);

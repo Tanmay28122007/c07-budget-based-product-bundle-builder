@@ -81,8 +81,86 @@ export function getPredefinedBaselineBundles(
   const p23 = byId('P23'); // Ergonomic Wireless Mouse (₹890, stock 12)
   const p24 = byId('P24'); // Compact Mechanical Keyboard (₹1450, stock 8)
   const p25 = byId('P25'); // Multi-Port Aluminum Type-C Hub (₹1150, stock 15)
+  const p41 = byId('P41'); // 27" 4K Designer Monitor (₹28500, stock 15)
+  const p42 = byId('P42'); // 34" Curved WQHD Monitor (₹36000, stock 12)
+  const p43 = byId('P43'); // 15.6" Portable USB-C FHD Monitor (₹12999, stock 18)
+  const p44 = byId('P44'); // Graphic Drawing Tablet (₹6499, stock 22)
+  const p48 = byId('P48'); // Thunderbolt 4 12-in-1 Triple Display Dock (₹14500, stock 14)
+  const p50 = byId('P50'); // 1TB Rugged NVMe SSD (₹7800, stock 25)
+  const p51 = byId('P51'); // Professional Color Calibrator (₹9999, stock 10)
+  const p52 = byId('P52'); // Pro Wireless Conference Headset (₹3499, stock 24)
+  const p54 = byId('P54'); // 3Dconnexion SpaceNavigator (₹8900, stock 11)
+  const p55 = byId('P55'); // Aluminum Laptop Cooling Pad (₹1650, stock 32)
+  const p61 = byId('P61'); // Enterprise Fleet 14" Business Ultrabook (₹54999, stock 45)
+  const p62 = byId('P62'); // Developer Pro 16" Workstation Laptop (₹89999, stock 30)
+  const p63 = byId('P63'); // Executive Carbon 13.3" Ultra-Slim Laptop (₹104999, stock 25)
+  const p64 = byId('P64'); // Entry Corporate Staff 15.6" Laptop (₹42999, stock 50)
+  const p65 = byId('P65'); // Creative Studio 16" RTX Workstation Laptop (₹149999, stock 18)
+  const p66 = byId('P66'); // Finance & Enterprise Secure 14" vPro Laptop (₹78999, stock 35)
+  const p67 = byId('P67'); // Corporate Silent Multi-Device Wireless Mouse (₹1299, stock 60)
+  const p68 = byId('P68'); // Enterprise Low-Profile Quiet Office Keyboard (₹1799, stock 55)
+  const p69 = byId('P69'); // Professional Ergonomic Split Wave Keyboard (₹3499, stock 40)
+  const p70 = byId('P70'); // Vertical Ergonomic Precision Laser Mouse (₹2299, stock 48)
+  const p71 = byId('P71'); // 100W GaN Triple-Port USB-C Fast Charger (₹2499, stock 50)
+  const p72 = byId('P72'); // Magnetic Anti-Glare & Privacy Screen Filter (₹1499, stock 70)
+  const p73 = byId('P73'); // Executive Leatherette Laptop Briefcase (₹2799, stock 35)
+  const p74 = byId('P74'); // 2K QHD Conference Webcam (₹3999, stock 40)
+  const p75 = byId('P75'); // Dual-Arm Desk Monitor Stand (₹4500, stock 25)
 
   const rawConfigs = [
+    {
+      id: 'corp-set-1',
+      name: 'Corporate Laptop & Fast Charger Power Duo',
+      tagline: 'High-mobility corporate package pairing 14" Business Ultrabook with 100W GaN fast power adapter',
+      items: [
+        { product: p61, quantity: 1 },
+        { product: p71, quantity: 1 }
+      ],
+      matchExplanation: 'Corporate mobility set pairing high-performance 14" fleet ultrabook with triple-port 100W GaN fast charger.'
+    },
+    {
+      id: 'corp-set-2',
+      name: 'Corporate Mug & Power Adapter Essentials',
+      tagline: 'Everyday corporate desk ceramic mug combined with 100W GaN multi-port fast power adapter',
+      items: [
+        { product: p21, quantity: 1 },
+        { product: p71, quantity: 1 }
+      ],
+      matchExplanation: 'Everyday corporate desktop essential pairing premium desk drinkware with 100W multi-device fast power delivery.'
+    },
+    {
+      id: 'corp-set-3',
+      name: 'Corporate Fleet Laptop, Mouse & Keyboard Suite',
+      tagline: 'Standard corporate fleet onboarding suite with 14" ultrabook, silent wireless mouse, and low-profile keyboard',
+      items: [
+        { product: p61, quantity: 1 },
+        { product: p67, quantity: 1 },
+        { product: p68, quantity: 1 }
+      ],
+      matchExplanation: 'Complete corporate IT onboarding workstation providing day-one business computing and silent desktop peripherals.'
+    },
+    {
+      id: 'corp-set-4',
+      name: 'Corporate Desk Hydration & Power Essentials',
+      tagline: 'Budget-friendly corporate desk setup featuring beverage mug, hardcover journal, and 100W GaN charger',
+      items: [
+        { product: p05, quantity: 1 },
+        { product: p71, quantity: 1 },
+        { product: p13, quantity: 1 }
+      ],
+      matchExplanation: 'Corporate office desktop bundle under ₹3,500 budget with caffeine mug, executive notebook, and fast charging.'
+    },
+    {
+      id: 'corp-set-5',
+      name: 'Corporate Executive Laptop, Charger & Briefcase Suite',
+      tagline: 'Executive mobility package combining 990g carbon ultrabook, 100W GaN charger, and luxury leatherette folio',
+      items: [
+        { product: p63, quantity: 1 },
+        { product: p71, quantity: 1 },
+        { product: p73, quantity: 1 }
+      ],
+      matchExplanation: 'Turnkey C-level business travel suite with ultra-light carbon laptop, rapid charger, and carrying briefcase.'
+    },
     {
       id: 'base-1',
       name: 'Core Desk Essentials',
@@ -374,6 +452,256 @@ export function getPredefinedBaselineBundles(
         { product: p13, quantity: 1 }
       ],
       matchExplanation: 'Robust everyday traveler kit featuring canvas commuter bag, multi-port aluminum hub, flask, and notebook.'
+    },
+    {
+      id: 'base-corp-1',
+      name: 'Corporate Standard Fleet Onboarding Suite',
+      tagline: 'Core enterprise IT deployment combining 14" Business Ultrabook with quiet tactile peripherals',
+      items: [
+        { product: p61, quantity: 1 },
+        { product: p67, quantity: 1 },
+        { product: p68, quantity: 1 }
+      ],
+      matchExplanation: 'The corporate standard: complete fleet laptop with dedicated low-noise wireless mouse and full-sized office keyboard for day-one productivity.'
+    },
+    {
+      id: 'base-corp-2',
+      name: 'Developer Pro Full-Stack Workstation',
+      tagline: 'Heavy-duty developer suite with 16" high-performance workstation, mechanical typing, and expansion dock',
+      items: [
+        { product: p62, quantity: 1 },
+        { product: p24, quantity: 1 },
+        { product: p23, quantity: 1 },
+        { product: p25, quantity: 1 }
+      ],
+      matchExplanation: 'Engineered for software engineers and DevOps: fast i7/32GB laptop with mechanical feedback keyboard, precision wireless mouse, and multi-display hub.'
+    },
+    {
+      id: 'base-corp-3',
+      name: 'Executive C-Suite Carbon Command Setup',
+      tagline: 'Ultra-premium executive mobility with 990g OLED ultrabook, posture-aligned peripherals, and leather folio',
+      items: [
+        { product: p63, quantity: 1 },
+        { product: p70, quantity: 1 },
+        { product: p69, quantity: 1 },
+        { product: p73, quantity: 1 }
+      ],
+      matchExplanation: 'Flagship executive deployment pairing featherlight OLED carbon touchscreen laptop with top-tier ergonomic wave inputs and luxury carrying case.'
+    },
+    {
+      id: 'base-corp-4',
+      name: 'Corporate Budget Staff Productivity Trio',
+      tagline: 'Cost-optimized corporate fleet pack featuring 15.6" FHD anti-glare laptop with USB-C peripherals',
+      items: [
+        { product: p64, quantity: 1 },
+        { product: p07, quantity: 1 },
+        { product: p08, quantity: 1 }
+      ],
+      matchExplanation: 'High-value corporate procurement bundle equipping operational staff with a durable 15.6" business laptop, USB-C mouse, and keyboard under budget.'
+    },
+    {
+      id: 'base-corp-5',
+      name: 'Finance & Enterprise Secure Workstation',
+      tagline: 'Compliance-ready corporate station with hardware TPM 2.0 vPro laptop, privacy filter, and full accounting keyboard',
+      items: [
+        { product: p66, quantity: 1 },
+        { product: p68, quantity: 1 },
+        { product: p67, quantity: 1 },
+        { product: p72, quantity: 1 }
+      ],
+      matchExplanation: 'Designed for audit, finance, and banking operations: hardware-encrypted laptop with dedicated 10-key numeric pad keyboard, silent mouse, and confidentiality privacy screen.'
+    },
+    {
+      id: 'base-corp-6',
+      name: 'Creative Director & CAD Workstation Suite',
+      tagline: 'Max-spec enterprise engineering and design powerhouse with i9 RTX laptop, 4K monitor, and articulated mount',
+      items: [
+        { product: p65, quantity: 1 },
+        { product: p70, quantity: 1 },
+        { product: p24, quantity: 1 },
+        { product: p41, quantity: 1 },
+        { product: p75, quantity: 1 }
+      ],
+      matchExplanation: 'Complete creative production suite featuring discrete GPU laptop, color-accurate 4K external display, mechanical typing, and heavy-duty gas spring arm.'
+    },
+    {
+      id: 'base-corp-7',
+      name: 'Hybrid Remote Worker Complete Suite',
+      tagline: 'All-in-one corporate remote setup with business laptop, video conference hardware, ergonomic stand, and peripherals',
+      items: [
+        { product: p61, quantity: 1 },
+        { product: p67, quantity: 1 },
+        { product: p68, quantity: 1 },
+        { product: p74, quantity: 1 },
+        { product: p52, quantity: 1 },
+        { product: p55, quantity: 1 }
+      ],
+      matchExplanation: 'Zero-compromise home office package providing the employee with a 14" ultrabook, dual inputs, crystal-clear 2K webcam, noise-cancelling boom mic headset, and thermal cooling stand.'
+    },
+    {
+      id: 'base-corp-8',
+      name: 'Enterprise Dual-Screen Mobile Office',
+      tagline: 'Dual-display mobile powerhouse for traveling consultants and corporate leaders',
+      items: [
+        { product: p61, quantity: 1 },
+        { product: p43, quantity: 1 },
+        { product: p67, quantity: 1 },
+        { product: p68, quantity: 1 }
+      ],
+      matchExplanation: 'Instantly doubles screen real estate anywhere: combines 14" ultrabook with a lightweight FHD USB-C secondary monitor and matched low-profile peripherals.'
+    },
+    {
+      id: 'base-corp-9',
+      name: 'Corporate Hot-Desking Mobility Pack',
+      tagline: 'Agile hot-desking setup with 15.6" business laptop, ultra-compact GaN fast power, and protective transit pack',
+      items: [
+        { product: p64, quantity: 1 },
+        { product: p67, quantity: 1 },
+        { product: p71, quantity: 1 },
+        { product: p19, quantity: 1 }
+      ],
+      matchExplanation: 'Equips agile office staff to transition smoothly between desk pods and conference rooms with multi-device fast charging and slim carry gear.'
+    },
+    {
+      id: 'base-corp-10',
+      name: 'Executive Presentations & Video Command Rig',
+      tagline: 'High-impact leadership conferencing setup with carbon OLED laptop, AI auto-framing webcam, and boom mic',
+      items: [
+        { product: p63, quantity: 1 },
+        { product: p74, quantity: 1 },
+        { product: p52, quantity: 1 },
+        { product: p67, quantity: 1 }
+      ],
+      matchExplanation: 'Optimized for board meetings and investor presentations: combines ultra-slim OLED laptop with AI auto-tracking 2K camera and broadcast-grade headset.'
+    },
+    {
+      id: 'base-corp-11',
+      name: 'Cloud Architect & DevOps Power Command Rig',
+      tagline: 'The ultimate 5-piece enterprise command center with 32GB RAM laptop, 34" curved display, and 12-port dock',
+      items: [
+        { product: p62, quantity: 1 },
+        { product: p42, quantity: 1 },
+        { product: p48, quantity: 1 },
+        { product: p69, quantity: 1 },
+        { product: p70, quantity: 1 }
+      ],
+      matchExplanation: 'Maximum productivity configuration for senior engineers: drives panoramic code and terminal workspaces via single-cable Thunderbolt 4 docking.'
+    },
+    {
+      id: 'base-corp-12',
+      name: 'Field Sales & Client Solutions Travel Kit',
+      tagline: 'Professional client-facing travel suite with sleek business ultrabook, luxury folio, and rapid charger',
+      items: [
+        { product: p61, quantity: 1 },
+        { product: p67, quantity: 1 },
+        { product: p73, quantity: 1 },
+        { product: p71, quantity: 1 }
+      ],
+      matchExplanation: 'Tailored for client visits and business trips: lightweight 14" ultrabook with silent clicker, executive leatherette transit bag, and all-day fast power adapter.'
+    },
+    {
+      id: 'base-corp-13',
+      name: 'Corporate Call Center & Support Operations Station',
+      tagline: 'High-endurance customer operations suite with dedicated laptop, noise-cancelling boom headset, and quiet inputs',
+      items: [
+        { product: p64, quantity: 1 },
+        { product: p68, quantity: 1 },
+        { product: p67, quantity: 1 },
+        { product: p52, quantity: 1 }
+      ],
+      matchExplanation: 'Designed for intensive support and sales operations: durable laptop paired with noise-isolating boom mic headset and silent typing peripherals.'
+    },
+    {
+      id: 'base-corp-14',
+      name: 'Modern Corporate Ergonomic Fleet Suite',
+      tagline: 'RSI-prevention corporate workspace featuring ergonomic wave keyboard, vertical laser mouse, and angled riser',
+      items: [
+        { product: p61, quantity: 1 },
+        { product: p70, quantity: 1 },
+        { product: p69, quantity: 1 },
+        { product: p55, quantity: 1 }
+      ],
+      matchExplanation: 'Approved for corporate ergonomic wellness programs: corrects wrist and neck posture with split cushioned keyboard, vertical thumb-rest mouse, and cooling riser.'
+    },
+    {
+      id: 'base-corp-15',
+      name: 'Enterprise Data & Analytics Fast Station',
+      tagline: 'High-bandwidth data engineering kit with 1050MB/s NVMe storage, 32GB laptop, and multi-port connectivity',
+      items: [
+        { product: p62, quantity: 1 },
+        { product: p50, quantity: 1 },
+        { product: p67, quantity: 1 },
+        { product: p68, quantity: 1 },
+        { product: p25, quantity: 1 }
+      ],
+      matchExplanation: 'Supports heavy ETL and machine learning workloads with ultra-fast portable storage, developer workstation laptop, and expanded peripheral ports.'
+    },
+    {
+      id: 'base-corp-16',
+      name: 'Secure Banking & Legal Audit Station',
+      tagline: 'Protected corporate compliance setup with vPro hardware protection, screen privacy, and secure transit pack',
+      items: [
+        { product: p66, quantity: 1 },
+        { product: p72, quantity: 1 },
+        { product: p68, quantity: 1 },
+        { product: p67, quantity: 1 },
+        { product: p19, quantity: 1 }
+      ],
+      matchExplanation: 'Ensures total visual and hardware security for legal and banking personnel in public or shared office environments.'
+    },
+    {
+      id: 'base-corp-17',
+      name: 'Corporate Media & Marketing Creator Rig',
+      tagline: 'Color-critical creative suite with RTX graphics laptop, 4K UHD display, hardware calibrator, and tactile inputs',
+      items: [
+        { product: p65, quantity: 1 },
+        { product: p41, quantity: 1 },
+        { product: p51, quantity: 1 },
+        { product: p24, quantity: 1 },
+        { product: p23, quantity: 1 }
+      ],
+      matchExplanation: 'Professional brand and multimedia setup ensuring 100% color accuracy from screen to print across all creative campaigns.'
+    },
+    {
+      id: 'base-corp-18',
+      name: 'Corporate Hot-Desking Dual Screen Expansion Rig',
+      tagline: 'Dual-screen on-the-go corporate productivity with lightweight monitor, business laptop, and GaN power',
+      items: [
+        { product: p64, quantity: 1 },
+        { product: p43, quantity: 1 },
+        { product: p67, quantity: 1 },
+        { product: p71, quantity: 1 }
+      ],
+      matchExplanation: 'Empowers roaming corporate staff with dual displays and rapid charging in any meeting room or hot desk.'
+    },
+    {
+      id: 'base-corp-19',
+      name: 'Enterprise Leadership Boardroom Mobility Suite',
+      tagline: 'Top-tier executive travel ensemble with OLED carbon ultrabook, visual confidentiality, and premium carry folio',
+      items: [
+        { product: p63, quantity: 1 },
+        { product: p72, quantity: 1 },
+        { product: p67, quantity: 1 },
+        { product: p71, quantity: 1 },
+        { product: p73, quantity: 1 }
+      ],
+      matchExplanation: 'The definitive C-level business kit: combines 990g carbon fiber laptop, anti-glare privacy filter, fast GaN charger, and leatherette briefcase.'
+    },
+    {
+      id: 'base-corp-20',
+      name: 'Complete Corporate Enterprise Flagship Powerhouse',
+      tagline: '8-piece comprehensive enterprise deployment pack covering computing, inputs, audio-video, power, and transit',
+      items: [
+        { product: p61, quantity: 1 },
+        { product: p67, quantity: 1 },
+        { product: p68, quantity: 1 },
+        { product: p74, quantity: 1 },
+        { product: p52, quantity: 1 },
+        { product: p71, quantity: 1 },
+        { product: p55, quantity: 1 },
+        { product: p19, quantity: 1 }
+      ],
+      matchExplanation: 'The total corporate solution: deploys every essential corporate requirement in a single coordinated bundle.'
     }
   ];
 
@@ -467,7 +795,7 @@ export function generateBundleRecommendations(
   exactOnly: boolean = false,
   shippingRule: ShippingRule = { baseFee: 100, freeShippingThreshold: 999999, heavyItemSurchargePerItem: 0, heavyThresholdKg: 999 },
   taxRule: TaxRule = { taxRate: 0, taxName: 'Included' },
-  maxResults: number = 25
+  maxResults: number = 100
 ): RecommendationResult {
   // If no requirements specified, return predefined baseline bundles filtered by budget
   if (!requirements || requirements.length === 0) {
@@ -715,7 +1043,17 @@ export function generateBundleRecommendations(
     ['P04', 'P10'], // Blue Tshirt L + Green Bottle
     ['P04', 'P09'], // Blue Tshirt L + Grey Hub
     ['P04', 'P05'], // Blue Tshirt L + Blue Mug
-    ['P08', 'P09']  // Black Keyboard + Grey Hub
+    ['P08', 'P09'], // Black Keyboard + Grey Hub
+    ['P67', 'P68'], // Corporate Silent Mouse + Quiet Office Keyboard
+    ['P70', 'P69'], // Vertical Laser Mouse + Split Wave Keyboard
+    ['P67', 'P71'], // Corporate Silent Mouse + 100W GaN Fast Charger
+    ['P67', 'P74'], // Corporate Silent Mouse + 2K QHD Conference Webcam
+    ['P68', 'P52'], // Quiet Office Keyboard + Noise-Cancelling Headset
+    ['P67', 'P55'], // Corporate Silent Mouse + Laptop Cooling Stand
+    ['P67', 'P73'], // Corporate Silent Mouse + Leatherette Briefcase
+    ['P68', 'P72'], // Quiet Office Keyboard + Privacy Screen Filter
+    ['P43', 'P67'], // 15.6" Portable Monitor + Corporate Silent Mouse
+    ['P48', 'P68']  // Thunderbolt Dock + Quiet Office Keyboard
   ];
 
   for (const [idA, idB] of compPairs) {
@@ -786,6 +1124,36 @@ export function generateBundleRecommendations(
       ids: ['P07', 'P08', 'P10', 'P11'],
       nameExtra: 'Executive Quad',
       descExtra: 'Mouse, Keyboard, Bottle, and Notebook'
+    },
+    {
+      ids: ['P67', 'P68'],
+      nameExtra: 'Corporate Fleet Input Duo',
+      descExtra: 'Silent Wireless Mouse and Low-Profile Keyboard'
+    },
+    {
+      ids: ['P70', 'P69'],
+      nameExtra: 'Ergonomic Health Input Duo',
+      descExtra: 'Vertical Laser Mouse and Split Wave Keyboard'
+    },
+    {
+      ids: ['P67', 'P68', 'P71'],
+      nameExtra: 'Corporate Power Productivity Trio',
+      descExtra: 'Silent Mouse, Quiet Keyboard, and 100W GaN Fast Charger'
+    },
+    {
+      ids: ['P67', 'P68', 'P74', 'P52'],
+      nameExtra: 'Corporate Remote Conferencing Suite',
+      descExtra: 'Mouse, Keyboard, 2K Conference Webcam, and Noise-Cancelling Boom Headset'
+    },
+    {
+      ids: ['P67', 'P68', 'P43'],
+      nameExtra: 'Dual-Screen Mobile Office Suite',
+      descExtra: 'Mouse, Keyboard, and 15.6" Portable USB-C FHD Display'
+    },
+    {
+      ids: ['P70', 'P69', 'P48', 'P41'],
+      nameExtra: 'Executive 4K Command Center',
+      descExtra: 'Ergonomic Inputs, Thunderbolt 4 Dock, and 27" 4K Designer Monitor'
     }
   ];
 

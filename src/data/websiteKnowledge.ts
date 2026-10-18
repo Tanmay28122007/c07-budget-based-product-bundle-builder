@@ -20,9 +20,9 @@ export const WEBSITE_PAGES: Record<string, WebsitePageInfo> = {
     id: 'catalogue',
     title: 'Product Catalogue',
     pathDescription: 'Comprehensive inventory & technical hardware directory',
-    summary: 'Displays all 60 products (P01 to P60) across 26 professional categories covering software engineering, design, marketing, finance, education, HR, students, entrepreneurs, and architecture.',
+    summary: 'Displays all 75 products (P01 to P75) across 27 professional categories covering Enterprise Laptops, Ultrabooks, Developer Workstations, software engineering, design, marketing, finance, corporate fleets, and office operations.',
     features: [
-      '60 Curated Products across 26 categories: Monitor, Tablet, Stylus, Stand, Keypad, Dock, CardReader, Storage, Colorimeter, Headset, Audio, 3DMouse, CoolingStand, PhoneStand, Lighting, DocCamera, Organizer, Printer, Mouse, Keyboard, Hub, Bottle, Mug, Notebook, Backpack, DeskMat.',
+      '75 Curated Products across 27 categories: Laptop, Monitor, Tablet, Stylus, Stand, Keypad, Dock, CardReader, Storage, Colorimeter, Headset, Audio, 3DMouse, CoolingStand, PhoneStand, Lighting, DocCamera, Organizer, Printer, Mouse, Keyboard, Hub, Bottle, Mug, Notebook, Backpack, DeskMat.',
       '6-Column Backend Filter Grid: Search query, Category filter, Colour filter, Size filter, In-Stock toggle, and Sort order.',
       'Live stock status tags (In Stock with exact unit count, or Currently Out of Stock).',
       'Direct Add to Cart button, Inspect Details view, and technical spec sheets.',
