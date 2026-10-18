@@ -29,18 +29,9 @@ const AppContent: React.FC = () => {
   if (!userRole || activeTab === 'login' || activeTab === 'home') {
     return (
       <AppLayout>
-        <AnimatePresence mode="wait">
-          <motion.div
-            key="signin-dashboard"
-            initial={{ opacity: 0, filter: 'blur(4px)' }}
-            animate={{ opacity: 1, filter: 'blur(0px)' }}
-            exit={{ opacity: 0, filter: 'blur(4px)' }}
-            transition={{ duration: 0.25 }}
-            className="w-full flex items-center justify-center"
-          >
-            <SignInDashboard />
-          </motion.div>
-        </AnimatePresence>
+        <div className="w-full flex items-center justify-center">
+          <SignInDashboard />
+        </div>
       </AppLayout>
     );
   }
