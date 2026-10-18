@@ -528,8 +528,8 @@ app.get(['/api/bundles', '/bundles'], (req, res) => {
   }
 });
 
-// Fallback root handler in case Vercel rewrote request to /api or /
-app.all(['/api', '/'], (req, res, next) => {
+// Fallback root handler in case Vercel rewrote request to /api or /api/
+app.all(['/api', '/api/'], (req, res, next) => {
   if (req.method === 'POST' && req.body && req.body.message) {
     req.url = '/api/ai/assistant';
     return app._router.handle(req, res, next);
