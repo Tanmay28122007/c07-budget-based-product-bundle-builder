@@ -430,7 +430,7 @@ Choose your preferred language below or ask me anything to assemble, optimize, o
                   />
                 </div>
               )}
-              <div className="flex-1 leading-relaxed text-sm font-semibold text-stone-900">
+              <div className="flex-1 leading-relaxed text-[15px] font-semibold text-stone-900">
                 {renderInlineMarkdown(numMatch[2])}
               </div>
             </div>
@@ -445,7 +445,7 @@ Choose your preferred language below or ask me anything to assemble, optimize, o
 
       // Regular paragraph
       return (
-        <p key={idx} className="text-stone-800 my-1 leading-relaxed text-sm font-normal">
+        <p key={idx} className="text-stone-800 my-1 leading-relaxed text-[15px] font-normal">
           {renderInlineMarkdown(line)}
         </p>
       );
@@ -682,9 +682,9 @@ Choose your preferred language below or ask me anything to assemble, optimize, o
                     >
                       {/* Message Text */}
                       {isUser ? (
-                        <p className="leading-relaxed whitespace-pre-wrap text-sm">{msg.text}</p>
+                        <p className="leading-relaxed whitespace-pre-wrap text-[15px]">{msg.text}</p>
                       ) : (
-                        <div className="space-y-1.5 text-sm">{renderFormattedText(msg.text)}</div>
+                        <div className="space-y-1.5 text-[15px]">{renderFormattedText(msg.text)}</div>
                       )}
 
                       {/* Visual Product Recommendation Cards */}
@@ -694,11 +694,11 @@ Choose your preferred language below or ask me anything to assemble, optimize, o
                         return (
                           <div className="mt-3.5 pt-3 border-t border-[#E6E1D3]">
                             <div className="flex items-center justify-between mb-2">
-                              <span className="text-xs font-bold text-[#2C3A2B] flex items-center gap-1.5 tracking-tight">
+                              <span className="text-[13px] font-bold text-[#2C3A2B] flex items-center gap-1.5 tracking-tight">
                                 <Package className="w-3.5 h-3.5 text-[#8B5A2B]" />
                                 Products Mentioned ({mentionedProds.length})
                               </span>
-                              <span className="text-[10px] text-[#8A8A88]">Click to inspect or add</span>
+                              <span className="text-[11px] text-[#8A8A88]">Click to inspect or add</span>
                             </div>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                               {mentionedProds.map(prod => (
@@ -721,27 +721,27 @@ Choose your preferred language below or ask me anything to assemble, optimize, o
                                     />
                                   </div>
                                   <div className="min-w-0 flex-1">
-                                    <div className="flex items-center gap-1.5 text-[10px] font-mono text-[#8A8A88]">
+                                    <div className="flex items-center gap-1.5 text-[11px] font-mono text-[#8A8A88]">
                                       <span className="font-bold text-[#8B5A2B]">{prod.id}</span>
                                       <span>•</span>
                                       <span className="truncate">{prod.category}</span>
                                     </div>
                                     <h5
                                       onClick={() => openProductDetails(prod.id)}
-                                      className="font-medium text-xs text-[#2C2C1E] truncate cursor-pointer group-hover:text-[#8B5A2B] transition-colors"
+                                      className="font-semibold text-xs sm:text-[13px] text-[#2C2C1E] truncate cursor-pointer group-hover:text-[#8B5A2B] transition-colors"
                                       title={prod.name}
                                     >
                                       {prod.name}
                                     </h5>
                                     <div className="flex items-center justify-between mt-1">
-                                      <span className="font-mono font-bold text-xs text-[#2C3A2B]">
+                                      <span className="font-mono font-bold text-xs sm:text-[13px] text-[#2C3A2B]">
                                         {formatINR(prod.price)}
                                       </span>
                                       <button
                                         type="button"
                                         onClick={() => handleAddProductToCart(prod)}
                                         disabled={!prod.inStock}
-                                        className={`px-2 py-0.5 rounded-md text-[10px] font-semibold flex items-center gap-1 transition-all cursor-pointer shadow-2xs ${
+                                        className={`px-2.5 py-1 rounded-md text-[11px] font-semibold flex items-center gap-1 transition-all cursor-pointer shadow-2xs ${
                                           addedProductIds[prod.id]
                                             ? 'bg-emerald-600 text-white'
                                             : prod.inStock
@@ -776,12 +776,12 @@ Choose your preferred language below or ask me anything to assemble, optimize, o
                           {msg.action.type === 'apply_bundle' && (
                             <div className="p-3 bg-[#FDFBF7] border border-[#E6E1D3] rounded-xl shadow-xs">
                               <div className="flex items-center justify-between mb-2">
-                                <div className="flex items-center gap-1.5 font-bold text-[#2C3A2B] text-[11px]">
+                                <div className="flex items-center gap-1.5 font-bold text-[#2C3A2B] text-xs sm:text-[13px]">
                                   <Package className="w-3.5 h-3.5 text-[#8B5A2B]" />
                                   <span>{msg.action.title || 'Recommended Bundle'}</span>
                                 </div>
                                 {msg.action.budget && (
-                                  <span className="font-mono text-[10px] px-1.5 py-0.5 rounded-md bg-[#F4F1EA] text-[#8B5A2B] font-medium border border-[#E6E1D3]">
+                                  <span className="font-mono text-[11px] px-1.5 py-0.5 rounded-md bg-[#F4F1EA] text-[#8B5A2B] font-medium border border-[#E6E1D3]">
                                     Target: {formatINR(msg.action.budget)}
                                   </span>
                                 )}
@@ -795,7 +795,7 @@ Choose your preferred language below or ask me anything to assemble, optimize, o
                                     return (
                                       <div
                                         key={slotId}
-                                        className="flex items-center justify-between text-[10px] text-[#5A5A40] bg-white border border-[#E6E1D3]/60 px-2 py-1 rounded-md"
+                                        className="flex items-center justify-between text-[11px] text-[#5A5A40] bg-white border border-[#E6E1D3]/60 px-2 py-1 rounded-md"
                                       >
                                         <span className="font-medium text-[#2C3A2B]">
                                           {slot?.label || slotId}:
@@ -812,7 +812,7 @@ Choose your preferred language below or ask me anything to assemble, optimize, o
                               <button
                                 onClick={() => handleApplyAction(msg.id, msg.action)}
                                 disabled={msg.actionApplied}
-                                className={`w-full py-2 px-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-all ${
+                                className={`w-full py-2 px-3 rounded-xl text-xs sm:text-[13px] font-semibold flex items-center justify-center gap-1.5 transition-all ${
                                   msg.actionApplied
                                     ? 'bg-[#A3B18A]/30 text-[#2C3A2B] border border-[#A3B18A] cursor-default'
                                     : 'bg-[#2C3A2B] hover:bg-[#1B281B] text-white shadow-xs cursor-pointer'
@@ -835,15 +835,15 @@ Choose your preferred language below or ask me anything to assemble, optimize, o
 
                           {msg.action.type === 'swap_product' && (
                             <div className="p-3 bg-[#FDFBF7] border border-[#E6E1D3] rounded-xl shadow-xs">
-                              <div className="flex items-center gap-1.5 font-bold text-[#2C3A2B] text-[11px] mb-1">
+                              <div className="flex items-center gap-1.5 font-bold text-[#2C3A2B] text-xs sm:text-[13px] mb-1">
                                 <RefreshCw className="w-3.5 h-3.5 text-[#8B5A2B]" />
                                 <span>Suggested Product Replacement</span>
                               </div>
-                              <p className="text-[11px] text-[#5A5A40] mb-2 leading-relaxed">
+                              <p className="text-xs text-[#5A5A40] mb-2 leading-relaxed">
                                 {msg.action.reason}
                               </p>
                               {msg.action.productId && (
-                                <div className="text-[10px] bg-white p-2 rounded-md mb-2 border border-[#E6E1D3] flex items-center justify-between">
+                                <div className="text-xs bg-white p-2 rounded-md mb-2 border border-[#E6E1D3] flex items-center justify-between">
                                   <span className="font-medium text-[#2C3A2B]">
                                     Target Item:
                                   </span>
@@ -855,7 +855,7 @@ Choose your preferred language below or ask me anything to assemble, optimize, o
                               <button
                                 onClick={() => handleApplyAction(msg.id, msg.action)}
                                 disabled={msg.actionApplied}
-                                className={`w-full py-2 px-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-all ${
+                                className={`w-full py-2 px-3 rounded-xl text-xs sm:text-[13px] font-semibold flex items-center justify-center gap-1.5 transition-all ${
                                   msg.actionApplied
                                     ? 'bg-[#A3B18A]/30 text-[#2C3A2B] border border-[#A3B18A] cursor-default'
                                     : 'bg-[#D46A43] hover:bg-[#b05534] text-white shadow-xs cursor-pointer'
@@ -879,22 +879,22 @@ Choose your preferred language below or ask me anything to assemble, optimize, o
                           {msg.action.type === 'set_budget' && (
                             <div className="p-3 bg-[#FDFBF7] border border-[#E6E1D3] rounded-xl shadow-xs">
                               <div className="flex items-center justify-between mb-1">
-                                <span className="font-bold text-[#2C3A2B] text-[11px]">
+                                <span className="font-bold text-[#2C3A2B] text-xs sm:text-[13px]">
                                   Adjust Target Budget
                                 </span>
-                                <span className="font-mono font-bold text-[#8B5A2B] text-xs">
+                                <span className="font-mono font-bold text-[#8B5A2B] text-xs sm:text-[13px]">
                                   {formatINR(msg.action.budget || 0)}
                                 </span>
                               </div>
                               {msg.action.reason && (
-                                <p className="text-[11px] text-[#5A5A40] mb-2 leading-relaxed">
+                                <p className="text-xs text-[#5A5A40] mb-2 leading-relaxed">
                                   {msg.action.reason}
                                 </p>
                               )}
                               <button
                                 onClick={() => handleApplyAction(msg.id, msg.action)}
                                 disabled={msg.actionApplied}
-                                className={`w-full py-2 px-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-all ${
+                                className={`w-full py-2 px-3 rounded-xl text-xs sm:text-[13px] font-semibold flex items-center justify-center gap-1.5 transition-all ${
                                   msg.actionApplied
                                     ? 'bg-[#A3B18A]/30 text-[#2C3A2B] border border-[#A3B18A] cursor-default'
                                     : 'bg-[#8B5A2B] hover:bg-[#743815] text-white shadow-xs cursor-pointer'
@@ -917,23 +917,23 @@ Choose your preferred language below or ask me anything to assemble, optimize, o
                           {msg.action.type === 'navigate' && (
                             <div className="p-3 bg-[#FDFBF7] border border-[#E6E1D3] rounded-xl shadow-xs">
                               <div className="flex items-center justify-between mb-1">
-                                <div className="flex items-center gap-1.5 font-bold text-[#2C3A2B] text-[11px]">
+                                <div className="flex items-center gap-1.5 font-bold text-[#2C3A2B] text-xs sm:text-[13px]">
                                   <Compass className="w-3.5 h-3.5 text-[#8B5A2B]" />
                                   <span>Navigate to {msg.action.tab ? (TAB_NAMES[msg.action.tab] || msg.action.tab) : 'Workspace'}</span>
                                 </div>
-                                <span className="font-mono text-[9px] px-1.5 py-0.5 rounded-md bg-[#F4F1EA] text-[#5A5A40] border border-[#E6E1D3]">
+                                <span className="font-mono text-[11px] px-1.5 py-0.5 rounded-md bg-[#F4F1EA] text-[#5A5A40] border border-[#E6E1D3]">
                                   /{msg.action.tab}
                                 </span>
                               </div>
                               {msg.action.reason && (
-                                <p className="text-[11px] text-[#5A5A40] mb-2 leading-relaxed">
+                                <p className="text-xs text-[#5A5A40] mb-2.5 leading-relaxed">
                                   {msg.action.reason}
                                 </p>
                               )}
                               <button
                                 onClick={() => handleApplyAction(msg.id, msg.action)}
                                 disabled={msg.actionApplied}
-                                className={`w-full py-2 px-3 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-all ${
+                                className={`w-full py-2 px-3 rounded-xl text-xs sm:text-[13px] font-semibold flex items-center justify-center gap-1.5 transition-all ${
                                   msg.actionApplied
                                     ? 'bg-[#A3B18A]/30 text-[#2C3A2B] border border-[#A3B18A] cursor-default'
                                     : 'bg-[#2C3A2B] hover:bg-[#1B281B] text-white shadow-xs cursor-pointer'
@@ -957,7 +957,7 @@ Choose your preferred language below or ask me anything to assemble, optimize, o
                       )}
 
                       <div
-                        className={`text-[9px] mt-1.5 flex justify-end ${
+                        className={`text-[11px] mt-1.5 flex justify-end ${
                           isUser ? 'text-emerald-200' : 'text-[#8A8A88]'
                         }`}
                       >
@@ -979,39 +979,6 @@ Choose your preferred language below or ask me anything to assemble, optimize, o
               )}
               <div ref={messagesEndRef} />
             </div>
-
-            {/* Whole Website Starter Prompt Chips */}
-            <div className="px-3.5 py-2.5 bg-[#FAF8F5] border-t border-[#E6E1D3]/80 flex items-center gap-2 overflow-x-auto text-xs">
-              <button
-                type="button"
-                onClick={() => handleSendMessage('Give me a complete overview of the whole website and its 9 pages.')}
-                className="px-3 py-1.5 rounded-full bg-white border border-[#E6E1D3] text-[#2C3A2B] hover:border-[#8B5A2B] hover:bg-[#F5F5EC] shrink-0 transition-colors shadow-2xs font-medium cursor-pointer text-xs"
-              >
-                🌐 Whole Website Overview
-              </button>
-              <button
-                type="button"
-                onClick={() => handleSendMessage('How does the Cartesian Auto-Solve algorithm work under the hood?')}
-                className="px-3 py-1.5 rounded-full bg-white border border-[#E6E1D3] text-[#2C3A2B] hover:border-[#8B5A2B] hover:bg-[#F5F5EC] shrink-0 transition-colors shadow-2xs font-medium cursor-pointer text-xs"
-              >
-                ⚡ Auto-Solve Logic
-              </button>
-              <button
-                type="button"
-                onClick={() => handleSendMessage('Check my current bundle for any hardware compatibility conflicts and fix them.')}
-                className="px-3 py-1.5 rounded-full bg-white border border-[#E6E1D3] text-[#2C3A2B] hover:border-[#8B5A2B] hover:bg-[#F5F5EC] shrink-0 transition-colors shadow-2xs font-medium cursor-pointer text-xs"
-              >
-                🔧 Fix Conflicts
-              </button>
-              <button
-                type="button"
-                onClick={() => handleSendMessage('Compare the Starter Pack, Developer Pro, and Executive Ultra presets.')}
-                className="px-3 py-1.5 rounded-full bg-white border border-[#E6E1D3] text-[#2C3A2B] hover:border-[#8B5A2B] hover:bg-[#F5F5EC] shrink-0 transition-colors shadow-2xs font-medium cursor-pointer text-xs"
-              >
-                ⚖️ Compare Presets
-              </button>
-            </div>
-
             {/* Input Area */}
             <form
               onSubmit={e => {
