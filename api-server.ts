@@ -139,6 +139,19 @@ app.get('/api/health', (_req, res) => {
   });
 });
 
+// Sanitizer to strip repetitive intro preambles
+function cleanAssistantReply(text: string): string {
+  if (!text || typeof text !== 'string') return text;
+  let cleaned = text;
+  // Remove robotic "I have complete knowledge of our entire catalog..." block
+  cleaned = cleaned.replace(/I have complete knowledge of our entire catalog[\s\S]*?unit economics\.[\r\n]*/gi, '');
+  cleaned = cleaned.replace(/I have complete knowledge of our entire catalog[^\n]*\n*/gi, '');
+  // Remove robotic "Right now, you are on the ... workspace/page with a target budget of..." block
+  cleaned = cleaned.replace(/Right now, you are on the [\s\S]*?budget headroom\)\.[\r\n]*/gi, '');
+  cleaned = cleaned.replace(/Right now, you are on the [^\n]*budget of[^\n]*\n*/gi, '');
+  return cleaned.trim();
+}
+
 // AI Assistant Chat & Recommendation API
 app.post('/api/ai/assistant', async (req, res) => {
   try {
@@ -279,6 +292,8 @@ app.post('/api/ai/assistant', async (req, res) => {
               }
             }
 
+            cleanedReply = cleanAssistantReply(cleanedReply);
+
             return res.json({
               reply: cleanedReply,
               action: actionData,
@@ -295,6 +310,9 @@ app.post('/api/ai/assistant', async (req, res) => {
 
     // Heuristic Fallback Engine Grounded in the Entire Website (instant response)
     const fallbackResponse = generateComprehensiveHeuristicResponse(message, context);
+    if (fallbackResponse && fallbackResponse.reply) {
+      fallbackResponse.reply = cleanAssistantReply(fallbackResponse.reply);
+    }
     return res.json(fallbackResponse);
 
   } catch (error: any) {

@@ -188,15 +188,13 @@ export const GeminiChatbotPage: React.FC = () => {
       role: 'assistant',
       text: `👋 Welcome to **Sahay AI (सहाय AI)**, your intelligent shopping assistant!
 
-I am fully trained on our **entire website**, all **40 products (P01 to P40)**, stock levels, and landed pricing calculations.
-
-✨ **You can order anything directly through me!** Just ask:
+✨ **You can order products directly through chat or configure your workspace setup:**
 • *"Order P26 Ergonomic Vertical Mouse"*
 • *"Buy RGB Mechanical Gaming Keyboard and 100W GaN Fast Charger"*
 • *"Order 2 Blue Tshirts (Size L) and 1 Insulated Travel Mug"*
 • *"Checkout my active bundle cart"*
 
-Your active bundle context is **${attachWorkspaceContext ? 'synced' : 'disconnected'}**. What would you like to buy or configure today?`,
+What would you like to order or configure today?`,
       model: 'gemini-3.1-flash-lite',
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }
