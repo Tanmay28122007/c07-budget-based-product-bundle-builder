@@ -609,39 +609,39 @@ export const CompareBundlesPage: React.FC<CompareBundlesPageProps> = ({ initialM
 
                 {remainingHeadroom > 0 ? (
                   affordableAddons.length > 0 ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
                       {displayedWorkspaceAddons.map(prod => (
                         <div
                           key={`addon-${prod.id}`}
-                          className="p-3 bg-white border border-[#E6E1D3] rounded-2xl shadow-2xs hover:shadow-xs transition-all flex flex-col justify-between gap-2.5 group"
+                          className="p-3.5 sm:p-4 bg-white border border-[#E6E1D3] rounded-2xl shadow-2xs hover:shadow-xs hover:border-[#8B5A2B]/40 transition-all flex flex-col justify-between gap-3 group"
                         >
-                          <div className="flex items-center gap-3">
+                          <div className="flex items-center gap-3.5">
                             <img
                               src={getProductImageUrl(prod.image, prod.id)}
                               alt={prod.name}
-                              className="w-12 h-12 rounded-xl object-contain bg-[#FDFBF7] border border-[#E6E1D3] p-1 shrink-0 group-hover:scale-105 transition-transform"
+                              className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl object-contain bg-[#FDFBF7] border border-[#E6E1D3] p-1.5 shrink-0 group-hover:scale-105 transition-transform"
                             />
                             <div className="min-w-0 flex-1">
-                              <span className="text-[9px] font-mono font-bold uppercase tracking-wider text-[#8B5A2B]">
+                              <span className="text-[10px] sm:text-[11px] font-mono font-bold uppercase tracking-wider text-[#8B5A2B]">
                                 {prod.category}
                               </span>
-                              <h5 className="font-serif font-bold text-xs text-[#2C3A2B] truncate">{prod.name}</h5>
-                              <div className="text-xs font-mono font-bold text-[#2C3A2B]">
+                              <h5 className="font-serif font-bold text-sm sm:text-[15px] text-[#2C3A2B] truncate group-hover:text-[#8B5A2B] transition-colors">{prod.name}</h5>
+                              <div className="text-sm sm:text-base font-mono font-bold text-[#2C3A2B] mt-0.5">
                                 {formatINR(prod.price)}
                               </div>
                             </div>
                           </div>
 
-                          <div className="flex items-center justify-between gap-2 pt-2 border-t border-[#E6E1D3]/60 text-[10px]">
-                            <span className="text-[#8B8B7A] font-mono">
+                          <div className="flex items-center justify-between gap-2 pt-2.5 border-t border-[#E6E1D3]/70 text-xs">
+                            <span className="text-[#6B6B58] font-mono text-[11px] sm:text-xs">
                               +{formatINR(remainingHeadroom - prod.price)} left
                             </span>
                             <button
                               type="button"
                               onClick={() => handleAddAddonToWorkspace(prod)}
-                              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg font-bold text-white bg-[#2C3A2B] hover:bg-[#1E281D] transition-colors cursor-pointer shadow-2xs"
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-white bg-[#2C3A2B] hover:bg-[#1E281D] transition-colors cursor-pointer shadow-2xs hover:scale-102 active:scale-98"
                             >
-                              <Plus className="w-3 h-3 text-amber-300" />
+                              <Plus className="w-3.5 h-3.5 text-amber-300" />
                               <span>Add to Bundle</span>
                             </button>
                           </div>
