@@ -191,7 +191,6 @@ export const CompareBundlesPage: React.FC<CompareBundlesPageProps> = ({ initialM
 
   // Selected bundle recommendation state
   const [selectedBundle, setSelectedBundle] = useState<BundleRecommendation | null>(null);
-  const [selectedWorkspaceAddonCategory, setSelectedWorkspaceAddonCategory] = useState<string>('all');
 
   // Active products configured in current bundle
   const activeBundleProducts = useMemo(() => {
@@ -253,14 +252,9 @@ export const CompareBundlesPage: React.FC<CompareBundlesPageProps> = ({ initialM
       .sort((a, b) => b.price - a.price);
   }, [fixture.products, remainingHeadroom, activeProductIds]);
 
-  const addonCategories = useMemo(() => {
-    return ['all', ...Array.from(new Set(affordableAddons.map(p => p.category)))];
-  }, [affordableAddons]);
-
   const displayedWorkspaceAddons = useMemo(() => {
-    if (selectedWorkspaceAddonCategory === 'all') return affordableAddons.slice(0, 8);
-    return affordableAddons.filter(p => p.category === selectedWorkspaceAddonCategory).slice(0, 8);
-  }, [affordableAddons, selectedWorkspaceAddonCategory]);
+    return affordableAddons.slice(0, 8);
+  }, [affordableAddons]);
 
   const handleAddAddonToWorkspace = (prod: Product) => {
     addItemToCart(prod);
@@ -587,24 +581,6 @@ export const CompareBundlesPage: React.FC<CompareBundlesPageProps> = ({ initialM
                     </p>
                   </div>
 
-                  {remainingHeadroom > 0 && addonCategories.length > 2 && (
-                    <div className="flex flex-wrap items-center gap-1">
-                      {addonCategories.map(cat => (
-                        <button
-                          key={cat}
-                          type="button"
-                          onClick={() => setSelectedWorkspaceAddonCategory(cat)}
-                          className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-colors cursor-pointer ${
-                            selectedWorkspaceAddonCategory === cat
-                              ? 'bg-[#2C3A2B] text-white shadow-2xs'
-                              : 'bg-white text-[#5A5A40] border border-[#E6E1D3] hover:bg-[#F4F1EA]'
-                          }`}
-                        >
-                          {cat === 'all' ? `All (${affordableAddons.length})` : cat}
-                        </button>
-                      ))}
-                    </div>
-                  )}
                 </div>
 
                 {remainingHeadroom > 0 ? (

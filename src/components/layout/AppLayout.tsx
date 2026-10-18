@@ -15,11 +15,11 @@ interface AppLayoutProps {
 
 export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { userRole, isSupabaseModalOpen, setIsSupabaseModalOpen, toggleCart, validation, currentItems } = useApp();
+  const { activeTab, userRole, isSupabaseModalOpen, setIsSupabaseModalOpen, toggleCart, validation, currentItems } = useApp();
 
   const cartItemsCount = Object.values(currentItems).filter(Boolean).length;
 
-  const isFrontPage = !userRole;
+  const isFrontPage = !userRole || activeTab === 'login' || activeTab === 'home';
 
   if (isFrontPage) {
     return (

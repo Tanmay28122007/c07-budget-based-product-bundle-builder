@@ -57,7 +57,11 @@ export interface AppNotification {
 interface AppContextType {
   // Authentication & Role
   userRole: UserRole;
-  loginAs: (role: 'customer' | 'admin', email?: string, name?: string) => void;
+  loginAs: (
+    role: 'customer' | 'admin',
+    providerOrEmail?: 'google' | 'facebook' | 'email' | 'guest' | string,
+    name?: string
+  ) => void;
   logout: () => void;
   adminSignInRequested: boolean;
   setAdminSignInRequested: (req: boolean) => void;
@@ -65,7 +69,7 @@ interface AppContextType {
   // Inventory Management & Testing (Admin)
   lowStockThreshold: number;
   setLowStockThreshold: (threshold: number) => void;
-  updateProductStock: (productId: string, newQuantity: number) => { success: boolean; error?: string };
+  updateProductStock: (productId: string, newQuantity: number | string) => { success: boolean; error?: string };
   inventoryTestHistory: InventoryTestRun[];
   activeTestRun: InventoryTestRun | null;
   setActiveTestRun: (run: InventoryTestRun | null) => void;
@@ -332,6 +336,8 @@ function parseProductHash(hash: string): string | null {
 }
 
 const VALID_TABS = [
+  'login',
+  'home',
   'landing',
   'dashboard',
   'signin',
@@ -352,24 +358,18 @@ const VALID_TABS = [
 const getInitialTab = (): string => {
   try {
     if (typeof window !== 'undefined') {
-      // Clear legacy localStorage role so fresh visits require signing in
-      try {
-        localStorage.removeItem('c07_user_role_v1');
-      } catch {}
+      const hash = window.location.hash ? window.location.hash.replace('#', '').trim() : '';
+      if (parseProductHash(window.location.hash)) return 'product-detail';
+      if (hash === 'login' || hash === 'home') return 'login';
 
-      const savedRole = typeof sessionStorage !== 'undefined'
-        ? sessionStorage.getItem('c07_user_role_v1')
-        : null;
+      const savedRole = (typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('c07_user_role_v1') : null)
+        || (typeof localStorage !== 'undefined' ? localStorage.getItem('c07_user_role_v1') : null);
 
-      // Only respect tab from URL or storage if the user is already authenticated in this session
       if (savedRole === 'customer' || savedRole === 'admin') {
-        if (window.location.hash) {
-          const hash = window.location.hash.replace('#', '').trim();
-          if (parseProductHash(window.location.hash)) return 'product-detail';
-          if (hash === 'builder' || hash === 'landing') return 'catalogue';
-          if (VALID_TABS.includes(hash) && hash !== 'landing' && hash !== 'dashboard') return hash;
-        }
-        const savedTab = sessionStorage.getItem('c07_active_tab_v1') || localStorage.getItem('c07_active_tab_v1');
+        if (hash === 'builder' || hash === 'landing') return 'catalogue';
+        if (hash && VALID_TABS.includes(hash) && hash !== 'landing') return hash;
+        const savedTab = (typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('c07_active_tab_v1') : null)
+          || (typeof localStorage !== 'undefined' ? localStorage.getItem('c07_active_tab_v1') : null);
         if (savedTab && VALID_TABS.includes(savedTab) && savedTab !== 'landing') return savedTab;
         return 'catalogue';
       }
@@ -377,8 +377,7 @@ const getInitialTab = (): string => {
   } catch (e) {
     console.warn('Could not read active tab from storage:', e);
   }
-  // When visiting without an active session, always show the Sign In Dashboard
-  return 'dashboard';
+  return 'login';
 };
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -496,13 +495,15 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         } catch {}
 
         const hash = window.location.hash.replace('#', '').trim();
+        if (hash === 'login' || hash === 'home') return null;
         if (hash === 'admin') return 'admin';
         if (hash === 'customer') return 'customer';
         if (hash === 'dashboard' || hash === 'signin' || hash === 'login') {
           return null;
         }
 
-        const saved = sessionStorage.getItem('c07_user_role_v1');
+        const saved = sessionStorage.getItem('c07_user_role_v1') || localStorage.getItem('c07_user_role_v1');
+        if (saved === 'null' || saved === 'logged_out') return null;
         if (saved === 'customer' || saved === 'admin') return saved as UserRole;
       }
     } catch (e) {
@@ -792,24 +793,70 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     setNotifications([]);
   };
 
-  const loginAs = (role: 'customer' | 'admin', email?: string, name?: string) => {
+  const loginAs = (
+    role: 'customer' | 'admin',
+    providerOrEmail?: 'google' | 'facebook' | 'email' | 'guest' | string,
+    name?: string
+  ) => {
     setUserRole(role);
     setAdminSignInRequested(false);
 
+    const isProvider = ['google', 'facebook', 'email', 'guest'].includes(providerOrEmail || '');
+    const provider = isProvider ? (providerOrEmail as 'google' | 'facebook' | 'email' | 'guest') : 'email';
+    const email = !isProvider && providerOrEmail ? providerOrEmail : undefined;
+
     // Record persistent sign-in event (never storing passwords/tokens)
-    const userEmail = email || (role === 'admin' ? 'admin@workspace.com' : 'tanmay.anand@craftbundle.io');
+    const userEmail = email || (
+      provider === 'google'
+        ? 'tanmay.anand@gmail.com'
+        : provider === 'facebook'
+        ? 'tanmay.anand@facebook.com'
+        : role === 'admin'
+        ? 'admin@workspace.com'
+        : 'tanmay.anand@craftbundle.io'
+    );
     const userName = name || (role === 'admin' ? 'Lead Administrator' : 'Tanmay Anand');
     recordUserSignIn(userEmail, userName, role);
 
     try {
       sessionStorage.setItem('c07_user_role_v1', role);
+      sessionStorage.setItem('c07_auth_provider_v1', provider);
+      localStorage.setItem('c07_user_role_v1', role);
+      localStorage.setItem('c07_auth_provider_v1', provider);
     } catch {}
+
+    if (provider === 'google') {
+      setUserProfile(prev => ({
+        ...prev,
+        name: prev.name || 'Tanmay Anand',
+        email: prev.email || 'tanmay.anand@gmail.com',
+        bio: 'Signed in via Google OAuth 2.0.'
+      }));
+      addNotification('Signed in with Google', 'Welcome! Google authentication verified successfully.', 'success');
+    } else if (provider === 'facebook') {
+      setUserProfile(prev => ({
+        ...prev,
+        name: prev.name || 'Tanmay Anand',
+        email: prev.email || 'tanmay.anand@facebook.com',
+        bio: 'Signed in via Meta Facebook OAuth.'
+      }));
+      addNotification('Signed in with Facebook', 'Welcome! Facebook account verified successfully.', 'success');
+    } else if (provider === 'email') {
+      addNotification(`Signed in as ${role === 'admin' ? 'Administrator' : 'Customer'}`, 'Welcome back to your workspace.', 'success');
+    } else {
+      addNotification('Guest Access Granted', 'Browsing with demo customer privileges.', 'info');
+    }
+
     if (role === 'customer') {
       setActiveTab('catalogue');
-      addNotification('Logged in as Customer', 'Welcome! You can now assemble custom product bundles within your budget.', 'success');
+      if (typeof window !== 'undefined') {
+        window.history.replaceState(null, '', '#catalogue');
+      }
     } else {
       setActiveTab('dashboard');
-      addNotification('Logged in as Administrator', 'Welcome! Full access to business insights, test suites, and configurations.', 'info');
+      if (typeof window !== 'undefined') {
+        window.history.replaceState(null, '', '#dashboard');
+      }
     }
   };
 
@@ -817,14 +864,17 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     setUserRole(null);
     try {
       sessionStorage.removeItem('c07_user_role_v1');
-      localStorage.removeItem('c07_user_role_v1');
+      sessionStorage.removeItem('c07_auth_provider_v1');
+      localStorage.setItem('c07_user_role_v1', 'null');
+      localStorage.removeItem('c07_auth_provider_v1');
+      localStorage.setItem('c07_active_tab_v1', 'login');
     } catch {}
     setAdminSignInRequested(false);
-    setActiveTab('dashboard');
+    setActiveTab('login');
     if (typeof window !== 'undefined') {
-      window.history.replaceState(null, '', '#dashboard');
+      window.history.replaceState(null, '', '#login');
     }
-    addNotification('Signed Out', 'You have been signed out. Welcome back to the Sign In Dashboard.', 'info');
+    addNotification('Logged Out', 'You have been signed out. Welcome back to the login page.', 'info');
   };
 
   const setBudget = (val: number) => {
@@ -1213,7 +1263,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     } catch {}
   };
 
-  const updateProductStock = (productId: string, newQuantity: number): { success: boolean; error?: string } => {
+  const updateProductStock = (productId: string, newQuantity: number | string): { success: boolean; error?: string } => {
     if (userRole !== 'admin') {
       addNotification("Unauthorized", "Only authorized administrators can modify inventory.", 'error');
       return { success: false, error: "Unauthorized: Admin privileges required." };

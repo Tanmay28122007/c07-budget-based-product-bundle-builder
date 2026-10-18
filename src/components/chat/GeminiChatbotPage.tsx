@@ -91,7 +91,7 @@ const ROLE_DEFINITIONS: Record<ChatbotRole, {
   workspace_architect: {
     name: 'Sahay Shopping & Setup Consultant',
     badge: 'Direct Orders & Assembly',
-    defaultModel: 'gemini-3.1-flash-lite',
+    defaultModel: 'gemini-flash-lite-latest',
     icon: Bot,
     description: 'Expert in ordering products, bundle assembly, human ergonomics, and complete setup recommendations across all 40 products.',
     systemInstruction: 'You are Sahay AI (सहाय AI), the master intelligent Shopping Consultant and Ordering Agent for the Budget-Based Product Bundle Builder. You can directly place orders, manage carts, compute landed costs, and recommend hardware across all 40 products (P01 to P40).',
@@ -106,7 +106,7 @@ const ROLE_DEFINITIONS: Record<ChatbotRole, {
   rapid_checker: {
     name: 'Rapid Compatibility & Spec Checker',
     badge: 'Fast Tasks',
-    defaultModel: 'gemini-3.1-flash-lite',
+    defaultModel: 'gemini-flash-lite-latest',
     icon: Zap,
     description: 'Ultra-fast verification of hardware port compatibility, desk dimensional clearances, power delivery wattage, and current stock.',
     systemInstruction: 'You are a Rapid Hardware Spec Checker. Deliver lightning-fast, high-density, no-fluff answers verifying hardware compatibility, port types, clamp dimensions, power wattage, and stock status. Be concise and direct.',
@@ -120,7 +120,7 @@ const ROLE_DEFINITIONS: Record<ChatbotRole, {
   procurement_strategist: {
     name: 'Procurement & Unit Economics Analyst',
     badge: 'Complex Tasks',
-    defaultModel: 'gemini-3.1-flash-lite',
+    defaultModel: 'gemini-flash-lite-latest',
     icon: Brain,
     description: 'Deep financial reasoning covering landed price modeling, shipping surcharge thresholds, platform referral fees, and B2B volume pricing.',
     systemInstruction: 'You are a Senior IT Procurement & Unit Economics Strategist. Analyze landed margins, shipping fee breakpoints, tax implications, platform commission referral models, and basket economics with rigorous quantitative detail.',
@@ -134,7 +134,7 @@ const ROLE_DEFINITIONS: Record<ChatbotRole, {
   custom: {
     name: 'Custom Persona / Prompt',
     badge: 'Configurable',
-    defaultModel: 'gemini-3.1-flash-lite',
+    defaultModel: 'gemini-flash-lite-latest',
     icon: Settings2,
     description: 'Define your own specialized chatbot persona, custom system instructions, and task parameters.',
     systemInstruction: 'You are a specialized hardware consultant and ordering assistant for budget-conscious corporate IT equipment.',
@@ -167,7 +167,7 @@ export const GeminiChatbotPage: React.FC = () => {
   } = useApp();
 
   const [activeRole, setActiveRole] = useState<ChatbotRole>('workspace_architect');
-  const [selectedModel, setSelectedModel] = useState<GeminiModel>('gemini-3.1-flash-lite');
+  const [selectedModel, setSelectedModel] = useState<GeminiModel>('gemini-flash-lite-latest');
   const [customInstruction, setCustomInstruction] = useState<string>(
     ROLE_DEFINITIONS.workspace_architect.systemInstruction
   );

@@ -19,7 +19,10 @@ import {
   Loader2,
   Compass,
   ShoppingCart,
-  ExternalLink
+  ExternalLink,
+  ShoppingBag,
+  Zap,
+  CheckCircle
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useApp } from '../../context/AppContext';
@@ -34,14 +37,18 @@ export interface ChatMessage {
   text: string;
   timestamp: string;
   action?: {
-    type: 'apply_bundle' | 'swap_product' | 'set_budget' | 'navigate';
+    type: 'apply_bundle' | 'swap_product' | 'set_budget' | 'navigate' | 'order_items' | 'add_to_cart' | 'checkout';
     tab?: string;
     title?: string;
     budget?: number;
-    items?: Record<string, string>;
+    items?: Record<string, string> | Array<{ id: string; name?: string; price?: number; quantity?: number }>;
     slotId?: string;
     productId?: string;
     reason?: string;
+    subtotal?: number;
+    netShipping?: number;
+    taxAmount?: number;
+    total?: number;
   } | null;
   actionApplied?: boolean;
 }
@@ -73,7 +80,9 @@ export const AIAssistantDrawer: React.FC = () => {
     addItemToCart,
     openProductDetails,
     activeTab,
-    setActiveTab
+    setActiveTab,
+    setIsCartOpen,
+    addNotification
   } = useApp();
 
   const [inputMessage, setInputMessage] = useState('');
@@ -81,6 +90,16 @@ export const AIAssistantDrawer: React.FC = () => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [selectedLang, setSelectedLang] = useState<'en' | 'hi' | 'gu'>('en');
   const [addedProductIds, setAddedProductIds] = useState<Record<string, boolean>>({});
+
+  // Direct order success confirmation modal
+  const [orderSuccessModal, setOrderSuccessModal] = useState<{
+    orderId: string;
+    items: { id: string; name: string; price: number; quantity: number }[];
+    subtotal: number;
+    shipping: number;
+    tax: number;
+    total: number;
+  } | null>(null);
 
   const handleAddProductToCart = (product: Product) => {
     addItemToCart(product);
@@ -98,7 +117,7 @@ export const AIAssistantDrawer: React.FC = () => {
       .map(id => fixture.products.find(p => p.id === id))
       .filter((p): p is Product => Boolean(p));
   };
-  const drawerModel = 'gemini-3.1-flash-lite';
+  const drawerModel = 'gemini-flash-lite-latest';
 
   const [messages, setMessages] = useState<ChatMessage[]>(() => [
     {
@@ -174,7 +193,7 @@ Choose your preferred language below or ask me anything to assemble, optimize, o
 
     try {
       const activeLangName = selectedLang === 'hi' ? 'Hindi' : selectedLang === 'gu' ? 'Gujarati' : 'English';
-      promptWithLanguage = `[SYSTEM: Selected Language = ${activeLangName}]\nPlease respond in ${activeLangName}.\n${text}`;
+      promptWithLanguage = selectedLang !== 'en' ? `[Please respond in ${activeLangName}]: ${text}` : text;
 
       // Build context payload for the server
       const currentItemsSummary: Record<string, any> = {};
@@ -243,7 +262,8 @@ Choose your preferred language below or ask me anything to assemble, optimize, o
             message: promptWithLanguage,
             history: historyPayload,
             context: contextPayload,
-            model: drawerModel
+            model: drawerModel,
+            role: 'workspace_architect'
           }),
           signal: abortController.signal
         });
@@ -295,8 +315,8 @@ Choose your preferred language below or ask me anything to assemble, optimize, o
   const handleApplyAction = (msgId: string, action: ChatMessage['action']) => {
     if (!action) return;
 
-    if (action.type === 'apply_bundle' && action.items) {
-      applyBundleRecommendation(action.items, action.budget);
+    if (action.type === 'apply_bundle' && action.items && !Array.isArray(action.items)) {
+      applyBundleRecommendation(action.items as Record<string, string>, action.budget);
       setActiveTab('compare');
     } else if (action.type === 'swap_product' && action.slotId && action.productId) {
       swapProductById(action.slotId, action.productId);
@@ -305,6 +325,71 @@ Choose your preferred language below or ask me anything to assemble, optimize, o
       setBudget(action.budget);
     } else if (action.type === 'navigate' && action.tab) {
       setActiveTab(action.tab as any);
+    } else if (action.type === 'order_items') {
+      const itemsList = Array.isArray(action.items) ? action.items : [];
+      itemsList.forEach((it: any) => {
+        const prod = fixture.products.find(p => p.id === it.id) || {
+          id: it.id,
+          name: it.name || it.id,
+          price: it.price || 0,
+          category: 'Peripherals',
+          inStock: true,
+          stockQuantity: 10,
+          brand: 'C07 Essentials',
+          model: it.id,
+          description: it.name || it.id,
+          weightKg: 0.5,
+          unitCostInr: Math.round((it.price || 0) * 0.6),
+          attributes: {},
+          incompatibleProductIds: []
+        } as Product;
+
+        const qty = it.quantity || 1;
+        for (let i = 0; i < qty; i++) {
+          addItemToCart(prod);
+        }
+      });
+
+      const newOrderId = `C07-ORD-${Math.floor(100000 + Math.random() * 900000)}`;
+
+      setOrderSuccessModal({
+        orderId: newOrderId,
+        items: itemsList.map((it: any) => ({
+          id: it.id,
+          name: it.name || it.id,
+          price: it.price || 0,
+          quantity: it.quantity || 1
+        })),
+        subtotal: action.subtotal || 0,
+        shipping: action.netShipping ?? 0,
+        tax: action.taxAmount || 0,
+        total: action.total || 0
+      });
+
+      addNotification(
+        'Direct Order Confirmed',
+        `Order ${newOrderId} placed successfully for ${formatINR(action.total || 0)}.`,
+        'success'
+      );
+    } else if (action.type === 'add_to_cart') {
+      const itemsList = Array.isArray(action.items) ? action.items : [];
+      itemsList.forEach((it: any) => {
+        const prod = fixture.products.find(p => p.id === it.id);
+        if (prod) {
+          const qty = it.quantity || 1;
+          for (let i = 0; i < qty; i++) {
+            addItemToCart(prod);
+          }
+        }
+      });
+      setIsCartOpen(true);
+      addNotification(
+        'Added to Cart',
+        `${itemsList.length} item(s) added to your bundle cart.`,
+        'success'
+      );
+    } else if (action.type === 'checkout') {
+      setIsCartOpen(true);
     }
 
     setMessages(prev =>
@@ -625,17 +710,17 @@ Choose your preferred language below or ask me anything to assemble, optimize, o
             </div>
 
             {/* Context Status Ribbon */}
-            <div className="px-4 py-2 bg-[#F4F1EA] border-b border-[#E6E1D3] flex items-center justify-between text-xs">
-              <div className="flex items-center gap-2 min-w-0">
-                <div className="flex items-center gap-1 text-[#5A5A40] text-[11px]">
-                  <span>Budget:</span>
-                  <span className="font-mono font-semibold text-[#2C3A2B]">{formatINR(budget)}</span>
+            <div className="px-4 py-2.5 bg-[#F4F1EA] border-b border-[#E6E1D3] flex items-center justify-between text-sm">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="flex items-center gap-1.5 text-sm sm:text-base">
+                  <span className="text-[#5A5A40] font-semibold">Budget:</span>
+                  <span className="font-mono font-bold text-[#2C3A2B]">{formatINR(budget)}</span>
                 </div>
-                <span className="text-[#E6E1D3]">|</span>
-                <div className="flex items-center gap-1 text-[11px]">
-                  <span className="text-[#5A5A40]">Landed:</span>
+                <span className="text-[#C8C2B3] font-bold mx-0.5">|</span>
+                <div className="flex items-center gap-1.5 text-sm sm:text-base">
+                  <span className="text-[#5A5A40] font-semibold">Landed:</span>
                   <span
-                    className={`font-mono font-semibold ${
+                    className={`font-mono font-bold ${
                       isOverBudget ? 'text-rose-600' : 'text-[#2C3A2B]'
                     }`}
                   >
@@ -646,17 +731,17 @@ Choose your preferred language below or ask me anything to assemble, optimize, o
 
               <div className="flex items-center gap-1.5 shrink-0">
                 {violationCount > 0 ? (
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-rose-100 text-rose-800 border border-rose-200 flex items-center gap-1">
-                    <AlertTriangle className="w-3 h-3" />
+                  <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-800 border border-rose-200 flex items-center gap-1">
+                    <AlertTriangle className="w-3.5 h-3.5" />
                     {violationCount} Conflict{violationCount > 1 ? 's' : ''}
                   </span>
                 ) : validation.isComplete ? (
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-[#A3B18A]/30 text-[#2C3A2B] border border-[#A3B18A]/50 flex items-center gap-1">
-                    <CheckCircle2 className="w-3 h-3 text-[#2C3A2B]" />
+                  <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-[#A3B18A]/30 text-[#2C3A2B] border border-[#A3B18A]/50 flex items-center gap-1">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-[#2C3A2B]" />
                     Feasible
                   </span>
                 ) : (
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-white text-[#5A5A40] border border-[#E6E1D3]">
+                  <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-white text-[#5A5A40] border border-[#E6E1D3]">
                     {validation.filledSlotCount}/{validation.totalSlotCount} Slots
                   </span>
                 )}
@@ -956,6 +1041,115 @@ Choose your preferred language below or ask me anything to assemble, optimize, o
                               </button>
                             </div>
                           )}
+
+                          {msg.action.type === 'order_items' && (
+                            <div className="p-3 bg-white border-2 border-emerald-600/30 rounded-xl shadow-xs space-y-2.5">
+                              <div className="flex items-center justify-between pb-1.5 border-b border-[#E6E1D3]">
+                                <div className="flex items-center gap-1.5 font-bold text-xs sm:text-[13px] text-[#2C3A2B]">
+                                  <ShoppingBag className="w-3.5 h-3.5 text-emerald-700" />
+                                  <span>{msg.action.title || 'Direct Order Prepared'}</span>
+                                </div>
+                                <span className="font-mono text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
+                                  {formatINR(msg.action.total || 0)}
+                                </span>
+                              </div>
+
+                              {/* Items list */}
+                              {Array.isArray(msg.action.items) && msg.action.items.length > 0 && (
+                                <div className="space-y-1.5">
+                                  {msg.action.items.map((it: any, i: number) => {
+                                    const prod = fixture.products.find(p => p.id === it.id);
+                                    return (
+                                      <div
+                                        key={i}
+                                        className="flex items-center justify-between p-1.5 rounded-lg bg-[#FDFBF7] border border-[#E6E1D3]"
+                                      >
+                                        <div className="flex items-center gap-2 min-w-0">
+                                          <div className="w-7 h-7 rounded-md bg-white border border-[#E6E1D3] overflow-hidden flex items-center justify-center shrink-0">
+                                            <img
+                                              src={getProductImageUrl(prod?.image, it.id)}
+                                              alt={it.name || it.id}
+                                              className="w-full h-full object-contain"
+                                              onError={e => {
+                                                (e.currentTarget as HTMLElement).style.display = 'none';
+                                              }}
+                                            />
+                                          </div>
+                                          <div className="min-w-0">
+                                            <div className="font-semibold text-[11px] text-[#2C3A2B] truncate">{it.name || it.id}</div>
+                                            <div className="text-[10px] text-[#5A5A40]">
+                                              Qty: {it.quantity || 1} · {formatINR(it.price || prod?.price || 0)}
+                                            </div>
+                                          </div>
+                                        </div>
+                                        <div className="font-mono font-bold text-xs text-[#2C3A2B] shrink-0 pl-2">
+                                          {formatINR((it.price || prod?.price || 0) * (it.quantity || 1))}
+                                        </div>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              )}
+
+                              {/* Cost Breakdown */}
+                              <div className="p-2 rounded-lg bg-[#F7F4EC] text-[10px] space-y-0.5">
+                                <div className="flex justify-between text-[#5A5A40]">
+                                  <span>Subtotal</span>
+                                  <span className="font-mono">{formatINR(msg.action.subtotal || 0)}</span>
+                                </div>
+                                <div className="flex justify-between text-[#5A5A40]">
+                                  <span>Shipping</span>
+                                  <span className="font-mono">{(msg.action.netShipping ?? 499) === 0 ? 'FREE' : formatINR(msg.action.netShipping ?? 499)}</span>
+                                </div>
+                                <div className="flex justify-between text-[#5A5A40]">
+                                  <span>GST (18%)</span>
+                                  <span className="font-mono">{formatINR(msg.action.taxAmount || 0)}</span>
+                                </div>
+                                <div className="pt-1 border-t border-[#E6E1D3] flex justify-between font-bold text-[11px] text-[#2C3A2B]">
+                                  <span>Landed Total</span>
+                                  <span className="font-mono text-xs">{formatINR(msg.action.total || 0)}</span>
+                                </div>
+                              </div>
+
+                              {/* Action Buttons */}
+                              <div className="grid grid-cols-2 gap-1.5 pt-0.5">
+                                <button
+                                  onClick={() => handleApplyAction(msg.id, msg.action)}
+                                  disabled={msg.actionApplied}
+                                  className={`py-2 px-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1 transition-all cursor-pointer ${
+                                    msg.actionApplied
+                                      ? 'bg-emerald-100 text-emerald-800 border border-emerald-300 cursor-default'
+                                      : 'bg-[#263325] hover:bg-[#1B261A] text-white shadow-2xs'
+                                  }`}
+                                >
+                                  {msg.actionApplied ? (
+                                    <>
+                                      <Check className="w-3.5 h-3.5 text-emerald-700" />
+                                      <span>Booked</span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Zap className="w-3.5 h-3.5 text-amber-300" />
+                                      <span>Order Now</span>
+                                    </>
+                                  )}
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    handleApplyAction(msg.id, {
+                                      type: 'add_to_cart',
+                                      items: msg.action?.items as any,
+                                      title: msg.action?.title
+                                    });
+                                  }}
+                                  className="py-2 px-2.5 rounded-xl text-xs font-semibold bg-white hover:bg-[#F4F1EA] text-[#2C3A2B] border border-[#E6E1D3] flex items-center justify-center gap-1 transition-colors cursor-pointer"
+                                >
+                                  <ShoppingCart className="w-3.5 h-3.5 text-[#5A5A40]" />
+                                  <span>+ Cart</span>
+                                </button>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       )}
 
@@ -1015,6 +1209,80 @@ Choose your preferred language below or ask me anything to assemble, optimize, o
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Order Success Confirmation Modal */}
+      {orderSuccessModal && (
+        <div className="fixed inset-0 z-60 overflow-y-auto flex items-center justify-center p-4">
+          <div
+            onClick={() => setOrderSuccessModal(null)}
+            className="fixed inset-0 bg-[#2C2C1E]/60 backdrop-blur-xs"
+          />
+
+          <div className="relative bg-white rounded-2xl border border-[#E6E1D3] shadow-2xl max-w-md w-full p-6 text-center z-10 space-y-4">
+            <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center mx-auto border border-emerald-200">
+              <Check className="w-8 h-8 stroke-[2.5]" />
+            </div>
+
+            <div>
+              <span className="text-[11px] font-mono font-semibold px-2.5 py-0.5 rounded-full bg-[#F4F1EA] text-[#5A5A40] border border-[#E6E1D3]">
+                {orderSuccessModal.orderId}
+              </span>
+              <h3 className="font-serif text-xl font-bold text-[#2C3A2B] mt-2">
+                Order Booked via Sahay AI!
+              </h3>
+              <p className="text-xs text-[#5A5A40] mt-1 leading-relaxed">
+                Your order has been recorded and loaded into your active checkout session.
+              </p>
+            </div>
+
+            {/* Itemized summary */}
+            <div className="p-3.5 rounded-xl bg-[#FDFBF7] border border-[#E6E1D3] text-left text-xs space-y-2">
+              <div className="font-semibold text-[#2C3A2B] text-[11px] uppercase tracking-wider border-b border-[#E6E1D3] pb-1">
+                Order Items:
+              </div>
+              {orderSuccessModal.items.map((it, i) => (
+                <div key={i} className="flex justify-between text-[#4A4A35]">
+                  <span>{it.quantity}x {it.name} ({it.id})</span>
+                  <span className="font-mono font-semibold">{formatINR(it.price * it.quantity)}</span>
+                </div>
+              ))}
+              <div className="pt-2 border-t border-[#E6E1D3] flex justify-between font-bold text-xs text-[#2C3A2B]">
+                <span>Total Landed Amount</span>
+                <span className="font-mono text-sm text-[#2C3A2B]">{formatINR(orderSuccessModal.total)}</span>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-2 pt-2">
+              <button
+                onClick={() => {
+                  setOrderSuccessModal(null);
+                  setActiveTab('compare');
+                }}
+                className="w-full py-2.5 px-4 rounded-xl text-xs font-bold text-white bg-[#263325] hover:bg-[#1B261A] shadow-md transition-colors cursor-pointer"
+              >
+                View in Workspace Builder →
+              </button>
+
+              <button
+                onClick={() => {
+                  setOrderSuccessModal(null);
+                  setIsCartOpen(true);
+                }}
+                className="w-full py-2 px-4 rounded-xl text-xs font-semibold text-[#2C2C1E] bg-[#F4F1EA] hover:bg-[#EAE5D9] border border-[#E6E1D3] transition-colors cursor-pointer"
+              >
+                View in Bundle Cart Drawer
+              </button>
+
+              <button
+                onClick={() => setOrderSuccessModal(null)}
+                className="text-xs text-[#8B8B7A] hover:text-[#2C2C1E] cursor-pointer pt-1"
+              >
+                Close & Continue Chatting
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };

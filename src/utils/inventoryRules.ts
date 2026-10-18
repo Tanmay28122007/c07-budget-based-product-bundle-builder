@@ -121,6 +121,23 @@ export function countInvalidInventory(products: Product[]): number {
   return products.filter(p => !validateStockQuantity(p.stockQuantity).isValid).length;
 }
 
+/**
+ * Aggregates all KPI metrics from actual catalogue data.
+ */
+export function calculateInventoryMetrics(
+  products: Product[],
+  threshold: number = DEFAULT_LOW_STOCK_THRESHOLD
+) {
+  return {
+    totalProducts: countDistinctProducts(products),
+    totalUnitsInStock: calculateTotalUnitsInStock(products),
+    inStockProducts: countInStockProducts(products),
+    lowStockProducts: countLowStockProducts(products, threshold),
+    outOfStockProducts: countOutOfStockProducts(products),
+    invalidInventoryProducts: countInvalidInventory(products)
+  };
+}
+
 // ============================================================================
 // TEST SUITE INTERFACES & RUNNER FOR INVENTORY AVAILABILITY
 // ============================================================================
