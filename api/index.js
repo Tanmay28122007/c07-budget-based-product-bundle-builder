@@ -307,12 +307,13 @@ ${productsIndex}
 5. DIRECT ORDERING & INTERACTIVE ACTION CARDS
 ==================================================
 YOU CAN ORDER ANY PRODUCT DIRECTLY FOR THE USER!
-Whenever a user wants to order, buy, purchase, or add to cart (e.g. "order P26", "buy the RGB keyboard and 100W GaN charger", "order 2 blue tshirts", "checkout now"):
-1. Identify the products by their IDs (P01-P40) or names.
+Whenever a user wants to order, buy, purchase, show, find, or add to cart (e.g. "order P26", "lets buy a laptop", "buy alptop", "buy the RGB keyboard and 100W GaN charger", "order 2 blue tshirts", "checkout now"):
+1. Identify the products by their IDs (P01-P60) or names.
+   - Note on Laptop queries: If the user asks for a laptop ("lets buy a laptop", "buy alptop", "laptop"), explain our top laptop workstation gear: P30 Aluminum Laptop Riser Stand (\u20B91,299), P55 Laptop Cooling Pad (\u20B91,650), P43 15.6" Portable FHD Second Screen (\u20B912,999), and P19 Laptop Backpack (\u20B91,650), and configure P30 in the action card!
 2. Determine the requested quantities.
 3. Calculate subtotal, shipping (\u20B9499 or free if subtotal >= \u20B950,000), 18% GST tax, and landed total.
 4. Output a clear, cheerful order confirmation breakdown in the response.
-5. INCLUDE AN ACTION CODE BLOCK AT THE VERY END in a \`\`\`action\`\`\` block!
+5. MANDATORY: ALWAYS INCLUDE AN ACTION CODE BLOCK AT THE VERY END in a \`\`\`action\`\`\` block so the interactive card with "Order Now" and "+ Cart" buttons renders in the UI!
 
 Supported Action Formats:
 
@@ -402,7 +403,7 @@ function generateComprehensiveHeuristicResponse(message, context) {
       (p) => p.id.toLowerCase() === q || p.name.toLowerCase().includes(q) || p.category.toLowerCase() === q || p.desc.toLowerCase().includes(q)
     );
   }
-  const isOrderIntent = lowerMsg.includes("order") || lowerMsg.includes("buy") || lowerMsg.includes("purchase") || lowerMsg.includes("get me") || lowerMsg.includes("i want to buy") || lowerMsg.includes("add to cart") || lowerMsg.includes("checkout") || lowerMsg.includes("\u0911\u0930\u094D\u0921\u0930") || lowerMsg.includes("\u0916\u0930\u0940\u0926") || lowerMsg.includes("\u0A93\u0AB0\u0ACD\u0AA1\u0AB0");
+  const isOrderIntent = lowerMsg.includes("order") || lowerMsg.includes("buy") || lowerMsg.includes("purchase") || lowerMsg.includes("get me") || lowerMsg.includes("i want") || lowerMsg.includes("need") || lowerMsg.includes("add to cart") || lowerMsg.includes("cart") || lowerMsg.includes("checkout") || lowerMsg.includes("lets buy") || lowerMsg.includes("let's buy") || lowerMsg.includes("lets get") || lowerMsg.includes("let's get") || lowerMsg.includes("show") || lowerMsg.includes("find") || lowerMsg.includes("looking for") || lowerMsg.includes("price of") || lowerMsg.includes("cost of") || lowerMsg.includes("laptop") || lowerMsg.includes("alptop") || lowerMsg.includes("leptop") || lowerMsg.includes("mouse") || lowerMsg.includes("mose") || lowerMsg.includes("keyboard") || lowerMsg.includes("monitor") || lowerMsg.includes("charger") || lowerMsg.includes("headphones") || lowerMsg.includes("headset") || lowerMsg.includes("tablet") || lowerMsg.includes("backpack") || lowerMsg.includes("tshirt") || lowerMsg.includes("mug") || lowerMsg.includes("bottle") || lowerMsg.includes("\u0911\u0930\u094D\u0921\u0930") || lowerMsg.includes("\u0916\u0930\u0940\u0926") || lowerMsg.includes("\u0A93\u0AB0\u0ACD\u0AA1\u0AB0");
   if (isOrderIntent) {
     if (lowerMsg.includes("checkout") && !lowerMsg.match(/\bp(?:0[1-9]|[1-3][0-9]|40)\b/)) {
       if (isHindi) {
@@ -498,8 +499,42 @@ function generateComprehensiveHeuristicResponse(message, context) {
         { key: "camera", id: "P37" },
         { key: "screenbar", id: "P38" },
         { key: "desk light", id: "P38" },
+        { key: "laptop cooling pad", id: "P55" },
+        { key: "laptop cooling", id: "P55" },
+        { key: "cooling pad", id: "P55" },
+        { key: "cooling stand", id: "P55" },
+        { key: "laptop backpack", id: "P19" },
+        { key: "laptop bag", id: "P19" },
         { key: "laptop stand", id: "P30" },
+        { key: "laptop riser", id: "P30" },
         { key: "riser stand", id: "P30" },
+        { key: "laptop arm", id: "P31" },
+        { key: "portable screen", id: "P43" },
+        { key: "second screen", id: "P43" },
+        { key: "portable monitor", id: "P43" },
+        { key: "laptop cooling pad", id: "P55" },
+        { key: "laptop cooling", id: "P55" },
+        { key: "cooling pad", id: "P55" },
+        { key: "cooling stand", id: "P55" },
+        { key: "laptop backpack", id: "P19" },
+        { key: "laptop bag", id: "P19" },
+        { key: "laptop stand", id: "P30" },
+        { key: "laptop riser", id: "P30" },
+        { key: "riser stand", id: "P30" },
+        { key: "laptop arm", id: "P31" },
+        { key: "portable screen", id: "P43" },
+        { key: "second screen", id: "P43" },
+        { key: "portable monitor", id: "P43" },
+        { key: "laptop", id: "P30" },
+        { key: "alptop", id: "P30" },
+        { key: "leptop", id: "P30" },
+        { key: "laptops", id: "P30" },
+        { key: "alptops", id: "P30" },
+        { key: "macbook", id: "P30" },
+        { key: "notebook pc", id: "P30" },
+        { key: "computer", id: "P30" },
+        { key: "pc", id: "P30" },
+        { key: "desktop", id: "P30" },
         { key: "monitor arm", id: "P31" },
         { key: "desk mat", id: "P32" },
         { key: "leather blotter", id: "P32" },
@@ -566,22 +601,35 @@ Would you like me to recommend an in-stock alternative? For example, **Blue Tshi
           model: "heuristic-website-trainer"
         };
       }
+      const isLaptopRelated = lowerMsg.includes("laptop") || lowerMsg.includes("alptop") || lowerMsg.includes("leptop") || lowerMsg.includes("macbook") || lowerMsg.includes("notebook");
       if (isHindi) {
-        return {
-          reply: `### \u{1F6D2} \u0911\u0930\u094D\u0921\u0930 \u0924\u0948\u092F\u093E\u0930 \u0939\u0948!
+        const header2 = isLaptopRelated ? `### \u{1F4BB} \u0932\u0948\u092A\u091F\u0949\u092A \u0935\u0930\u094D\u0915\u0938\u094D\u091F\u0947\u0936\u0928 \u0939\u093E\u0930\u094D\u0921\u0935\u0947\u092F\u0930 \u0924\u0948\u092F\u093E\u0930 \u0939\u0948!
+
+\u092F\u0939\u093E\u0901 \u0939\u092E\u093E\u0930\u093E \u0936\u0940\u0930\u094D\u0937 **[P30] \u090F\u0932\u094D\u092F\u0941\u092E\u093F\u0928\u093F\u092F\u092E \u0932\u0948\u092A\u091F\u0949\u092A \u0938\u094D\u091F\u0948\u0902\u0921** (\u20B91,299) \u0914\u0930 \u0932\u0948\u092A\u091F\u0949\u092A \u090F\u0915\u094D\u0938\u0947\u0938\u0930\u0940\u091C\u093C \u0924\u0948\u092F\u093E\u0930 \u0939\u0948\u0902:
+
+${itemsDescription}
+
+\u{1F4A1} **\u0938\u0902\u092C\u0902\u0927\u093F\u0924 \u0932\u0948\u092A\u091F\u0949\u092A \u090F\u0915\u094D\u0938\u0947\u0938\u0930\u0940\u091C\u093C**:
+* **[P55] \u0921\u0941\u0905\u0932 \u092B\u0948\u0928 \u0932\u0948\u092A\u091F\u0949\u092A \u0915\u0942\u0932\u093F\u0902\u0917 \u092A\u0948\u0921** \u2014 \u20B91,650 (\u0938\u094D\u091F\u0949\u0915: 32)
+* **[P43] 15.6" \u092A\u094B\u0930\u094D\u091F\u0947\u092C\u0932 USB-C \u0938\u0947\u0915\u0902\u0921 \u0938\u094D\u0915\u094D\u0930\u0940\u0928** \u2014 \u20B912,999 (\u0938\u094D\u091F\u0949\u0915: 18)
+* **[P19] \u090F\u0902\u091F\u0940-\u0925\u0947\u092B\u094D\u091F \u0932\u0948\u092A\u091F\u0949\u092A \u092C\u0948\u0915\u092A\u0948\u0915** \u2014 \u20B91,650 (\u0938\u094D\u091F\u0949\u0915: 20)
+
+` : `### \u{1F6D2} \u0911\u0930\u094D\u0921\u0930 \u0924\u0948\u092F\u093E\u0930 \u0939\u0948!
 
 \u092E\u0948\u0902\u0928\u0947 \u0906\u092A\u0915\u0947 \u0926\u094D\u0935\u093E\u0930\u093E \u0905\u0928\u0941\u0930\u094B\u0927\u093F\u0924 \u0909\u0924\u094D\u092A\u093E\u0926 \u0924\u0948\u092F\u093E\u0930 \u0915\u0930 \u0932\u093F\u090F \u0939\u0948\u0902:
 
 ${itemsDescription}
 
-**\u092A\u094D\u0930\u093E\u0907\u0938 \u092C\u094D\u0930\u0947\u0915\u0921\u093E\u0909\u0928 (Landed Cost)**:
+`;
+        return {
+          reply: header2 + `**\u092A\u094D\u0930\u093E\u0907\u0938 \u092C\u094D\u0930\u0947\u0915\u0921\u093E\u0909\u0928 (Landed Cost)**:
 - \u092A\u094D\u0930\u094B\u0921\u0915\u094D\u091F \u0938\u092C\u091F\u094B\u091F\u0932: \u20B9${subtotal.toLocaleString("en-IN")}
 - \u0936\u093F\u092A\u093F\u0902\u0917 \u0936\u0941\u0932\u094D\u0915: ${netShipping === 0 ? "\u20B90 (\u092E\u0941\u092B\u094D\u0924 \u0936\u093F\u092A\u093F\u0902\u0917)" : `\u20B9${netShipping}`}
 - 18% GST \u091F\u0948\u0915\u094D\u0938: \u20B9${taxAmount.toLocaleString("en-IN")}
 - **\u0915\u0941\u0932 \u0926\u0947\u092F \u0930\u093E\u0936\u093F (Landed Total)**: \u20B9${totalLandedPrice.toLocaleString("en-IN")}
 
 \u0921\u093F\u0932\u0940\u0935\u0930\u0940 \u092A\u0924\u093E: **\u0924\u0928\u094D\u092E\u092F \u0906\u0928\u0902\u0926 (Tanmay Anand)**, \u092C\u0948\u0902\u0917\u0932\u094B\u0930 / \u092E\u0941\u0902\u092C\u0908\u0964
-\u0928\u0940\u091A\u0947 \u0926\u093F\u090F \u0917\u090F \u092C\u091F\u0928 \u092A\u0930 \u0915\u094D\u0932\u093F\u0915 \u0915\u0930\u0915\u0947 \u0911\u0930\u094D\u0921\u0930 \u0924\u0941\u0930\u0902\u0924 \u092A\u094D\u0932\u0947\u0938 \u0915\u0930\u0947\u0902 \u092F\u093E \u0915\u093E\u0930\u094D\u091F \u092E\u0947\u0902 \u091C\u094B\u0921\u093C\u0947\u0902!`,
+\u0928\u0940\u091A\u0947 \u0926\u093F\u090F \u0917\u090F \u090F\u0915\u094D\u0936\u0928 \u0915\u093E\u0930\u094D\u0921 \u092A\u0930 **Order Now** \u092F\u093E **+ Cart** \u0926\u092C\u093E\u0915\u0930 \u0911\u0930\u094D\u0921\u0930 \u0924\u0941\u0930\u0902\u0924 \u092A\u094D\u0932\u0947\u0938 \u0915\u0930\u0947\u0902 \u092F\u093E \u0915\u093E\u0930\u094D\u091F \u092E\u0947\u0902 \u091C\u094B\u0921\u093C\u0947\u0902!`,
           action: {
             type: "order_items",
             title: `Order: ${matchedProducts.map((it) => `${it.quantity}x ${it.product.name}`).join(", ")}`,
@@ -595,14 +643,27 @@ ${itemsDescription}
           model: "heuristic-website-trainer"
         };
       }
-      return {
-        reply: `### \u{1F6D2} Order Prepared Successfully!
+      const header = isLaptopRelated ? `### \u{1F4BB} Laptop Workstation Gear Prepared!
+
+Here is our premier **[P30] Aluminum Laptop Riser Stand** (\u20B91,299) along with top-rated modular laptop hardware ready for your workstation:
+
+${itemsDescription}
+
+\u{1F4A1} **Recommended Laptop Companions in our Catalogue**:
+* **[P55] Aluminum Laptop Cooling Pad with Dual Silent Fans** \u2014 \u20B91,650 (In Stock: 32)
+* **[P43] 15.6" Portable USB-C FHD Second Screen Monitor** \u2014 \u20B912,999 (In Stock: 18)
+* **[P19] Professional Anti-Theft Laptop Backpack** \u2014 \u20B91,650 (In Stock: 20)
+* **[P34] USB-C 100W GaN Fast Charger** \u2014 \u20B91,899 (In Stock: 22)
+
+` : `### \u{1F6D2} Order Prepared Successfully!
 
 I have configured your requested items for instant ordering:
 
 ${itemsDescription}
 
-**Landed Cost Breakdown**:
+`;
+      return {
+        reply: header + `**Landed Cost Breakdown**:
 - **Product Subtotal**: \u20B9${subtotal.toLocaleString("en-IN")}
 - **Net Logistics/Shipping**: ${netShipping === 0 ? "\u20B90 (Free Shipping waiver applied!)" : `\u20B9${netShipping} standard base fee`}
 - **GST (18%)**: \u20B9${taxAmount.toLocaleString("en-IN")}
@@ -610,11 +671,41 @@ ${itemsDescription}
 
 \u{1F4CD} **Delivery Destination**: Tanmay Anand (Customer Profile defaults).
 
-You can confirm and place this order right now with 1 click using the interactive action card below!`,
+You can confirm and place this order right now with 1 click using the interactive action card below, or click **+ Cart** to add it to your bundle!`,
         action: {
           type: "order_items",
           title: `Order: ${matchedProducts.map((it) => `${it.quantity}x ${it.product.name}`).join(", ")}`,
           items: actionItems,
+          subtotal,
+          netShipping,
+          taxAmount,
+          total: totalLandedPrice,
+          reason: "1-Click Direct Order via Sahay AI"
+        },
+        model: "heuristic-website-trainer"
+      };
+    } else {
+      const defaultProd = CATALOGUE_PRODUCTS_METADATA.find((p) => p.id === "P30") || CATALOGUE_PRODUCTS_METADATA[0];
+      const subtotal = defaultProd.price;
+      const netShipping = 499;
+      const taxAmount = Math.round((subtotal + netShipping) * 0.18 * 100) / 100;
+      const totalLandedPrice = Math.round((subtotal + netShipping + taxAmount) * 100) / 100;
+      return {
+        reply: `### \u{1F6D2} Order & Workspace Setup Assistant
+
+I would love to help you assemble your order! Here is our top-selling workspace hardware: **[${defaultProd.id}] ${defaultProd.name}** (\u20B9${defaultProd.price.toLocaleString("en-IN")}).
+
+**Landed Cost Breakdown**:
+- **Product Subtotal**: \u20B9${subtotal.toLocaleString("en-IN")}
+- **Logistics/Shipping**: \u20B9${netShipping}
+- **GST (18%)**: \u20B9${taxAmount.toLocaleString("en-IN")}
+- **Total Landed Price**: \u20B9${totalLandedPrice.toLocaleString("en-IN")}
+
+You can click **Order Now** or **+ Cart** below, or tell me which specific hardware you'd like (e.g. *"laptop stand"*, *"ergonomic mouse"*, *"mechanical keyboard"*, *"4k monitor"*).`,
+        action: {
+          type: "order_items",
+          title: `Order: ${defaultProd.name} (${defaultProd.id})`,
+          items: [{ id: defaultProd.id, name: defaultProd.name, price: defaultProd.price, quantity: 1 }],
           subtotal,
           netShipping,
           taxAmount,
@@ -792,7 +883,8 @@ Click below to apply this setup to your Workspace Builder!`,
     }
   }
   const categoryKeywords = [
-    { label: "Mouse / Ergonomic Mice", triggers: ["mouse", "mice"], ids: ["P26", "P29", "P07", "P22", "P54"] },
+    { label: "Laptop Gear & Accessories", triggers: ["laptop", "alptop", "leptop", "laptops", "alptops", "macbook"], ids: ["P30", "P55", "P43", "P19", "P48"] },
+    { label: "Mouse / Ergonomic Mice", triggers: ["mouse", "mice", "mose"], ids: ["P26", "P29", "P07", "P22", "P54"] },
     { label: "Keyboards", triggers: ["keyboard", "keyboards", "keys"], ids: ["P27", "P28", "P08", "P21", "P47"] },
     { label: "Monitors / Displays", triggers: ["monitor", "monitors", "display", "displays", "screen", "screens"], ids: ["P41", "P42", "P43"] },
     { label: "Chargers / Power", triggers: ["charger", "chargers", "charging", "gan", "power"], ids: ["P34", "P35", "P10"] },
@@ -807,17 +899,27 @@ Click below to apply this setup to your Workspace Builder!`,
   for (const cat of categoryKeywords) {
     if (cat.triggers.some((t) => lowerMsg.includes(t))) {
       const matched = cat.ids.map((id) => CATALOGUE_PRODUCTS_METADATA.find((p) => p.id === id)).filter(Boolean);
+      const topProd = matched.find((p) => p.stock > 0) || matched[0];
       const lines = matched.map((p) => `* **[${p.id}] ${p.name}** \u2014 \u20B9${p.price.toLocaleString("en-IN")} (${p.stock > 0 ? `${p.stock} in stock` : "Out of Stock"}) \u2014 ${p.desc}`);
+      const subtotal = topProd ? topProd.price : 1299;
+      const netShipping = subtotal >= 5e4 ? 0 : 499;
+      const taxAmount = Math.round((subtotal + netShipping) * 0.18 * 100) / 100;
+      const totalLandedPrice = Math.round((subtotal + netShipping + taxAmount) * 100) / 100;
       return {
         reply: `Here are our top **${cat.label.toUpperCase()}** options in the catalogue:
 
 ` + lines.join("\n") + `
 
-Tell me which item you'd like (e.g. *"Order ${cat.ids[0]}"*) or ask me to add it to your bundle!`,
+I have pre-configured **[${topProd.id}] ${topProd.name}** below so you can order directly with 1 click or click **+ Cart** to add it to your bundle!`,
         action: {
-          type: "navigate",
-          tab: "catalogue",
-          reason: `Browse ${cat.label} products in catalogue`
+          type: "order_items",
+          title: `Order: ${topProd.name} (${topProd.id})`,
+          items: [{ id: topProd.id, name: topProd.name, price: topProd.price, quantity: 1 }],
+          subtotal,
+          netShipping,
+          taxAmount,
+          total: totalLandedPrice,
+          reason: `1-Click Direct Order for ${cat.label}`
         },
         model: "heuristic-website-trainer"
       };
@@ -2779,6 +2881,15 @@ app.post(["/api/ai/assistant", "/ai/assistant"], async (req, res) => {
                 cleanedReply = replyText.replace(/```action\s*[\s\S]*?\s*```/, "").trim();
               } catch (e) {
                 console.error("Failed to parse action json:", e);
+              }
+            }
+            if (!actionData) {
+              try {
+                const heuristicFallback = generateComprehensiveHeuristicResponse(message, context);
+                if (heuristicFallback?.action && (heuristicFallback.action.type === "order_items" || heuristicFallback.action.type === "add_to_cart")) {
+                  actionData = heuristicFallback.action;
+                }
+              } catch (e) {
               }
             }
             cleanedReply = cleanAssistantReply(cleanedReply);

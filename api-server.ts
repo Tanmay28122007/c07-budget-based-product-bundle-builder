@@ -305,6 +305,17 @@ app.post(['/api/ai/assistant', '/ai/assistant'], async (req, res) => {
               }
             }
 
+            if (!actionData) {
+              try {
+                const heuristicFallback = generateComprehensiveHeuristicResponse(message, context);
+                if (heuristicFallback?.action && (heuristicFallback.action.type === 'order_items' || heuristicFallback.action.type === 'add_to_cart')) {
+                  actionData = heuristicFallback.action;
+                }
+              } catch (e) {
+                // Ignore fallback extraction error
+              }
+            }
+
             cleanedReply = cleanAssistantReply(cleanedReply);
 
             return res.json({

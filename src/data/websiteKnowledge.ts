@@ -360,12 +360,13 @@ ${productsIndex}
 5. DIRECT ORDERING & INTERACTIVE ACTION CARDS
 ==================================================
 YOU CAN ORDER ANY PRODUCT DIRECTLY FOR THE USER!
-Whenever a user wants to order, buy, purchase, or add to cart (e.g. "order P26", "buy the RGB keyboard and 100W GaN charger", "order 2 blue tshirts", "checkout now"):
-1. Identify the products by their IDs (P01-P40) or names.
+Whenever a user wants to order, buy, purchase, show, find, or add to cart (e.g. "order P26", "lets buy a laptop", "buy alptop", "buy the RGB keyboard and 100W GaN charger", "order 2 blue tshirts", "checkout now"):
+1. Identify the products by their IDs (P01-P60) or names.
+   - Note on Laptop queries: If the user asks for a laptop ("lets buy a laptop", "buy alptop", "laptop"), explain our top laptop workstation gear: P30 Aluminum Laptop Riser Stand (₹1,299), P55 Laptop Cooling Pad (₹1,650), P43 15.6" Portable FHD Second Screen (₹12,999), and P19 Laptop Backpack (₹1,650), and configure P30 in the action card!
 2. Determine the requested quantities.
 3. Calculate subtotal, shipping (₹499 or free if subtotal >= ₹50,000), 18% GST tax, and landed total.
 4. Output a clear, cheerful order confirmation breakdown in the response.
-5. INCLUDE AN ACTION CODE BLOCK AT THE VERY END in a \`\`\`action\`\`\` block!
+5. MANDATORY: ALWAYS INCLUDE AN ACTION CODE BLOCK AT THE VERY END in a \`\`\`action\`\`\` block so the interactive card with "Order Now" and "+ Cart" buttons renders in the UI!
 
 Supported Action Formats:
 
@@ -479,9 +480,35 @@ export function generateComprehensiveHeuristicResponse(message: string, context:
     lowerMsg.includes('buy') ||
     lowerMsg.includes('purchase') ||
     lowerMsg.includes('get me') ||
-    lowerMsg.includes('i want to buy') ||
+    lowerMsg.includes('i want') ||
+    lowerMsg.includes('need') ||
     lowerMsg.includes('add to cart') ||
+    lowerMsg.includes('cart') ||
     lowerMsg.includes('checkout') ||
+    lowerMsg.includes('lets buy') ||
+    lowerMsg.includes("let's buy") ||
+    lowerMsg.includes('lets get') ||
+    lowerMsg.includes("let's get") ||
+    lowerMsg.includes('show') ||
+    lowerMsg.includes('find') ||
+    lowerMsg.includes('looking for') ||
+    lowerMsg.includes('price of') ||
+    lowerMsg.includes('cost of') ||
+    lowerMsg.includes('laptop') ||
+    lowerMsg.includes('alptop') ||
+    lowerMsg.includes('leptop') ||
+    lowerMsg.includes('mouse') ||
+    lowerMsg.includes('mose') ||
+    lowerMsg.includes('keyboard') ||
+    lowerMsg.includes('monitor') ||
+    lowerMsg.includes('charger') ||
+    lowerMsg.includes('headphones') ||
+    lowerMsg.includes('headset') ||
+    lowerMsg.includes('tablet') ||
+    lowerMsg.includes('backpack') ||
+    lowerMsg.includes('tshirt') ||
+    lowerMsg.includes('mug') ||
+    lowerMsg.includes('bottle') ||
     lowerMsg.includes('ऑर्डर') ||
     lowerMsg.includes('खरीद') ||
     lowerMsg.includes('ઓર્ડર');
@@ -587,8 +614,42 @@ export function generateComprehensiveHeuristicResponse(message: string, context:
         { key: 'camera', id: 'P37' },
         { key: 'screenbar', id: 'P38' },
         { key: 'desk light', id: 'P38' },
+        { key: 'laptop cooling pad', id: 'P55' },
+        { key: 'laptop cooling', id: 'P55' },
+        { key: 'cooling pad', id: 'P55' },
+        { key: 'cooling stand', id: 'P55' },
+        { key: 'laptop backpack', id: 'P19' },
+        { key: 'laptop bag', id: 'P19' },
         { key: 'laptop stand', id: 'P30' },
+        { key: 'laptop riser', id: 'P30' },
         { key: 'riser stand', id: 'P30' },
+        { key: 'laptop arm', id: 'P31' },
+        { key: 'portable screen', id: 'P43' },
+        { key: 'second screen', id: 'P43' },
+        { key: 'portable monitor', id: 'P43' },
+        { key: 'laptop cooling pad', id: 'P55' },
+        { key: 'laptop cooling', id: 'P55' },
+        { key: 'cooling pad', id: 'P55' },
+        { key: 'cooling stand', id: 'P55' },
+        { key: 'laptop backpack', id: 'P19' },
+        { key: 'laptop bag', id: 'P19' },
+        { key: 'laptop stand', id: 'P30' },
+        { key: 'laptop riser', id: 'P30' },
+        { key: 'riser stand', id: 'P30' },
+        { key: 'laptop arm', id: 'P31' },
+        { key: 'portable screen', id: 'P43' },
+        { key: 'second screen', id: 'P43' },
+        { key: 'portable monitor', id: 'P43' },
+        { key: 'laptop', id: 'P30' },
+        { key: 'alptop', id: 'P30' },
+        { key: 'leptop', id: 'P30' },
+        { key: 'laptops', id: 'P30' },
+        { key: 'alptops', id: 'P30' },
+        { key: 'macbook', id: 'P30' },
+        { key: 'notebook pc', id: 'P30' },
+        { key: 'computer', id: 'P30' },
+        { key: 'pc', id: 'P30' },
+        { key: 'desktop', id: 'P30' },
         { key: 'monitor arm', id: 'P31' },
         { key: 'desk mat', id: 'P32' },
         { key: 'leather blotter', id: 'P32' },
@@ -665,18 +726,33 @@ export function generateComprehensiveHeuristicResponse(message: string, context:
         };
       }
 
+      const isLaptopRelated =
+        lowerMsg.includes('laptop') ||
+        lowerMsg.includes('alptop') ||
+        lowerMsg.includes('leptop') ||
+        lowerMsg.includes('macbook') ||
+        lowerMsg.includes('notebook');
+
       if (isHindi) {
-        return {
-          reply: `### 🛒 ऑर्डर तैयार है!\n\n` +
-            `मैंने आपके द्वारा अनुरोधित उत्पाद तैयार कर लिए हैं:\n\n` +
+        const header = isLaptopRelated
+          ? `### 💻 लैपटॉप वर्कस्टेशन हार्डवेयर तैयार है!\n\n` +
+            `यहाँ हमारा शीर्ष **[P30] एल्युमिनियम लैपटॉप स्टैंड** (₹1,299) और लैपटॉप एक्सेसरीज़ तैयार हैं:\n\n` +
             `${itemsDescription}\n\n` +
+            `💡 **संबंधित लैपटॉप एक्सेसरीज़**:\n` +
+            `* **[P55] डुअल फैन लैपटॉप कूलिंग पैड** — ₹1,650 (स्टॉक: 32)\n` +
+            `* **[P43] 15.6" पोर्टेबल USB-C सेकंड स्क्रीन** — ₹12,999 (स्टॉक: 18)\n` +
+            `* **[P19] एंटी-थेफ्ट लैपटॉप बैकपैक** — ₹1,650 (स्टॉक: 20)\n\n`
+          : `### 🛒 ऑर्डर तैयार है!\n\nमैंने आपके द्वारा अनुरोधित उत्पाद तैयार कर लिए हैं:\n\n${itemsDescription}\n\n`;
+
+        return {
+          reply: header +
             `**प्राइस ब्रेकडाउन (Landed Cost)**:\n` +
             `- प्रोडक्ट सबटोटल: ₹${subtotal.toLocaleString('en-IN')}\n` +
             `- शिपिंग शुल्क: ${netShipping === 0 ? '₹0 (मुफ्त शिपिंग)' : `₹${netShipping}`}\n` +
             `- 18% GST टैक्स: ₹${taxAmount.toLocaleString('en-IN')}\n` +
             `- **कुल देय राशि (Landed Total)**: ₹${totalLandedPrice.toLocaleString('en-IN')}\n\n` +
             `डिलीवरी पता: **तन्मय आनंद (Tanmay Anand)**, बैंगलोर / मुंबई।\n` +
-            `नीचे दिए गए बटन पर क्लिक करके ऑर्डर तुरंत प्लेस करें या कार्ट में जोड़ें!`,
+            `नीचे दिए गए एक्शन कार्ड पर **Order Now** या **+ Cart** दबाकर ऑर्डर तुरंत प्लेस करें या कार्ट में जोड़ें!`,
           action: {
             type: 'order_items',
             title: `Order: ${matchedProducts.map(it => `${it.quantity}x ${it.product.name}`).join(', ')}`,
@@ -691,21 +767,59 @@ export function generateComprehensiveHeuristicResponse(message: string, context:
         };
       }
 
-      return {
-        reply: `### 🛒 Order Prepared Successfully!\n\n` +
-          `I have configured your requested items for instant ordering:\n\n` +
+      const header = isLaptopRelated
+        ? `### 💻 Laptop Workstation Gear Prepared!\n\n` +
+          `Here is our premier **[P30] Aluminum Laptop Riser Stand** (₹1,299) along with top-rated modular laptop hardware ready for your workstation:\n\n` +
           `${itemsDescription}\n\n` +
+          `💡 **Recommended Laptop Companions in our Catalogue**:\n` +
+          `* **[P55] Aluminum Laptop Cooling Pad with Dual Silent Fans** — ₹1,650 (In Stock: 32)\n` +
+          `* **[P43] 15.6" Portable USB-C FHD Second Screen Monitor** — ₹12,999 (In Stock: 18)\n` +
+          `* **[P19] Professional Anti-Theft Laptop Backpack** — ₹1,650 (In Stock: 20)\n` +
+          `* **[P34] USB-C 100W GaN Fast Charger** — ₹1,899 (In Stock: 22)\n\n`
+        : `### 🛒 Order Prepared Successfully!\n\nI have configured your requested items for instant ordering:\n\n${itemsDescription}\n\n`;
+
+      return {
+        reply: header +
           `**Landed Cost Breakdown**:\n` +
           `- **Product Subtotal**: ₹${subtotal.toLocaleString('en-IN')}\n` +
           `- **Net Logistics/Shipping**: ${netShipping === 0 ? '₹0 (Free Shipping waiver applied!)' : `₹${netShipping} standard base fee`}\n` +
           `- **GST (18%)**: ₹${taxAmount.toLocaleString('en-IN')}\n` +
           `- **Total Landed Price**: ₹${totalLandedPrice.toLocaleString('en-IN')}\n\n` +
           `📍 **Delivery Destination**: Tanmay Anand (Customer Profile defaults).\n\n` +
-          `You can confirm and place this order right now with 1 click using the interactive action card below!`,
+          `You can confirm and place this order right now with 1 click using the interactive action card below, or click **+ Cart** to add it to your bundle!`,
         action: {
           type: 'order_items',
           title: `Order: ${matchedProducts.map(it => `${it.quantity}x ${it.product.name}`).join(', ')}`,
           items: actionItems,
+          subtotal,
+          netShipping,
+          taxAmount,
+          total: totalLandedPrice,
+          reason: '1-Click Direct Order via Sahay AI'
+        },
+        model: 'heuristic-website-trainer'
+      };
+    } else {
+      // User wanted to order/buy, but did not specify an exact product ID or recognized keyword
+      const defaultProd = CATALOGUE_PRODUCTS_METADATA.find(p => p.id === 'P30') || CATALOGUE_PRODUCTS_METADATA[0];
+      const subtotal = defaultProd.price;
+      const netShipping = 499;
+      const taxAmount = Math.round((subtotal + netShipping) * 0.18 * 100) / 100;
+      const totalLandedPrice = Math.round((subtotal + netShipping + taxAmount) * 100) / 100;
+
+      return {
+        reply: `### 🛒 Order & Workspace Setup Assistant\n\n` +
+          `I would love to help you assemble your order! Here is our top-selling workspace hardware: **[${defaultProd.id}] ${defaultProd.name}** (₹${defaultProd.price.toLocaleString('en-IN')}).\n\n` +
+          `**Landed Cost Breakdown**:\n` +
+          `- **Product Subtotal**: ₹${subtotal.toLocaleString('en-IN')}\n` +
+          `- **Logistics/Shipping**: ₹${netShipping}\n` +
+          `- **GST (18%)**: ₹${taxAmount.toLocaleString('en-IN')}\n` +
+          `- **Total Landed Price**: ₹${totalLandedPrice.toLocaleString('en-IN')}\n\n` +
+          `You can click **Order Now** or **+ Cart** below, or tell me which specific hardware you'd like (e.g. *"laptop stand"*, *"ergonomic mouse"*, *"mechanical keyboard"*, *"4k monitor"*).`,
+        action: {
+          type: 'order_items',
+          title: `Order: ${defaultProd.name} (${defaultProd.id})`,
+          items: [{ id: defaultProd.id, name: defaultProd.name, price: defaultProd.price, quantity: 1 }],
           subtotal,
           netShipping,
           taxAmount,
@@ -899,7 +1013,8 @@ export function generateComprehensiveHeuristicResponse(message: string, context:
   // 3.6. Category Search & Inquiries (supports singulars, plurals, synonyms)
   // =========================================================================
   const categoryKeywords: Array<{ label: string; triggers: string[]; ids: string[] }> = [
-    { label: 'Mouse / Ergonomic Mice', triggers: ['mouse', 'mice'], ids: ['P26', 'P29', 'P07', 'P22', 'P54'] },
+    { label: 'Laptop Gear & Accessories', triggers: ['laptop', 'alptop', 'leptop', 'laptops', 'alptops', 'macbook'], ids: ['P30', 'P55', 'P43', 'P19', 'P48'] },
+    { label: 'Mouse / Ergonomic Mice', triggers: ['mouse', 'mice', 'mose'], ids: ['P26', 'P29', 'P07', 'P22', 'P54'] },
     { label: 'Keyboards', triggers: ['keyboard', 'keyboards', 'keys'], ids: ['P27', 'P28', 'P08', 'P21', 'P47'] },
     { label: 'Monitors / Displays', triggers: ['monitor', 'monitors', 'display', 'displays', 'screen', 'screens'], ids: ['P41', 'P42', 'P43'] },
     { label: 'Chargers / Power', triggers: ['charger', 'chargers', 'charging', 'gan', 'power'], ids: ['P34', 'P35', 'P10'] },
@@ -914,16 +1029,28 @@ export function generateComprehensiveHeuristicResponse(message: string, context:
 
   for (const cat of categoryKeywords) {
     if (cat.triggers.some(t => lowerMsg.includes(t))) {
-      const matched = cat.ids.map(id => CATALOGUE_PRODUCTS_METADATA.find(p => p.id === id)).filter(Boolean);
+      const matched = cat.ids.map(id => CATALOGUE_PRODUCTS_METADATA.find(p => p.id === id)).filter(Boolean) as any[];
+      const topProd = matched.find(p => p.stock > 0) || matched[0];
       const lines = matched.map((p: any) => `* **[${p.id}] ${p.name}** — ₹${p.price.toLocaleString('en-IN')} (${p.stock > 0 ? `${p.stock} in stock` : 'Out of Stock'}) — ${p.desc}`);
+
+      const subtotal = topProd ? topProd.price : 1299;
+      const netShipping = subtotal >= 50000 ? 0 : 499;
+      const taxAmount = Math.round((subtotal + netShipping) * 0.18 * 100) / 100;
+      const totalLandedPrice = Math.round((subtotal + netShipping + taxAmount) * 100) / 100;
+
       return {
         reply: `Here are our top **${cat.label.toUpperCase()}** options in the catalogue:\n\n` +
           lines.join('\n') +
-          `\n\nTell me which item you'd like (e.g. *"Order ${cat.ids[0]}"*) or ask me to add it to your bundle!`,
+          `\n\nI have pre-configured **[${topProd.id}] ${topProd.name}** below so you can order directly with 1 click or click **+ Cart** to add it to your bundle!`,
         action: {
-          type: 'navigate',
-          tab: 'catalogue',
-          reason: `Browse ${cat.label} products in catalogue`
+          type: 'order_items',
+          title: `Order: ${topProd.name} (${topProd.id})`,
+          items: [{ id: topProd.id, name: topProd.name, price: topProd.price, quantity: 1 }],
+          subtotal,
+          netShipping,
+          taxAmount,
+          total: totalLandedPrice,
+          reason: `1-Click Direct Order for ${cat.label}`
         },
         model: 'heuristic-website-trainer'
       };
