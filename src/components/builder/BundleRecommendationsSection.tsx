@@ -152,6 +152,9 @@ export const BundleRecommendationsSection: React.FC<BundleRecommendationsSection
       if (q.includes('coperat') || q.includes('coporat')) {
         q = 'corporate';
       }
+      if (q.includes('appliance') || q.includes('applience') || q.includes('apliance')) {
+        q = 'appliance';
+      }
       filtered = filtered.filter(b => {
         const name = b.name.toLowerCase();
         const tagline = b.tagline.toLowerCase();
@@ -305,7 +308,7 @@ export const BundleRecommendationsSection: React.FC<BundleRecommendationsSection
                 setRequirements([]);
                 addNotification('Corporate Bundles Active', 'Filtered to corporate bundles with Laptops, Wireless Mice, Office Keyboards & Workstations.', 'success');
               }}
-              className="inline-flex items-center gap-2 px-4 py-2 text-xs sm:text-sm font-semibold text-white bg-[#2C3A2B] hover:bg-[#1E281D] border border-[#2C3A2B] rounded-xl transition-all cursor-pointer shadow-xs hover:shadow-md"
+              className="inline-flex items-center gap-2 px-4 py-2 text-xs sm:text-sm font-semibold text-[#5A5A40] bg-[#FDFBF7] hover:bg-[#F4F1EA] border border-[#E6E1D3] rounded-xl transition-all cursor-pointer shadow-2xs hover:shadow-sm"
             >
               <span>🏢 Corporate Bundles (Laptops + Peripherals)</span>
             </button>
@@ -321,6 +324,19 @@ export const BundleRecommendationsSection: React.FC<BundleRecommendationsSection
               className="inline-flex items-center gap-2 px-4 py-2 text-xs sm:text-sm font-semibold text-[#8B5A2B] bg-[#FDFBF7] hover:bg-[#F4F1EA] border border-[#E6E1D3] rounded-xl transition-all cursor-pointer shadow-2xs hover:shadow-sm"
             >
               <span>💻 Developer & Executive Rigs</span>
+            </button>
+
+            <button
+              onClick={() => {
+                setBundleSearch('Home Appliances');
+                setBundleCategory('all');
+                setOnlyWithinBudget(false);
+                setRequirements([]);
+                addNotification('Home Appliances Bundles', 'Showing kitchen, cafe, breakfast, and home automation bundles.', 'success');
+              }}
+              className="inline-flex items-center gap-2 px-4 py-2 text-xs sm:text-sm font-semibold text-[#5A5A40] bg-[#FDFBF7] hover:bg-[#F4F1EA] border border-[#E6E1D3] rounded-xl transition-all cursor-pointer shadow-2xs hover:shadow-sm"
+            >
+              <span>🏡 Home Appliances</span>
             </button>
 
             <button
@@ -375,7 +391,7 @@ export const BundleRecommendationsSection: React.FC<BundleRecommendationsSection
               <option value="all">All Categories</option>
               {availableCategories.map(cat => (
                 <option key={cat} value={cat}>
-                  {cat === 'Laptop' ? '💻 Laptop' : cat === 'Mouse' ? '🖱️ Mouse' : cat === 'Keyboard' ? '⌨️ Keyboard' : cat}
+                  {cat === 'Laptop' ? '💻 Laptop' : cat === 'Mouse' ? '🖱️ Mouse' : cat === 'Keyboard' ? '⌨️ Keyboard' : cat === 'Home Appliance' ? '🏡 Home Appliance' : cat}
                 </option>
               ))}
             </select>
