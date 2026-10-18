@@ -118,14 +118,14 @@ export const BundleCartDrawer: React.FC = () => {
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <h2 className="font-serif text-lg font-bold text-[#2C3A2B]">
+                      <h2 className="font-serif text-xl font-bold text-[#2C3A2B]">
                         Your Bundle Cart
                       </h2>
-                      <span className="text-xs font-mono font-bold px-2 py-0.5 rounded-full bg-[#2C3A2B] text-white">
+                      <span className="text-xs font-mono font-bold px-2.5 py-0.5 rounded-full bg-[#2C3A2B] text-white">
                         {filledItems.length}
                       </span>
                     </div>
-                    <p className="text-[11px] text-[#5A5A40]">
+                    <p className="text-xs text-[#5A5A40] mt-0.5">
                       {filledItems.length} {filledItems.length === 1 ? 'item' : 'items'} in bundle cart · {fixture.activity.name}
                     </p>
                   </div>
@@ -142,19 +142,19 @@ export const BundleCartDrawer: React.FC = () => {
 
               {/* Live Budget Utilization Strip */}
               <div className="px-5 py-3.5 bg-[#F4F1EA] border-b border-[#E6E1D3] space-y-2">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-[#5A5A40] font-medium">Budget: {formatINR(budget)}</span>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-[#5A5A40] font-semibold">Budget: {formatINR(budget)}</span>
                   <div className="flex items-center gap-1.5">
                     {validation.landedPrice.isOverBudget ? (
-                      <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-rose-100 text-rose-800 border border-rose-300">
+                      <span className="px-2.5 py-1 rounded-md text-xs font-bold bg-rose-100 text-rose-800 border border-rose-300">
                         Over by {formatINR(Math.abs(validation.landedPrice.remainingBudget))}
                       </span>
                     ) : validation.landedPrice.remainingBudget === 0 && filledItems.length > 0 ? (
-                      <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                      <span className="px-2.5 py-1 rounded-md text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
                         Exact Fit
                       </span>
                     ) : (
-                      <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                      <span className="px-2.5 py-1 rounded-md text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
                         +{formatINR(validation.landedPrice.remainingBudget)} Headroom
                       </span>
                     )}
@@ -208,15 +208,15 @@ export const BundleCartDrawer: React.FC = () => {
                 ) : (
                   <>
                     <div className="flex items-center justify-between pb-1">
-                      <span className="text-[11px] font-bold text-[#8B5A2B] uppercase tracking-wider">
+                      <span className="text-xs sm:text-[13px] font-bold text-[#8B5A2B] uppercase tracking-wider">
                         Items in Bundle ({filledItems.length})
                       </span>
                       <button
                         onClick={resetBundle}
-                        className="text-[11px] text-[#5A5A40] hover:text-rose-600 flex items-center gap-1 transition-colors cursor-pointer"
+                        className="text-xs text-[#5A5A40] hover:text-rose-600 flex items-center gap-1 transition-colors cursor-pointer"
                         title="Clear all products from bundle"
                       >
-                        <RotateCcw className="w-3 h-3" />
+                        <RotateCcw className="w-3.5 h-3.5" />
                         <span>Clear All</span>
                       </button>
                     </div>
@@ -239,7 +239,7 @@ export const BundleCartDrawer: React.FC = () => {
                           >
                             <div className="flex items-start gap-3">
                               {/* Product Image */}
-                              <div className="w-14 h-14 rounded-xl bg-[#F5F5EC] border border-[#E6E1D3] overflow-hidden flex items-center justify-center shrink-0">
+                              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-[#F5F5EC] border border-[#E6E1D3] overflow-hidden flex items-center justify-center shrink-0">
                                 <img
                                   src={getProductImageUrl(prod.image, prod.id)}
                                   alt={prod.name}
@@ -253,19 +253,19 @@ export const BundleCartDrawer: React.FC = () => {
                               {/* Product Details */}
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center justify-between gap-1">
-                                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#8B5A2B] bg-[#8B5A2B]/10 px-1.5 py-0.5 rounded">
+                                  <span className="text-xs font-bold uppercase tracking-wider text-[#8B5A2B] bg-[#8B5A2B]/10 px-2 py-0.5 rounded-md">
                                     {slotLabel}
                                   </span>
-                                  <span className="text-xs font-mono font-bold text-[#2C3A2B]">
+                                  <span className="text-sm font-mono font-bold text-[#2C3A2B]">
                                     {formatINR(prod.price)}
                                   </span>
                                 </div>
 
-                                <h4 className="text-xs font-bold text-[#2C3A2B] line-clamp-1 mt-1">
+                                <h4 className="text-sm font-bold text-[#2C3A2B] line-clamp-1 mt-1">
                                   {prod.name}
                                 </h4>
 
-                                <div className="flex items-center gap-2 mt-1 text-[10px] text-[#5A5A40]">
+                                <div className="flex items-center gap-2 mt-1 text-xs text-[#5A5A40]">
                                   <span className="font-mono">{prod.id}</span>
                                   {(prod.colour || prod.attributes?.colour) && (
                                     <span className="flex items-center gap-1">
@@ -282,8 +282,8 @@ export const BundleCartDrawer: React.FC = () => {
                                 </div>
 
                                 {hasConflict && (
-                                  <div className="mt-2 p-1.5 rounded-lg bg-rose-50 border border-rose-200 text-[10px] text-rose-800 flex items-center gap-1">
-                                    <ShieldAlert className="w-3 h-3 text-rose-600 shrink-0" />
+                                  <div className="mt-2 p-1.5 rounded-lg bg-rose-50 border border-rose-200 text-xs text-rose-800 flex items-center gap-1">
+                                    <ShieldAlert className="w-3.5 h-3.5 text-rose-600 shrink-0" />
                                     <span>Compatibility warning</span>
                                   </div>
                                 )}
@@ -309,11 +309,11 @@ export const BundleCartDrawer: React.FC = () => {
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-1.5">
                           <Sparkles className="w-3.5 h-3.5 text-[#8B5A2B]" />
-                          <span className="text-[11px] font-bold text-[#8B5A2B] uppercase tracking-wider">
+                          <span className="text-xs sm:text-[13px] font-bold text-[#8B5A2B] uppercase tracking-wider">
                             Quick Add More Items to Cart
                           </span>
                         </div>
-                        <span className="text-[10px] text-[#8B8B7A] font-mono">
+                        <span className="text-xs text-[#8B8B7A] font-mono">
                           {availableQuickAddProducts.length} in stock
                         </span>
                       </div>
@@ -325,7 +325,7 @@ export const BundleCartDrawer: React.FC = () => {
                             key={cat}
                             type="button"
                             onClick={() => setQuickAddCategory(cat)}
-                            className={`px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase transition-all shrink-0 cursor-pointer ${
+                            className={`px-3 py-1 rounded-full text-xs font-bold tracking-wider uppercase transition-all shrink-0 cursor-pointer ${
                               quickAddCategory === cat
                                 ? 'bg-[#2C3A2B] text-white shadow-2xs'
                                 : 'bg-white hover:bg-[#F4F1EA] text-[#5A5A40] border border-[#E6E1D3]'
@@ -337,7 +337,7 @@ export const BundleCartDrawer: React.FC = () => {
                       </div>
 
                       {/* Quick Add Grid */}
-                      <div className="grid grid-cols-1 gap-2 max-h-56 overflow-y-auto pr-1">
+                      <div className="grid grid-cols-1 gap-2.5 max-h-56 overflow-y-auto pr-1">
                         {availableQuickAddProducts.map(prod => {
                           const prodImg = getProductImageUrl(prod.image, prod.id);
                           const isAlreadyInCart = Object.values(currentItems).some(item => item?.id === prod.id);
@@ -345,10 +345,10 @@ export const BundleCartDrawer: React.FC = () => {
                           return (
                             <div
                               key={prod.id}
-                              className="p-2.5 rounded-xl border border-[#E6E1D3] bg-white hover:border-[#2C3A2B]/40 hover:shadow-xs transition-all flex items-center justify-between gap-2 group/add"
+                              className="p-3 rounded-xl border border-[#E6E1D3] bg-white hover:border-[#2C3A2B]/40 hover:shadow-xs transition-all flex items-center justify-between gap-2.5 group/add"
                             >
-                              <div className="flex items-center gap-2.5 min-w-0">
-                                <div className="w-10 h-10 rounded-lg bg-[#F5F5EC] border border-[#E6E1D3] p-1 shrink-0 overflow-hidden flex items-center justify-center">
+                              <div className="flex items-center gap-3 min-w-0">
+                                <div className="w-12 h-12 rounded-lg bg-[#F5F5EC] border border-[#E6E1D3] p-1 shrink-0 overflow-hidden flex items-center justify-center">
                                   <img
                                     src={prodImg}
                                     alt={prod.name}
@@ -356,10 +356,10 @@ export const BundleCartDrawer: React.FC = () => {
                                   />
                                 </div>
                                 <div className="min-w-0">
-                                  <h5 className="text-xs font-bold text-[#2C3A2B] truncate block">
+                                  <h5 className="text-sm font-bold text-[#2C3A2B] truncate block">
                                     {prod.name}
                                   </h5>
-                                  <div className="flex items-center gap-1.5 text-[10px] font-mono text-[#8B8B7A]">
+                                  <div className="flex items-center gap-1.5 text-xs font-mono text-[#8B8B7A] mt-0.5">
                                     <span className="text-[#8B5A2B] font-semibold">{prod.category}</span>
                                     <span>·</span>
                                     <span className="font-bold text-[#2C3A2B]">{formatINR(prod.price)}</span>
@@ -375,7 +375,7 @@ export const BundleCartDrawer: React.FC = () => {
                               <button
                                 type="button"
                                 onClick={() => addItemToCart(prod)}
-                                className="py-1 px-3 rounded-lg bg-[#2C3A2B] hover:bg-[#1E281D] text-white shadow-2xs hover:scale-105 active:scale-95 transition-all cursor-pointer shrink-0 flex items-center gap-1 text-[11px] font-bold"
+                                className="py-1.5 px-3.5 rounded-lg bg-[#2C3A2B] hover:bg-[#1E281D] text-white shadow-2xs hover:scale-105 active:scale-95 transition-all cursor-pointer shrink-0 flex items-center gap-1 text-xs font-bold"
                                 title={`Add ${prod.name} to cart`}
                               >
                                 <Plus className="w-3.5 h-3.5" />
@@ -394,7 +394,7 @@ export const BundleCartDrawer: React.FC = () => {
               {filledItems.length > 0 && (
                 <div className="p-4 sm:p-5 bg-white border-t border-[#E6E1D3] space-y-3 shadow-md">
                   {/* Price Stack */}
-                  <div className="space-y-1.5 text-xs text-[#5A5A40]">
+                  <div className="space-y-1.5 text-sm text-[#5A5A40]">
                     <div className="flex items-center justify-between">
                       <span>Items Subtotal ({validation.filledSlotCount} items)</span>
                       <span className="font-mono font-medium text-[#2C3A2B]">
@@ -406,7 +406,7 @@ export const BundleCartDrawer: React.FC = () => {
                       <div className="flex items-center gap-1">
                         <span>Net Shipping</span>
                         {validation.landedPrice.shippingDiscount > 0 && (
-                          <span className="text-[10px] text-emerald-700 font-semibold">(Free Tier)</span>
+                          <span className="text-xs text-emerald-700 font-semibold">(Free Tier)</span>
                         )}
                       </div>
                       <span className="font-mono font-medium text-[#2C3A2B]">
@@ -423,14 +423,14 @@ export const BundleCartDrawer: React.FC = () => {
 
                     <div className="pt-2 border-t border-[#E6E1D3] flex items-center justify-between">
                       <div>
-                        <span className="font-serif font-bold text-sm text-[#2C3A2B] block">
+                        <span className="font-serif font-bold text-base text-[#2C3A2B] block">
                           Total Landed Cost
                         </span>
-                        <span className="text-[10px] text-[#5A5A40]">
+                        <span className="text-xs text-[#5A5A40]">
                           Final payable inclusive of taxes & logistics
                         </span>
                       </div>
-                      <span className={`text-base font-mono font-bold ${
+                      <span className={`text-lg font-mono font-bold ${
                         validation.landedPrice.isOverBudget ? 'text-rose-600' : 'text-[#2C3A2B]'
                       }`}>
                         {formatINR(validation.landedPrice.landedPrice)}
@@ -445,7 +445,7 @@ export const BundleCartDrawer: React.FC = () => {
                         setIsCartOpen(false);
                         initiateCheckout();
                       }}
-                      className="w-full py-3 px-4 rounded-xl text-xs font-bold uppercase tracking-wider text-white bg-[#2C3A2B] hover:bg-[#1E281D] shadow-md hover:shadow-lg flex items-center justify-center gap-2 transition-all cursor-pointer hover:scale-[1.01] active:scale-[0.99]"
+                      className="w-full py-3.5 px-4 rounded-xl text-sm font-bold uppercase tracking-wider text-white bg-[#2C3A2B] hover:bg-[#1E281D] shadow-md hover:shadow-lg flex items-center justify-center gap-2 transition-all cursor-pointer hover:scale-[1.01] active:scale-[0.99]"
                     >
                       <CreditCard className="w-4 h-4 text-amber-300" />
                       <span>BUY NOW — {formatINR(validation.landedPrice.landedPrice)}</span>
@@ -458,7 +458,7 @@ export const BundleCartDrawer: React.FC = () => {
                           setActiveTab('compare');
                           setIsCartOpen(false);
                         }}
-                        className="flex-1 py-2 px-3 rounded-xl text-xs font-semibold text-[#2C2C1E] bg-[#F4F1EA] hover:bg-[#E6E1D3] border border-[#E6E1D3] flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                        className="flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-semibold text-[#2C2C1E] bg-[#F4F1EA] hover:bg-[#E6E1D3] border border-[#E6E1D3] flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                       >
                         <Columns className="w-3.5 h-3.5 text-[#5A5A40]" />
                         <span>Compare Builder</span>
@@ -469,7 +469,7 @@ export const BundleCartDrawer: React.FC = () => {
                           setActiveTab('catalogue');
                           setIsCartOpen(false);
                         }}
-                        className="flex-1 py-2 px-3 rounded-xl text-xs font-semibold text-[#2C2C1E] bg-[#F4F1EA] hover:bg-[#E6E1D3] border border-[#E6E1D3] flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                        className="flex-1 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-semibold text-[#2C2C1E] bg-[#F4F1EA] hover:bg-[#E6E1D3] border border-[#E6E1D3] flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                       >
                         <Layers className="w-3.5 h-3.5 text-[#5A5A40]" />
                         <span>Add More</span>
