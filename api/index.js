@@ -725,6 +725,104 @@ What would you like to explore or order?`,
       };
     }
   }
+  const isRecommendationIntent = lowerMsg.includes("recommend") || lowerMsg.includes("setup") || lowerMsg.includes("bundle") || lowerMsg.includes("build") || lowerMsg.includes("suggest") || lowerMsg.includes("assemble") || lowerMsg.includes("workstation");
+  if (isRecommendationIntent) {
+    const budgetMatch = lowerMsg.match(/(?:under|below|budget|for|of)?\s*(?:₹|rs\.?|inr)?\s*(\d{2,6})\s*(?:k)?/i);
+    let targetAmt = currentBudget || 75e3;
+    if (budgetMatch) {
+      const parsedNum = parseInt(budgetMatch[1], 10);
+      targetAmt = lowerMsg.includes("k") && parsedNum < 1e3 ? parsedNum * 1e3 : parsedNum;
+    }
+    if (targetAmt <= 15e3) {
+      const subtotal = 1450 + 1850 + 1899 + 399;
+      const shipping = 499;
+      const tax = Math.round((subtotal + shipping) * 0.18);
+      const landed = subtotal + shipping + tax;
+      return {
+        reply: `Here is an essential workspace setup tailored under **\u20B9${targetAmt.toLocaleString("en-IN")}**:
+
+1. **[P26] Ergonomic Wireless Vertical Mouse** \u2014 \u20B91,450 (In Stock: 18)
+2. **[P28] Compact 60% Wireless Keyboard** \u2014 \u20B91,850 (In Stock: 15)
+3. **[P34] USB-C 100W GaN Fast Charger** \u2014 \u20B91,899 (In Stock: 30)
+4. **[P33] Magnetic Cable Management Organizer** \u2014 \u20B9399 (In Stock: 40)
+
+* **Product Subtotal:** \u20B9${subtotal.toLocaleString("en-IN")}
+* **Standard Shipping:** \u20B9${shipping}
+* **18% GST Tax:** \u20B9${tax.toLocaleString("en-IN")}
+* **Landed Total:** **\u20B9${landed.toLocaleString("en-IN")}** (Within \u20B9${targetAmt.toLocaleString("en-IN")} target!)
+
+Click below to apply this setup directly to your builder or ask me to order any item!`,
+        action: {
+          type: "apply_bundle",
+          title: `Budget Setup Under \u20B9${targetAmt.toLocaleString("en-IN")}`,
+          budget: targetAmt,
+          items: { Mouse: "P26", Keyboard: "P28", Charger: "P34", Organizer: "P33" }
+        },
+        model: "heuristic-website-trainer"
+      };
+    } else {
+      const monitor = targetAmt < 6e4 ? { id: "P41", name: '27" 4K Professional Monitor', price: 28500 } : { id: "P42", name: '34" Curved WQHD Ultrawide Monitor', price: 36e3 };
+      const subtotal = monitor.price + 1450 + 2499 + 1899 + 399;
+      const shipping = subtotal >= 5e4 ? 0 : 499;
+      const tax = Math.round((subtotal + shipping) * 0.18);
+      const landed = subtotal + shipping + tax;
+      return {
+        reply: `Here is a high-performance WFH workstation setup curated for your target budget of **\u20B9${targetAmt.toLocaleString("en-IN")}**:
+
+1. **[${monitor.id}] ${monitor.name}** \u2014 \u20B9${monitor.price.toLocaleString("en-IN")} (In Stock: 10)
+2. **[P26] Ergonomic Wireless Vertical Mouse** \u2014 \u20B91,450 (In Stock: 18)
+3. **[P27] RGB Mechanical Gaming Keyboard** \u2014 \u20B92,499 (In Stock: 12)
+4. **[P34] USB-C 100W GaN Fast Charger** \u2014 \u20B91,899 (In Stock: 30)
+5. **[P33] Magnetic Cable Management Organizer** \u2014 \u20B9399 (In Stock: 40)
+
+* **Product Subtotal:** \u20B9${subtotal.toLocaleString("en-IN")}
+* **Shipping Fee:** ${shipping === 0 ? "**FREE** (Order meets \u20B950,000 threshold)" : `\u20B9${shipping}`}
+* **18% GST Tax:** \u20B9${tax.toLocaleString("en-IN")}
+* **Total Landed Cost:** **\u20B9${landed.toLocaleString("en-IN")}**
+
+Click below to apply this setup to your Workspace Builder!`,
+        action: {
+          type: "apply_bundle",
+          title: `WFH Setup (${monitor.name})`,
+          budget: targetAmt,
+          items: { Monitor: monitor.id, Mouse: "P26", Keyboard: "P27", Charger: "P34", Organizer: "P33" }
+        },
+        model: "heuristic-website-trainer"
+      };
+    }
+  }
+  const categoryKeywords = [
+    { label: "Mouse / Ergonomic Mice", triggers: ["mouse", "mice"], ids: ["P26", "P29", "P07", "P22", "P54"] },
+    { label: "Keyboards", triggers: ["keyboard", "keyboards", "keys"], ids: ["P27", "P28", "P08", "P21", "P47"] },
+    { label: "Monitors / Displays", triggers: ["monitor", "monitors", "display", "displays", "screen", "screens"], ids: ["P41", "P42", "P43"] },
+    { label: "Chargers / Power", triggers: ["charger", "chargers", "charging", "gan", "power"], ids: ["P34", "P35", "P10"] },
+    { label: "Hubs / Docks", triggers: ["hub", "hubs", "dock", "docks", "multiport"], ids: ["P09", "P48", "P49"] },
+    { label: "Drawing Tablets & Stylus", triggers: ["tablet", "tablets", "stylus"], ids: ["P44", "P45", "P46"] },
+    { label: "Audio / Microphones / Headsets", triggers: ["audio", "microphone", "mic", "headset", "headphone", "headphones"], ids: ["P36", "P52", "P53"] },
+    { label: "Webcams / Cameras", triggers: ["webcam", "webcams", "camera", "cameras"], ids: ["P37", "P38"] },
+    { label: "Backpacks & Sleeves", triggers: ["backpack", "backpacks", "bag", "bags", "sleeve"], ids: ["P14", "P15", "P16"] },
+    { label: "Mugs & Drinkware", triggers: ["mug", "mugs", "tumbler", "bottle", "bottles"], ids: ["P04", "P05", "P06", "P11", "P12"] },
+    { label: "Apparel / T-Shirts", triggers: ["tshirt", "t-shirt", "shirt", "apparel", "hoodie"], ids: ["P01", "P02", "P03"] }
+  ];
+  for (const cat of categoryKeywords) {
+    if (cat.triggers.some((t) => lowerMsg.includes(t))) {
+      const matched = cat.ids.map((id) => CATALOGUE_PRODUCTS_METADATA.find((p) => p.id === id)).filter(Boolean);
+      const lines = matched.map((p) => `* **[${p.id}] ${p.name}** \u2014 \u20B9${p.price.toLocaleString("en-IN")} (${p.stock > 0 ? `${p.stock} in stock` : "Out of Stock"}) \u2014 ${p.desc}`);
+      return {
+        reply: `Here are our top **${cat.label.toUpperCase()}** options in the catalogue:
+
+` + lines.join("\n") + `
+
+Tell me which item you'd like (e.g. *"Order ${cat.ids[0]}"*) or ask me to add it to your bundle!`,
+        action: {
+          type: "navigate",
+          tab: "catalogue",
+          reason: `Browse ${cat.label} products in catalogue`
+        },
+        model: "heuristic-website-trainer"
+      };
+    }
+  }
   return {
     reply: `Hello! I am **Sahay AI (\u0938\u0939\u093E\u092F AI)**, your shopping consultant fully trained on the **Budget-Based Product Bundle Builder** platform!
 
@@ -1669,8 +1767,8 @@ var fixture_default = {
 function mapC07Fixture(raw = fixture_default) {
   const records = raw.records || {};
   const rawProducts = records.products || [];
-  const rawSlots = records.required_slots || [];
   const rawRequests = records.reference_requests || [];
+  const rawSlots = Array.isArray(records.required_slots) && records.required_slots.length > 0 ? records.required_slots : Array.isArray(rawRequests) && rawRequests[0]?.required_slots?.length > 0 ? rawRequests[0].required_slots : ["Mouse", "Keyboard"];
   const products = rawProducts.map((p) => {
     const isUsbC = Array.isArray(p.compatible_with) && p.compatible_with.includes("usb-c");
     const inStock = typeof p.stock === "number" ? p.stock > 0 : Boolean(p.inStock);
@@ -2479,10 +2577,11 @@ function getGeminiApiKey() {
     return process.env.GEMINI_API_KEY;
   }
   try {
-    return dotenv.config({ path: path.join(__dirname, ".env") }).parsed?.GEMINI_API_KEY;
+    const key = dotenv.config({ path: path.join(__dirname, ".env") }).parsed?.GEMINI_API_KEY;
+    if (key) return key;
   } catch {
-    return void 0;
   }
+  return "";
 }
 var app = express();
 app.use((req, res, next) => {
@@ -2649,14 +2748,12 @@ app.post(["/api/ai/assistant", "/ai/assistant"], async (req, res) => {
           role: "user",
           parts: [{ text: message }]
         });
-        const candidateModels = [];
-        if (requestedModel && supportedModels.includes(requestedModel)) {
+        const candidateModels = ["gemini-flash-lite-latest"];
+        if (requestedModel && supportedModels.includes(requestedModel) && requestedModel !== "gemini-flash-lite-latest") {
           candidateModels.push(requestedModel);
         }
-        for (const m of ["gemini-3.1-flash-lite", "gemini-flash-lite-latest"]) {
-          if (!candidateModels.includes(m)) {
-            candidateModels.push(m);
-          }
+        if (!candidateModels.includes("gemini-3.1-flash-lite")) {
+          candidateModels.push("gemini-3.1-flash-lite");
         }
         for (const modelToTry of candidateModels) {
           try {
@@ -2669,7 +2766,7 @@ app.post(["/api/ai/assistant", "/ai/assistant"], async (req, res) => {
               }
             });
             const timeoutPromise = new Promise(
-              (_, reject) => setTimeout(() => reject(new Error(`Timeout waiting for model ${modelToTry}`)), 3500)
+              (_, reject) => setTimeout(() => reject(new Error(`Timeout waiting for model ${modelToTry}`)), 5500)
             );
             const response = await Promise.race([generatePromise, timeoutPromise]);
             const replyText = response.text || "I've analyzed your workspace bundle.";

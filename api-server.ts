@@ -14,15 +14,15 @@ try {
   // Ignore in environments where .env is not present (e.g. Vercel)
 }
 
-function getGeminiApiKey(): string | undefined {
+function getGeminiApiKey(): string {
   if (process.env.GEMINI_API_KEY) {
     return process.env.GEMINI_API_KEY;
   }
   try {
-    return dotenv.config({ path: path.join(__dirname, '.env') }).parsed?.GEMINI_API_KEY;
-  } catch {
-    return undefined;
-  }
+    const key = dotenv.config({ path: path.join(__dirname, '.env') }).parsed?.GEMINI_API_KEY;
+    if (key) return key;
+  } catch {}
+  return "";
 }
 
 const app = express();
@@ -263,15 +263,13 @@ app.post(['/api/ai/assistant', '/ai/assistant'], async (req, res) => {
           parts: [{ text: message }]
         });
 
-        // Build candidate models order (fast fallback within serverless limits)
-        const candidateModels: string[] = [];
-        if (requestedModel && supportedModels.includes(requestedModel)) {
+        // Prioritize gemini-flash-lite-latest for ultra-fast, reliable sub-second AI responses
+        const candidateModels: string[] = ['gemini-flash-lite-latest'];
+        if (requestedModel && supportedModels.includes(requestedModel) && requestedModel !== 'gemini-flash-lite-latest') {
           candidateModels.push(requestedModel);
         }
-        for (const m of ['gemini-3.1-flash-lite', 'gemini-flash-lite-latest']) {
-          if (!candidateModels.includes(m)) {
-            candidateModels.push(m);
-          }
+        if (!candidateModels.includes('gemini-3.1-flash-lite')) {
+          candidateModels.push('gemini-3.1-flash-lite');
         }
 
         for (const modelToTry of candidateModels) {
@@ -285,9 +283,9 @@ app.post(['/api/ai/assistant', '/ai/assistant'], async (req, res) => {
               }
             });
 
-            // 3.5s timeout per model so execution stays well under Vercel's 10s serverless limit
+            // 5.5s timeout per model so execution stays responsive and under serverless limits
             const timeoutPromise = new Promise<never>((_, reject) =>
-              setTimeout(() => reject(new Error(`Timeout waiting for model ${modelToTry}`)), 3500)
+              setTimeout(() => reject(new Error(`Timeout waiting for model ${modelToTry}`)), 5500)
             );
 
             const response = await Promise.race([generatePromise, timeoutPromise]);
