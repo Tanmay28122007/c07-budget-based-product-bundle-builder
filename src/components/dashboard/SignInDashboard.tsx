@@ -178,7 +178,7 @@ export const SignInDashboard: React.FC = () => {
                   </p>
                 </div>
 
-                <div className="relative z-10 pt-2">
+                <div className="relative z-10 pt-2 space-y-2">
                   <button
                     type="button"
                     onClick={(e) => {
@@ -190,6 +190,18 @@ export const SignInDashboard: React.FC = () => {
                   >
                     <span>LOGIN AS CUSTOMER</span>
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-2 transition-transform duration-300" />
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleQuickDemoCustomer();
+                    }}
+                    className="w-full py-2 px-3 rounded-xl bg-transparent hover:bg-[#F4F1EA] text-[#5A5A40] hover:text-[#2C3A2B] text-[11px] font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                  >
+                    <Zap className="w-3.5 h-3.5 text-amber-600 fill-amber-500" />
+                    <span>Quick 1-Click Demo Login</span>
                   </button>
                 </div>
               </motion.div>
@@ -228,7 +240,7 @@ export const SignInDashboard: React.FC = () => {
                   </p>
                 </div>
 
-                <div className="relative z-10 pt-2">
+                <div className="relative z-10 pt-2 space-y-2">
                   <button
                     type="button"
                     onClick={(e) => {
@@ -240,6 +252,18 @@ export const SignInDashboard: React.FC = () => {
                   >
                     <span>LOGIN AS ADMIN</span>
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-2 transition-transform duration-300" />
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleQuickDemoAdmin();
+                    }}
+                    className="w-full py-2 px-3 rounded-xl bg-transparent hover:bg-[#F4F1EA] text-[#5A5A40] hover:text-[#8B5A2B] text-[11px] font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                  >
+                    <Zap className="w-3.5 h-3.5 text-amber-600 fill-amber-500" />
+                    <span>Quick 1-Click Demo Login</span>
                   </button>
                 </div>
               </motion.div>
