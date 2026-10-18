@@ -233,6 +233,29 @@ export function computeBusinessInsights(
 }
 
 /**
+ * Retrieves quick click stats and overall ranking for a specific product.
+ */
+export function getProductClickStats(
+  productId: string,
+  products: Product[]
+): {
+  totalClicks: number;
+  uniqueViewers: number;
+  rank: number | null;
+} {
+  const { allRankedProducts } = computeBusinessInsights(products, 'all');
+  const found = allRankedProducts.find(item => item.product.id === productId);
+  if (!found) {
+    return { totalClicks: 0, uniqueViewers: 0, rank: null };
+  }
+  return {
+    totalClicks: found.totalClicks,
+    uniqueViewers: found.uniqueViewers,
+    rank: found.totalClicks > 0 ? found.rank : null
+  };
+}
+
+/**
  * Optional seed helper to generate initial realistic test clicks if catalogue is fresh.
  */
 export function seedSampleClickData(products: Product[]): void {

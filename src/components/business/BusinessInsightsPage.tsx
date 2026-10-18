@@ -1,586 +1,546 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   TrendingUp,
-  DollarSign,
-  Calculator,
-  Users,
+  Eye,
+  MousePointerClick,
+  Sparkles,
+  BarChart2,
+  Calendar,
+  Filter,
+  Package,
+  Layers,
   CheckCircle2,
   AlertTriangle,
-  HelpCircle,
-  Edit2,
   RotateCcw,
-  Plus,
-  Save,
-  Check
+  Zap,
+  Trash2,
+  ExternalLink,
+  ChevronRight,
+  Calculator,
+  DollarSign,
+  Users
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { formatINR } from '../../utils/pricing';
-import { ShopperExperimentRecord } from '../../types';
+import {
+  computeBusinessInsights,
+  TimeFilterType,
+  seedSampleClickData,
+  clearAllClickEvents,
+  RankedProductItem
+} from '../../utils/analytics';
+import { Product } from '../../types';
+import { getProductImageUrl } from '../../utils/imageUtils';
 
 export const BusinessInsightsPage: React.FC = () => {
   const {
+    fixture,
+    lowStockThreshold,
+    openProductDetails,
     unitEconomics,
     updateUnitEconomics,
     shopperRecords,
-    updateShopperRecord,
-    resetShopperRecords
+    updateShopperRecord
   } = useApp();
 
-  const [editingParticipant, setEditingParticipant] = useState<ShopperExperimentRecord | null>(null);
+  const [timeFilter, setTimeFilter] = useState<TimeFilterType>('all');
+  const [activeViewTab, setActiveViewTab] = useState<'clicks' | 'economics'>('clicks');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('all');
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
-  // Unit Economics Formulas
-  // 1. Monthly retailer contribution = Monthly retailer revenue - monthly cost to serve
+  // Listen to product click events in real-time
+  useEffect(() => {
+    const handleEvent = () => {
+      setRefreshTrigger(prev => prev + 1);
+    };
+    window.addEventListener('c07_product_click_recorded', handleEvent);
+    return () => window.removeEventListener('c07_product_click_recorded', handleEvent);
+  }, []);
+
+  // Compute live analytics from actual recorded clicks
+  const { rankedProducts, engagement, allRankedProducts } = useMemo(() => {
+    return computeBusinessInsights(fixture.products, timeFilter, lowStockThreshold);
+  }, [fixture.products, timeFilter, lowStockThreshold, refreshTrigger]);
+
+  // Categories list
+  const categories = useMemo(() => {
+    return Array.from(new Set(fixture.products.map(p => p.category).filter(Boolean)));
+  }, [fixture.products]);
+
+  // Table filtering
+  const displayedRankings = useMemo(() => {
+    return rankedProducts.filter(item => {
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase().trim();
+        const matchName = (item.product.name || '').toLowerCase().includes(q);
+        const matchId = (item.product.id || '').toLowerCase().includes(q);
+        const matchCat = (item.product.category || '').toLowerCase().includes(q);
+        if (!matchName && !matchId && !matchCat) return false;
+      }
+      if (categoryFilter !== 'all' && item.product.category.toLowerCase() !== categoryFilter.toLowerCase()) {
+        return false;
+      }
+      return true;
+    });
+  }, [rankedProducts, searchQuery, categoryFilter]);
+
+  const handleSeedSampleClicks = () => {
+    seedSampleClickData(fixture.products);
+    setRefreshTrigger(prev => prev + 1);
+  };
+
+  const handleClearClicks = () => {
+    if (window.confirm('Are you sure you want to clear all recorded product clicks?')) {
+      clearAllClickEvents();
+      setRefreshTrigger(prev => prev + 1);
+    }
+  };
+
+  // Unit Economics Formulas (Preserved MBA Strategic section)
   const retailerMonthlyContribution = unitEconomics.retailerMonthlyFee - unitEconomics.monthlyCostToServe;
-
-  // 2. Referral revenue per basket = Eligible basket value × referral %
   const referralRevenuePerBasket = Math.round(unitEconomics.avgEligibleBasketValue * unitEconomics.referralPercentage);
-
-  // 3. Referral contribution per basket = Referral revenue - variable cost per completed basket
   const referralContributionPerBasket = referralRevenuePerBasket - unitEconomics.variableCostPerBasket;
-
-  // 4. Estimated break-even baskets = Fixed monthly costs ÷ positive contribution per basket
   const breakEvenBaskets = referralContributionPerBasket > 0
     ? Math.ceil(unitEconomics.fixedMonthlyCosts / referralContributionPerBasket)
     : null;
-
-  // Combined projected monthly contribution at forecasted volume
   const projectedMonthlyReferralContribution = referralContributionPerBasket * unitEconomics.monthlyBasketsForecast;
   const projectedTotalContribution = retailerMonthlyContribution + projectedMonthlyReferralContribution;
   const projectedNetProfitBeforeTax = projectedTotalContribution - unitEconomics.fixedMonthlyCosts;
 
-  const handleSaveParticipantEdit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (editingParticipant) {
-      updateShopperRecord(editingParticipant.id, editingParticipant);
-      setEditingParticipant(null);
-    }
-  };
-
   return (
-    <div className="space-y-8">
-      {/* Page Title */}
-      <div>
-        <h1 className="text-2xl font-serif font-bold tracking-tight text-[#2C3A2B]">
-          Business Insights & Strategy
-        </h1>
-        <p className="text-xs text-[#5A5A40] mt-0.5">
-          MBA market analysis, unit economics simulation, and empirical shopper research log.
-        </p>
-      </div>
-
-      {/* Sections A, B & C: Strategic Foundations Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Section A: Customer Problem */}
-        <div className="p-6 bg-white border border-[#E6E1D3] rounded-[24px] shadow-xs space-y-2">
-          <div className="text-[11px] font-semibold text-[#8B5A2B] uppercase tracking-wider">
-            Section A · Problem Statement
-          </div>
-          <h3 className="text-base font-serif font-bold text-[#2C3A2B]">Customer Assembly Friction</h3>
-          <p className="text-xs text-[#5A5A40] leading-relaxed">
-            Customers struggle to assemble complete, physically compatible product setups within a strict budget. Online shoppers frequently face surprise checkout shipping fees, port/mounting mismatches, and out-of-stock items across multi-category setups.
-          </p>
-        </div>
-
-        {/* Section B: Value Proposition */}
-        <div className="p-6 bg-white border border-[#E6E1D3] rounded-[24px] shadow-xs space-y-2">
-          <div className="text-[11px] font-semibold text-[#8B5A2B] uppercase tracking-wider">
-            Section B · Core Proposition
-          </div>
-          <h3 className="text-base font-serif font-bold text-[#2C3A2B]">Deterministic Landed Bundles</h3>
-          <p className="text-xs text-[#2C3A2B] font-medium leading-relaxed bg-[#F5F5EC] p-3 rounded-xl border border-[#E6E1D3]">
-            “Help shoppers build complete, compatible bundles with transparent landed pricing.”
-          </p>
-          <p className="text-[11px] text-[#5A5A40] leading-relaxed">
-            Eliminates cognitive burden and post-purchase returns through rule-backed Cartesian bundle discovery.
-          </p>
-        </div>
-
-        {/* Section C: Target Segments */}
-        <div className="p-6 bg-white border border-[#E6E1D3] rounded-[24px] shadow-xs space-y-2">
-          <div className="text-[11px] font-semibold text-[#8B5A2B] uppercase tracking-wider">
-            Section C · Target Market
-          </div>
-          <h3 className="text-base font-serif font-bold text-[#2C3A2B]">Hypothesized Segments</h3>
-          <div className="space-y-1.5 text-xs text-[#5A5A40]">
-            <div className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#2C3A2B]" />
-              <span>Work-from-Home Corporate Employees</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#2C3A2B]" />
-              <span>College Students Setting Up Study Spaces</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#2C3A2B]" />
-              <span>Remote Freelancers & Digital Nomads</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#2C3A2B]" />
-              <span>First-Time Ergonomic Setup Buyers</span>
-            </div>
-          </div>
-          <span className="text-[10px] text-[#8B5A2B] block font-mono mt-2">
-            * Classified as target hypotheses, not verified customers.
-          </span>
-        </div>
-      </div>
-
-      {/* Section D: Monetisation Models & Assumptions */}
-      <div className="p-6 bg-white border border-[#E6E1D3] rounded-[24px] shadow-xs space-y-4">
-        <div className="flex items-center justify-between pb-3 border-b border-[#E6E1D3]">
-          <div>
-            <div className="text-[11px] font-semibold text-[#8B5A2B] uppercase tracking-wider">
-              Section D · Monetisation Models
-            </div>
-            <h3 className="text-base font-serif font-bold text-[#2C3A2B]">Two Competing Commercial Hypotheses</h3>
-          </div>
-          <span className="text-xs font-mono text-[#713F12] bg-[#FEF9C3] px-2.5 py-0.5 rounded-full border border-[#F4E1A1]">
-            All prices are hypothetical assumptions
-          </span>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Model 1: Retailer SaaS Tool Fee */}
-          <div className="p-4 rounded-2xl border border-[#E6E1D3] bg-[#FDFBF7] space-y-2">
-            <div className="flex items-center justify-between">
-              <h4 className="text-xs font-bold text-[#2C3A2B]">
-                Model 1: Retailer SaaS Subscription Fee
-              </h4>
-              <span className="text-[10px] font-mono text-[#5A5A40]">B2B SaaS</span>
-            </div>
-            <p className="text-xs text-[#5A5A40] leading-relaxed">
-              The ecommerce merchant pays a proposed recurring monthly software fee to host the bundle-building widget and reduce return rates on their storefront.
-            </p>
-            <div className="pt-2 text-xs font-mono space-y-1">
-              <div className="flex justify-between">
-                <span className="text-[#5A5A40]">Proposed monthly fee:</span>
-                <span className="font-bold text-[#2C3A2B]">{formatINR(unitEconomics.retailerMonthlyFee)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-[#5A5A40]">Est. cost-to-serve (AWS/Infra):</span>
-                <span className="text-[#2C3A2B]">{formatINR(unitEconomics.monthlyCostToServe)}</span>
-              </div>
-              <div className="flex justify-between border-t border-[#E6E1D3] pt-1 text-[#2C3A2B] font-bold">
-                <span>Monthly retailer contribution:</span>
-                <span>{formatINR(retailerMonthlyContribution)}</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Model 2: Disclosed Basket Referral Fee */}
-          <div className="p-4 rounded-2xl border border-[#E6E1D3] bg-[#FDFBF7] space-y-2">
-            <div className="flex items-center justify-between">
-              <h4 className="text-xs font-bold text-[#2C3A2B]">
-                Model 2: Disclosed Basket Referral Fee
-              </h4>
-              <span className="text-[10px] font-mono text-[#5A5A40]">Performance</span>
-            </div>
-            <p className="text-xs text-[#5A5A40] leading-relaxed">
-              The merchant pays a transparent, pre-agreed commission (e.g. 4.5%) on verified multi-item checkouts attributed directly to the compatibility tool.
-            </p>
-            <div className="pt-2 text-xs font-mono space-y-1">
-              <div className="flex justify-between">
-                <span className="text-[#5A5A40]">Commission rate:</span>
-                <span className="font-bold text-[#2C3A2B]">{(unitEconomics.referralPercentage * 100).toFixed(1)}%</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-[#5A5A40]">Revenue per ₹55k basket:</span>
-                <span className="text-[#2C3A2B]">{formatINR(referralRevenuePerBasket)}</span>
-              </div>
-              <div className="flex justify-between border-t border-[#E6E1D3] pt-1 text-[#2C3A2B] font-bold">
-                <span>Net contribution per basket:</span>
-                <span>{formatINR(referralContributionPerBasket)}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Section E: Unit Economics Calculator */}
-      <div className="p-6 bg-white border border-[#E6E1D3] rounded-[24px] shadow-xs space-y-5">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-[#E6E1D3]">
-          <div>
-            <div className="text-[11px] font-semibold text-[#8B5A2B] uppercase tracking-wider">
-              Section E · Interactive Economics Engine
-            </div>
-            <h3 className="text-base font-serif font-bold text-[#2C3A2B]">Unit Economics & Break-Even Simulation</h3>
-          </div>
-          <span className="text-xs font-mono text-[#5A5A40]">
-            Contribution ≠ Net Profit (Accounts for overhead)
-          </span>
-        </div>
-
-        {/* Input Controls Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <div>
-            <label className="text-[11px] font-semibold text-[#2C3A2B] block mb-1">
-              Proposed Retailer Fee (₹ / month)
-            </label>
-            <input
-              type="number"
-              step="1000"
-              value={unitEconomics.retailerMonthlyFee}
-              onChange={e => updateUnitEconomics({ retailerMonthlyFee: Number(e.target.value) })}
-              className="w-full px-3 py-2 text-xs font-mono font-medium border border-[#E6E1D3] rounded-xl bg-[#FDFBF7] text-[#2C3A2B] focus:bg-white focus:outline-hidden"
-            />
-          </div>
-
-          <div>
-            <label className="text-[11px] font-semibold text-[#2C3A2B] block mb-1">
-              Monthly Cost-to-Serve (₹ / month)
-            </label>
-            <input
-              type="number"
-              step="500"
-              value={unitEconomics.monthlyCostToServe}
-              onChange={e => updateUnitEconomics({ monthlyCostToServe: Number(e.target.value) })}
-              className="w-full px-3 py-2 text-xs font-mono font-medium border border-[#E6E1D3] rounded-xl bg-[#FDFBF7] text-[#2C3A2B] focus:bg-white focus:outline-hidden"
-            />
-          </div>
-
-          <div>
-            <label className="text-[11px] font-semibold text-[#2C3A2B] block mb-1">
-              Referral Commission Rate (%)
-            </label>
-            <input
-              type="number"
-              step="0.5"
-              value={(unitEconomics.referralPercentage * 100).toFixed(1)}
-              onChange={e => updateUnitEconomics({ referralPercentage: Number(e.target.value) / 100 })}
-              className="w-full px-3 py-2 text-xs font-mono font-medium border border-[#E6E1D3] rounded-xl bg-[#FDFBF7] text-[#2C3A2B] focus:bg-white focus:outline-hidden"
-            />
-          </div>
-
-          <div>
-            <label className="text-[11px] font-semibold text-[#2C3A2B] block mb-1">
-              Avg Eligible Basket Value (₹)
-            </label>
-            <input
-              type="number"
-              step="5000"
-              value={unitEconomics.avgEligibleBasketValue}
-              onChange={e => updateUnitEconomics({ avgEligibleBasketValue: Number(e.target.value) })}
-              className="w-full px-3 py-2 text-xs font-mono font-medium border border-[#E6E1D3] rounded-xl bg-[#FDFBF7] text-[#2C3A2B] focus:bg-white focus:outline-hidden"
-            />
-          </div>
-
-          <div>
-            <label className="text-[11px] font-semibold text-[#2C3A2B] block mb-1">
-              Variable Servicing Cost / Basket (₹)
-            </label>
-            <input
-              type="number"
-              step="50"
-              value={unitEconomics.variableCostPerBasket}
-              onChange={e => updateUnitEconomics({ variableCostPerBasket: Number(e.target.value) })}
-              className="w-full px-3 py-2 text-xs font-mono font-medium border border-[#E6E1D3] rounded-xl bg-[#FDFBF7] text-[#2C3A2B] focus:bg-white focus:outline-hidden"
-            />
-          </div>
-
-          <div>
-            <label className="text-[11px] font-semibold text-[#2C3A2B] block mb-1">
-              Fixed Monthly Costs (₹ / month)
-            </label>
-            <input
-              type="number"
-              step="5000"
-              value={unitEconomics.fixedMonthlyCosts}
-              onChange={e => updateUnitEconomics({ fixedMonthlyCosts: Number(e.target.value) })}
-              className="w-full px-3 py-2 text-xs font-mono font-medium border border-[#E6E1D3] rounded-xl bg-[#FDFBF7] text-[#2C3A2B] focus:bg-white focus:outline-hidden"
-            />
-          </div>
-        </div>
-
-        {/* Calculated Results Strip */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-3 border-t border-[#E6E1D3]">
-          <div className="p-3.5 bg-[#F5F5EC] rounded-2xl border border-[#E6E1D3]">
-            <span className="text-[10px] text-[#5A5A40] uppercase font-semibold block">Retailer Contribution</span>
-            <div className="text-base font-bold font-mono text-[#2C3A2B] mt-0.5">
-              {formatINR(retailerMonthlyContribution)}
-            </div>
-            <span className="text-[10px] text-[#5A5A40]">Monthly net of servicing</span>
-          </div>
-
-          <div className="p-3.5 bg-[#F5F5EC] rounded-2xl border border-[#E6E1D3]">
-            <span className="text-[10px] text-[#5A5A40] uppercase font-semibold block">Referral Contribution</span>
-            <div className={`text-base font-bold font-mono mt-0.5 ${referralContributionPerBasket > 0 ? 'text-[#2C3A2B]' : 'text-[#C05621]'}`}>
-              {formatINR(referralContributionPerBasket)}
-            </div>
-            <span className="text-[10px] text-[#5A5A40]">Per completed bundle</span>
-          </div>
-
-          <div className="p-3.5 bg-[#F5F5EC] rounded-2xl border border-[#E6E1D3]">
-            <span className="text-[10px] text-[#5A5A40] uppercase font-semibold block">Estimated Break-Even</span>
-            <div className="text-base font-bold font-mono text-[#2C3A2B] mt-0.5">
-              {breakEvenBaskets !== null ? `${breakEvenBaskets} baskets` : 'Infeasible (≤ 0)'}
-            </div>
-            <span className="text-[10px] text-[#5A5A40]">Baskets to cover ₹{unitEconomics.fixedMonthlyCosts} fixed</span>
-          </div>
-
-          <div className="p-3.5 bg-[#F5F5EC] rounded-2xl border border-[#E6E1D3]">
-            <span className="text-[10px] text-[#5A5A40] uppercase font-semibold block">Projected Net @ 80 Baskets</span>
-            <div className={`text-base font-bold font-mono mt-0.5 ${projectedNetProfitBeforeTax >= 0 ? 'text-[#2C3A2B]' : 'text-[#C05621]'}`}>
-              {formatINR(projectedNetProfitBeforeTax)}
-            </div>
-            <span className="text-[10px] text-[#5A5A40]">Monthly profit before tax</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Section F: Five-Shopper Experiment Log */}
-      <div className="p-6 bg-white border border-[#E6E1D3] rounded-[24px] shadow-xs space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-[#E6E1D3]">
-          <div>
-            <div className="text-[11px] font-semibold text-[#8B5A2B] uppercase tracking-wider">
-              Section F · Empirical Research
-            </div>
-            <h3 className="text-base font-serif font-bold text-[#2C3A2B]">Five-Shopper Experiment Field Log</h3>
-          </div>
-
+    <div className="space-y-8 py-2">
+      {/* Top Header & Section Switcher */}
+      <div className="p-5 rounded-3xl bg-white border border-[#E6E1D3] shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
           <div className="flex items-center gap-2">
-            <span className="text-xs font-mono text-[#5A5A40]">
-              Starts blank / unrecorded as required
+            <h1 className="font-serif font-bold text-xl text-[#2C3A2B]">
+              Business Insights & Product Analytics
+            </h1>
+            <span className="text-[10px] font-mono font-bold uppercase px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
+              Live Click Stream
             </span>
-            <button
-              onClick={resetShopperRecords}
-              className="p-1.5 text-[#5A5A40] hover:text-[#2C3A2B] rounded-lg hover:bg-[#F4F1EA]"
-              title="Reset records to blank state"
-            >
-              <RotateCcw className="w-4 h-4" />
-            </button>
           </div>
+          <p className="text-xs text-[#5A5A40] mt-0.5">
+            Identify customer demand patterns, monitor engagement velocity, and rank catalogue interest.
+          </p>
         </div>
 
-        <p className="text-xs text-[#5A5A40]">
-          Field interview records reserved for qualitative validation. Note: No fabricated customer interview records are generated by default. Click any record to document real participant observations.
-        </p>
+        {/* View Switcher: Click Analytics vs MBA Economics */}
+        <div className="flex items-center gap-1.5 p-1 bg-[#F4F1EA] rounded-2xl border border-[#E6E1D3]">
+          <button
+            onClick={() => setActiveViewTab('clicks')}
+            className={`px-3.5 py-1.5 text-xs font-semibold rounded-xl transition-all cursor-pointer ${
+              activeViewTab === 'clicks'
+                ? 'bg-[#2C3A2B] text-white shadow-xs'
+                : 'text-[#5A5A40] hover:text-[#2C2C1E]'
+            }`}
+          >
+            Product Clicks & Rankings
+          </button>
+          <button
+            onClick={() => setActiveViewTab('economics')}
+            className={`px-3.5 py-1.5 text-xs font-semibold rounded-xl transition-all cursor-pointer ${
+              activeViewTab === 'economics'
+                ? 'bg-[#2C3A2B] text-white shadow-xs'
+                : 'text-[#5A5A40] hover:text-[#2C2C1E]'
+            }`}
+          >
+            Unit Economics (MBA)
+          </button>
+        </div>
+      </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse text-xs">
-            <thead>
-              <tr className="bg-[#F5F5EC]/70 border-b border-[#E6E1D3] text-[11px] font-serif font-bold text-[#2C3A2B] uppercase">
-                <th className="py-3 px-3">Participant ID</th>
-                <th className="py-3 px-3">Target Category</th>
-                <th className="py-3 px-3">Approach Date</th>
-                <th className="py-3 px-3">Task Completion</th>
-                <th className="py-3 px-3">Budget Compliance</th>
-                <th className="py-3 px-3">Compatibility Errors</th>
-                <th className="py-3 px-3">Researcher Observations</th>
-                <th className="py-3 px-3 text-right">Edit</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#E6E1D3]/50">
-              {shopperRecords.map(rec => (
-                <tr key={rec.id} className="hover:bg-[#FDFBF7]">
-                  <td className="py-3 px-3 font-mono font-bold text-[#2C3A2B]">
-                    {rec.participantId}
-                  </td>
-                  <td className="py-3 px-3 font-medium text-[#2C3A2B]">
-                    {rec.targetShopperCategory}
-                  </td>
-                  <td className="py-3 px-3 text-[#5A5A40] font-mono text-[11px]">
-                    {rec.approachDate}
-                  </td>
-                  <td className="py-3 px-3">
-                    <span className={`text-[11px] font-mono ${rec.taskCompletion === 'Not yet recorded' ? 'text-[#5A5A40]/50 italic' : 'text-[#2C3A2B]'}`}>
-                      {rec.taskCompletion}
-                    </span>
-                  </td>
-                  <td className="py-3 px-3">
-                    <span className={`text-[11px] font-mono ${rec.budgetCompliance === 'Not yet recorded' ? 'text-[#5A5A40]/50 italic' : 'text-[#2C3A2B]'}`}>
-                      {rec.budgetCompliance}
-                    </span>
-                  </td>
-                  <td className="py-3 px-3">
-                    <span className={`text-[11px] font-mono ${rec.compatibilityErrors === 'Not yet recorded' ? 'text-[#5A5A40]/50 italic' : 'text-[#2C3A2B]'}`}>
-                      {rec.compatibilityErrors}
-                    </span>
-                  </td>
-                  <td className="py-3 px-3 text-[#5A5A40] text-[11px] max-w-xs truncate">
-                    {rec.researcherObservations}
-                  </td>
-                  <td className="py-3 px-3 text-right">
+      {activeViewTab === 'clicks' && (
+        <>
+          {/* ========================================================================= */}
+          {/* 1. TIME FILTERS & ACTION CONTROLS                                         */}
+          {/* ========================================================================= */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-[#E6E1D3] shadow-2xs">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold text-[#8B5A2B] uppercase tracking-wider flex items-center gap-1">
+                <Calendar className="w-3.5 h-3.5" />
+                Time Period:
+              </span>
+              <div className="flex items-center gap-1 bg-[#F4F1EA] p-1 rounded-xl border border-[#E6E1D3]">
+                {(['today', '7days', '30days', 'all'] as TimeFilterType[]).map(tf => {
+                  const label = tf === 'today' ? 'Today' : tf === '7days' ? 'Last 7 Days' : tf === '30days' ? 'Last 30 Days' : 'All Time';
+                  const active = timeFilter === tf;
+                  return (
                     <button
-                      onClick={() => setEditingParticipant(rec)}
-                      className="px-2.5 py-1 text-[11px] font-medium text-[#8B5A2B] hover:text-[#2C3A2B] hover:bg-[#F4F1EA] rounded-lg border border-transparent hover:border-[#E6E1D3]"
+                      key={tf}
+                      onClick={() => setTimeFilter(tf)}
+                      className={`px-3 py-1 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
+                        active
+                          ? 'bg-[#2C3A2B] text-white shadow-2xs'
+                          : 'text-[#5A5A40] hover:text-[#2C2C1E] hover:bg-white/60'
+                      }`}
                     >
-                      Record Data
+                      {label}
                     </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* Section G: Observed Evidence vs Assumptions Matrix */}
-      <div className="p-6 bg-white border border-[#E6E1D3] rounded-[24px] shadow-xs space-y-4">
-        <div className="pb-3 border-b border-[#E6E1D3]">
-          <div className="text-[11px] font-semibold text-[#8B5A2B] uppercase tracking-wider">
-            Section G · Epistemic Classification
-          </div>
-          <h3 className="text-base font-serif font-bold text-[#2C3A2B]">Observed Evidence vs. Assumptions Matrix</h3>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="p-4 rounded-2xl bg-[#A3B18A]/15 border border-[#A3B18A]/40 space-y-2">
-            <h4 className="text-xs font-serif font-bold text-[#2C3A2B] uppercase">1. Observed Evidence</h4>
-            <ul className="text-xs text-[#2C3A2B] space-y-1.5 list-disc list-inside">
-              <li>Algorithm finds deterministic 6-slot bundles in &lt; 2ms.</li>
-              <li>Shipping surcharge and 18% GST calculation fully verified.</li>
-              <li>Physical monitor/clamp light incompatibility caught 100%.</li>
-            </ul>
-          </div>
-
-          <div className="p-4 rounded-2xl bg-[#FEF9C3]/50 border border-[#F4E1A1] space-y-2">
-            <h4 className="text-xs font-serif font-bold text-[#713F12] uppercase">2. Assumptions</h4>
-            <ul className="text-xs text-[#713F12] space-y-1.5 list-disc list-inside">
-              <li>Merchant willing to pay ₹25,000/mo SaaS fee.</li>
-              <li>Customers accept 18% GST upfront in configuration.</li>
-              <li>Average basket value stays consistent at ₹55,000.</li>
-            </ul>
-          </div>
-
-          <div className="p-4 rounded-2xl bg-[#F5F5EC] border border-[#E6E1D3] space-y-2">
-            <h4 className="text-xs font-serif font-bold text-[#2C3A2B] uppercase">3. Untested Hypotheses</h4>
-            <ul className="text-xs text-[#5A5A40] space-y-1.5 list-disc list-inside">
-              <li>Tool reduces customer return rates by &gt; 25%.</li>
-              <li>Transparency increases checkout completion vs mystery fees.</li>
-              <li>Users prefer lowest-cost valid bundles over unbundled picking.</li>
-            </ul>
-          </div>
-
-          <div className="p-4 rounded-2xl bg-[#FDFBF7] border border-[#E6E1D3] space-y-2">
-            <h4 className="text-xs font-serif font-bold text-[#2C3A2B] uppercase">4. Next Validation Step</h4>
-            <ul className="text-xs text-[#5A5A40] space-y-1.5 list-disc list-inside">
-              <li>Execute 5 qualitative shopper think-aloud sessions.</li>
-              <li>Pitch prototype to 2 ecommerce merchant operators.</li>
-              <li>A/B test landed price summary clarity in simulated checkout.</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      {/* Participant Edit Drawer / Modal */}
-      {editingParticipant && (
-        <div className="fixed inset-0 z-50 bg-[#2C3A2B]/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-[24px] max-w-lg w-full border border-[#E6E1D3] shadow-2xl overflow-hidden p-6 space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-[#E6E1D3]">
-              <h3 className="text-base font-serif font-bold text-[#2C3A2B]">
-                Log Research Data for Participant {editingParticipant.participantId}
-              </h3>
-              <button
-                onClick={() => setEditingParticipant(null)}
-                className="text-[#5A5A40] hover:text-[#2C3A2B] text-xs"
-              >
-                Cancel
-              </button>
+                  );
+                })}
+              </div>
             </div>
 
-            <form onSubmit={handleSaveParticipantEdit} className="space-y-3">
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-[11px] font-semibold text-[#2C3A2B] block mb-1">
-                    Approach Date
-                  </label>
-                  <input
-                    type="text"
-                    value={editingParticipant.approachDate}
-                    onChange={e => setEditingParticipant({ ...editingParticipant, approachDate: e.target.value })}
-                    className="w-full px-3 py-1.5 text-xs border border-[#E6E1D3] rounded-xl bg-[#FDFBF7] text-[#2C3A2B]"
-                  />
-                </div>
-                <div>
-                  <label className="text-[11px] font-semibold text-[#2C3A2B] block mb-1">
-                    Contact Outcome
-                  </label>
-                  <input
-                    type="text"
-                    value={editingParticipant.contactOutcome}
-                    onChange={e => setEditingParticipant({ ...editingParticipant, contactOutcome: e.target.value })}
-                    className="w-full px-3 py-1.5 text-xs border border-[#E6E1D3] rounded-xl bg-[#FDFBF7] text-[#2C3A2B]"
-                  />
-                </div>
-              </div>
+            {/* Live Analytics Operations */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleSeedSampleClicks}
+                title="Seed sample interaction traffic to test ranking behaviors immediately"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-[#2C2C1E] bg-[#F4F1EA] hover:bg-[#E6E1D3] rounded-xl border border-[#E6E1D3] transition-colors cursor-pointer"
+              >
+                <Zap className="w-3.5 h-3.5 text-[#8B5A2B]" />
+                <span>Simulate Sample Traffic</span>
+              </button>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-[11px] font-semibold text-[#2C3A2B] block mb-1">
-                    Task Completion
-                  </label>
-                  <input
-                    type="text"
-                    value={editingParticipant.taskCompletion}
-                    onChange={e => setEditingParticipant({ ...editingParticipant, taskCompletion: e.target.value })}
-                    className="w-full px-3 py-1.5 text-xs border border-[#E6E1D3] rounded-xl bg-[#FDFBF7] text-[#2C3A2B]"
-                  />
-                </div>
-                <div>
-                  <label className="text-[11px] font-semibold text-[#2C3A2B] block mb-1">
-                    Time Taken (mins)
-                  </label>
-                  <input
-                    type="text"
-                    value={editingParticipant.timeTaken}
-                    onChange={e => setEditingParticipant({ ...editingParticipant, timeTaken: e.target.value })}
-                    className="w-full px-3 py-1.5 text-xs border border-[#E6E1D3] rounded-xl bg-[#FDFBF7] text-[#2C3A2B]"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="text-[11px] font-semibold text-[#2C3A2B] block mb-1">
-                  Budget Compliance & Feedback
-                </label>
-                <input
-                  type="text"
-                  value={editingParticipant.budgetCompliance}
-                  onChange={e => setEditingParticipant({ ...editingParticipant, budgetCompliance: e.target.value })}
-                  className="w-full px-3 py-1.5 text-xs border border-[#E6E1D3] rounded-xl bg-[#FDFBF7] text-[#2C3A2B]"
-                />
-              </div>
-
-              <div>
-                <label className="text-[11px] font-semibold text-[#2C3A2B] block mb-1">
-                  Researcher Observations
-                </label>
-                <textarea
-                  rows={2}
-                  value={editingParticipant.researcherObservations}
-                  onChange={e => setEditingParticipant({ ...editingParticipant, researcherObservations: e.target.value })}
-                  className="w-full px-3 py-1.5 text-xs border border-[#E6E1D3] rounded-xl bg-[#FDFBF7] text-[#2C3A2B]"
-                />
-              </div>
-
-              <div>
-                <label className="text-[11px] font-semibold text-[#2C3A2B] block mb-1">
-                  Improvement Identified
-                </label>
-                <input
-                  type="text"
-                  value={editingParticipant.improvementIdentified}
-                  onChange={e => setEditingParticipant({ ...editingParticipant, improvementIdentified: e.target.value })}
-                  className="w-full px-3 py-1.5 text-xs border border-[#E6E1D3] rounded-xl bg-[#FDFBF7] text-[#2C3A2B]"
-                />
-              </div>
-
-              <div className="pt-2 flex items-center justify-end gap-2 border-t border-[#E6E1D3]">
+              {engagement.totalClicks > 0 && (
                 <button
-                  type="button"
-                  onClick={() => setEditingParticipant(null)}
-                  className="px-3.5 py-2 text-xs text-[#5A5A40] hover:bg-[#F4F1EA] rounded-xl"
+                  onClick={handleClearClicks}
+                  title="Clear all recorded product click events"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium text-rose-700 hover:bg-rose-50 rounded-xl border border-rose-200 transition-colors cursor-pointer"
                 >
-                  Cancel
+                  <Trash2 className="w-3.5 h-3.5 text-rose-600" />
+                  <span>Clear Clicks</span>
                 </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 text-xs font-semibold text-white bg-[#2C3A2B] hover:bg-[#3A4D39] rounded-xl shadow-xs"
-                >
-                  Save Participant Record
-                </button>
+              )}
+            </div>
+          </div>
+
+          {/* ========================================================================= */}
+          {/* 2. PRODUCT ENGAGEMENT CARDS                                               */}
+          {/* ========================================================================= */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {/* Card 1: Total Product Clicks */}
+            <div className="p-5 bg-white border border-[#E6E1D3] rounded-3xl shadow-xs">
+              <div className="flex items-center justify-between text-[#5A5A40] mb-2">
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-[#7A7A68]">Total Clicks</span>
+                <MousePointerClick className="w-4 h-4 text-[#8B5A2B]" />
               </div>
-            </form>
+              <div className="text-3xl font-bold font-mono tabular-nums text-[#2C3A2B]">
+                {engagement.totalClicks.toLocaleString('en-IN')}
+              </div>
+              <p className="text-[11px] text-[#7A7A68] mt-1 font-medium">Customer interactions recorded</p>
+            </div>
+
+            {/* Card 2: Most Clicked Product */}
+            <div className="p-5 bg-white border border-[#E6E1D3] rounded-3xl shadow-xs">
+              <div className="flex items-center justify-between text-[#5A5A40] mb-2">
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-[#7A7A68]">Most Clicked</span>
+                <Sparkles className="w-4 h-4 text-amber-600" />
+              </div>
+              {engagement.mostClickedProduct ? (
+                <div>
+                  <div className="text-lg font-serif font-bold text-[#2C3A2B] truncate" title={engagement.mostClickedProduct.product.name}>
+                    {engagement.mostClickedProduct.product.name}
+                  </div>
+                  <p className="text-[11px] text-[#8B5A2B] mt-1 font-mono font-bold">
+                    {engagement.mostClickedProduct.clicks} clicks ({engagement.mostClickedProduct.product.category})
+                  </p>
+                </div>
+              ) : (
+                <div>
+                  <div className="text-lg font-serif font-bold text-[#8B8B7A] italic">No clicks yet</div>
+                  <p className="text-[11px] text-[#7A7A68] mt-1">Awaiting shopper traffic</p>
+                </div>
+              )}
+            </div>
+
+            {/* Card 3: Number of Products Viewed */}
+            <div className="p-5 bg-white border border-[#E6E1D3] rounded-3xl shadow-xs">
+              <div className="flex items-center justify-between text-[#5A5A40] mb-2">
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-[#7A7A68]">Products Viewed</span>
+                <Eye className="w-4 h-4 text-emerald-600" />
+              </div>
+              <div className="text-3xl font-bold font-mono tabular-nums text-emerald-700">
+                {engagement.productsViewedCount}
+                <span className="text-xs font-normal text-[#8B8B7A] ml-1.5 font-sans">
+                  / {fixture.products.length}
+                </span>
+              </div>
+              <p className="text-[11px] text-[#7A7A68] mt-1 font-medium">Unique products inspected</p>
+            </div>
+
+            {/* Card 4: Average Clicks per Product */}
+            <div className="p-5 bg-white border border-[#E6E1D3] rounded-3xl shadow-xs">
+              <div className="flex items-center justify-between text-[#5A5A40] mb-2">
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-[#7A7A68]">Avg Clicks / Product</span>
+                <BarChart2 className="w-4 h-4 text-[#8B5A2B]" />
+              </div>
+              <div className="text-3xl font-bold font-mono tabular-nums text-[#8B5A2B]">
+                {engagement.avgClicksPerProduct}
+              </div>
+              <p className="text-[11px] text-[#7A7A68] mt-1 font-medium">Mean catalogue attention</p>
+            </div>
+          </div>
+
+          {/* ========================================================================= */}
+          {/* 3. PRODUCT RANKING TABLE                                                  */}
+          {/* ========================================================================= */}
+          <div className="bg-white border border-[#E6E1D3] rounded-3xl shadow-xs overflow-hidden">
+            {/* Table Header Filter Bar */}
+            <div className="p-5 border-b border-[#E6E1D3] flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[#FDFBF7]">
+              <div>
+                <h3 className="font-serif font-bold text-lg text-[#2C3A2B]">
+                  Product Popularity Rankings
+                </h3>
+                <p className="text-xs text-[#5A5A40] mt-0.5">
+                  Ordered by descending click velocity; ties resolved alphabetically.
+                </p>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2.5">
+                {/* Search */}
+                <div className="relative min-w-[200px]">
+                  <input
+                    type="text"
+                    placeholder="Search product name or ID..."
+                    value={searchQuery}
+                    onChange={e => setSearchQuery(e.target.value)}
+                    className="w-full pl-3 pr-3 py-1.5 text-xs bg-white border border-[#E6E1D3] rounded-xl focus:outline-hidden focus:border-[#2C3A2B] text-[#2C2C1E]"
+                  />
+                </div>
+
+                {/* Category Filter */}
+                <select
+                  value={categoryFilter}
+                  onChange={e => setCategoryFilter(e.target.value)}
+                  className="px-3 py-1.5 text-xs bg-white border border-[#E6E1D3] rounded-xl text-[#2C2C1E] focus:outline-hidden"
+                >
+                  <option value="all">All Categories</option>
+                  {categories.map(c => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Table Content */}
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-[#F8FAFC] border-b border-[#E6E1D3] text-[#5A5A40] uppercase tracking-wider font-semibold text-[11px]">
+                  <tr>
+                    <th className="py-3 px-4 text-center w-14">Rank</th>
+                    <th className="py-3 px-4 w-14 text-center">Image</th>
+                    <th className="py-3 px-4">Product Name</th>
+                    <th className="py-3 px-4">Product ID</th>
+                    <th className="py-3 px-4">Category</th>
+                    <th className="py-3 px-4 text-right">Price</th>
+                    <th className="py-3 px-4 text-right">Stock</th>
+                    <th className="py-3 px-4 text-right">Total Clicks</th>
+                    <th className="py-3 px-4 text-right">Unique Viewers</th>
+                    <th className="py-3 px-4 text-center">Stock Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#E6E1D3]/60 font-normal">
+                  {displayedRankings.length === 0 ? (
+                    <tr>
+                      <td colSpan={10} className="py-12 text-center text-xs text-[#8B8B7A]">
+                        <MousePointerClick className="w-8 h-8 text-[#B5B5A3] mx-auto mb-2" />
+                        <div className="font-semibold text-sm text-[#2C2C1E] mb-1">
+                          No product clicks recorded for this period
+                        </div>
+                        <p className="max-w-md mx-auto text-[#7A7A68]">
+                          Interactions in the customer catalogue, workspace builder, or product modals will automatically appear here.
+                        </p>
+                        <button
+                          onClick={handleSeedSampleClicks}
+                          className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#2C3A2B] text-white text-xs font-semibold cursor-pointer shadow-xs"
+                        >
+                          <Zap className="w-3.5 h-3.5 text-amber-200" />
+                          <span>Simulate Sample Clicks</span>
+                        </button>
+                      </td>
+                    </tr>
+                  ) : (
+                    displayedRankings.map(item => {
+                      const isTop3 = item.rank <= 3;
+                      const status = item.stockStatus;
+                      return (
+                        <tr key={item.product.id} className="hover:bg-[#FDFBF7] transition-colors">
+                          {/* Rank badge */}
+                          <td className="py-3 px-4 text-center">
+                            <span
+                              className={`inline-flex items-center justify-center w-6 h-6 rounded-full font-mono text-xs font-bold ${
+                                item.rank === 1
+                                  ? 'bg-amber-100 text-amber-900 border border-amber-300'
+                                  : item.rank === 2
+                                  ? 'bg-slate-200 text-slate-800 border border-slate-300'
+                                  : item.rank === 3
+                                  ? 'bg-amber-50 text-[#8B5A2B] border border-amber-200'
+                                  : 'text-[#5A5A40]'
+                              }`}
+                            >
+                              {item.rank}
+                            </span>
+                          </td>
+
+                          {/* Product Image */}
+                          <td className="py-3 px-4 text-center">
+                            <div className="w-10 h-10 rounded-xl bg-[#F4F1EA] border border-[#E6E1D3] overflow-hidden flex items-center justify-center p-1 mx-auto">
+                              <img
+                                src={getProductImageUrl(item.product.image, item.product.id)}
+                                alt={item.product.name}
+                                onError={e => {
+                                  (e.target as HTMLElement).style.display = 'none';
+                                }}
+                                className="w-full h-full object-contain"
+                              />
+                            </div>
+                          </td>
+
+                          {/* Product Name */}
+                          <td className="py-3 px-4 font-semibold text-[#2C2C1E]">
+                            <button
+                              onClick={() => openProductDetails(item.product.id)}
+                              className="hover:underline text-left cursor-pointer flex items-center gap-1 group"
+                            >
+                              <span>{item.product.name}</span>
+                              <ExternalLink className="w-3 h-3 text-[#B5B5A3] group-hover:text-[#2C3A2B]" />
+                            </button>
+                          </td>
+
+                          {/* Product ID */}
+                          <td className="py-3 px-4 font-mono font-bold text-[#8B5A2B]">
+                            {item.product.id}
+                          </td>
+
+                          {/* Category */}
+                          <td className="py-3 px-4 text-[#5A5A40]">
+                            <span className="px-2 py-0.5 rounded-md bg-[#F4F1EA] text-[11px]">
+                              {item.product.category}
+                            </span>
+                          </td>
+
+                          {/* Product Price */}
+                          <td className="py-3 px-4 text-right font-mono font-semibold text-[#2C2C1E]">
+                            {formatINR(item.product.price)}
+                          </td>
+
+                          {/* Stock Quantity */}
+                          <td className="py-3 px-4 text-right font-mono font-bold">
+                            <span
+                              className={
+                                status === 'OUT_OF_STOCK'
+                                  ? 'text-rose-700'
+                                  : status === 'LOW_STOCK'
+                                  ? 'text-amber-700'
+                                  : 'text-[#2C3A2B]'
+                              }
+                            >
+                              {item.product.stockQuantity ?? 0}
+                            </span>
+                          </td>
+
+                          {/* Total Clicks */}
+                          <td className="py-3 px-4 text-right font-mono font-bold text-[#2C3A2B] text-sm">
+                            {item.totalClicks}
+                          </td>
+
+                          {/* Unique Viewers */}
+                          <td className="py-3 px-4 text-right font-mono text-[#5A5A40]">
+                            {item.uniqueViewers}
+                          </td>
+
+                          {/* Stock Status Badge */}
+                          <td className="py-3 px-4 text-center">
+                            {status === 'IN_STOCK' && (
+                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-600" />
+                                In Stock
+                              </span>
+                            )}
+                            {status === 'LOW_STOCK' && (
+                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-800 border border-amber-200">
+                                <span className="w-1.5 h-1.5 rounded-full bg-amber-600" />
+                                Low Stock
+                              </span>
+                            )}
+                            {status === 'OUT_OF_STOCK' && (
+                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-rose-50 text-rose-800 border border-rose-200">
+                                <span className="w-1.5 h-1.5 rounded-full bg-rose-600" />
+                                Out of Stock
+                              </span>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* ========================================================================= */}
+      {/* 4. MBA STRATEGY & UNIT ECONOMICS TAB (Preserved from prior work)           */}
+      {/* ========================================================================= */}
+      {activeViewTab === 'economics' && (
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="p-6 bg-white border border-[#E6E1D3] rounded-3xl shadow-xs space-y-2">
+              <div className="text-[11px] font-semibold text-[#8B5A2B] uppercase tracking-wider">
+                Section A · Problem Statement
+              </div>
+              <h3 className="text-base font-serif font-bold text-[#2C3A2B]">Assembly Friction</h3>
+              <p className="text-xs text-[#5A5A40] leading-relaxed">
+                Customers struggle to assemble complete, physically compatible product setups within a strict budget. Online shoppers frequently face surprise checkout shipping fees and port mismatches.
+              </p>
+            </div>
+
+            <div className="p-6 bg-white border border-[#E6E1D3] rounded-3xl shadow-xs space-y-2">
+              <div className="text-[11px] font-semibold text-[#8B5A2B] uppercase tracking-wider">
+                Section B · Core Proposition
+              </div>
+              <h3 className="text-base font-serif font-bold text-[#2C3A2B]">Deterministic Landed Bundles</h3>
+              <p className="text-xs text-[#2C3A2B] font-medium leading-relaxed bg-[#F5F5EC] p-3 rounded-xl border border-[#E6E1D3]">
+                “Help shoppers build complete, compatible bundles with transparent landed pricing.”
+              </p>
+            </div>
+
+            <div className="p-6 bg-white border border-[#E6E1D3] rounded-3xl shadow-xs space-y-2">
+              <div className="text-[11px] font-semibold text-[#8B5A2B] uppercase tracking-wider">
+                Section C · Target Segments
+              </div>
+              <h3 className="text-base font-serif font-bold text-[#2C3A2B]">Market Focus</h3>
+              <p className="text-xs text-[#5A5A40] leading-relaxed">
+                Work-from-home professionals, software engineers, and university students seeking guaranteed compatibility within predefined expense budgets.
+              </p>
+            </div>
+          </div>
+
+          {/* Unit Economics Simulation Cards */}
+          <div className="p-6 bg-white border border-[#E6E1D3] rounded-3xl shadow-xs space-y-4">
+            <div className="flex items-center justify-between border-b border-[#E6E1D3] pb-3">
+              <div>
+                <h3 className="font-serif font-bold text-base text-[#2C3A2B]">
+                  Unit Economics Simulation (INR)
+                </h3>
+                <p className="text-xs text-[#5A5A40]">Calculated monthly forecast & contribution</p>
+              </div>
+              <Calculator className="w-5 h-5 text-[#8B5A2B]" />
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <div className="p-4 rounded-2xl bg-[#FDFBF7] border border-[#E6E1D3]">
+                <span className="text-[11px] text-[#7A7A68] block">Retailer Monthly Fee</span>
+                <span className="text-lg font-bold font-mono text-[#2C3A2B]">{formatINR(unitEconomics.retailerMonthlyFee)}</span>
+              </div>
+              <div className="p-4 rounded-2xl bg-[#FDFBF7] border border-[#E6E1D3]">
+                <span className="text-[11px] text-[#7A7A68] block">Referral Rate</span>
+                <span className="text-lg font-bold font-mono text-[#8B5A2B]">{(unitEconomics.referralPercentage * 100).toFixed(1)}%</span>
+              </div>
+              <div className="p-4 rounded-2xl bg-[#FDFBF7] border border-[#E6E1D3]">
+                <span className="text-[11px] text-[#7A7A68] block">Break-Even Baskets</span>
+                <span className="text-lg font-bold font-mono text-emerald-700">{breakEvenBaskets ?? '—'}</span>
+              </div>
+              <div className="p-4 rounded-2xl bg-[#FDFBF7] border border-[#E6E1D3]">
+                <span className="text-[11px] text-[#7A7A68] block">Projected Monthly Contribution</span>
+                <span className="text-lg font-bold font-mono text-[#2C3A2B]">{formatINR(projectedTotalContribution)}</span>
+              </div>
+            </div>
           </div>
         </div>
       )}
