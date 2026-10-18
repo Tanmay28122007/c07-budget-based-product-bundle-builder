@@ -29,12 +29,14 @@ export function mapC07Fixture(raw: any = fixtureJson): FixtureData {
         ? 'Peripherals' 
         : p.category === 'Laptop'
         ? 'Enterprise Computing'
+        : p.category === 'Home Appliance'
+        ? 'Smart Home & Living'
         : p.category === 'Tshirt' || p.category === 'Backpack' 
         ? 'C07 Apparel' 
         : 'C07 Essentials',
       model: p.product_id || p.id,
       description: `${p.colour || ''} ${p.title || p.name}${p.size && p.size !== 'One' ? ' (Size: ' + p.size + ')' : ''} · Unit Cost: ₹${unitCost}`,
-      weightKg: p.category === 'Laptop' ? 1.5 : p.category === 'Monitor' ? 6.5 : p.category === 'Stand' ? 2.5 : p.category === 'Backpack' ? 1.0 : p.category === 'Keyboard' ? 0.7 : p.category === 'Mouse' ? 0.2 : 0.4,
+      weightKg: p.category === 'Laptop' ? 1.5 : p.category === 'Monitor' ? 6.5 : p.category === 'Home Appliance' ? 2.2 : p.category === 'Stand' ? 2.5 : p.category === 'Backpack' ? 1.0 : p.category === 'Keyboard' ? 0.7 : p.category === 'Mouse' ? 0.2 : 0.4,
       image: p.image,
       unitCostInr: unitCost,
       size: p.size,

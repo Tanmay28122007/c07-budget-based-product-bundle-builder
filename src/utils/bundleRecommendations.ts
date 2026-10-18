@@ -106,8 +106,56 @@ export function getPredefinedBaselineBundles(
   const p73 = byId('P73'); // Executive Leatherette Laptop Briefcase (₹2799, stock 35)
   const p74 = byId('P74'); // 2K QHD Conference Webcam (₹3999, stock 40)
   const p75 = byId('P75'); // Dual-Arm Desk Monitor Stand (₹4500, stock 25)
+  const p76 = byId('P76'); // Smart Electric Rapid-Boil Kettle (₹2199, stock 40)
+  const p77 = byId('P77'); // 15-Bar Compact Espresso & Cappuccino Coffee Machine (₹6499, stock 25)
+  const p78 = byId('P78'); // Smart HEPA Air Purifier (₹7999, stock 30)
+  const p79 = byId('P79'); // High-Speed Nutrient Extractor Blender (₹3499, stock 35)
+  const p80 = byId('P80'); // Smart Robotic Vacuum & Mop Cleaner (₹18999, stock 20)
+  const p81 = byId('P81'); // Digital 4-Slice Convection Pop-Up Toaster (₹2799, stock 45)
+  const p82 = byId('P82'); // Cordless Handheld Cyclonic Stick Vacuum Cleaner (₹8499, stock 28)
 
   const rawConfigs = [
+    {
+      id: 'home-app-1',
+      name: 'Home Appliances Morning Breakfast Duo',
+      tagline: 'Complete morning kitchen breakfast duo with rapid-boil 1.7L stainless kettle and 4-slice digital toaster',
+      items: [
+        { product: p76, quantity: 1 },
+        { product: p81, quantity: 1 }
+      ],
+      matchExplanation: 'Morning kitchen essentials pairing rapid-boil 1.7L electric kettle with 4-slice precision toaster for quick family breakfasts.'
+    },
+    {
+      id: 'home-app-2',
+      name: 'Home Appliances Cafe & Barista Beverage Suite',
+      tagline: 'Premium home cafe experience pairing 15-bar espresso machine, precision rapid kettle, and ceramic mug',
+      items: [
+        { product: p77, quantity: 1 },
+        { product: p76, quantity: 1 },
+        { product: p21, quantity: 1 }
+      ],
+      matchExplanation: 'Barista-grade home cafe station featuring 15-bar espresso & cappuccino maker, rapid boiling kettle, and ceramic coffee mug.'
+    },
+    {
+      id: 'home-app-3',
+      name: 'Home Appliances Clean & Pure Living Automation Suite',
+      tagline: 'Autonomous home wellness set combining intelligent HEPA air purifier with smart auto-docking robotic vacuum',
+      items: [
+        { product: p78, quantity: 1 },
+        { product: p80, quantity: 1 }
+      ],
+      matchExplanation: 'Automated home wellness setup combining smart HEPA room air purifier with autonomous floor vacuum and mop robot.'
+    },
+    {
+      id: 'home-app-4',
+      name: 'Home Appliances Kitchen Chef Quick Prep Duo',
+      tagline: 'Quick countertop kitchen prep duo featuring 1000W high-speed nutrient blender paired with durable ceramic mug',
+      items: [
+        { product: p79, quantity: 1 },
+        { product: p05, quantity: 1 }
+      ],
+      matchExplanation: 'Healthy living kitchen starter duo pairing a 1000W high-speed smoothie extractor blender with an everyday mug.'
+    },
     {
       id: 'corp-set-1',
       name: 'Corporate Laptop & Fast Charger Power Duo',
