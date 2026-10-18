@@ -111,11 +111,7 @@ export const LoginPage: React.FC = () => {
             <button
               onClick={handleAdminLogin}
               className="hidden md:flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold text-[#5A5A40] hover:text-[#2C3A2B] hover:bg-[#F4F1EA] transition-colors cursor-pointer border border-transparent hover:border-[#E6E1D3]"
-<<<<<<< HEAD
               title="Access Admin Overview, Test Suites, and System Diagnostics"
-=======
-              title="Access Admin Overview, Test Suites, and MBA Insights"
->>>>>>> b766b4a8e9dd43622984d8524897f4071d4bda53
             >
               <Cpu className="w-3.5 h-3.5 text-[#8B5A2B]" />
               <span>Admin Demo</span>
@@ -434,11 +430,7 @@ export const LoginPage: React.FC = () => {
                     'ErgoPro High-Back Mesh Chair',
                     'Solid Teak Studio Work Desk (140cm)',
                     'UltraSharp 27" 4K IPS Monitor',
-<<<<<<< HEAD
                     'ScreenBar Halo LED Desk Light',
-=======
-                    'Silent Wireless Keyboard & Mouse Combo',
->>>>>>> b766b4a8e9dd43622984d8524897f4071d4bda53
                     'Multi-Port Thunderbolt 4 Dock'
                   ].map((item, idx) => (
                     <span
