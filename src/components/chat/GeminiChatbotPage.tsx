@@ -36,20 +36,11 @@ import {
 import { useApp } from '../../context/AppContext';
 import { Product } from '../../types';
 import { formatINR } from '../../utils/pricing';
+import { getProductImageUrl, getProductImageFallback } from '../../utils/imageUtils';
+import { generateComprehensiveHeuristicResponse } from '../../data/websiteKnowledge';
 
 export type ChatbotRole = 'workspace_architect' | 'rapid_checker' | 'procurement_strategist' | 'custom';
-export type GeminiModel = 'gemini-3.8-flash' | 'gemini-3.1-flash-lite' | 'gemini-4-argon';
-
-function getProductImageUrl(img?: string, id?: string): string {
-  if (!img) return id ? `/assets/${id}.png` : '';
-  if (img.startsWith('../assets/')) {
-    return img.replace('../assets/', '/assets/');
-  }
-  if (img.startsWith('./assets/')) {
-    return img.replace('./assets/', '/assets/');
-  }
-  return img;
-}
+export type GeminiModel = 'gemini-3.1-flash-lite' | 'gemini-flash-lite-latest' | 'gemini-3-flash-preview' | 'gemini-3.8-flash' | 'gemini-4-argon';
 
 interface Message {
   id: string;
@@ -100,7 +91,7 @@ const ROLE_DEFINITIONS: Record<ChatbotRole, {
   workspace_architect: {
     name: 'Sahay Shopping & Setup Consultant',
     badge: 'Direct Orders & Assembly',
-    defaultModel: 'gemini-3.8-flash',
+    defaultModel: 'gemini-flash-lite-latest',
     icon: Bot,
     description: 'Expert in ordering products, bundle assembly, human ergonomics, and complete setup recommendations across all 40 products.',
     systemInstruction: 'You are Sahay AI (सहाय AI), the master intelligent Shopping Consultant and Ordering Agent for the Budget-Based Product Bundle Builder. You can directly place orders, manage carts, compute landed costs, and recommend hardware across all 40 products (P01 to P40).',
@@ -115,7 +106,7 @@ const ROLE_DEFINITIONS: Record<ChatbotRole, {
   rapid_checker: {
     name: 'Rapid Compatibility & Spec Checker',
     badge: 'Fast Tasks',
-    defaultModel: 'gemini-3.1-flash-lite',
+    defaultModel: 'gemini-flash-lite-latest',
     icon: Zap,
     description: 'Ultra-fast verification of hardware port compatibility, desk dimensional clearances, power delivery wattage, and current stock.',
     systemInstruction: 'You are a Rapid Hardware Spec Checker. Deliver lightning-fast, high-density, no-fluff answers verifying hardware compatibility, port types, clamp dimensions, power wattage, and stock status. Be concise and direct.',
@@ -129,7 +120,7 @@ const ROLE_DEFINITIONS: Record<ChatbotRole, {
   procurement_strategist: {
     name: 'Procurement & Unit Economics Analyst',
     badge: 'Complex Tasks',
-    defaultModel: 'gemini-4-argon',
+    defaultModel: 'gemini-flash-lite-latest',
     icon: Brain,
     description: 'Deep financial reasoning covering landed price modeling, shipping surcharge thresholds, platform referral fees, and B2B volume pricing.',
     systemInstruction: 'You are a Senior IT Procurement & Unit Economics Strategist. Analyze landed margins, shipping fee breakpoints, tax implications, platform commission referral models, and basket economics with rigorous quantitative detail.',
@@ -143,7 +134,7 @@ const ROLE_DEFINITIONS: Record<ChatbotRole, {
   custom: {
     name: 'Custom Persona / Prompt',
     badge: 'Configurable',
-    defaultModel: 'gemini-3.8-flash',
+    defaultModel: 'gemini-flash-lite-latest',
     icon: Settings2,
     description: 'Define your own specialized chatbot persona, custom system instructions, and task parameters.',
     systemInstruction: 'You are a specialized hardware consultant and ordering assistant for budget-conscious corporate IT equipment.',
@@ -165,6 +156,7 @@ export const GeminiChatbotPage: React.FC = () => {
     applyBundleRecommendation,
     swapProductById,
     addItemToCart,
+    openProductDetails,
     initiateCheckout,
     isCartOpen,
     setIsCartOpen,
@@ -175,7 +167,7 @@ export const GeminiChatbotPage: React.FC = () => {
   } = useApp();
 
   const [activeRole, setActiveRole] = useState<ChatbotRole>('workspace_architect');
-  const [selectedModel, setSelectedModel] = useState<GeminiModel>('gemini-3.8-flash');
+  const [selectedModel, setSelectedModel] = useState<GeminiModel>('gemini-flash-lite-latest');
   const [customInstruction, setCustomInstruction] = useState<string>(
     ROLE_DEFINITIONS.workspace_architect.systemInstruction
   );
@@ -198,16 +190,14 @@ export const GeminiChatbotPage: React.FC = () => {
       role: 'assistant',
       text: `👋 Welcome to **Sahay AI (सहाय AI)**, your intelligent shopping assistant!
 
-I am fully trained on our **entire website**, all **40 products (P01 to P40)**, stock levels, and landed pricing calculations.
-
-✨ **You can order anything directly through me!** Just ask:
+✨ **You can order products directly through chat or configure your workspace setup:**
 • *"Order P26 Ergonomic Vertical Mouse"*
 • *"Buy RGB Mechanical Gaming Keyboard and 100W GaN Fast Charger"*
 • *"Order 2 Blue Tshirts (Size L) and 1 Insulated Travel Mug"*
 • *"Checkout my active bundle cart"*
 
-Your active bundle context is **${attachWorkspaceContext ? 'synced' : 'disconnected'}**. What would you like to buy or configure today?`,
-      model: 'gemini-3.8-flash',
+What would you like to order or configure today?`,
+      model: 'gemini-3.1-flash-lite',
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }
   ]);
@@ -300,8 +290,9 @@ Please provide an in-depth evaluation for this product based on our current cata
     if (!textOverride) setInputMessage('');
     setIsLoading(true);
 
+    let contextPayload: any = null;
+
     try {
-      let contextPayload = null;
       if (attachWorkspaceContext) {
         const currentItemsSummary: Record<string, any> = {};
         for (const [slotId, prod] of Object.entries(currentItems)) {
@@ -358,45 +349,65 @@ Please provide an in-depth evaluation for this product based on our current cata
         text: m.text
       }));
 
-      const res = await fetch('/api/ai/assistant', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: text,
-          history: historyPayload,
-          context: contextPayload,
-          model: selectedModel,
-          role: activeRole,
-          systemInstruction: customInstruction
-        })
-      });
+      const abortController = new AbortController();
+      const timeoutId = setTimeout(() => abortController.abort(), 18000);
 
-      if (!res.ok) {
-        throw new Error(`Chat API error (${res.status}): ${res.statusText}`);
+      let res: Response;
+      try {
+        res = await fetch('/api/ai/assistant', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message: text,
+            history: historyPayload,
+            context: contextPayload,
+            model: selectedModel,
+            role: activeRole,
+            systemInstruction: customInstruction
+          }),
+          signal: abortController.signal
+        });
+      } finally {
+        clearTimeout(timeoutId);
       }
 
-      const data = await res.json();
+      let data: any = null;
+      if (res && res.ok) {
+        try {
+          data = await res.json();
+        } catch (jsonErr) {
+          console.warn('Failed to parse AI response JSON:', jsonErr);
+        }
+      }
+
+      // If server returned non-200 (e.g. 500 on Vercel) or empty, fall back to offline intelligence engine
+      if (!data || !data.reply) {
+        console.warn('API returned non-200 or missing reply. Using robust client-side reasoning engine.');
+        data = generateComprehensiveHeuristicResponse(text, contextPayload);
+      }
 
       const botMessage: Message = {
         id: `bot-${Date.now()}`,
         role: 'assistant',
-        text: data.reply || "I've analyzed your prompt.",
-        model: data.model || selectedModel,
-        action: data.action || null,
+        text: data?.reply || "I've analyzed your prompt.",
+        model: data?.model || selectedModel,
+        action: data?.action || null,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
 
       setMessages(prev => [...prev, botMessage]);
     } catch (err: any) {
-      console.error('Chat error:', err);
-      const errMsg: Message = {
-        id: `err-${Date.now()}`,
+      console.warn('Network exception during AI chat fetch, activating local intelligence fallback:', err);
+      const localData = generateComprehensiveHeuristicResponse(text, contextPayload);
+      const botMessage: Message = {
+        id: `bot-${Date.now()}-fallback`,
         role: 'assistant',
-        text: `Sorry, an error occurred while processing your request: ${err.message}.`,
-        model: selectedModel,
+        text: localData?.reply || `I've analyzed your configuration. What would you like to build or optimize next?`,
+        model: localData?.model || 'heuristic-engine',
+        action: (localData?.action as any) || null,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
-      setMessages(prev => [...prev, errMsg]);
+      setMessages(prev => [...prev, botMessage]);
     } finally {
       setIsLoading(false);
     }
@@ -526,33 +537,86 @@ Please provide an in-depth evaluation for this product based on our current cata
     const lines = text.split('\n');
     return lines.map((line, idx) => {
       if (line.startsWith('### ')) {
-        return <h4 key={idx} className="font-bold text-[#2C3A2B] text-sm mt-3 mb-1">{line.replace('### ', '')}</h4>;
+        return <h4 key={idx} className="font-bold text-[#2C3A2B] text-sm sm:text-base mt-3 mb-1">{line.replace('### ', '')}</h4>;
       }
       if (line.startsWith('## ')) {
-        return <h3 key={idx} className="font-bold text-[#2C3A2B] text-base mt-4 mb-1">{line.replace('## ', '')}</h3>;
+        return <h3 key={idx} className="font-bold text-[#2C3A2B] text-base sm:text-lg mt-4 mb-1.5">{line.replace('## ', '')}</h3>;
       }
       if (line.startsWith('- ') || line.startsWith('* ')) {
+        const content = line.substring(2);
+        const prodMatch = content.match(/\b(?:\[)?(P(?:0[1-9]|[1-5][0-9]|60))(?:\])?\b/i);
+        const bulletProduct = prodMatch
+          ? fixture.products.find(p => p.id.toUpperCase() === prodMatch[1].toUpperCase())
+          : null;
+
         return (
-          <li key={idx} className="ml-4 list-disc text-[#4A4A35] my-0.5 leading-relaxed">
-            {renderInlineMarkdown(line.substring(2))}
-          </li>
+          <div key={idx} className="flex items-start gap-2.5 my-1.5 text-stone-800 text-sm">
+            {bulletProduct ? (
+              <div
+                onClick={() => openProductDetails(bulletProduct.id)}
+                className="w-9 h-9 rounded-lg bg-white border border-[#E6E1D3] flex items-center justify-center p-0.5 shrink-0 overflow-hidden cursor-pointer hover:border-[#8B5A2B] shadow-2xs transition-all hover:scale-105"
+                title={`View ${bulletProduct.name}`}
+              >
+                <img
+                  src={getProductImageUrl(bulletProduct.image, bulletProduct.id)}
+                  alt={bulletProduct.name}
+                  className="w-full h-full object-contain"
+                  onError={(e) => {
+                    e.currentTarget.src = getProductImageFallback(e.currentTarget.src);
+                  }}
+                />
+              </div>
+            ) : (
+              <span className="w-1.5 h-1.5 rounded-full bg-[#8B5A2B] mt-2 shrink-0" />
+            )}
+            <div className="flex-1 leading-relaxed">
+              {renderInlineMarkdown(content)}
+            </div>
+          </div>
         );
       }
       if (/^\d+\.\s/.test(line)) {
+        const content = line.replace(/^\d+\.\s/, '');
+        const prodMatch = content.match(/\b(?:\[)?(P(?:0[1-9]|[1-5][0-9]|60))(?:\])?\b/i);
+        const itemProduct = prodMatch
+          ? fixture.products.find(p => p.id.toUpperCase() === prodMatch[1].toUpperCase())
+          : null;
+
         return (
-          <li key={idx} className="ml-4 list-decimal text-[#4A4A35] my-0.5 leading-relaxed">
-            {renderInlineMarkdown(line.replace(/^\d+\.\s/, ''))}
-          </li>
+          <div key={idx} className="flex items-start gap-2.5 my-2.5">
+            <span className="font-mono font-bold text-xs text-[#8B5A2B] bg-[#F4F1EA] w-6 h-6 flex items-center justify-center rounded-lg shrink-0 border border-[#E6E1D3] mt-0.5 shadow-2xs">
+              {line.match(/^\d+/)?.[0]}
+            </span>
+            {itemProduct && (
+              <div
+                onClick={() => openProductDetails(itemProduct.id)}
+                className="w-11 h-11 rounded-xl bg-white border border-[#E6E1D3] flex items-center justify-center p-1 shrink-0 overflow-hidden cursor-pointer hover:border-[#8B5A2B] hover:shadow-xs transition-all hover:scale-105"
+                title={`View ${itemProduct.name}`}
+              >
+                <img
+                  src={getProductImageUrl(itemProduct.image, itemProduct.id)}
+                  alt={itemProduct.name}
+                  className="w-full h-full object-contain"
+                  onError={(e) => {
+                    e.currentTarget.src = getProductImageFallback(e.currentTarget.src);
+                  }}
+                />
+              </div>
+            )}
+            <div className="flex-1 leading-relaxed text-sm font-semibold text-stone-900">
+              {renderInlineMarkdown(content)}
+            </div>
+          </div>
         );
       }
       if (line.startsWith('---')) {
-        return <hr key={idx} className="my-2 border-[#E6E1D3]" />;
+        return <hr key={idx} className="my-3 border-[#E6E1D3]" />;
       }
       if (!line.trim()) {
-        return <div key={idx} className="h-1.5" />;
+        return <div key={idx} className="h-2" />;
       }
       return (
-        <p key={idx} className="text-[#3A3A2C] my-1 leading-relaxed">
+        <p key={idx} className="text-[#3A3A2C] my-1 leading-relaxed text-sm">
           {renderInlineMarkdown(line)}
         </p>
       );
@@ -567,16 +631,18 @@ Please provide an in-depth evaluation for this product based on our current cata
     while (remaining.length > 0) {
       const boldMatch = remaining.match(/\*\*(.+?)\*\*/);
       const codeMatch = remaining.match(/`([^`]+)`/);
+      const prodMatch = remaining.match(/\[(P(?:0[1-9]|[1-5][0-9]|60))\]|\b(P(?:0[1-9]|[1-5][0-9]|60))\b/i);
 
       const boldIdx = boldMatch ? remaining.indexOf(boldMatch[0]) : -1;
       const codeIdx = codeMatch ? remaining.indexOf(codeMatch[0]) : -1;
+      const prodIdx = prodMatch ? remaining.indexOf(prodMatch[0]) : -1;
 
-      if (boldIdx === -1 && codeIdx === -1) {
+      if (boldIdx === -1 && codeIdx === -1 && prodIdx === -1) {
         parts.push(<span key={keyIdx++}>{remaining}</span>);
         break;
       }
 
-      if (boldIdx !== -1 && (codeIdx === -1 || boldIdx < codeIdx)) {
+      if (boldIdx !== -1 && (codeIdx === -1 || boldIdx < codeIdx) && (prodIdx === -1 || boldIdx < prodIdx)) {
         if (boldIdx > 0) {
           parts.push(<span key={keyIdx++}>{remaining.substring(0, boldIdx)}</span>);
         }
@@ -586,16 +652,41 @@ Please provide an in-depth evaluation for this product based on our current cata
           </strong>
         );
         remaining = remaining.substring(boldIdx + boldMatch![0].length);
-      } else if (codeIdx !== -1) {
+      } else if (codeIdx !== -1 && (prodIdx === -1 || codeIdx < prodIdx)) {
         if (codeIdx > 0) {
           parts.push(<span key={keyIdx++}>{remaining.substring(0, codeIdx)}</span>);
         }
         parts.push(
-          <code key={keyIdx++} className="px-1.5 py-0.5 rounded-md bg-[#F4F1EA] font-mono text-[11px] text-[#2C3A2B] border border-[#E6E1D3]">
+          <code key={keyIdx++} className="px-1.5 py-0.5 rounded-md bg-[#F4F1EA] font-mono text-xs text-[#2C3A2B] border border-[#E6E1D3]">
             {codeMatch![1]}
           </code>
         );
         remaining = remaining.substring(codeIdx + codeMatch![0].length);
+      } else if (prodIdx !== -1) {
+        if (prodIdx > 0) {
+          parts.push(<span key={keyIdx++}>{remaining.substring(0, prodIdx)}</span>);
+        }
+        const prodId = (prodMatch![1] || prodMatch![2]).toUpperCase();
+        const product = fixture.products.find(p => p.id === prodId);
+        parts.push(
+          <span
+            key={keyIdx++}
+            onClick={() => product && openProductDetails(product.id)}
+            className="inline-flex items-center gap-1 px-1.5 py-0.5 mx-0.5 rounded-md bg-[#F4F1EA] hover:bg-[#EAE5D9] text-[#2C3A2B] border border-[#E6E1D3] font-mono font-bold text-xs cursor-pointer shadow-2xs transition-colors"
+            title={product ? `${product.name} (Click for specs)` : prodId}
+          >
+            {product && (
+              <img
+                src={getProductImageUrl(product.image, product.id)}
+                alt=""
+                className="w-3.5 h-3.5 rounded object-contain shrink-0"
+                onError={(e) => { e.currentTarget.style.display = 'none'; }}
+              />
+            )}
+            <span>{prodId}</span>
+          </span>
+        );
+        remaining = remaining.substring(prodIdx + prodMatch![0].length);
       }
     }
     return parts;
@@ -702,6 +793,22 @@ Please provide an in-depth evaluation for this product based on our current cata
         {/* Configuration Bar: Model Selector, System Instruction, Context Toggle */}
         <div className="mt-3 pt-3 border-t border-stone-100 flex flex-wrap items-center justify-between gap-3 text-xs">
           <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg border border-stone-200 bg-white text-stone-700 font-medium">
+              <Brain className="w-3.5 h-3.5 text-[#2C3A2B]" />
+              <span className="text-[11px] text-[#5A5A40]">Model:</span>
+              <select
+                value={selectedModel}
+                onChange={e => setSelectedModel(e.target.value as GeminiModel)}
+                className="bg-transparent text-xs font-semibold text-[#2C3A2B] focus:outline-none cursor-pointer"
+              >
+                <option value="gemini-3.1-flash-lite">gemini-3.1-flash-lite (Fast & Responsive)</option>
+                <option value="gemini-flash-lite-latest">gemini-flash-lite-latest (Ultra Low Latency)</option>
+                <option value="gemini-3-flash-preview">gemini-3-flash-preview (High Accuracy)</option>
+                <option value="gemini-3.8-flash">gemini-3.8-flash (Standard)</option>
+                <option value="gemini-4-argon">gemini-4-argon (Analytical)</option>
+              </select>
+            </div>
+
             <button
               onClick={() => setShowSystemInstruction(prev => !prev)}
               className="flex items-center gap-1 px-2.5 py-1 rounded-lg border border-stone-200 hover:bg-stone-50 text-stone-700 font-medium cursor-pointer"
@@ -1093,11 +1200,11 @@ Please provide an in-depth evaluation for this product based on our current cata
                   </div>
 
                   {/* Body Content */}
-                  <div className={isUser ? 'text-white' : 'text-[#2C2C1E]'}>
+                  <div className={isUser ? 'text-white text-sm' : 'text-[#2C2C1E] text-sm'}>
                     {isUser ? (
-                      <p className="leading-relaxed whitespace-pre-wrap">{msg.text}</p>
+                      <p className="leading-relaxed whitespace-pre-wrap text-sm">{msg.text}</p>
                     ) : (
-                      renderFormatted(msg.text)
+                      <div className="space-y-1.5 text-sm">{renderFormatted(msg.text)}</div>
                     )}
                   </div>
 

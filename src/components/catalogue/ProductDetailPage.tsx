@@ -16,22 +16,20 @@ import {
   Sparkles,
   ExternalLink,
   ChevronRight,
-  CheckCircle2
+  CheckCircle2,
+  Edit3,
+  TrendingUp,
+  BarChart2,
+  Clock,
+  Layers
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { Product } from '../../types';
 import { formatINR } from '../../utils/pricing';
-
-function getProductImageUrl(img?: string, id?: string): string {
-  if (!img) return id ? `/assets/${id}.png` : '';
-  if (img.startsWith('../assets/')) {
-    return img.replace('../assets/', '/assets/');
-  }
-  if (img.startsWith('./assets/')) {
-    return img.replace('./assets/', '/assets/');
-  }
-  return img;
-}
+import { getProductImageUrl, getProductImageFallback } from '../../utils/imageUtils';
+import { classifyStockStatus } from '../../utils/inventoryRules';
+import { getProductClickStats } from '../../utils/analytics';
+import { formatKolkataDate, formatKolkataTime } from '../../utils/userActivity';
 
 function getColourHex(colour?: string): string {
   if (!colour) return '#9CA3AF';
@@ -59,11 +57,18 @@ export const ProductDetailPage: React.FC = () => {
     addItemToCart,
     removeProduct,
     toggleCart,
-    setActiveTab
+    setActiveTab,
+    userRole,
+    lowStockThreshold,
+    updateProductStock
   } = useApp();
 
   const [copiedLink, setCopiedLink] = useState(false);
   const [imgError, setImgError] = useState(false);
+  const [isEditingStock, setIsEditingStock] = useState(false);
+  const [editStockInput, setEditStockInput] = useState('');
+  const [editStockError, setEditStockError] = useState<string | null>(null);
+  const [editStockSuccess, setEditStockSuccess] = useState<string | null>(null);
 
   // Find product from fixture or fallback to first product
   const product: Product | undefined = fixture.products.find(p => p.id === selectedProductId) || fixture.products[0];
@@ -97,6 +102,10 @@ export const ProductDetailPage: React.FC = () => {
 
   // Other products from the SAME product category/type only (excluding the currently viewed item)
   const sameCategoryProducts = categoryProducts.filter(p => p.id !== product.id);
+
+  const isAdmin = userRole === 'admin';
+  const stockStatus = classifyStockStatus(product.stockQuantity, lowStockThreshold);
+  const clickStats = getProductClickStats(product.id, fixture.products);
 
   const imgSrc = getProductImageUrl(product.image, product.id);
 
@@ -205,8 +214,18 @@ export const ProductDetailPage: React.FC = () => {
               <img
                 src={imgSrc}
                 alt={product.name}
-                onError={() => setImgError(true)}
+                onError={(e) => {
+                  const target = e.currentTarget;
+                  const fallback = getProductImageFallback(target.src);
+                  if (fallback !== target.src) {
+                    target.src = fallback;
+                  } else {
+                    setImgError(true);
+                  }
+                }}
                 className="w-full h-full object-contain mix-blend-multiply transition-transform duration-500 group-hover:scale-105"
+                loading="eager"
+                decoding="async"
               />
             )}
 
@@ -284,21 +303,179 @@ export const ProductDetailPage: React.FC = () => {
 
             <div className="pt-3 border-t border-[#E6E1D3]/70 flex flex-wrap items-center justify-between gap-3 text-xs">
               <div className="flex items-center gap-2">
-                <span className="text-[#5A5A40]">Inventory:</span>
-                {product.inStock ? (
-                  <span className="font-semibold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200 text-[11px]">
-                    {product.stockQuantity} units available
+                <span className="text-[#5A5A40]">Stock Status:</span>
+                {stockStatus === 'IN_STOCK' ? (
+                  <span className="font-semibold text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200 text-[11px] inline-flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-600" />
+                    <span>In Stock ({product.stockQuantity} units)</span>
+                  </span>
+                ) : stockStatus === 'LOW_STOCK' ? (
+                  <span className="font-semibold text-amber-800 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200 text-[11px] inline-flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-600" />
+                    <span>Low Stock ({product.stockQuantity} units ≤ {lowStockThreshold})</span>
                   </span>
                 ) : (
-                  <span className="font-semibold text-rose-800 bg-rose-50 px-2 py-0.5 rounded-full border border-rose-200 text-[11px]">
-                    Out of Stock
+                  <span className="font-semibold text-rose-800 bg-rose-50 px-2.5 py-0.5 rounded-full border border-rose-200 text-[11px] inline-flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-rose-600" />
+                    <span>Out of Stock</span>
                   </span>
                 )}
               </div>
               <span className="text-[#8B8B7A] text-[11px]">
-                Shipping & Tax rules apply at checkout
+                Threshold: <strong>{lowStockThreshold} units</strong>
               </span>
             </div>
+          </div>
+
+          {/* Inventory Analytics & Live Engagement Card */}
+          <div className="bg-white rounded-3xl border border-[#E6E1D3] p-5 shadow-xs space-y-4">
+            <div className="flex items-center justify-between border-b border-[#E6E1D3]/70 pb-3">
+              <div className="flex items-center gap-2">
+                <BarChart2 className="w-4 h-4 text-[#8B5A2B]" />
+                <span className="text-xs font-bold text-[#2C3A2B] uppercase tracking-wider">
+                  Inventory & Engagement Profile
+                </span>
+              </div>
+              {product.lastUpdated && (
+                <div className="flex items-center gap-1 text-[11px] text-[#5A5A40] font-mono">
+                  <Clock className="w-3 h-3 text-[#8B8B7A]" />
+                  <span>Updated: {formatKolkataDate(product.lastUpdated)} {formatKolkataTime(product.lastUpdated)}</span>
+                </div>
+              )}
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+              <div className="p-3 rounded-2xl bg-[#FDFBF7] border border-[#E6E1D3]">
+                <span className="text-[10px] font-mono uppercase tracking-wider text-[#8B8B7A] block">
+                  Available Units
+                </span>
+                <span className="font-mono text-xl font-bold text-[#2C3A2B] mt-0.5 block">
+                  {product.stockQuantity}
+                </span>
+              </div>
+
+              <div className="p-3 rounded-2xl bg-[#FDFBF7] border border-[#E6E1D3]">
+                <span className="text-[10px] font-mono uppercase tracking-wider text-[#8B8B7A] block">
+                  Low Stock Threshold
+                </span>
+                <span className="font-mono text-xl font-bold text-[#8B5A2B] mt-0.5 block">
+                  {lowStockThreshold}
+                </span>
+              </div>
+
+              <div className="p-3 rounded-2xl bg-[#FDFBF7] border border-[#E6E1D3]">
+                <span className="text-[10px] font-mono uppercase tracking-wider text-[#8B8B7A] block">
+                  Total Clicks
+                </span>
+                <span className="font-mono text-xl font-bold text-blue-700 mt-0.5 block flex items-center justify-center gap-1">
+                  <TrendingUp className="w-3.5 h-3.5" />
+                  <span>{clickStats.totalClicks}</span>
+                </span>
+              </div>
+
+              <div className="p-3 rounded-2xl bg-[#FDFBF7] border border-[#E6E1D3]">
+                <span className="text-[10px] font-mono uppercase tracking-wider text-[#8B8B7A] block">
+                  Popularity Rank
+                </span>
+                <span className="font-mono text-xl font-bold text-[#2C3A2B] mt-0.5 block">
+                  {clickStats.rank ? `#${clickStats.rank}` : 'Unranked'}
+                </span>
+              </div>
+            </div>
+
+            {/* Admin Stock Management Drawer */}
+            {isAdmin && (
+              <div className="pt-3 border-t border-[#E6E1D3] space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5 text-xs font-semibold text-[#2C3A2B]">
+                    <Edit3 className="w-3.5 h-3.5 text-[#8B5A2B]" />
+                    <span>Administrator Stock Adjustment</span>
+                  </div>
+                  {!isEditingStock && (
+                    <button
+                      onClick={() => {
+                        setEditStockInput(String(product.stockQuantity));
+                        setIsEditingStock(true);
+                        setEditStockError(null);
+                        setEditStockSuccess(null);
+                      }}
+                      className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-[#2C3A2B] text-white hover:bg-[#1E281D] transition-colors cursor-pointer"
+                    >
+                      Update Inventory
+                    </button>
+                  )}
+                </div>
+
+                {isEditingStock && (
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      const res = updateProductStock(product.id, editStockInput);
+                      if (!res.success) {
+                        setEditStockError(res.error || 'Failed to update stock quantity.');
+                        setEditStockSuccess(null);
+                      } else {
+                        setEditStockSuccess(`Inventory successfully updated to ${editStockInput} units.`);
+                        setEditStockError(null);
+                        setTimeout(() => setIsEditingStock(false), 1200);
+                      }
+                    }}
+                    className="p-3.5 rounded-2xl bg-[#FDFBF7] border border-[#E6E1D3] space-y-3 text-xs"
+                  >
+                    <div className="flex flex-col sm:flex-row items-center gap-3">
+                      <div className="flex-1 w-full space-y-1">
+                        <label className="text-[11px] font-semibold text-[#5A5A40]">
+                          New Physical Stock Quantity
+                        </label>
+                        <input
+                          type="number"
+                          min="0"
+                          step="1"
+                          required
+                          value={editStockInput}
+                          onChange={(e) => {
+                            setEditStockInput(e.target.value);
+                            setEditStockError(null);
+                            setEditStockSuccess(null);
+                          }}
+                          placeholder="e.g. 10"
+                          className="w-full bg-white border border-[#E6E1D3] rounded-xl px-3 py-1.5 text-xs font-mono text-[#2C3A2B] focus:outline-none focus:border-[#2C3A2B]"
+                        />
+                      </div>
+                      <div className="flex items-center gap-2 self-end w-full sm:w-auto pt-2 sm:pt-0">
+                        <button
+                          type="button"
+                          onClick={() => setIsEditingStock(false)}
+                          className="px-3 py-1.5 rounded-xl border border-[#E6E1D3] bg-white text-[#5A5A40] hover:bg-[#F4F1EA] text-xs font-semibold cursor-pointer"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="submit"
+                          className="px-3 py-1.5 rounded-xl bg-[#2C3A2B] hover:bg-[#1E281D] text-white text-xs font-bold transition-colors cursor-pointer shadow-2xs"
+                        >
+                          Save
+                        </button>
+                      </div>
+                    </div>
+
+                    {editStockError && (
+                      <div className="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2">
+                        <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                        <span>{editStockError}</span>
+                      </div>
+                    )}
+
+                    {editStockSuccess && (
+                      <div className="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2">
+                        <Check className="w-3.5 h-3.5 shrink-0 text-emerald-600" />
+                        <span>{editStockSuccess}</span>
+                      </div>
+                    )}
+                  </form>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Product Description */}

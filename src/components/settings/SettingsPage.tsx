@@ -10,7 +10,8 @@ import {
   Shield,
   Layers,
   Save,
-  Check
+  Check,
+  Database
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { formatINR } from '../../utils/pricing';
@@ -24,7 +25,8 @@ export const SettingsPage: React.FC = () => {
     loadFixtureData,
     resetFixtureToDefault,
     updateShippingRule,
-    updateTaxRule
+    updateTaxRule,
+    setIsSupabaseModalOpen
   } = useApp();
 
   const [jsonInput, setJsonInput] = useState('');
@@ -141,6 +143,13 @@ export const SettingsPage: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-2">
+          <button
+            onClick={() => setIsSupabaseModalOpen(true)}
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-xl shadow-2xs transition-colors cursor-pointer"
+          >
+            <Database className="w-3.5 h-3.5 text-emerald-700" />
+            Supabase Database
+          </button>
           <button
             onClick={handleDownloadActiveFixture}
             className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium text-[#2C3A2B] bg-[#FDFBF7] hover:bg-[#F4F1EA] border border-[#E6E1D3] rounded-xl shadow-2xs transition-colors"

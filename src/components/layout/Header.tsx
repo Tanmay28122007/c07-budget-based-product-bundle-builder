@@ -9,7 +9,8 @@ import {
   X,
   LogOut,
   Wallet,
-  User
+  User,
+  LogIn
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 
@@ -24,6 +25,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
     notifications,
     markNotificationsRead,
     clearNotifications,
+    activeTab,
     setActiveTab,
     userRole,
     logout,
@@ -52,10 +54,34 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Page title mapping
+  const pageTitles: Record<string, string> = {
+    dashboard: 'Admin Dashboard',
+    business: 'Business Insights',
+    catalogue: 'Product Catalogue',
+    tests: 'Test Results',
+    compare: 'Bundle Builder',
+    settings: 'Fixture & Rules',
+    evidence: 'Project Evidence',
+    profile: 'My Profile',
+    checkout: 'Checkout Simulation'
+  };
+
+  const currentPageTitle = pageTitles[activeTab] || 'Admin Portal';
+
+  // Format current date in Asia/Kolkata timezone
+  const formattedCurrentDate = new Intl.DateTimeFormat('en-IN', {
+    timeZone: 'Asia/Kolkata',
+    weekday: 'short',
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric'
+  }).format(new Date());
+
   return (
-    <header className="sticky top-0 z-30 h-16 bg-[#FDFBF7]/90 backdrop-blur-md border-b border-[#E6E1D3] px-4 lg:px-6 flex items-center justify-between gap-4">
-      {/* Left Area: Mobile Menu, Search Bar & Budget Bar Side-by-Side */}
-      <div className="flex items-center gap-3.5 flex-1 max-w-xl sm:max-w-2xl lg:max-w-3xl">
+    <header className="sticky top-0 z-30 h-16 bg-[#FDFBF7]/95 backdrop-blur-md border-b border-[#E6E1D3] px-4 lg:px-6 flex items-center justify-between gap-4">
+      {/* Left Area: Mobile Menu + Page Title & Date (or Search for Customer) */}
+      <div className="flex items-center gap-3.5 flex-1 min-w-0">
         <button
           onClick={onToggleSidebar}
           aria-label="Toggle navigation menu"
@@ -64,48 +90,70 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
           <Menu className="w-5 h-5" />
         </button>
 
-        {/* Global Search Bar */}
-        <div className="relative flex-1 min-w-[200px]">
-          <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8B8B7A]" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-            placeholder="Search items, specs, IDs..."
-            className="w-full pl-10 pr-9 py-2.5 text-xs sm:text-sm bg-[#F4F1EA]/70 hover:bg-[#F4F1EA] focus:bg-white border border-[#E6E1D3] rounded-xl focus:outline-hidden focus:border-[#2C3A2B] transition-all text-[#2C2C1E] placeholder-[#8B8B7A] shadow-2xs font-medium"
-          />
-          {searchQuery && (
-            <button
-              onClick={() => setSearchQuery('')}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#8B8B7A] hover:text-[#2C2C1E] cursor-pointer p-1"
-            >
-              <X className="w-3.5 h-3.5" />
-            </button>
-          )}
-        </div>
-
-        {/* Budget Input Bar - Placed next to the product search bar */}
-        <div className="flex items-center gap-2 shrink-0">
-          <span className="text-xs sm:text-sm font-bold text-[#8B5A2B] uppercase tracking-wider hidden sm:inline-flex items-center gap-1.5">
-            <Wallet className="w-4 h-4 text-[#8B5A2B]" />
-            <span>Budget:</span>
-          </span>
-          <div className="relative w-32 sm:w-40">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8B5A2B] font-mono text-xs sm:text-sm font-bold pointer-events-none">
-              ₹
-            </span>
-            <input
-              type="number"
-              min="0"
-              step="500"
-              value={budget || ''}
-              onChange={e => setBudget(Math.max(0, Number(e.target.value) || 0))}
-              placeholder="Budget"
-              title="Set Target Budget (₹)"
-              className="w-full pl-7 pr-3 py-2.5 text-xs sm:text-sm font-mono font-bold text-[#2C2C1E] bg-[#F4F1EA]/70 hover:bg-[#F4F1EA] focus:bg-white border border-[#E6E1D3] rounded-xl focus:outline-hidden focus:border-[#2C3A2B] transition-all placeholder-[#8B8B7A] shadow-2xs"
-            />
+        {userRole === 'admin' ? (
+          <div className="flex items-center gap-3 min-w-0">
+            <div>
+              <div className="flex items-center gap-2">
+                <h1 className="font-serif font-bold text-base sm:text-lg text-[#2C3A2B] truncate tracking-tight">
+                  {currentPageTitle}
+                </h1>
+                <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider bg-emerald-50 text-emerald-800 border border-emerald-200">
+                  Admin Portal
+                </span>
+              </div>
+              <p className="text-[11px] text-[#7A7A68] flex items-center gap-1.5 mt-0.5 font-medium">
+                <span>{formattedCurrentDate}</span>
+                <span className="text-[#B5B5A3]">·</span>
+                <span className="font-mono text-[10px]">IST (Asia/Kolkata)</span>
+              </p>
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="flex items-center gap-3.5 flex-1 max-w-xl sm:max-w-2xl lg:max-w-3xl">
+            {/* Global Search Bar */}
+            <div className="relative flex-1 min-w-[180px]">
+              <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8B8B7A]" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                placeholder="Search items, specs, IDs..."
+                className="w-full pl-10 pr-9 py-2 text-xs sm:text-sm bg-[#F4F1EA]/70 hover:bg-[#F4F1EA] focus:bg-white border border-[#E6E1D3] rounded-xl focus:outline-hidden focus:border-[#2C3A2B] transition-all text-[#2C2C1E] placeholder-[#8B8B7A] shadow-2xs font-medium"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#8B8B7A] hover:text-[#2C2C1E] cursor-pointer p-1"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+
+            {/* Budget Input Bar */}
+            <div className="flex items-center gap-2 shrink-0">
+              <span className="text-xs sm:text-sm font-bold text-[#8B5A2B] uppercase tracking-wider hidden sm:inline-flex items-center gap-1.5">
+                <Wallet className="w-4 h-4 text-[#8B5A2B]" />
+                <span>Budget:</span>
+              </span>
+              <div className="relative w-28 sm:w-36">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8B5A2B] font-mono text-xs sm:text-sm font-bold pointer-events-none">
+                  ₹
+                </span>
+                <input
+                  type="number"
+                  min="0"
+                  step="500"
+                  value={budget || ''}
+                  onChange={e => setBudget(Math.max(0, Number(e.target.value) || 0))}
+                  placeholder="Budget"
+                  title="Set Target Budget (₹)"
+                  className="w-full pl-7 pr-3 py-2 text-xs sm:text-sm font-mono font-bold text-[#2C2C1E] bg-[#F4F1EA]/70 hover:bg-[#F4F1EA] focus:bg-white border border-[#E6E1D3] rounded-xl focus:outline-hidden focus:border-[#2C3A2B] transition-all placeholder-[#8B8B7A] shadow-2xs"
+                />
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Right Controls: Notifications & Profile Avatar */}
@@ -182,57 +230,101 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
           )}
         </div>
 
-        {/* User Profile Avatar on Top Right Corner */}
-        <div className="relative" ref={profileRef}>
+        {/* Direct Admin Logout button on top navigation bar */}
+        {userRole === 'admin' && (
           <button
-            onClick={() => setShowProfile(prev => !prev)}
-            aria-label="User profile settings"
-            title="Tanmay Anand"
-            className="flex items-center justify-center p-0.5 rounded-full hover:ring-2 hover:ring-[#2C3A2B]/20 transition-all cursor-pointer group"
+            onClick={logout}
+            title="Sign out of Administrator Portal"
+            className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-rose-200 bg-rose-50/60 hover:bg-rose-100/70 text-rose-800 text-xs font-semibold transition-colors cursor-pointer shadow-2xs shrink-0"
           >
-            <div className="w-8 h-8 rounded-full bg-[#2C3A2B] text-white flex items-center justify-center font-bold text-xs tracking-tight shadow-xs ring-2 ring-[#E6E1D3] group-hover:ring-[#2C3A2B] transition-transform group-hover:scale-105">
-              TA
-            </div>
+            <LogOut className="w-3.5 h-3.5 text-rose-600" />
+            <span>Log Out</span>
           </button>
+        )}
 
-          {showProfile && (
-            <div className="absolute right-0 mt-2 w-60 bg-white border border-[#E6E1D3] rounded-2xl shadow-xl z-50 p-2">
-              <div className="px-3 py-2 border-b border-[#E6E1D3] mb-1">
-                <div className="text-xs font-serif font-bold text-[#2C3A2B]">Tanmay Anand</div>
-                <div className="text-[11px] text-[#5A5A40] flex items-center justify-between mt-0.5">
-                  <span>Current Session:</span>
-                  <span className="font-bold uppercase text-[10px] text-[#8B5A2B]">
-                    {userRole ? userRole : 'Not Logged In'}
-                  </span>
-                </div>
+        {/* User Profile Avatar or Sign In button on Top Right Corner */}
+        {!userRole ? (
+          <button
+            onClick={() => setActiveTab('dashboard')}
+            aria-label="Sign In"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#2C3A2B] hover:bg-[#1E281D] text-white text-xs font-bold uppercase tracking-wider shadow-xs transition-all cursor-pointer shrink-0"
+          >
+            <LogIn className="w-3.5 h-3.5 text-amber-200" />
+            <span>Sign In</span>
+          </button>
+        ) : (
+          <div className="relative" ref={profileRef}>
+            <button
+              onClick={() => setShowProfile(prev => !prev)}
+              aria-label="User profile settings"
+              title={userRole === 'admin' ? 'Administrator' : 'Tanmay Anand'}
+              className="flex items-center gap-2 p-1 rounded-2xl hover:bg-[#F4F1EA] border border-transparent hover:border-[#E6E1D3] transition-all cursor-pointer group"
+            >
+              <div className="w-8 h-8 rounded-full bg-[#2C3A2B] text-white flex items-center justify-center font-bold text-xs tracking-tight shadow-xs ring-2 ring-[#E6E1D3] group-hover:ring-[#2C3A2B] transition-transform group-hover:scale-105 shrink-0">
+                {userRole === 'admin' ? 'AD' : 'TA'}
               </div>
+              {userRole === 'admin' && (
+                <div className="text-left hidden md:block pr-1">
+                  <div className="text-xs font-bold text-[#2C2C1E] leading-tight">Admin</div>
+                  <div className="text-[10px] text-[#7A7A68]">Security Lead</div>
+                </div>
+              )}
+            </button>
 
-              <button
-                onClick={() => {
-                  setActiveTab('profile');
-                  setShowProfile(false);
-                }}
-                className="w-full text-left px-3 py-1.5 rounded-xl text-xs font-semibold text-[#2C3A2B] hover:bg-[#F4F1EA] flex items-center justify-between cursor-pointer"
-              >
-                <span>My Profile</span>
-                <User className="w-3.5 h-3.5 text-[#5A5A40]" />
-              </button>
+            {showProfile && (
+              <div className="absolute right-0 mt-2 w-64 bg-white border border-[#E6E1D3] rounded-2xl shadow-xl z-50 p-2">
+                <div className="px-3 py-2 border-b border-[#E6E1D3] mb-1">
+                  <div className="text-xs font-serif font-bold text-[#2C3A2B]">
+                    {userRole === 'admin' ? 'Administrator' : 'Tanmay Anand'}
+                  </div>
+                  <div className="text-[11px] text-[#5A5A40] flex items-center justify-between mt-0.5">
+                    <span>Current Session:</span>
+                    <span className="font-bold uppercase text-[10px] text-[#8B5A2B]">
+                      {userRole}
+                    </span>
+                  </div>
+                </div>
 
-              <div className="my-1 border-t border-[#E6E1D3]" />
+                {userRole === 'customer' && (
+                  <button
+                    onClick={() => {
+                      setActiveTab('profile');
+                      setShowProfile(false);
+                    }}
+                    className="w-full text-left px-3 py-1.5 rounded-xl text-xs font-semibold text-[#2C3A2B] hover:bg-[#F4F1EA] flex items-center justify-between cursor-pointer"
+                  >
+                    <span>My Profile</span>
+                    <User className="w-3.5 h-3.5 text-[#5A5A40]" />
+                  </button>
+                )}
 
-              <button
-                onClick={() => {
-                  logout();
-                  setShowProfile(false);
-                }}
-                className="w-full text-left px-3 py-1.5 rounded-xl text-xs font-semibold text-rose-700 hover:bg-rose-50 flex items-center justify-between cursor-pointer transition-colors"
-              >
-                <span>Log Out</span>
-                <LogOut className="w-3.5 h-3.5 text-rose-600" />
-              </button>
-            </div>
-          )}
-        </div>
+                <button
+                  onClick={() => {
+                    logout();
+                    setShowProfile(false);
+                  }}
+                  className="w-full text-left px-3 py-1.5 rounded-xl text-xs font-semibold text-[#8B5A2B] hover:bg-[#F4F1EA] flex items-center justify-between cursor-pointer"
+                >
+                  <span>Switch Account / Sign In</span>
+                  <LogIn className="w-3.5 h-3.5 text-[#8B5A2B]" />
+                </button>
+
+                <div className="my-1 border-t border-[#E6E1D3]" />
+
+                <button
+                  onClick={() => {
+                    logout();
+                    setShowProfile(false);
+                  }}
+                  className="w-full text-left px-3 py-1.5 rounded-xl text-xs font-semibold text-rose-700 hover:bg-rose-50 flex items-center justify-between cursor-pointer transition-colors"
+                >
+                  <span>Log Out</span>
+                  <LogOut className="w-3.5 h-3.5 text-rose-600" />
+                </button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </header>
   );

@@ -303,13 +303,13 @@ export function buildMasterSystemPrompt(params: {
     p => `[${p.id}] ${p.name} (${p.category}) - ₹${p.price.toLocaleString('en-IN')}${p.stock === 0 ? ' [OUT OF STOCK]' : ` [In Stock: ${p.stock}]`} - ${p.desc}`
   ).join('\n');
 
-  return `${rolePersona ? rolePersona + '\n\n' : ''}${customInstruction ? customInstruction + '\n\n' : ''}You are Sahay AI (सहाय AI), the master intelligent AI Assistant and Shopping Agent for the "Budget-Based Product Bundle Builder" (C07 Challenge) web application.
-You possess complete, authoritative knowledge of the ENTIRE platform, all 40 products (P01 to P40), compatibility rules, pricing formulas, MBA unit economics, and CAN DIRECTLY TAKE ORDERS AND MANAGE CARTS!
+  return `${rolePersona ? rolePersona + '\n\n' : ''}${customInstruction ? customInstruction + '\n\n' : ''}You are Sahay AI (सहाय AI), the intelligent AI Assistant and Shopping Agent for the "Budget-Based Product Bundle Builder" web application.
+You can directly recommend products, assemble bundles, calculate landed costs, and place 1-click orders.
 
 ==================================================
-1. CURRENT USER & WORKSPACE STATE
+1. CURRENT USER & WORKSPACE STATE (FOR INTERNAL CONTEXT ONLY - DO NOT ECHO THIS BACK TO THE USER)
 ==================================================
-- Active Page on Website: "${currentPage.title}" (tab: "${currentPage.id}") - ${currentPage.summary}
+- Active Page: "${currentPage.title}" (tab: "${currentPage.id}") - ${currentPage.summary}
 - Current Activity: "${activityName}"
 - Target Budget: ₹${currentBudget.toLocaleString('en-IN')}
 - Limiting Factor: ${limitingFactor}
@@ -431,9 +431,12 @@ Supported Action Formats:
 Supported tabs for navigation: "catalogue", "compare", "cart", "checkout", "profile", "dashboard", "business", "tests", "evidence", "settings", "chat".
 
 ==================================================
-6. RESPONSE STYLE & MULTILINGUAL SUPPORT
+6. RESPONSE STYLE & STRICT PROHIBITIONS
 ==================================================
-- Be enthusiastic, accurate, and deeply helpful.
+- CRITICAL: NEVER recite system capabilities or echo user workspace state as an opening introduction!
+  * FORBIDDEN: Do NOT say "I have complete knowledge of our entire catalog of 40 curated products...", "As an AI with knowledge of...", or similar introductory filler.
+  * FORBIDDEN: Do NOT say "Right now, you are on the Compare Builder workspace with a target budget of...", or regurgitate the user's budget and headroom, unless they explicitly asked "What is my current budget status?".
+- Jump straight into answering the user's question, suggestion, or order request directly and concisely.
 - For orders, explicitly list each item name, product ID, quantity, unit price, subtotal, shipping, 18% GST, and landed total.
 - Mention that delivery will be addressed to the active customer profile (Tanmay Anand).
 - Fully support questions and orders in English, Hindi (हिंदी), and Gujarati (ગુજરાતી)!`;
@@ -813,6 +816,115 @@ export function generateComprehensiveHeuristicResponse(message: string, context:
       return {
         reply: `Opening the **Automated Test Suite**. Run 22+ live verification tests with execution latency tracking.`,
         action: { type: 'navigate', tab: 'tests', reason: 'Open Test Results' },
+        model: 'heuristic-website-trainer'
+      };
+    }
+  }
+
+  // =========================================================================
+  // 3.5. Setup Recommendation & Bundle Assembly Intents
+  // =========================================================================
+  const isRecommendationIntent =
+    lowerMsg.includes('recommend') ||
+    lowerMsg.includes('setup') ||
+    lowerMsg.includes('bundle') ||
+    lowerMsg.includes('build') ||
+    lowerMsg.includes('suggest') ||
+    lowerMsg.includes('assemble') ||
+    lowerMsg.includes('workstation');
+
+  if (isRecommendationIntent) {
+    const budgetMatch = lowerMsg.match(/(?:under|below|budget|for|of)?\s*(?:₹|rs\.?|inr)?\s*(\d{2,6})\s*(?:k)?/i);
+    let targetAmt = currentBudget || 75000;
+    if (budgetMatch) {
+      const parsedNum = parseInt(budgetMatch[1], 10);
+      targetAmt = lowerMsg.includes('k') && parsedNum < 1000 ? parsedNum * 1000 : parsedNum;
+    }
+
+    if (targetAmt <= 15000) {
+      const subtotal = 1450 + 1850 + 1899 + 399;
+      const shipping = 499;
+      const tax = Math.round((subtotal + shipping) * 0.18);
+      const landed = subtotal + shipping + tax;
+      return {
+        reply: `Here is an essential workspace setup tailored under **₹${targetAmt.toLocaleString('en-IN')}**:\n\n` +
+          `1. **[P26] Ergonomic Wireless Vertical Mouse** — ₹1,450 (In Stock: 18)\n` +
+          `2. **[P28] Compact 60% Wireless Keyboard** — ₹1,850 (In Stock: 15)\n` +
+          `3. **[P34] USB-C 100W GaN Fast Charger** — ₹1,899 (In Stock: 30)\n` +
+          `4. **[P33] Magnetic Cable Management Organizer** — ₹399 (In Stock: 40)\n\n` +
+          `* **Product Subtotal:** ₹${subtotal.toLocaleString('en-IN')}\n` +
+          `* **Standard Shipping:** ₹${shipping}\n` +
+          `* **18% GST Tax:** ₹${tax.toLocaleString('en-IN')}\n` +
+          `* **Landed Total:** **₹${landed.toLocaleString('en-IN')}** (Within ₹${targetAmt.toLocaleString('en-IN')} target!)\n\n` +
+          `Click below to apply this setup directly to your builder or ask me to order any item!`,
+        action: {
+          type: 'apply_bundle',
+          title: `Budget Setup Under ₹${targetAmt.toLocaleString('en-IN')}`,
+          budget: targetAmt,
+          items: { Mouse: 'P26', Keyboard: 'P28', Charger: 'P34', Organizer: 'P33' }
+        },
+        model: 'heuristic-website-trainer'
+      };
+    } else {
+      const monitor = targetAmt < 60000 ? { id: 'P41', name: '27" 4K Professional Monitor', price: 28500 } : { id: 'P42', name: '34" Curved WQHD Ultrawide Monitor', price: 36000 };
+      const subtotal = monitor.price + 1450 + 2499 + 1899 + 399;
+      const shipping = subtotal >= 50000 ? 0 : 499;
+      const tax = Math.round((subtotal + shipping) * 0.18);
+      const landed = subtotal + shipping + tax;
+
+      return {
+        reply: `Here is a high-performance WFH workstation setup curated for your target budget of **₹${targetAmt.toLocaleString('en-IN')}**:\n\n` +
+          `1. **[${monitor.id}] ${monitor.name}** — ₹${monitor.price.toLocaleString('en-IN')} (In Stock: 10)\n` +
+          `2. **[P26] Ergonomic Wireless Vertical Mouse** — ₹1,450 (In Stock: 18)\n` +
+          `3. **[P27] RGB Mechanical Gaming Keyboard** — ₹2,499 (In Stock: 12)\n` +
+          `4. **[P34] USB-C 100W GaN Fast Charger** — ₹1,899 (In Stock: 30)\n` +
+          `5. **[P33] Magnetic Cable Management Organizer** — ₹399 (In Stock: 40)\n\n` +
+          `* **Product Subtotal:** ₹${subtotal.toLocaleString('en-IN')}\n` +
+          `* **Shipping Fee:** ${shipping === 0 ? '**FREE** (Order meets ₹50,000 threshold)' : `₹${shipping}`}\n` +
+          `* **18% GST Tax:** ₹${tax.toLocaleString('en-IN')}\n` +
+          `* **Total Landed Cost:** **₹${landed.toLocaleString('en-IN')}**\n\n` +
+          `Click below to apply this setup to your Workspace Builder!`,
+        action: {
+          type: 'apply_bundle',
+          title: `WFH Setup (${monitor.name})`,
+          budget: targetAmt,
+          items: { Monitor: monitor.id, Mouse: 'P26', Keyboard: 'P27', Charger: 'P34', Organizer: 'P33' }
+        },
+        model: 'heuristic-website-trainer'
+      };
+    }
+  }
+
+  // =========================================================================
+  // 3.6. Category Search & Inquiries (supports singulars, plurals, synonyms)
+  // =========================================================================
+  const categoryKeywords: Array<{ label: string; triggers: string[]; ids: string[] }> = [
+    { label: 'Mouse / Ergonomic Mice', triggers: ['mouse', 'mice'], ids: ['P26', 'P29', 'P07', 'P22', 'P54'] },
+    { label: 'Keyboards', triggers: ['keyboard', 'keyboards', 'keys'], ids: ['P27', 'P28', 'P08', 'P21', 'P47'] },
+    { label: 'Monitors / Displays', triggers: ['monitor', 'monitors', 'display', 'displays', 'screen', 'screens'], ids: ['P41', 'P42', 'P43'] },
+    { label: 'Chargers / Power', triggers: ['charger', 'chargers', 'charging', 'gan', 'power'], ids: ['P34', 'P35', 'P10'] },
+    { label: 'Hubs / Docks', triggers: ['hub', 'hubs', 'dock', 'docks', 'multiport'], ids: ['P09', 'P48', 'P49'] },
+    { label: 'Drawing Tablets & Stylus', triggers: ['tablet', 'tablets', 'stylus'], ids: ['P44', 'P45', 'P46'] },
+    { label: 'Audio / Microphones / Headsets', triggers: ['audio', 'microphone', 'mic', 'headset', 'headphone', 'headphones'], ids: ['P36', 'P52', 'P53'] },
+    { label: 'Webcams / Cameras', triggers: ['webcam', 'webcams', 'camera', 'cameras'], ids: ['P37', 'P38'] },
+    { label: 'Backpacks & Sleeves', triggers: ['backpack', 'backpacks', 'bag', 'bags', 'sleeve'], ids: ['P14', 'P15', 'P16'] },
+    { label: 'Mugs & Drinkware', triggers: ['mug', 'mugs', 'tumbler', 'bottle', 'bottles'], ids: ['P04', 'P05', 'P06', 'P11', 'P12'] },
+    { label: 'Apparel / T-Shirts', triggers: ['tshirt', 't-shirt', 'shirt', 'apparel', 'hoodie'], ids: ['P01', 'P02', 'P03'] }
+  ];
+
+  for (const cat of categoryKeywords) {
+    if (cat.triggers.some(t => lowerMsg.includes(t))) {
+      const matched = cat.ids.map(id => CATALOGUE_PRODUCTS_METADATA.find(p => p.id === id)).filter(Boolean);
+      const lines = matched.map((p: any) => `* **[${p.id}] ${p.name}** — ₹${p.price.toLocaleString('en-IN')} (${p.stock > 0 ? `${p.stock} in stock` : 'Out of Stock'}) — ${p.desc}`);
+      return {
+        reply: `Here are our top **${cat.label.toUpperCase()}** options in the catalogue:\n\n` +
+          lines.join('\n') +
+          `\n\nTell me which item you'd like (e.g. *"Order ${cat.ids[0]}"*) or ask me to add it to your bundle!`,
+        action: {
+          type: 'navigate',
+          tab: 'catalogue',
+          reason: `Browse ${cat.label} products in catalogue`
+        },
         model: 'heuristic-website-trainer'
       };
     }

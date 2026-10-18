@@ -4,8 +4,12 @@ import fixtureJson from './fixture.json';
 export function mapC07Fixture(raw: any = fixtureJson): FixtureData {
   const records = raw.records || {};
   const rawProducts = records.products || [];
-  const rawSlots: string[] = records.required_slots || [];
   const rawRequests = records.reference_requests || [];
+  const rawSlots: string[] = Array.isArray(records.required_slots) && records.required_slots.length > 0
+    ? records.required_slots
+    : (Array.isArray(rawRequests) && rawRequests[0]?.required_slots?.length > 0
+        ? rawRequests[0].required_slots
+        : ['Mouse', 'Keyboard']);
 
   const products: Product[] = rawProducts.map((p: any) => {
     const isUsbC = Array.isArray(p.compatible_with) && p.compatible_with.includes('usb-c');

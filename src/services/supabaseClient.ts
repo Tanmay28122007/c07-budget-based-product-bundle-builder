@@ -31,8 +31,8 @@ export function getSupabaseConfig(): SupabaseConfig {
     };
   }
 
-  const envUrl = (import.meta.env.VITE_SUPABASE_URL || '').trim();
-  const envKey = (import.meta.env.VITE_SUPABASE_ANON_KEY || '').trim();
+  const envUrl = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_SUPABASE_URL || typeof process !== 'undefined' && process.env?.VITE_SUPABASE_URL || '').trim();
+  const envKey = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_SUPABASE_ANON_KEY || typeof process !== 'undefined' && process.env?.VITE_SUPABASE_ANON_KEY || '').trim();
 
   if (envUrl && envKey && !envUrl.includes('your-project') && !envUrl.includes('xyzcompany')) {
     return {
