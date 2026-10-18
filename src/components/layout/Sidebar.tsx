@@ -163,8 +163,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         </button>
 
         {/* Navigation Section */}
-        <nav className="flex-1 px-3.5 py-4 space-y-2.5 overflow-y-auto">
-          <div className="px-3 pb-2 text-xs font-bold text-[#7A7A68] uppercase tracking-wider">
+        <nav className="flex-1 px-3 py-3 space-y-1.5 overflow-y-auto">
+          <div className="px-2.5 pb-1.5 text-[11px] font-bold text-[#7A7A68] uppercase tracking-wider">
             Workspace
           </div>
 
@@ -182,24 +182,24 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                   }
                   onClose();
                 }}
-                className={`w-full flex items-center justify-between px-4 py-3.5 rounded-2xl text-sm sm:text-base font-medium transition-all duration-200 group/nav ${
+                className={`w-full flex items-center justify-between px-3 py-2 sm:py-2.5 rounded-xl text-xs sm:text-[13px] font-medium transition-all duration-200 group/nav ${
                   isActive
-                    ? 'bg-[#2C3A2B] text-white font-semibold shadow-md translate-x-1'
-                    : 'text-[#4A4A35] hover:text-[#2C3A2B] hover:bg-[#F4F1EA] hover:translate-x-2 hover:shadow-xs'
+                    ? 'bg-[#2C3A2B] text-white font-semibold shadow-xs translate-x-0.5'
+                    : 'text-[#4A4A35] hover:text-[#2C3A2B] hover:bg-[#F4F1EA] hover:translate-x-1 hover:shadow-2xs'
                 }`}
               >
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2.5 min-w-0">
                   <Icon
-                    className={`w-5 h-5 transition-transform duration-200 group-hover/nav:scale-115 ${
+                    className={`w-4 h-4 shrink-0 transition-transform duration-200 group-hover/nav:scale-110 ${
                       isActive ? 'text-emerald-300' : 'text-[#7A7A68] group-hover/nav:text-[#2C3A2B]'
                     }`}
                   />
-                  <span className={isActive ? 'font-serif font-bold text-base' : 'font-medium text-sm sm:text-base'}>{item.label}</span>
+                  <span className={`truncate whitespace-nowrap ${isActive ? 'font-semibold text-[13px] text-white' : 'font-medium text-[13px]'}`}>{item.label}</span>
                 </div>
 
                 {item.badge && (
                   <span
-                    className={`text-xs font-mono font-semibold tabular-nums px-2.5 py-0.5 rounded-lg transition-transform group-hover/nav:scale-105 ${
+                    className={`text-[11px] font-mono font-semibold tabular-nums px-2 py-0.5 rounded-md shrink-0 transition-transform group-hover/nav:scale-105 ${
                       isActive
                         ? 'bg-white/20 text-white font-bold'
                         : 'bg-[#F4F1EA] text-[#8B5A2B] border border-[#E6E1D3]'
