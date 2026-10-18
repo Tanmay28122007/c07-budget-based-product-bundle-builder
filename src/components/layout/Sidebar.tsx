@@ -6,7 +6,6 @@ import {
   Columns,
   CheckCircle2,
   TrendingUp,
-  Settings,
   ShoppingCart,
   User,
   LogIn,
@@ -24,7 +23,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     activeTab,
     setActiveTab,
     fixture,
-    isCustomFixture,
     validation,
     savedBundles,
     testResults,
@@ -68,12 +66,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           label: 'Customer Builder',
           icon: Columns,
           badge: 'Workspace'
-        },
-        {
-          id: 'settings',
-          label: 'Fixture & Rules',
-          icon: Settings,
-          badge: isCustomFixture ? 'Custom' : 'Demo'
         }
       ]
     : userRole === 'customer'

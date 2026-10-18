@@ -12,7 +12,6 @@ import { ProductCataloguePage } from './components/catalogue/ProductCataloguePag
 import { CompareBundlesPage } from './components/compare/CompareBundlesPage';
 import { TestResultsPage } from './components/tests/TestResultsPage';
 import { BusinessInsightsPage } from './components/business/BusinessInsightsPage';
-import { SettingsPage } from './components/settings/SettingsPage';
 import { GeminiChatbotPage } from './components/chat/GeminiChatbotPage';
 import { ProductDetailPage } from './components/catalogue/ProductDetailPage';
 import { ProfilePage } from './components/profile/ProfilePage';
@@ -46,7 +45,7 @@ const AppContent: React.FC = () => {
           transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
           className="w-full"
         >
-          {(activeTab === 'dashboard' || activeTab === 'signin' || activeTab === 'login') && <DashboardPage />}
+          {(activeTab === 'dashboard' || activeTab === 'signin' || activeTab === 'login' || activeTab === 'settings') && <DashboardPage />}
           {activeTab === 'builder' && <CompareBundlesPage initialMode="workspace" />}
           {activeTab === 'chat' && <GeminiChatbotPage />}
           {activeTab === 'catalogue' && <ProductCataloguePage />}
@@ -54,11 +53,10 @@ const AppContent: React.FC = () => {
           {activeTab === 'compare' && <CompareBundlesPage />}
           {activeTab === 'tests' && <TestResultsPage />}
           {activeTab === 'business' && <BusinessInsightsPage />}
-          {activeTab === 'settings' && <SettingsPage />}
           {activeTab === 'profile' && <ProfilePage />}
           {activeTab === 'checkout' && <CheckoutPage />}
           {/* Fallback for unknown or legacy 'landing' tab */}
-          {(!['dashboard', 'signin', 'login', 'builder', 'chat', 'catalogue', 'product-detail', 'compare', 'tests', 'business', 'settings', 'profile', 'checkout'].includes(activeTab)) && <ProductCataloguePage />}
+          {(!['dashboard', 'signin', 'login', 'builder', 'chat', 'catalogue', 'product-detail', 'compare', 'tests', 'business', 'profile', 'checkout'].includes(activeTab)) && <ProductCataloguePage />}
         </motion.div>
       </AnimatePresence>
     </AppLayout>

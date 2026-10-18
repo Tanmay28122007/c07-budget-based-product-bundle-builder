@@ -61,7 +61,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
     catalogue: 'Product Catalogue',
     tests: 'Test Results',
     compare: 'Bundle Builder',
-    settings: 'Fixture & Rules',
+    settings: 'Admin Dashboard',
     evidence: 'Project Evidence',
     profile: 'My Profile',
     checkout: 'Checkout Simulation'
