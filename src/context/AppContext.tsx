@@ -63,7 +63,7 @@ interface AppContextType {
   // Inventory Management & Testing (Admin)
   lowStockThreshold: number;
   setLowStockThreshold: (threshold: number) => void;
-  updateProductStock: (productId: string, newQuantity: number) => { success: boolean; error?: string };
+  updateProductStock: (productId: string, newQuantity: number | string) => { success: boolean; error?: string };
   inventoryTestHistory: InventoryTestRun[];
   activeTestRun: InventoryTestRun | null;
   setActiveTestRun: (run: InventoryTestRun | null) => void;
@@ -1233,7 +1233,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     } catch {}
   };
 
-  const updateProductStock = (productId: string, newQuantity: number): { success: boolean; error?: string } => {
+  const updateProductStock = (productId: string, newQuantity: number | string): { success: boolean; error?: string } => {
     if (userRole !== 'admin') {
       addNotification("Unauthorized", "Only authorized administrators can modify inventory.", 'error');
       return { success: false, error: "Unauthorized: Admin privileges required." };
