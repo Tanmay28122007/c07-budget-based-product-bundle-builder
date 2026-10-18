@@ -18,18 +18,28 @@ import { GeminiChatbotPage } from './components/chat/GeminiChatbotPage';
 import { ProductDetailPage } from './components/catalogue/ProductDetailPage';
 import { ProfilePage } from './components/profile/ProfilePage';
 import { CheckoutPage } from './components/checkout/CheckoutPage';
+import { LoginPage } from './components/auth/LoginPage';
 
 import { motion, AnimatePresence } from 'motion/react';
 
 const AppContent: React.FC = () => {
   const { activeTab, userRole } = useApp();
 
-  // When visiting the website and not signed in, ALWAYS show the Sign-In Dashboard
-  if (!userRole) {
+  // If user is not authenticated or explicitly on login/home page, display LoginPage
+  if (!userRole || activeTab === 'login' || activeTab === 'home') {
     return (
-      <AppLayout>
-        <DashboardPage />
-      </AppLayout>
+      <AnimatePresence mode="wait">
+        <motion.div
+          key="login-page"
+          initial={{ opacity: 0, filter: 'blur(4px)' }}
+          animate={{ opacity: 1, filter: 'blur(0px)' }}
+          exit={{ opacity: 0, filter: 'blur(4px)' }}
+          transition={{ duration: 0.25 }}
+          className="w-full"
+        >
+          <LoginPage />
+        </motion.div>
+      </AnimatePresence>
     );
   }
 
