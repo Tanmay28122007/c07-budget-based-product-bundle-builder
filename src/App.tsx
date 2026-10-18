@@ -22,7 +22,16 @@ import { CheckoutPage } from './components/checkout/CheckoutPage';
 import { motion, AnimatePresence } from 'motion/react';
 
 const AppContent: React.FC = () => {
-  const { activeTab } = useApp();
+  const { activeTab, userRole } = useApp();
+
+  // When visiting the website and not signed in, ALWAYS show the Sign-In Dashboard
+  if (!userRole) {
+    return (
+      <AppLayout>
+        <DashboardPage />
+      </AppLayout>
+    );
+  }
 
   return (
     <AppLayout>

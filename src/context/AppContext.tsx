@@ -347,26 +347,33 @@ const VALID_TABS = [
 
 const getInitialTab = (): string => {
   try {
-    if (typeof window !== 'undefined' && window.location.hash) {
-      const hash = window.location.hash.replace('#', '').trim();
-      if (parseProductHash(window.location.hash)) return 'product-detail';
-      if (hash === 'signin' || hash === 'login') return 'dashboard';
-      if (hash === 'builder' || hash === 'landing') return 'catalogue';
-      if (VALID_TABS.includes(hash) && hash !== 'landing') return hash;
-    }
-    const savedRole = typeof sessionStorage !== 'undefined'
-      ? (sessionStorage.getItem('c07_user_role_v1') || localStorage.getItem('c07_user_role_v1'))
-      : null;
+    if (typeof window !== 'undefined') {
+      // Clear legacy localStorage role so fresh visits require signing in
+      try {
+        localStorage.removeItem('c07_user_role_v1');
+      } catch {}
 
-    if (savedRole === 'customer' || savedRole === 'admin') {
-      const savedTab = typeof localStorage !== 'undefined' ? localStorage.getItem('c07_active_tab_v1') : null;
-      if (savedTab && VALID_TABS.includes(savedTab) && savedTab !== 'landing') return savedTab;
-      return 'catalogue';
+      const savedRole = typeof sessionStorage !== 'undefined'
+        ? sessionStorage.getItem('c07_user_role_v1')
+        : null;
+
+      // Only respect tab from URL or storage if the user is already authenticated in this session
+      if (savedRole === 'customer' || savedRole === 'admin') {
+        if (window.location.hash) {
+          const hash = window.location.hash.replace('#', '').trim();
+          if (parseProductHash(window.location.hash)) return 'product-detail';
+          if (hash === 'builder' || hash === 'landing') return 'catalogue';
+          if (VALID_TABS.includes(hash) && hash !== 'landing' && hash !== 'dashboard') return hash;
+        }
+        const savedTab = sessionStorage.getItem('c07_active_tab_v1') || localStorage.getItem('c07_active_tab_v1');
+        if (savedTab && VALID_TABS.includes(savedTab) && savedTab !== 'landing') return savedTab;
+        return 'catalogue';
+      }
     }
   } catch (e) {
     console.warn('Could not read active tab from storage:', e);
   }
-  // First page / front page defaults to the Sign In Dashboard
+  // When visiting without an active session, always show the Sign In Dashboard
   return 'dashboard';
 };
 
@@ -478,18 +485,21 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [userRole, setUserRole] = useState<UserRole>(() => {
     try {
       if (typeof window !== 'undefined') {
+        // Clean legacy localStorage role so opening/reloading the website without an active session shows the Sign-In dashboard
+        try {
+          localStorage.removeItem('c07_user_role_v1');
+        } catch {}
+
         const hash = window.location.hash.replace('#', '').trim();
         if (hash === 'admin') return 'admin';
         if (hash === 'customer') return 'customer';
         if (hash === 'dashboard' || hash === 'signin' || hash === 'login') {
-          // If hash is explicitly dashboard/signin, check saved role or return null
-          const savedRole = sessionStorage.getItem('c07_user_role_v1') || localStorage.getItem('c07_user_role_v1');
-          if (savedRole === 'customer' || savedRole === 'admin') return savedRole as UserRole;
           return null;
         }
+
+        const saved = sessionStorage.getItem('c07_user_role_v1');
+        if (saved === 'customer' || saved === 'admin') return saved as UserRole;
       }
-      const saved = sessionStorage.getItem('c07_user_role_v1') || localStorage.getItem('c07_user_role_v1');
-      if (saved === 'customer' || saved === 'admin') return saved as UserRole;
     } catch (e) {
       console.warn('Could not read user role from storage:', e);
     }
@@ -782,7 +792,6 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     setAdminSignInRequested(false);
     try {
       sessionStorage.setItem('c07_user_role_v1', role);
-      localStorage.setItem('c07_user_role_v1', role);
     } catch {}
     if (role === 'customer') {
       setActiveTab('catalogue');
