@@ -29,9 +29,19 @@ const app = express();
 
 // Restore original URL if rewritten by Vercel serverless router
 app.use((req, res, next) => {
-  const original = req.headers['x-matched-path'] || req.headers['x-forwarded-uri'] || req.headers['x-original-url'];
-  if (original && typeof original === 'string') {
-    req.url = original;
+  // If request arrived via Vercel rewrite parameter (?__subpath=...), restore req.url
+  if (req.query && typeof req.query.__subpath === 'string') {
+    const rawSubpath = req.query.__subpath;
+    const subpath = rawSubpath.startsWith('/') ? rawSubpath : `/${rawSubpath}`;
+    delete req.query.__subpath;
+    const searchParams = new URLSearchParams(req.query as Record<string, string>).toString();
+    req.url = `/api${subpath}${searchParams ? `?${searchParams}` : ''}`;
+  } else if (req.url === '/api' || req.url === '/' || req.url === '/api/') {
+    // Only restore from forwarded URI if req.url was flattened and forwarded URI has a subpath
+    const forwarded = (req.headers['x-forwarded-uri'] || req.headers['x-original-url']) as string | undefined;
+    if (forwarded && typeof forwarded === 'string' && forwarded !== '/api' && forwarded !== '/' && forwarded !== '/api/') {
+      req.url = forwarded;
+    }
   }
   next();
 });
@@ -687,14 +697,47 @@ app.get(['/api/payment/orders', '/payment/orders'], (_req, res) => {
 
 // Fallback root handler in case Vercel rewrote request to /api or /api/
 app.all(['/api', '/api/'], (req, res, next) => {
-  if (req.method === 'POST' && req.body && req.body.message) {
-    req.url = '/api/ai/assistant';
-    return app._router.handle(req, res, next);
+  if (req.method === 'POST') {
+    if (req.body && (req.body.items || req.body.bundleName)) {
+      req.url = '/api/payment/create-order';
+      return (app as any)._router.handle(req, res, next);
+    }
+    if (req.body && (req.body.razorpayPaymentId || req.body.razorpaySignature)) {
+      req.url = '/api/payment/verify';
+      return (app as any)._router.handle(req, res, next);
+    }
+    if (req.headers['x-razorpay-signature'] || (req.body && req.body.event)) {
+      req.url = '/api/payment/webhook';
+      return (app as any)._router.handle(req, res, next);
+    }
+    if (req.body && req.body.message) {
+      req.url = '/api/ai/assistant';
+      return (app as any)._router.handle(req, res, next);
+    }
+    if (req.body && (req.body.requirements || req.body.budget)) {
+      req.url = '/api/bundles/filter';
+      return (app as any)._router.handle(req, res, next);
+    }
+    if (req.body && (req.body.category || req.body.filters || req.body.search)) {
+      req.url = '/api/products/filter';
+      return (app as any)._router.handle(req, res, next);
+    }
   }
+
   if (req.method === 'GET') {
+    if (req.query && (req.query.search || req.query.category || req.query.colour || req.query.sort)) {
+      req.url = '/api/products';
+      return (app as any)._router.handle(req, res, next);
+    }
+    if (req.query && req.query.budget) {
+      req.url = '/api/bundles';
+      return (app as any)._router.handle(req, res, next);
+    }
+
     return res.json({
       status: 'ok',
       hasApiKey: Boolean(getGeminiApiKey()),
+      razorpayConfigured: true,
       message: 'Budget-Based Product Bundle Builder API Service',
       timestamp: new Date().toISOString()
     });

@@ -14,8 +14,12 @@
   ],
   "rewrites": [
     {
-      "source": "/api/(.*)",
+      "source": "/api",
       "destination": "/api"
+    },
+    {
+      "source": "/api/:match*",
+      "destination": "/api?__subpath=/:match*"
     },
     {
       "source": "/((?!api/).*)",
