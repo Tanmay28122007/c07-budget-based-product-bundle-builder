@@ -46,11 +46,52 @@ app.use((req, res, next) => {
   next();
 });
 
+// Standard security headers to defend against clickjacking, MIME-sniffing, and XSS
+app.use((_req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+  res.removeHeader('X-Powered-By');
+  next();
+});
+
+// Lightweight in-memory rate limiting against DoS / resource exhaustion
+interface RateBucket {
+  count: number;
+  resetAt: number;
+}
+const rateLimitMap = new Map<string, RateBucket>();
+
+function checkRateLimit(key: string, limit: number, windowMs: number): boolean {
+  const now = Date.now();
+  const bucket = rateLimitMap.get(key);
+  if (!bucket || now > bucket.resetAt) {
+    if (rateLimitMap.size > 10000) rateLimitMap.clear();
+    rateLimitMap.set(key, { count: 1, resetAt: now + windowMs });
+    return true;
+  }
+  if (bucket.count >= limit) {
+    return false;
+  }
+  bucket.count++;
+  return true;
+}
+
+function getClientIp(req: express.Request): string {
+  const forwarded = req.headers['x-forwarded-for'];
+  if (typeof forwarded === 'string') {
+    return forwarded.split(',')[0].trim();
+  }
+  return req.socket.remoteAddress || 'unknown';
+}
+
 // Enable CORS for same-origin and development requests
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-admin-role');
   if (req.method === 'OPTIONS') {
     return res.sendStatus(200);
   }
@@ -193,10 +234,23 @@ function cleanAssistantReply(text: string): string {
 // AI Assistant Chat & Recommendation API
 app.post(['/api/ai/assistant', '/ai/assistant'], async (req, res) => {
   try {
-    const { message, history = [], context, model: requestedModel, role, systemInstruction: customInstruction } = req.body;
+    const ip = getClientIp(req);
+    if (!checkRateLimit(`ai_${ip}`, 60, 60000)) {
+      return res.status(429).json({ error: 'Too many requests. Please wait a moment before sending another message.' });
+    }
+
+    const { message, history = [], context, model: requestedModel, role, systemInstruction: customInstruction } = req.body || {};
 
     if (!message || typeof message !== 'string') {
       return res.status(400).json({ error: 'A valid message string is required.' });
+    }
+
+    if (message.length > 4000) {
+      return res.status(400).json({ error: 'Message exceeds the maximum limit of 4000 characters.' });
+    }
+
+    if (!Array.isArray(history)) {
+      return res.status(400).json({ error: 'Conversation history must be an array.' });
     }
 
     const apiKey = getGeminiApiKey();
@@ -592,6 +646,11 @@ app.get(['/api/payment/config', '/payment/config'], (_req, res) => {
 // Create Order: Validates items, prices, stock, and creates order
 app.post(['/api/payment/create-order', '/payment/create-order'], async (req, res) => {
   try {
+    const ip = getClientIp(req);
+    if (!checkRateLimit(`order_${ip}`, 30, 60000)) {
+      return res.status(429).json({ success: false, error: 'Order creation rate limit exceeded. Please wait a moment.' });
+    }
+
     const { items, customer, userId, bundleName } = req.body || {};
     if (!items || !customer) {
       return res.status(400).json({
@@ -676,21 +735,24 @@ app.post(['/api/payment/webhook', '/payment/webhook'], (req, res) => {
   }
 });
 
-// Get Order Details by internal or Razorpay order ID
+// Get Order Details by internal or Razorpay order ID (masks PII unless admin role provided)
 app.get(['/api/payment/order/:id', '/payment/order/:id'], (req, res) => {
-  const order = getOrderById(req.params.id);
+  const isAdmin = req.headers['x-admin-role'] === 'admin';
+  const order = getOrderById(req.params.id, !isAdmin);
   if (!order) {
     return res.status(404).json({ success: false, error: `Order '${req.params.id}' not found.` });
   }
-  res.json({ success: true, order });
+  res.json({ success: true, masked: !isAdmin, order });
 });
 
-// Get All Orders for administrative audit
-app.get(['/api/payment/orders', '/payment/orders'], (_req, res) => {
-  const orders = getAllOrders();
+// Get All Orders for administrative audit (masks PII by default to prevent data exfiltration)
+app.get(['/api/payment/orders', '/payment/orders'], (req, res) => {
+  const isAdmin = req.headers['x-admin-role'] === 'admin';
+  const orders = getAllOrders(!isAdmin);
   res.json({
     success: true,
     total: orders.length,
+    masked: !isAdmin,
     orders
   });
 });

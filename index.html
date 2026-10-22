@@ -12,6 +12,13 @@
     <meta property="og:description" content="Assemble complete, compatible product bundles within budget with real-time compatibility validation, landed pricing, and business insights." />
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary_large_image" />
+    <!-- Razorpay Checkout & Gateway Preconnections for Zero-Latency Modal Open -->
+    <link rel="preconnect" href="https://checkout.razorpay.com" crossorigin />
+    <link rel="preconnect" href="https://api.razorpay.com" crossorigin />
+    <link rel="dns-prefetch" href="https://checkout.razorpay.com" />
+    <link rel="dns-prefetch" href="https://api.razorpay.com" />
+    <link rel="dns-prefetch" href="https://lumberjack.razorpay.com" />
+    <link rel="preload" href="https://checkout.razorpay.com/v1/checkout.js" as="script" />
     <!-- Official Razorpay Checkout SDK -->
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
   </head>

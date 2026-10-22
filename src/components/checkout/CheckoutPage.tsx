@@ -33,6 +33,8 @@ import {
   requestVerifyPayment,
   launchRazorpayCheckout,
   getBackendPaymentConfig,
+  prewarmPaymentOrder,
+  loadRazorpayCheckoutScript,
   PaymentConfigResponse,
   RazorpayPaymentSuccessResponse,
   RazorpayPaymentFailureResponse
@@ -145,12 +147,52 @@ export const CheckoutPage: React.FC = () => {
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const [paymentConfig, setPaymentConfig] = useState<PaymentConfigResponse | null>(null);
 
-  // Fetch Razorpay configuration on mount
+  // Fetch Razorpay configuration & eager preload SDK on mount
   useEffect(() => {
+    loadRazorpayCheckoutScript().catch(() => {});
     getBackendPaymentConfig()
       .then(cfg => setPaymentConfig(cfg))
       .catch(() => {});
   }, []);
+
+  // Pre-warm order creation in the background while the user inspects details
+  // so that clicking "Pay with Razorpay" opens the gateway modal instantly with 0 latency
+  useEffect(() => {
+    if (!activeOrder || activeOrder.items.length === 0) return;
+    const cleanPhone = customer.phone.replace(/[^0-9]/g, '');
+    if (!customer.fullName.trim() || !customer.email.includes('@') || cleanPhone.length < 10 || !customer.address.trim()) {
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      const itemsPayload = activeOrder.items.map(it => ({
+        productId: it.product.id,
+        quantity: it.quantity
+      }));
+      prewarmPaymentOrder({
+        items: itemsPayload,
+        customer,
+        bundleName: activeOrder.bundleName || 'C07 Product Bundle'
+      }).catch(() => {});
+    }, 250);
+
+    return () => clearTimeout(timer);
+  }, [activeOrder, customer]);
+
+  const handleWarmup = () => {
+    if (!activeOrder || activeOrder.items.length === 0) return;
+    const cleanPhone = customer.phone.replace(/[^0-9]/g, '');
+    if (!customer.fullName.trim() || !customer.email.includes('@') || cleanPhone.length < 10) return;
+    const itemsPayload = activeOrder.items.map(it => ({
+      productId: it.product.id,
+      quantity: it.quantity
+    }));
+    prewarmPaymentOrder({
+      items: itemsPayload,
+      customer,
+      bundleName: activeOrder.bundleName || 'C07 Product Bundle'
+    }).catch(() => {});
+  };
 
   // Form Validation
   const validate = (): boolean => {
@@ -251,7 +293,7 @@ export const CheckoutPage: React.FC = () => {
 
     setIsProcessing(true);
     setPaymentError(null);
-    setProcessStepText('Validating products & available inventory on server...');
+    setProcessStepText('Connecting to official Razorpay Checkout gateway...');
 
     try {
       // Construct item payload for server validation
@@ -260,7 +302,7 @@ export const CheckoutPage: React.FC = () => {
         quantity: it.quantity
       }));
 
-      // 1. Create order on server (server calculates exact landed price & stock)
+      // 1. Create order on server or retrieve pre-warmed instant order
       const orderRes = await requestCreatePaymentOrder({
         items: itemsPayload,
         customer,
@@ -269,7 +311,6 @@ export const CheckoutPage: React.FC = () => {
 
       setConfirmedOrderId(orderRes.orderId);
       setRazorpayOrderId(orderRes.razorpayOrderId);
-      setProcessStepText('Connecting to official Razorpay Checkout gateway...');
 
       const paymentLabel =
         paymentMethod === 'upi'
@@ -279,6 +320,16 @@ export const CheckoutPage: React.FC = () => {
           : paymentMethod === 'netbanking'
           ? `Net Banking (${selectedBank})`
           : 'Cash on Delivery';
+
+      // Determine prefill method based on selected tab for instant direct opening
+      const prefillMethod =
+        paymentMethod === 'upi'
+          ? 'upi'
+          : paymentMethod === 'card'
+          ? 'card'
+          : paymentMethod === 'netbanking'
+          ? 'netbanking'
+          : undefined;
 
       // 2. Launch Razorpay Standard Checkout
       const launchResult = await launchRazorpayCheckout(
@@ -292,7 +343,9 @@ export const CheckoutPage: React.FC = () => {
           prefill: {
             name: customer.fullName.trim(),
             email: customer.email.trim(),
-            contact: customer.phone.replace(/[^0-9]/g, '')
+            contact: customer.phone.replace(/[^0-9]/g, ''),
+            method: prefillMethod,
+            ...(paymentMethod === 'upi' && upiApp === 'custom' && customUpiId ? { vpa: customUpiId } : {})
           },
           notes: {
             orderId: orderRes.orderId,
@@ -953,6 +1006,8 @@ export const CheckoutPage: React.FC = () => {
                   <button
                     type="button"
                     onClick={handlePayNow}
+                    onMouseEnter={handleWarmup}
+                    onTouchStart={handleWarmup}
                     disabled={isProcessing}
                     className="px-3 py-1.5 rounded-xl bg-[#2C3A2B] text-white text-xs font-bold hover:bg-[#1E281D] transition-colors cursor-pointer flex items-center gap-1.5 shadow-2xs"
                   >
@@ -1208,6 +1263,8 @@ export const CheckoutPage: React.FC = () => {
               <button
                 type="button"
                 onClick={handlePayNow}
+                onMouseEnter={handleWarmup}
+                onTouchStart={handleWarmup}
                 disabled={isProcessing}
                 className="w-full py-4 px-6 rounded-2xl text-sm font-bold uppercase tracking-wider text-white bg-[#2C3A2B] hover:bg-[#1E281D] shadow-md hover:shadow-lg transition-all cursor-pointer hover:scale-[1.01] active:scale-[0.99] disabled:opacity-75 disabled:cursor-wait flex items-center justify-center gap-2 group"
               >
