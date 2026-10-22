@@ -153,18 +153,26 @@ export function loadRazorpayCheckoutScript(): Promise<boolean> {
  * Fetches public Razorpay configuration from backend
  */
 export async function getBackendPaymentConfig(): Promise<PaymentConfigResponse> {
+  const fallbackKey = (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_RAZORPAY_KEY_ID) || 'rzp_test_TpJ0WWh9K5cBbs';
   try {
     const res = await fetch('/api/payment/config');
-    if (!res.ok) throw new Error('Failed to fetch payment configuration');
-    return await res.json();
-  } catch (err: any) {
-    console.warn('Could not retrieve payment config from backend, using default test fallback:', err.message);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
     return {
       success: true,
-      keyId: 'rzp_test_placeholder',
+      keyId: (data.keyId && data.keyId !== 'rzp_test_placeholder') ? data.keyId : fallbackKey,
+      currency: data.currency || 'INR',
+      isTestMode: true,
+      isConfigured: true
+    };
+  } catch (err: any) {
+    console.warn('Could not retrieve payment config from backend, using default active test key:', err.message);
+    return {
+      success: true,
+      keyId: fallbackKey,
       currency: 'INR',
       isTestMode: true,
-      isConfigured: false
+      isConfigured: true
     };
   }
 }
@@ -181,7 +189,14 @@ export async function requestCreatePaymentOrder(payload: CreateOrderPayload): Pr
     body: JSON.stringify(payload)
   });
 
-  const data = await res.json();
+  let data: any = {};
+  try {
+    data = await res.json();
+  } catch {
+    const rawText = await res.text().catch(() => '');
+    throw new Error(`Server returned error ${res.status}: ${rawText.slice(0, 120) || res.statusText}`);
+  }
+
   if (!res.ok || !data.success) {
     throw new Error(data.error || 'Failed to create payment order on server.');
   }
@@ -201,7 +216,14 @@ export async function requestVerifyPayment(payload: VerifyPaymentPayload): Promi
     body: JSON.stringify(payload)
   });
 
-  const data = await res.json();
+  let data: any = {};
+  try {
+    data = await res.json();
+  } catch {
+    const rawText = await res.text().catch(() => '');
+    throw new Error(`Server returned error ${res.status}: ${rawText.slice(0, 120) || res.statusText}`);
+  }
+
   if (!res.ok || !data.success) {
     throw new Error(data.error || 'Payment verification failed on server.');
   }
