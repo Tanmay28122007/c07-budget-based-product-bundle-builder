@@ -208,6 +208,23 @@ export function validateAndCalculateOrder(items: OrderItemInput[], shippingRule?
   };
 }
 
+// Cached basic auth header
+let cachedAuthKey = '';
+let cachedAuthHeader = '';
+
+function getAuthHeader(keyId: string, keySecret: string): string {
+  const combo = `${keyId}:${keySecret}`;
+  if (cachedAuthKey === combo && cachedAuthHeader) {
+    return cachedAuthHeader;
+  }
+  cachedAuthKey = combo;
+  cachedAuthHeader = 'Basic ' + Buffer.from(combo).toString('base64');
+  return cachedAuthHeader;
+}
+
+// Active pending orders cache: map of payload hash -> { orderData, orderId, timestamp }
+const pendingOrderCache = new Map<string, { orderData: any; orderId: string; timestamp: number }>();
+
 /**
  * Creates an order on Razorpay API or generates a sandbox test order
  */
@@ -220,7 +237,7 @@ export async function createRazorpayOrder(params: {
   const config = getRazorpayConfig();
 
   if (config.isConfigured) {
-    const authHeader = 'Basic ' + Buffer.from(`${config.keyId}:${config.keySecret}`).toString('base64');
+    const authHeader = getAuthHeader(config.keyId, config.keySecret);
     try {
       const response = await fetch('https://api.razorpay.com/v1/orders', {
         method: 'POST',
@@ -233,7 +250,8 @@ export async function createRazorpayOrder(params: {
           currency: params.currency || 'INR',
           receipt: params.receipt,
           notes: params.notes || {}
-        })
+        }),
+        signal: AbortSignal.timeout(7000)
       });
 
       if (!response.ok) {
@@ -263,6 +281,15 @@ export async function createRazorpayOrder(params: {
   };
 }
 
+function sanitizeInputString(str: string, maxLen = 250): string {
+  if (typeof str !== 'string') return '';
+  return str
+    .replace(/<[^>]*>/g, '')
+    .replace(/[\x00-\x1F\x7F]/g, '')
+    .trim()
+    .slice(0, maxLen);
+}
+
 /**
  * Initiates an order and stores it in pending state
  */
@@ -272,18 +299,52 @@ export async function initiatePaymentOrder(data: {
   userId?: string;
   bundleName?: string;
 }) {
-  // Validate customer details
-  if (!data.customer?.fullName?.trim()) {
+  // Validate and sanitize customer details
+  const fullName = sanitizeInputString(data.customer?.fullName || '', 100);
+  const email = sanitizeInputString(data.customer?.email || '', 120).toLowerCase();
+  const phone = (data.customer?.phone || '').replace(/[^0-9]/g, '').slice(0, 15);
+  const address = sanitizeInputString(data.customer?.address || '', 300);
+  const city = sanitizeInputString(data.customer?.city || '', 80);
+  const state = sanitizeInputString(data.customer?.state || '', 80);
+  const postalCode = sanitizeInputString(data.customer?.postalCode || '', 20);
+
+  if (!fullName) {
     throw new Error('Customer full name is required.');
   }
-  if (!data.customer?.email?.trim() || !data.customer.email.includes('@')) {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!email || !emailRegex.test(email)) {
     throw new Error('A valid customer email address is required.');
   }
-  if (!data.customer?.phone?.trim() || data.customer.phone.replace(/[^0-9]/g, '').length < 10) {
+  if (!phone || phone.length < 10) {
     throw new Error('A valid 10-digit mobile number is required.');
   }
-  if (!data.customer?.address?.trim()) {
+  if (!address) {
     throw new Error('Customer shipping address is required.');
+  }
+
+  const sanitizedCustomer: CustomerDetails = {
+    fullName,
+    email,
+    phone,
+    address,
+    city,
+    state,
+    postalCode
+  };
+
+  // Check for existing active pending order for this customer + item combination to eliminate redundant gateway calls
+  const itemsKey = (data.items || [])
+    .map(i => `${i.productId}:${i.quantity}`)
+    .sort()
+    .join('|');
+  const cacheKey = `${email}:${phone}__${itemsKey}`;
+
+  const cached = pendingOrderCache.get(cacheKey);
+  if (cached && (Date.now() - cached.timestamp < 5 * 60 * 1000)) {
+    const existingRecord = ordersStore.get(cached.orderId);
+    if (existingRecord && existingRecord.status === 'pending') {
+      return cached.orderData;
+    }
   }
 
   // Validate items & calculate trusted server pricing
@@ -299,8 +360,8 @@ export async function initiatePaymentOrder(data: {
     receipt: internalOrderId,
     notes: {
       orderId: internalOrderId,
-      customerName: data.customer.fullName,
-      customerPhone: data.customer.phone,
+      customerName: sanitizedCustomer.fullName,
+      customerPhone: sanitizedCustomer.phone,
       bundleName: data.bundleName || 'C07 Product Bundle'
     }
   });
@@ -309,7 +370,7 @@ export async function initiatePaymentOrder(data: {
   const orderRecord: OrderRecord = {
     id: internalOrderId,
     userId: data.userId,
-    customer: data.customer,
+    customer: sanitizedCustomer,
     items: calculation.resolvedItems,
     subtotal: calculation.productSubtotal,
     netShipping: calculation.netShipping,
@@ -328,14 +389,14 @@ export async function initiatePaymentOrder(data: {
 
   const config = getRazorpayConfig();
 
-  return {
+  const orderResult = {
     orderId: internalOrderId,
     razorpayOrderId: rzpOrder.id,
     amount: calculation.amountInPaise,
     currency: 'INR',
     totalAmountINR: calculation.totalAmount,
     keyId: config.keyId,
-    customer: data.customer,
+    customer: sanitizedCustomer,
     calculation: {
       subtotal: calculation.productSubtotal,
       netShipping: calculation.netShipping,
@@ -343,6 +404,14 @@ export async function initiatePaymentOrder(data: {
       totalAmount: calculation.totalAmount
     }
   };
+
+  pendingOrderCache.set(cacheKey, {
+    orderData: orderResult,
+    orderId: internalOrderId,
+    timestamp: Date.now()
+  });
+
+  return orderResult;
 }
 
 /**
@@ -522,15 +591,21 @@ export function processRazorpayWebhook(params: {
 }) {
   const config = getRazorpayConfig();
 
-  // Verify webhook signature if webhook secret is configured
+  // Verify webhook signature if webhook secret is configured and signature header provided
   if (config.webhookSecret && params.signatureHeader) {
     const expectedSignature = crypto
       .createHmac('sha256', config.webhookSecret)
       .update(params.rawBody)
       .digest('hex');
 
-    if (expectedSignature !== params.signatureHeader) {
-      throw new Error('Invalid Razorpay webhook signature header.');
+    try {
+      const a = Buffer.from(expectedSignature, 'utf8');
+      const b = Buffer.from(params.signatureHeader, 'utf8');
+      if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) {
+        throw new Error('Invalid Razorpay webhook signature header.');
+      }
+    } catch (err: any) {
+      throw new Error(err.message || 'Invalid Razorpay webhook signature header.');
     }
   }
 
@@ -583,19 +658,49 @@ export function processRazorpayWebhook(params: {
 }
 
 /**
- * Retrieves order details by ID
+ * Mask PII helper for secure public display
  */
-export function getOrderById(orderId: string): OrderRecord | undefined {
-  return ordersStore.get(orderId);
+export function maskOrderPII(order: OrderRecord): OrderRecord {
+  const c = order.customer;
+  const emailParts = (c.email || '').split('@');
+  const maskedEmail =
+    emailParts.length === 2 && emailParts[0].length > 1
+      ? `${emailParts[0][0]}***@${emailParts[1]}`
+      : '***@***.com';
+  const phoneDigits = (c.phone || '').replace(/[^0-9]/g, '');
+  const maskedPhone = phoneDigits.length >= 4 ? `******${phoneDigits.slice(-4)}` : '******';
+  const maskedAddress = c.address ? `${c.address.slice(0, 4)}***, Protected Delivery Address` : '***';
+  const nameParts = (c.fullName || '').trim().split(/\s+/);
+  const maskedName = nameParts.map(p => (p.length > 1 ? `${p[0]}***` : p)).join(' ');
+
+  return {
+    ...order,
+    customer: {
+      ...c,
+      fullName: maskedName || 'Customer',
+      email: maskedEmail,
+      phone: maskedPhone,
+      address: maskedAddress
+    }
+  };
 }
 
 /**
- * Retrieves all orders (masked for security)
+ * Retrieves order details by ID (safely masks PII unless unmask requested)
  */
-export function getAllOrders(): OrderRecord[] {
+export function getOrderById(orderId: string, maskPII = true): OrderRecord | undefined {
+  const ord = ordersStore.get(orderId);
+  if (!ord) return undefined;
+  return maskPII ? maskOrderPII(ord) : ord;
+}
+
+/**
+ * Retrieves all orders (safely masks PII by default to prevent data exfiltration)
+ */
+export function getAllOrders(maskPII = true): OrderRecord[] {
   const set = new Set<OrderRecord>();
   for (const ord of ordersStore.values()) {
-    set.add(ord);
+    set.add(maskPII ? maskOrderPII(ord) : ord);
   }
   return Array.from(set);
 }

@@ -3516,10 +3516,22 @@ function validateAndCalculateOrder(items, shippingRule, taxRule) {
     heavyItemCount
   };
 }
+var cachedAuthKey = "";
+var cachedAuthHeader = "";
+function getAuthHeader(keyId, keySecret) {
+  const combo = `${keyId}:${keySecret}`;
+  if (cachedAuthKey === combo && cachedAuthHeader) {
+    return cachedAuthHeader;
+  }
+  cachedAuthKey = combo;
+  cachedAuthHeader = "Basic " + Buffer.from(combo).toString("base64");
+  return cachedAuthHeader;
+}
+var pendingOrderCache = /* @__PURE__ */ new Map();
 async function createRazorpayOrder(params) {
   const config = getRazorpayConfig();
   if (config.isConfigured) {
-    const authHeader = "Basic " + Buffer.from(`${config.keyId}:${config.keySecret}`).toString("base64");
+    const authHeader = getAuthHeader(config.keyId, config.keySecret);
     try {
       const response = await fetch("https://api.razorpay.com/v1/orders", {
         method: "POST",
@@ -3532,7 +3544,8 @@ async function createRazorpayOrder(params) {
           currency: params.currency || "INR",
           receipt: params.receipt,
           notes: params.notes || {}
-        })
+        }),
+        signal: AbortSignal.timeout(7e3)
       });
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
@@ -3557,18 +3570,48 @@ async function createRazorpayOrder(params) {
     currency: params.currency || "INR"
   };
 }
+function sanitizeInputString(str, maxLen = 250) {
+  if (typeof str !== "string") return "";
+  return str.replace(/<[^>]*>/g, "").replace(/[\x00-\x1F\x7F]/g, "").trim().slice(0, maxLen);
+}
 async function initiatePaymentOrder(data) {
-  if (!data.customer?.fullName?.trim()) {
+  const fullName = sanitizeInputString(data.customer?.fullName || "", 100);
+  const email = sanitizeInputString(data.customer?.email || "", 120).toLowerCase();
+  const phone = (data.customer?.phone || "").replace(/[^0-9]/g, "").slice(0, 15);
+  const address = sanitizeInputString(data.customer?.address || "", 300);
+  const city = sanitizeInputString(data.customer?.city || "", 80);
+  const state = sanitizeInputString(data.customer?.state || "", 80);
+  const postalCode = sanitizeInputString(data.customer?.postalCode || "", 20);
+  if (!fullName) {
     throw new Error("Customer full name is required.");
   }
-  if (!data.customer?.email?.trim() || !data.customer.email.includes("@")) {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!email || !emailRegex.test(email)) {
     throw new Error("A valid customer email address is required.");
   }
-  if (!data.customer?.phone?.trim() || data.customer.phone.replace(/[^0-9]/g, "").length < 10) {
+  if (!phone || phone.length < 10) {
     throw new Error("A valid 10-digit mobile number is required.");
   }
-  if (!data.customer?.address?.trim()) {
+  if (!address) {
     throw new Error("Customer shipping address is required.");
+  }
+  const sanitizedCustomer = {
+    fullName,
+    email,
+    phone,
+    address,
+    city,
+    state,
+    postalCode
+  };
+  const itemsKey = (data.items || []).map((i) => `${i.productId}:${i.quantity}`).sort().join("|");
+  const cacheKey = `${email}:${phone}__${itemsKey}`;
+  const cached = pendingOrderCache.get(cacheKey);
+  if (cached && Date.now() - cached.timestamp < 5 * 60 * 1e3) {
+    const existingRecord = ordersStore.get(cached.orderId);
+    if (existingRecord && existingRecord.status === "pending") {
+      return cached.orderData;
+    }
   }
   const calculation = validateAndCalculateOrder(data.items);
   const internalOrderId = `C07-ORD-${Date.now().toString().slice(-6)}${Math.floor(100 + Math.random() * 900)}`;
@@ -3578,8 +3621,8 @@ async function initiatePaymentOrder(data) {
     receipt: internalOrderId,
     notes: {
       orderId: internalOrderId,
-      customerName: data.customer.fullName,
-      customerPhone: data.customer.phone,
+      customerName: sanitizedCustomer.fullName,
+      customerPhone: sanitizedCustomer.phone,
       bundleName: data.bundleName || "C07 Product Bundle"
     }
   });
@@ -3587,7 +3630,7 @@ async function initiatePaymentOrder(data) {
   const orderRecord = {
     id: internalOrderId,
     userId: data.userId,
-    customer: data.customer,
+    customer: sanitizedCustomer,
     items: calculation.resolvedItems,
     subtotal: calculation.productSubtotal,
     netShipping: calculation.netShipping,
@@ -3603,14 +3646,14 @@ async function initiatePaymentOrder(data) {
   ordersStore.set(internalOrderId, orderRecord);
   ordersStore.set(rzpOrder.id, orderRecord);
   const config = getRazorpayConfig();
-  return {
+  const orderResult = {
     orderId: internalOrderId,
     razorpayOrderId: rzpOrder.id,
     amount: calculation.amountInPaise,
     currency: "INR",
     totalAmountINR: calculation.totalAmount,
     keyId: config.keyId,
-    customer: data.customer,
+    customer: sanitizedCustomer,
     calculation: {
       subtotal: calculation.productSubtotal,
       netShipping: calculation.netShipping,
@@ -3618,6 +3661,12 @@ async function initiatePaymentOrder(data) {
       totalAmount: calculation.totalAmount
     }
   };
+  pendingOrderCache.set(cacheKey, {
+    orderData: orderResult,
+    orderId: internalOrderId,
+    timestamp: Date.now()
+  });
+  return orderResult;
 }
 function verifyRazorpaySignature(params) {
   const secret = params.keySecret || getRazorpayConfig().keySecret;
@@ -3737,8 +3786,14 @@ function processRazorpayWebhook(params) {
   const config = getRazorpayConfig();
   if (config.webhookSecret && params.signatureHeader) {
     const expectedSignature = crypto.createHmac("sha256", config.webhookSecret).update(params.rawBody).digest("hex");
-    if (expectedSignature !== params.signatureHeader) {
-      throw new Error("Invalid Razorpay webhook signature header.");
+    try {
+      const a = Buffer.from(expectedSignature, "utf8");
+      const b = Buffer.from(params.signatureHeader, "utf8");
+      if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) {
+        throw new Error("Invalid Razorpay webhook signature header.");
+      }
+    } catch (err) {
+      throw new Error(err.message || "Invalid Razorpay webhook signature header.");
     }
   }
   const eventPayload = params.event;
@@ -3781,13 +3836,35 @@ function processRazorpayWebhook(params) {
     eventId
   };
 }
-function getOrderById(orderId) {
-  return ordersStore.get(orderId);
+function maskOrderPII(order) {
+  const c = order.customer;
+  const emailParts = (c.email || "").split("@");
+  const maskedEmail = emailParts.length === 2 && emailParts[0].length > 1 ? `${emailParts[0][0]}***@${emailParts[1]}` : "***@***.com";
+  const phoneDigits = (c.phone || "").replace(/[^0-9]/g, "");
+  const maskedPhone = phoneDigits.length >= 4 ? `******${phoneDigits.slice(-4)}` : "******";
+  const maskedAddress = c.address ? `${c.address.slice(0, 4)}***, Protected Delivery Address` : "***";
+  const nameParts = (c.fullName || "").trim().split(/\s+/);
+  const maskedName = nameParts.map((p) => p.length > 1 ? `${p[0]}***` : p).join(" ");
+  return {
+    ...order,
+    customer: {
+      ...c,
+      fullName: maskedName || "Customer",
+      email: maskedEmail,
+      phone: maskedPhone,
+      address: maskedAddress
+    }
+  };
 }
-function getAllOrders() {
+function getOrderById(orderId, maskPII = true) {
+  const ord = ordersStore.get(orderId);
+  if (!ord) return void 0;
+  return maskPII ? maskOrderPII(ord) : ord;
+}
+function getAllOrders(maskPII = true) {
   const set = /* @__PURE__ */ new Set();
   for (const ord of ordersStore.values()) {
-    set.add(ord);
+    set.add(maskPII ? maskOrderPII(ord) : ord);
   }
   return Array.from(set);
 }
@@ -3826,10 +3903,41 @@ app.use((req, res, next) => {
   }
   next();
 });
+app.use((_req, res, next) => {
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("X-Frame-Options", "SAMEORIGIN");
+  res.setHeader("X-XSS-Protection", "1; mode=block");
+  res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+  res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+  res.removeHeader("X-Powered-By");
+  next();
+});
+var rateLimitMap = /* @__PURE__ */ new Map();
+function checkRateLimit(key, limit, windowMs) {
+  const now = Date.now();
+  const bucket = rateLimitMap.get(key);
+  if (!bucket || now > bucket.resetAt) {
+    if (rateLimitMap.size > 1e4) rateLimitMap.clear();
+    rateLimitMap.set(key, { count: 1, resetAt: now + windowMs });
+    return true;
+  }
+  if (bucket.count >= limit) {
+    return false;
+  }
+  bucket.count++;
+  return true;
+}
+function getClientIp(req) {
+  const forwarded = req.headers["x-forwarded-for"];
+  if (typeof forwarded === "string") {
+    return forwarded.split(",")[0].trim();
+  }
+  return req.socket.remoteAddress || "unknown";
+}
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, x-admin-role");
   if (req.method === "OPTIONS") {
     return res.sendStatus(200);
   }
@@ -3913,9 +4021,19 @@ function cleanAssistantReply(text) {
 }
 app.post(["/api/ai/assistant", "/ai/assistant"], async (req, res) => {
   try {
-    const { message, history = [], context, model: requestedModel, role, systemInstruction: customInstruction } = req.body;
+    const ip = getClientIp(req);
+    if (!checkRateLimit(`ai_${ip}`, 60, 6e4)) {
+      return res.status(429).json({ error: "Too many requests. Please wait a moment before sending another message." });
+    }
+    const { message, history = [], context, model: requestedModel, role, systemInstruction: customInstruction } = req.body || {};
     if (!message || typeof message !== "string") {
       return res.status(400).json({ error: "A valid message string is required." });
+    }
+    if (message.length > 4e3) {
+      return res.status(400).json({ error: "Message exceeds the maximum limit of 4000 characters." });
+    }
+    if (!Array.isArray(history)) {
+      return res.status(400).json({ error: "Conversation history must be an array." });
     }
     const apiKey = getGeminiApiKey();
     const supportedModels = [
@@ -4244,6 +4362,10 @@ app.get(["/api/payment/config", "/payment/config"], (_req, res) => {
 });
 app.post(["/api/payment/create-order", "/payment/create-order"], async (req, res) => {
   try {
+    const ip = getClientIp(req);
+    if (!checkRateLimit(`order_${ip}`, 30, 6e4)) {
+      return res.status(429).json({ success: false, error: "Order creation rate limit exceeded. Please wait a moment." });
+    }
     const { items, customer, userId, bundleName } = req.body || {};
     if (!items || !customer) {
       return res.status(400).json({
@@ -4317,17 +4439,20 @@ app.post(["/api/payment/webhook", "/payment/webhook"], (req, res) => {
   }
 });
 app.get(["/api/payment/order/:id", "/payment/order/:id"], (req, res) => {
-  const order = getOrderById(req.params.id);
+  const isAdmin = req.headers["x-admin-role"] === "admin";
+  const order = getOrderById(req.params.id, !isAdmin);
   if (!order) {
     return res.status(404).json({ success: false, error: `Order '${req.params.id}' not found.` });
   }
-  res.json({ success: true, order });
+  res.json({ success: true, masked: !isAdmin, order });
 });
-app.get(["/api/payment/orders", "/payment/orders"], (_req, res) => {
-  const orders = getAllOrders();
+app.get(["/api/payment/orders", "/payment/orders"], (req, res) => {
+  const isAdmin = req.headers["x-admin-role"] === "admin";
+  const orders = getAllOrders(!isAdmin);
   res.json({
     success: true,
     total: orders.length,
+    masked: !isAdmin,
     orders
   });
 });
